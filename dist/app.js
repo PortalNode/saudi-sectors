@@ -1,8 +1,8 @@
 const columns = [
   ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],
-  ['eps','ربحية السهم · آخر ٤ أرباع','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
-  ['pb','مكرر القيمة الدفترية','pb'],['day','تغير اليوم','day'],['month3','تغير ٣ أشهر','3m'],
-  ['month6','تغير ٦ أشهر','6m'],['year1','تغير سنة','1y']
+  ['eps','ربحية السهم · آخر 4 أرباع','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
+  ['pb','مكرر القيمة الدفترية','pb'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
+  ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const epsFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:3,maximumFractionDigits:3});
