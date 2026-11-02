@@ -22,6 +22,12 @@ function periodValid(period){
   const day=new Date(`${period}T12:00:00`);
   return !Number.isNaN(day.getTime()) && day <= new Date() && day >= new Date('2020-01-01T00:00:00');
 }
+function today(){
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+}
+function sourceDate(record){
+  return record.dateKind==='checked' ? `فُحصت بيانات الشركة في ${record.period}؛ تاريخ تحديث القطاع لدى أرقام غير صالح` : `آخر تحديث للقطاع ${record.period}`;
+}
 function applyFinancials(){
   for(const stock of allStocks()){
     const fallback=stock._fallback || (stock._fallback={eps:stock.eps,pe:stock.pe,bookValue:stock.bookValue,pb:stock.pb});
@@ -34,10 +40,11 @@ function applyFinancials(){
     stock.pe=chosen == null ? fallback.pe : chosen > 0 && stock.price != null ? stock.price/chosen : null;
     stock.bookValue=record?.book == null ? fallback.bookValue : safeNumber(record.book);
     stock.pb=record?.book == null ? fallback.pb : stock.bookValue > 0 && stock.price != null ? stock.price/stock.bookValue : null;
-    stock._epsSource=chosen == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ربحية ${epsKind} · آخر تحديث للقطاع ${record.period}`;
-    stock._bookSource=record?.book == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · آخر تحديث للقطاع ${record.period}`;
+    stock._epsSource=chosen == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ربحية ${epsKind} · ${sourceDate(record)}`;
+    stock._bookSource=record?.book == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ${sourceDate(record)}`;
     stock._hasCurrentEps=chosen != null;
     stock._epsPeriod=chosen == null ? null : record.period;
+    stock._epsDateKind=chosen == null ? null : record.dateKind;
     stock._epsKind=epsKind;
   }
   stats();render();
@@ -53,7 +60,7 @@ function nav(){
     data.sectors.map((sector,i)=>`<button class="sector-button ${activeSector===i?'active':''}" data-sector="${i}" type="button" aria-pressed="${activeSector===i}"><span>${escapeHtml(sector.name)}</span><span class="count">${sector.stocks.length}</span></button>`).join('');
 }
 function row(stock){
-  const source=stock._hasCurrentEps?`أرقام · ${stock._epsKind} · قطاع ${stock._epsPeriod.slice(0,7)}`:'تداول · بيانات أقدم';
+  const source=stock._hasCurrentEps?`أرقام · ${stock._epsKind} · ${stock._epsDateKind==='checked'?'فُحصت '+stock._epsPeriod:'قطاع '+stock._epsPeriod.slice(0,7)}`:'تداول · بيانات أقدم';
   const sourceClass=stock._hasCurrentEps?'fresh':'stale';
   return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="القيمة السوقية بمليون ريال · تداول السعودية 02.11.2026">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
 }
@@ -88,7 +95,7 @@ function updateMode(mode){
   $('reported-mode').setAttribute('aria-pressed',String(mode==='reported'));
   applyFinancials();
   const updated=allStocks().filter(s=>s._hasCurrentEps).length;
-  updateStatus(`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض قيمة تداول الأقدم. نوع الربحية وتاريخ القطاع ظاهران أسفل القيمة.`);
+  updateStatus(`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض قيمة تداول الأقدم. يظهر نوع الربحية وتاريخ المصدر أو الفحص أسفل القيمة.`);
 }
 function readSector(html,sectorId){
   const documentHtml=new DOMParser().parseFromString(html,'text/html');
@@ -96,7 +103,10 @@ function readSector(html,sectorId){
   const m=rawDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
   if(!m)return {reason:'missing-date'};
   const period=`${m[3]}-${m[2]}-${m[1]}`;
-  if(!periodValid(period))return {reason:'invalid-date'};
+  const futureSectorDate=new Date(`${period}T12:00:00`) > new Date();
+  if(!periodValid(period) && !futureSectorDate)return {reason:'invalid-date'};
+  const recordPeriod=futureSectorDate?today():period;
+  const dateKind=futureSectorDate?'checked':'sector';
   const records=[];
   for(const cell of documentHtml.querySelectorAll('td[compid]')){
     const symbol=financialMap.companyIds[cell.getAttribute('compid')];
@@ -105,9 +115,9 @@ function readSector(html,sectorId){
     const field=key=>safeNumber(row.querySelector(`td[field-column="${key}"]`)?.getAttribute('data-order'));
     const recurring=field('EPSBeforeXOItems'),reported=field('EarningsPerShare'),book=field('BookValue');
     if(recurring == null && reported == null && book == null)continue;
-    records.push({symbol,sector:sectorId,period,recurring,reported,book});
+    records.push({symbol,sector:sectorId,period:recordPeriod,dateKind,recurring,reported,book});
   }
-  return {records};
+  return {records,futureSectorDate};
 }
 async function getSector(sectorId){
   const url=`https://www.argaam.com/en/financialratios-sector/${sectorId}/quarter/per-share-data/${sectorId}`;
@@ -127,9 +137,10 @@ async function refreshFinancials(){
   const results=[];
   async function worker(){while(ids.length){const id=ids.shift();try{results.push(await getSector(id));}catch(error){results.push({reason:error.name==='AbortError'?'timeout':'network'});}}}
   await Promise.all(Array.from({length:Math.min(4,ids.length)},worker));
-  let changed=0,invalid=0,failed=0;
+  let changed=0,invalid=0,failed=0,futureHeaders=0;
   for(const result of results){
     if(result.reason){if(result.reason==='invalid-date')invalid++;else failed++;continue;}
+    if(result.futureSectorDate)futureHeaders++;
     for(const record of result.records){
       const previous=financials.get(record.symbol);
       if(!previous || record.period>=previous.period){financials.set(record.symbol,record);changed++;}
@@ -139,6 +150,7 @@ async function refreshFinancials(){
   const updated=allStocks().filter(s=>s._hasCurrentEps).length;
   let message=`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض قيمة تداول الأقدم. آخر فحص ${new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(new Date())}.`;
   if(invalid)message+=` استُبعدت ${invalid} قطاعات بسبب تاريخ غير صالح.`;
+  if(futureHeaders)message+=` تاريخ تحديث ${futureHeaders} قطاع لدى أرقام يقع في المستقبل؛ استُخدمت قيم الشركات مع إظهار تاريخ الفحص بدلًا منه.`;
   if(failed)message+=` تعذر فحص ${failed} قطاعات؛ ستُعاد المحاولة تلقائيًا.`;
   updateStatus(message);
   refreshRunning=false;
