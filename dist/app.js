@@ -1,12 +1,12 @@
 const columns = [
   ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],
   ['eps','ربحية السهم · آخر 4 أرباع','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
-  ['pb','مكرر القيمة الدفترية','pb'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
+  ['pb','مكرر القيمة الدفترية','pb'],['marketCap','القيمة السوقية · مليون ريال','mcap'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
   ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const epsFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:3,maximumFractionDigits:3});
-let data, financialMap, activeSector = null, query = '', sortBySector = new Map(), epsMode = 'recurring', refreshRunning = false;
+let data, financialMap, activeSector = null, query = '', sortBySector = new Map([['all',{key:'marketCap',dir:-1}]]), epsMode = 'recurring', refreshRunning = false;
 const financials = new Map();
 const $ = id => document.getElementById(id);
 const escapeHtml = value => String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -55,26 +55,28 @@ function nav(){
 function row(stock){
   const source=stock._hasCurrentEps?`أرقام · ${stock._epsKind} · قطاع ${stock._epsPeriod.slice(0,7)}`:'تداول · بيانات أقدم';
   const sourceClass=stock._hasCurrentEps?'fresh':'stale';
-  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
+  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="القيمة السوقية بمليون ريال · تداول السعودية 02.11.2026">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
 }
 function render(){
   nav();
-  columns[3][1]='ربحية السهم · آخر 4 أرباع';
-  const selected=activeSector===null?data.sectors.map((sector,index)=>({sector,index})):[{sector:data.sectors[activeSector],index:activeSector}];
-  const filtered=selected.map(({sector,index})=>({sector,index,stocks:sector.stocks.filter(s=>normalized(s.name).includes(query)||s.symbol.includes(query))})).filter(s=>s.stocks.length);
-  const count=filtered.reduce((n,s)=>n+s.stocks.length,0);
+  const selected=activeSector===null
+    ? [{index:'all',name:'جميع الشركات',stocks:allStocks()}]
+    : [{index:activeSector,name:data.sectors[activeSector].name,stocks:data.sectors[activeSector].stocks}];
+  const filtered=selected.map(group=>({...group,stocks:group.stocks.filter(s=>normalized(s.name).includes(query)||s.symbol.includes(query))})).filter(group=>group.stocks.length);
+  const count=filtered.reduce((n,group)=>n+group.stocks.length,0);
   $('view-title').textContent=activeSector===null?'جميع القطاعات':data.sectors[activeSector].name;
-  $('result-count').textContent=`${count} شركة في ${filtered.length} قطاع`;
+  const allSort=sortBySector.get('all');
+  $('result-count').textContent=activeSector===null?`${count} شركة في جدول واحد${allSort?.key==='marketCap'&&allSort.dir===-1?' · الأكبر قيمة سوقية أولًا':''}`:`${count} شركة في قطاع ${data.sectors[activeSector].name}`;
   $('clear').hidden=!query;
   $('empty').hidden=filtered.length!==0;
-  $('sectors').innerHTML=filtered.map(({sector,index,stocks})=>{
+  $('sectors').innerHTML=filtered.map(({name,index,stocks})=>{
     const sort=sortBySector.get(index);
     if(sort){stocks=[...stocks].sort((a,b)=>{
       const av=a[sort.key],bv=b[sort.key];
       if(av==null) return 1;if(bv==null)return -1;
-      return (typeof av==='string'?av.localeCompare(bv,'ar'):av-bv)*sort.dir;
+      return (typeof av==='string'?av.localeCompare(bv,'ar'):av-bv)*sort.dir || a.symbol.localeCompare(b.symbol,'en');
     });}
-    return `<section class="sector-section" id="sector-${index}" aria-labelledby="heading-${index}"><div class="sector-heading"><div class="sector-title-wrap"><span class="sector-index">${String(index+1).padStart(2,'0')}</span><h3 id="heading-${index}">${escapeHtml(sector.name)}</h3></div><span class="sector-pill">${stocks.length} ${stocks.length===1?'شركة':'شركات'}</span></div><div class="table-wrap" tabindex="0" aria-label="جدول ${escapeHtml(sector.name)}؛ مرر أفقيًا لرؤية كل الأعمدة"><table><colgroup>${columns.map(c=>`<col class="col-${c[2]}">`).join('')}</colgroup><thead><tr>${columns.map(([key,label],ci)=>`<th class="${ci===0?'sticky-1':ci===1?'sticky-2':''}" scope="col"><button type="button" data-sort="${key}" data-index="${index}" class="${sort?.key===key?'sorted':''}" aria-label="ترتيب حسب ${label}">${label}<span class="sort-glyph">${sort?.key===key?(sort.dir===1?'↑':'↓'):'↕'}</span></button></th>`).join('')}</tr></thead><tbody>${stocks.map(row).join('')}</tbody></table></div></section>`;
+    return `<section class="sector-section" id="sector-${index}" aria-labelledby="heading-${index}"><div class="sector-heading"><div class="sector-title-wrap">${index==='all'?'':`<span class="sector-index">${String(index+1).padStart(2,'0')}</span>`}<h3 id="heading-${index}">${escapeHtml(name)}</h3></div><span class="sector-pill">${stocks.length} ${index==='all'||stocks.length===1?'شركة':'شركات'}</span></div><div class="table-wrap" tabindex="0" aria-label="جدول ${escapeHtml(name)}؛ مرر أفقيًا لرؤية كل الأعمدة"><table><colgroup>${columns.map(c=>`<col class="col-${c[2]}">`).join('')}</colgroup><thead><tr>${columns.map(([key,label],ci)=>`<th class="${ci===0?'sticky-1':ci===1?'sticky-2':''}" scope="col"><button type="button" data-sort="${key}" data-index="${index}" class="${sort?.key===key?'sorted':''}" aria-label="ترتيب حسب ${label}">${label}<span class="sort-glyph">${sort?.key===key?(sort.dir===1?'↑':'↓'):'↕'}</span></button></th>`).join('')}</tr></thead><tbody>${stocks.map(row).join('')}</tbody></table></div></section>`;
   }).join('');
 }
 function updateStatus(message){$('financial-status').textContent=message;}
@@ -144,9 +146,9 @@ async function refreshFinancials(){
 
 document.addEventListener('click',event=>{
   const sectorButton=event.target.closest('[data-sector]');
-  if(sectorButton){activeSector=sectorButton.dataset.sector==='all'?null:Number(sectorButton.dataset.sector);render();$('main-content').scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(sectorButton){activeSector=sectorButton.dataset.sector==='all'?null:Number(sectorButton.dataset.sector);if(activeSector===null)sortBySector.set('all',{key:'marketCap',dir:-1});render();$('main-content').scrollIntoView({behavior:'smooth',block:'start'});return;}
   const sortButton=event.target.closest('[data-sort]');
-  if(sortButton){const index=Number(sortButton.dataset.index),key=sortButton.dataset.sort,current=sortBySector.get(index);sortBySector.set(index,{key,dir:current?.key===key?-current.dir:1});const section=document.getElementById(`sector-${index}`);const scroll=section.querySelector('.table-wrap').scrollLeft;render();document.getElementById(`sector-${index}`).querySelector('.table-wrap').scrollLeft=scroll;}
+  if(sortButton){const index=sortButton.dataset.index==='all'?'all':Number(sortButton.dataset.index),key=sortButton.dataset.sort,current=sortBySector.get(index);sortBySector.set(index,{key,dir:current?.key===key?-current.dir:1});const section=document.getElementById(`sector-${index}`);const scroll=section.querySelector('.table-wrap').scrollLeft;render();document.getElementById(`sector-${index}`).querySelector('.table-wrap').scrollLeft=scroll;}
 });
 $('search').addEventListener('input',event=>{query=normalized(event.target.value);render();});
 $('clear').addEventListener('click',()=>{$('search').value='';query='';render();$('search').focus();});
