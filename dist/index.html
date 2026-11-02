@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d2432">
+  <meta name="description" content="الشركات السعودية حسب ترتيب القطاعات المرفقة، مع السعر والربحية والقيمة الدفترية والأداء التاريخي.">
+  <title>قطاعات السوق السعودي | مؤشرات الشركات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="topline"></div>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="brand"><span class="brand-icon" aria-hidden="true"><i></i><i></i><i></i></span><span>السوق <strong>السعودي</strong></span></div>
+      <span class="masthead-tag">لوحة مؤشرات الشركات</span>
+    </div>
+  </header>
+
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="قائمة القطاعات">
+      <div class="side-head"><span class="eyebrow">استعرض البيانات</span><h2>القطاعات</h2><p>بنفس ترتيب الملف المرفق</p></div>
+      <nav id="sector-nav" class="sector-nav" aria-label="اختيار القطاع"></nav>
+      <div class="sidebar-source"><span class="source-dot"></span><span>بيانات الإغلاق بتاريخ <bdi>02.11.2026</bdi></span></div>
+    </aside>
+
+    <main id="main-content" class="main-content">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <span class="eyebrow light">نظرة شاملة · تداول السعودية</span>
+          <h1 id="page-title">الشركات السعودية،<br><em>قطاعًا بقطاع.</em></h1>
+          <p>استعرض الأسعار، ربحية السهم، مكررات التقييم، وحركة السعر عبر الفترات المختلفة في مكان واحد.</p>
+          <div class="hero-date"><span class="live-dot"></span> لقطة إغلاق <bdi>٢ نوفمبر ٢٠٢٦</bdi> <span class="divider"></span> ليست أسعارًا مباشرة</div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><span class="hero-art-mark">س</span></div>
+      </section>
+
+      <div class="stats" id="stats" aria-label="ملخص البيانات"></div>
+
+      <section class="workspace" aria-label="جدول الشركات">
+        <div class="toolbar">
+          <div class="toolbar-heading"><span class="eyebrow">دليل الشركات</span><h2 id="view-title">جميع القطاعات</h2><p id="result-count" role="status" aria-live="polite"></p></div>
+          <div class="toolbar-actions">
+            <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.4 4.4"/></svg><span class="sr-only">البحث عن شركة أو رمز</span><input id="search" type="search" placeholder="ابحث باسم الشركة أو الرمز" autocomplete="off"></label>
+            <button id="clear" class="clear-button" type="button" hidden>مسح البحث</button>
+          </div>
+        </div>
+        <div class="table-note"><span class="note-icon">i</span><span>اضغط عنوان العمود للترتيب داخل القطاع. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون ربحية السهم سالبة.</span></div>
+        <div id="sectors" class="sections"></div>
+        <div id="empty" class="empty" hidden><div class="empty-icon">⌕</div><h3>لا توجد نتائج مطابقة</h3><p>جرّب البحث باسم آخر أو برمز السهم.</p></div>
+      </section>
+
+      <footer class="footer">
+        <div><strong>عن البيانات</strong><p>ترتيب القطاعات وأسماء الشركات والأسعار والتغير اليومي من الملف المرفق. ربحية السهم لآخر أربعة أرباع والقيمة الدفترية والمكررات من تقرير المؤشرات المالية اليومية لتداول السعودية. أداء ٣ أشهر و٦ أشهر وسنة من أداة فحص الأسهم في تريدينغ فيو؛ وهو تغير سعري ولا يشمل التوزيعات النقدية. قد تختلف طرق معالجة إجراءات الشركات بين المصدرين.</p></div>
+        <div class="footer-links"><a href="https://www.saudiexchange.sa/Resources/Reports-v2/DailyFinancialIndicators_ar.html" target="_blank" rel="noopener noreferrer">تقرير تداول ↗</a><a href="https://www.tradingview.com/support/solutions/43000636536-how-is-performance-calculated-in-the-screener/" target="_blank" rel="noopener noreferrer">طريقة حساب الأداء ↗</a></div>
+        <div class="footer-bottom">آخر تحديث للبيانات: <bdi>02.11.2026</bdi> · الأرباح وفق آخر أربعة أرباع تنتهي في الربع الثاني <bdi>2026</bdi> بحسب تقرير تداول. الأرقام للمتابعة والمقارنة وليست توصية استثمارية.</div>
+      </footer>
+    </main>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>
