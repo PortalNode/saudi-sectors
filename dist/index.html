@@ -41,19 +41,21 @@
         <div class="toolbar">
           <div class="toolbar-heading"><span class="eyebrow">دليل الشركات</span><h2 id="view-title">جميع القطاعات</h2><p id="result-count" role="status" aria-live="polite"></p></div>
           <div class="toolbar-actions">
+            <div class="eps-switch" role="group" aria-label="نوع ربحية السهم"><button id="recurring-mode" type="button" class="selected" aria-pressed="true">الربحية المتكررة</button><button id="reported-mode" type="button" aria-pressed="false">الربحية المعلنة</button></div>
             <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.4 4.4"/></svg><span class="sr-only">البحث عن شركة أو رمز</span><input id="search" type="search" placeholder="ابحث باسم الشركة أو الرمز" autocomplete="off"></label>
             <button id="clear" class="clear-button" type="button" hidden>مسح البحث</button>
           </div>
         </div>
-        <div class="table-note"><span class="note-icon">i</span><span>اضغط عنوان العمود للترتيب داخل القطاع. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون ربحية السهم سالبة.</span></div>
+        <div class="table-note"><span class="note-icon">i</span><span>اضغط عنوان العمود للترتيب داخل القطاع. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم توفر أرقام ربحية متكررة للسهم، ويظهر نوع الربحية أسفل الرقم. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة. مكرر الأرباح محسوب بسعر لقطة 02.11.2026.</span></div>
+        <p id="financial-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات الأرباح…</p>
         <div id="sectors" class="sections"></div>
         <div id="empty" class="empty" hidden><div class="empty-icon">⌕</div><h3>لا توجد نتائج مطابقة</h3><p>جرّب البحث باسم آخر أو برمز السهم.</p></div>
       </section>
 
       <footer class="footer">
-        <div><strong>عن البيانات</strong><p>ترتيب القطاعات وأسماء الشركات والأسعار والتغير اليومي من الملف المرفق. ربحية السهم لآخر أربعة أرباع والقيمة الدفترية والمكررات من تقرير المؤشرات المالية اليومية لتداول السعودية. أداء 3 أشهر و6 أشهر وسنة من أداة فحص الأسهم في تريدينغ فيو؛ وهو تغير سعري ولا يشمل التوزيعات النقدية. قد تختلف طرق معالجة إجراءات الشركات بين المصدرين.</p></div>
-        <div class="footer-links"><a href="https://www.saudiexchange.sa/Resources/Reports-v2/DailyFinancialIndicators_ar.html" target="_blank" rel="noopener noreferrer">تقرير تداول ↗</a><a href="https://www.tradingview.com/support/solutions/43000636536-how-is-performance-calculated-in-the-screener/" target="_blank" rel="noopener noreferrer">طريقة حساب الأداء ↗</a></div>
-        <div class="footer-bottom">آخر تحديث للبيانات: <bdi>02.11.2026</bdi> · الأرباح وفق آخر أربعة أرباع تنتهي في الربع الثاني <bdi>2026</bdi> بحسب تقرير تداول. الأرقام للمتابعة والمقارنة وليست توصية استثمارية.</div>
+        <div><strong>عن البيانات</strong><p>الأسعار وتغير اليوم لقطة إغلاق 02.11.2026 من الملف المرفق. ربحية السهم والقيمة الدفترية تُقرأ من جداول أرقام القطاعية عند فتح الصفحة، وتُحدّث كل ساعة أثناء بقائها مفتوحة. لا تُستخدم بيانات المصدر إن كان تاريخ القطاع لاحقًا لليوم. عند غياب الربحية أو تعذر جلبها، تظهر قيمة تقرير تداول للربع الثاني 2026 مع علامة توضح أنها أقدم. مكرر الأرباح والقيمة الدفترية محسوبان بسعر اللقطة الثابت. أداء 3 أشهر و6 أشهر وسنة من تريدينغ فيو، وهو تغير سعري لا يشمل التوزيعات.</p></div>
+        <div class="footer-links"><a href="https://www.argaam.com/en/financialratios-sector/35/quarter/per-share-data/35" target="_blank" rel="noopener noreferrer">بيانات أرقام ↗</a><a href="https://www.saudiexchange.sa/Resources/Reports-v2/DailyFinancialIndicators_ar.html" target="_blank" rel="noopener noreferrer">تقرير تداول ↗</a><a href="https://www.tradingview.com/support/solutions/43000636536-how-is-performance-calculated-in-the-screener/" target="_blank" rel="noopener noreferrer">طريقة حساب الأداء ↗</a></div>
+        <div class="footer-bottom">آخر سعر في الجدول: <bdi>02.11.2026</bdi> · تاريخ القطاع المعروض أسفل الربحية ليس تاريخ إعلان كل شركة. القيم للمتابعة والمقارنة وليست توصية استثمارية.</div>
       </footer>
     </main>
   </div>
