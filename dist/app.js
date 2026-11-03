@@ -1,7 +1,7 @@
 const columns = [
   ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],
-  ['eps','ربحية السهم · آخر 4 أرباع','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
-  ['pb','مكرر القيمة الدفترية','pb'],['marketCap','القيمة السوقية · مليون ريال','mcap'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
+  ['eps','ربحية السهم','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
+  ['pb','مكرر القيمة الدفترية','pb'],['marketCap','القيمة السوقية','mcap'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
   ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -56,8 +56,8 @@ function stats(){
   $('stats').innerHTML=values.map(([label,value])=>`<div class="stat"><span class="stat-label">${label}</span><strong class="stat-value">${value}</strong></div>`).join('');
 }
 function nav(){
-  $('sector-nav').innerHTML=`<button class="sector-button ${activeSector===null?'active':''}" data-sector="all" type="button" aria-pressed="${activeSector===null}"><span>جميع القطاعات</span><span class="count">${data.sectors.length}</span></button>`+
-    data.sectors.map((sector,i)=>`<button class="sector-button ${activeSector===i?'active':''}" data-sector="${i}" type="button" aria-pressed="${activeSector===i}"><span>${escapeHtml(sector.name)}</span><span class="count">${sector.stocks.length}</span></button>`).join('');
+  $('sector-nav').innerHTML=`<button class="sector-button ${activeSector===null?'active':''}" data-sector="all" type="button" aria-pressed="${activeSector===null}" title="جميع القطاعات · ${allStocks().length} شركة"><span>جميع القطاعات</span><span class="count">${data.sectors.length}</span></button>`+
+    data.sectors.map((sector,i)=>`<button class="sector-button ${activeSector===i?'active':''}" data-sector="${i}" type="button" aria-pressed="${activeSector===i}" title="${escapeHtml(sector.name)} · ${sector.stocks.length} شركة"><span>${escapeHtml(sector.name)}</span><span class="count">${sector.stocks.length}</span></button>`).join('');
 }
 function row(stock){
   const source=stock._hasCurrentEps?`أرقام · ${stock._epsKind} · ${stock._epsDateKind==='checked'?'فُحصت '+stock._epsPeriod:'قطاع '+stock._epsPeriod.slice(0,7)}`:'تداول · بيانات أقدم';

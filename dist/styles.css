@@ -69,3 +69,35 @@ th:has([data-sort="marketCap"]){background:#242d37}td[title^="القيمة ال�
 .footer{border-top:1px solid #28313b;color:#9da7b2;padding:20px 0;display:block;text-align:center}.footer strong{color:#e2e7ec}.footer p{max-width:640px;margin:6px auto;font-size:9px;line-height:1.85}.footer-links{justify-content:center;margin:12px 0}.footer-links a{background:#1d2630;color:#d7dee5;border-radius:2px;padding:6px 8px}.footer-links a:hover{background:#293542}.footer-bottom{border-top:0;padding-top:4px;font-size:9px;color:#808b97}
 button:focus-visible,a:focus-visible,input:focus-visible{outline-color:#f59e0b}
 @media(max-width:760px){.main-content{padding:27px 10px 20px}.hero h1{font-size:22px}.toolbar{gap:8px}.sector-nav{gap:10px}.sector-button{font-size:9px}.financial-status{font-size:9px}.eps-switch{grid-column:1/-1}.clear-button{grid-column:1/-1}.footer-links{gap:6px}}
+
+/* Desktop fit + sticky table head + even sector grid */
+.main-content{max-width:1320px;padding:22px 20px 18px}
+.workspace{padding-top:12px}
+.sector-nav{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin:11px 0 13px;padding:0;border:0}
+.sector-button{display:block;width:100%;padding:5px 5px;border:1px solid #28323c!important;border-radius:2px;background:#151b22!important;color:#a8b1bc;font-size:9.5px;line-height:1.4;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sector-button:hover{background:#1d2731!important;color:#f7b339!important;border-color:#3f4c59!important}
+.sector-button.active{background:#f59e0b!important;color:#15191f!important;border-color:#f59e0b!important}
+table{width:100%;min-width:1150px}
+.col-symbol{width:70px}.col-name{width:auto}.col-price{width:78px}.col-eps{width:110px}
+.col-pe{width:88px}.col-bv{width:92px}.col-pb{width:100px}.col-mcap{width:130px}
+.col-day,.col-3m,.col-6m,.col-1y{width:92px}
+thead th{height:auto;min-height:31px;padding:5px 9px;background:#242d37;position:sticky;top:0;z-index:8;box-shadow:0 1px 0 #2b3540}
+thead th.sticky-1,thead th.sticky-2{z-index:9}
+@media(min-width:1200px){.table-wrap{overflow:visible}}
+/* single-line toolbar on desktop */
+@media(min-width:761px){
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+  .toolbar-heading{grid-column:auto;flex:none;text-align:right}
+  .toolbar-heading p{margin-top:2px}
+  .toolbar-actions{display:flex;align-items:center;gap:8px;grid-row:auto}
+  .search-box{grid-row:auto;grid-column:auto;min-width:250px;height:31px;flex:1;max-width:380px}
+  .eps-switch{grid-row:auto}
+  .clear-button{grid-row:auto;height:31px}
+}
+@media(min-width:761px) and (max-width:1100px){.sector-nav{grid-template-columns:repeat(4,minmax(0,1fr))}.main-content{padding:20px 16px 16px}.table-wrap{overflow:auto;max-height:calc(100vh - 330px)}}
+@media(min-width:1101px) and (max-width:1199px){.table-wrap{overflow:auto;max-height:calc(100vh - 330px)}}
+@media(max-width:760px){.main-content{padding:26px 12px 18px}.sector-nav{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;margin:10px 0 14px;padding:0 0 2px;border:0}.sector-button{width:auto;flex:none;padding:7px 10px}.table-wrap{overflow:auto}}
+.table-wrap{scrollbar-width:thin;scrollbar-color:#3a4551 #151b22}
+.table-wrap::-webkit-scrollbar{width:10px;height:10px}
+.table-wrap::-webkit-scrollbar-track{background:#151b22}
+.table-wrap::-webkit-scrollbar-thumb{background:#3a4551;border-radius:6px}
