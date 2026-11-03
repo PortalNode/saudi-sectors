@@ -140,3 +140,15 @@ tbody td{font-size:12.5px;height:47px;padding:9px 8px}
 /* Market summary */
 .market-summary{margin:15px 0 18px;padding:12px 14px;background:#151b22;border:1px solid #2a333e}.market-summary h2{font-size:14px;color:#f59e0b;margin:0 0 10px;display:flex;justify-content:space-between}.market-date{font-size:11px;color:#9da7b2;font-weight:400}.market-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}.market-card{border-left:1px solid #2a333e;padding:4px 9px;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.market-card span{display:block;color:#aeb8c3;font-size:11px}.market-card strong{display:block;color:#eef2f5;font:700 18px var(--font);direction:ltr;text-align:center;margin-top:5px;white-space:nowrap}.market-card strong.up{color:#54e878}.market-card strong.down{color:#ff6b6b}.market-card strong.flat{color:#bdc6ce}.col-yield{width:105px}
 @media(max-width:760px){.market-summary{margin:12px 0;padding:10px}.market-stats{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:10px}.market-card{padding:3px 6px;min-height:48px}.market-card span{font-size:10px}.market-card strong{font-size:14px}}
+
+/* Final layout correction: keep company identity columns readable and the market strip on one row. */
+.col-symbol{width:86px}.col-name{width:190px}.col-price{width:82px}.col-eps{width:112px}.col-pe{width:82px}.col-bv{width:86px}.col-pb{width:108px}.col-yield{width:105px}.col-mcap{width:140px}.col-ytd{width:115px}.col-day,.col-3m,.col-6m,.col-1y{width:82px}
+.sticky-1{right:0;width:86px;min-width:86px;max-width:86px;z-index:12}
+.sticky-2{right:86px;width:190px;min-width:190px;max-width:190px;z-index:11}
+thead th.sticky-1,thead th.sticky-2{z-index:20}
+.company-name{display:table-cell;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.market-stats{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;white-space:nowrap}
+.market-card{min-width:0;padding:3px 5px;min-height:48px}
+.market-card span{font-size:10px;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.market-card strong{font-size:15px;margin-top:3px}
+@media(max-width:760px){.market-stats{grid-template-columns:repeat(7,minmax(112px,1fr));overflow-x:auto}.market-card{min-width:112px}.market-card strong{font-size:14px}}
