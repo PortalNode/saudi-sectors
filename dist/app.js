@@ -69,11 +69,15 @@ function stats(){
 }
 function paintMarketSummary(){
   const m=data.marketSummary||{};
+  const breadth=allStocks().reduce((counts,stock)=>{const change=safeNumber(stock.day);if(change>0)counts.up++;else if(change<0)counts.down++;else if(change===0)counts.flat++;return counts;},{up:0,down:0,flat:0});
   const signed=n=>`${n>0?'+':n<0?'−':''}${numberFormat.format(Math.abs(n))}`;
   const daily=m.day==null?'—':`${m.pointChange==null?'':`${signed(m.pointChange)} `}(${signed(m.day)}%)`;
   const items=[
     {label:'قيمة المؤشر',value:m.value==null?'—':numberFormat.format(m.value)},
     {label:'التغيير اليومي',value:daily,trend:m.day},
+    {label:'الشركات المرتفعة',value:integerFormat.format(breadth.up),trend:1},
+    {label:'الشركات المنخفضة',value:integerFormat.format(breadth.down),trend:-1},
+    {label:'دون تغيير',value:integerFormat.format(breadth.flat),trend:0},
     {label:'القيمة المتداولة',value:m.turnover==null?'—':integerFormat.format(m.turnover)},
     {label:'3 أشهر',value:m.month3,percent:true},
     {label:'6 أشهر',value:m.month6,percent:true},
@@ -87,6 +91,11 @@ function paintMarketSummary(){
     return `<div class="market-card"><span>${item.label}</span><strong class="${cls}">${display}</strong></div>`;
   }).join('');
   $('market-date').textContent=m.date?`إغلاق ${m.date}`:'بانتظار تحديث المؤشر';
+}
+function sectorChange(stocks){
+  let weighted=0,total=0;
+  for(const stock of stocks){const change=safeNumber(stock.day),cap=safeNumber(stock.marketCap);if(change==null||cap==null||cap<=0)continue;weighted+=change*cap;total+=cap;}
+  return total?weighted/total:null;
 }
 function nav(){
   $('sector-nav').innerHTML=`<button class="sector-button ${activeSector===null?'active':''}" data-sector="all" type="button" aria-pressed="${activeSector===null}" title="جميع القطاعات · ${allStocks().length} شركة"><span>جميع القطاعات</span><span class="count">${data.sectors.length}</span></button>`+
@@ -115,7 +124,8 @@ function render(){
       if(av==null) return 1;if(bv==null)return -1;
       return (typeof av==='string'?av.localeCompare(bv,'ar'):av-bv)*sort.dir || a.symbol.localeCompare(b.symbol,'en');
     });}
-    return `<section class="sector-section" id="sector-${index}" aria-labelledby="heading-${index}"><div class="sector-heading"><div class="sector-title-wrap">${index==='all'?'':`<span class="sector-index">${String(index+1).padStart(2,'0')}</span>`}<h3 id="heading-${index}">${escapeHtml(name)}</h3></div><span class="sector-pill">${stocks.length} ${index==='all'||stocks.length===1?'شركة':'شركات'}</span></div><div class="table-wrap" tabindex="0" aria-label="جدول ${escapeHtml(name)}؛ مرر أفقيًا لرؤية كل الأعمدة"><table><colgroup>${columns.map(c=>`<col class="col-${c[2]}">`).join('')}</colgroup><thead><tr>${columns.map(([key,label],ci)=>`<th class="${ci===0?'sticky-1':ci===1?'sticky-2':''}" scope="col"><button type="button" data-sort="${key}" data-index="${index}" class="${sort?.key===key?'sorted':''}" aria-label="ترتيب حسب ${label}">${label}<span class="sort-glyph">${sort?.key===key?(sort.dir===1?'↑':'↓'):'↕'}</span></button></th>`).join('')}</tr></thead><tbody>${stocks.map(row).join('')}</tbody></table></div></section>`;
+    const change=sectorChange(stocks),changeClass=change==null?'':change>0?'up':change<0?'down':'flat',changeText=change==null?'—':`${change>0?'+':''}${numberFormat.format(change)}%`;
+    return `<section class="sector-section" id="sector-${index}" aria-labelledby="heading-${index}"><div class="sector-heading"><div class="sector-title-wrap">${index==='all'?'':`<span class="sector-index">${String(index+1).padStart(2,'0')}</span>`}<h3 id="heading-${index}">${escapeHtml(name)}</h3></div><div class="sector-meta"><span class="sector-pill">${stocks.length} ${index==='all'||stocks.length===1?'شركة':'شركات'}</span>${index==='all'?'':`<span class="sector-performance ${changeClass}">تغير القطاع <strong>${changeText}</strong></span>`}</div></div><div class="table-wrap" tabindex="0" aria-label="جدول ${escapeHtml(name)}؛ مرر أفقيًا لرؤية كل الأعمدة"><table><colgroup>${columns.map(c=>`<col class="col-${c[2]}">`).join('')}</colgroup><thead><tr>${columns.map(([key,label],ci)=>`<th class="${ci===0?'sticky-1':ci===1?'sticky-2':''}" scope="col"><button type="button" data-sort="${key}" data-index="${index}" class="${sort?.key===key?'sorted':''}" aria-label="ترتيب حسب ${label}">${label}<span class="sort-glyph">${sort?.key===key?(sort.dir===1?'↑':'↓'):'↕'}</span></button></th>`).join('')}</tr></thead><tbody>${stocks.map(row).join('')}</tbody></table></div></section>`;
   }).join('');
 }
 function updateStatus(message){$('financial-status').textContent=message;}

@@ -152,3 +152,16 @@ thead th.sticky-1,thead th.sticky-2{z-index:20}
 .market-card span{font-size:10px;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .market-card strong{font-size:15px;margin-top:3px}
 @media(max-width:760px){.market-stats{grid-template-columns:repeat(7,minmax(112px,1fr));overflow-x:auto}.market-card{min-width:112px}.market-card strong{font-size:14px}}
+
+/* Desktop market breadth and sector performance */
+.market-summary{width:100%;max-width:none}
+.market-summary h2{justify-content:center;position:relative;text-align:center}
+.market-date{position:absolute;left:0;top:50%;transform:translateY(-50%)}
+.market-stats{grid-template-columns:repeat(10,minmax(0,1fr));gap:3px}
+.market-card{border-left:1px solid #2a333e;padding:3px 4px}
+.market-card:last-child{border-left:0}
+.sector-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.sector-performance{border:1px solid #2a333e;background:#151b22;border-radius:2px;color:#aeb8c3;padding:4px 8px;font-size:10px;white-space:nowrap}
+.sector-performance strong{margin-right:4px;direction:ltr;display:inline-block}
+.sector-performance.up strong{color:#54e878}.sector-performance.down strong{color:#ff6b6b}.sector-performance.flat strong{color:#bdc6ce}
+@media(max-width:760px){.market-summary h2{justify-content:center}.market-date{position:static;transform:none;margin-right:8px}.market-stats{grid-template-columns:repeat(10,minmax(112px,1fr))}.sector-meta{gap:5px}.sector-performance{font-size:9px;padding:3px 6px}}
