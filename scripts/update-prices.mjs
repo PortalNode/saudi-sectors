@@ -300,76 +300,36 @@ try{
 try{data.marketSummary={...(data.marketSummary||{}),...await officialTadawulSummary()};}
 catch(error){console.log(`Official Tadawul summary failed: ${error.message}; previous daily summary retained.`);}
 
-// Build Argaam's "last year" dividend yield from the prior fiscal year's
-// per-share cash dividends and the latest stock close. Report-page yield values
-// are snapshots and can lag the current share price.
+// Read Argaam's own financial indicator instead of rebuilding the yield from
+// dividend-history reports. This is the same value shown on the company page:
+// "Dividend Yield (%) (Last Year)".
 async function argaamHtml(url){
   let lastError;
   for(let attempt=0;attempt<3;attempt++){
     const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),20000);
-    try{const response=await fetch(url,{headers:{'User-Agent':USER_AGENT,'Accept':'text/html'},signal:controller.signal});if(!response.ok)throw Error(`Argaam HTTP ${response.status}`);return await response.text();}
+    try{const response=await fetch(url,{headers:{'User-Agent':USER_AGENT,'Accept':'text/html','X-Requested-With':'XMLHttpRequest','Referer':'https://www.argaam.com/en/tadawul/tasi/saudi-energy'},signal:controller.signal});if(!response.ok)throw Error(`Argaam HTTP ${response.status}`);return await response.text();}
     catch(error){lastError=error;if(attempt<2)await sleep(700*(attempt+1));}
     finally{clearTimeout(timer);}
   }
   throw lastError;
 }
 async function pool(items,limit,worker){let next=0;await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(next<items.length){const i=next++;try{await worker(items[i]);}catch(error){console.log(`Argaam fetch failed: ${error.message}`);}}}));}
-const argaamBase='https://www.argaam.com';const companyPaths=new Map();
-await pool([...financialMap.sectorIds],4,async sectorId=>{
-  const html=await argaamHtml(`${argaamBase}/en/financialratios-sector/${sectorId}/quarter/per-share-data/${sectorId}`);
-  for(const cell of html.matchAll(/<td\b[^>]*compid=["']?(\d+)["']?[^>]*>([\s\S]*?)<\/td>/gi)){
-    const symbol=financialMap.companyIds[cell[1]];const href=cell[2].match(/href=["']([^"']*\/en\/tadawul\/(?:tasi|nomu)\/[^"']+)["']/i)?.[1];
-    if(symbol&&href&&!companyPaths.has(symbol))companyPaths.set(symbol,new URL(href,argaamBase).pathname);
-  }
-});
-const candidates=[];
-await pool([...companyPaths],8,async([symbol,path])=>{
-  const html=await argaamHtml(new URL(path,argaamBase).href);
-  const links=[...html.matchAll(/href=["']([^"']*\/reports\/company-dividend\/\d+[^"']*)["']/gi)]
-    .map(x=>new URL(x[1].replace(/&amp;/g,'&'),argaamBase).href);
-  const unique=[...new Set(links)];
-  for(const url of unique)candidates.push({symbol,url});
-});
-// Some Argaam stock pages omit the dividend article link even when their
-// dividend-history table contains the reported fiscal-year distribution.
-// Use verified report links for FY2025 only; future years must be rediscovered.
-const priorFiscalYear=Number((data.asOf||new Date().toISOString().slice(0,10)).slice(0,4))-1;
-if(priorFiscalYear===2025){
-  const reportOverrides={1020:'55755',1320:'59359',2082:'61238',2310:'50105',3040:'60900',4144:'54106',7202:'56129'};
-  for(const [symbol,reportId] of Object.entries(reportOverrides)){
-    for(let index=candidates.length-1;index>=0;index--){
-      if(candidates[index].symbol===symbol)candidates.splice(index,1);
-    }
-    candidates.push({symbol,url:`${argaamBase}/en/reports/company-dividend/${reportId}?preview=true`});
-  }
-}
-let yieldCount=0;const stocksBySymbol=new Map(stocks.map(stock=>[stock.symbol,stock]));
-const parsedDividendSymbols=new Set();
-await pool(candidates,8,async({symbol,url})=>{
-  const html=await argaamHtml(url);const stock=stocksBySymbol.get(symbol);if(!stock||!(stock.price>0))return;
-  const start=html.indexOf('id="tblCashDivdnds"');if(start<0)return;
-  const end=html.indexOf('</table>',start);if(end<0)return;
-  parsedDividendSymbols.add(symbol);
-  const table=html.slice(start,end+8),priorYear=Number((data.asOf||new Date().toISOString().slice(0,10)).slice(0,4))-1;
-  let totalDividendM=0,totalPerShare=0;
-  for(const tr of table.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)){
-    const cells=[...tr[1].matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)].map(cell=>cell[1].replace(/<[^>]*>/g,' ').replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim());
-    if(cells.length<5)continue;
-    const dateMatch=cells[1].match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);const amountM=Number(cells[3].replace(/,/g,'')),perShare=Number(cells[4].replace(/,/g,''));
-    if(!dateMatch||(!Number.isFinite(amountM)&&!Number.isFinite(perShare)))continue;
-    const notedYear=cells[5].match(/(?:19|20)\d{2}/g)?.map(Number)||[];
-    const belongsToPriorYear=notedYear.includes(priorYear)||(!notedYear.length&&Number(dateMatch[3])===priorYear);
-    if(belongsToPriorYear){if(Number.isFinite(amountM)&&amountM>0)totalDividendM+=amountM;if(Number.isFinite(perShare)&&perShare>0)totalPerShare+=perShare;}
-  }
-  const total=stock.shares>0&&totalDividendM>0?totalDividendM*1e6/stock.shares:totalPerShare;
-  if(total>0){stock.dividendYield=round(total/stock.price*100,2);stock.dividendYieldSource=`Argaam FY${priorYear} dividends / latest close`;}
-});
-for(const symbol of parsedDividendSymbols){
-  const stock=stocksBySymbol.get(symbol);
-  if(stock?.dividendYield!=null)yieldCount++;
+const argaamBase='https://www.argaam.com';
+const companyIdsBySymbol=new Map(Object.entries(financialMap.companyIds).map(([companyId,symbol])=>[symbol,companyId]));
+const stocksBySymbol=new Map(stocks.map(stock=>[stock.symbol,stock]));
+let yieldCount=0,ratioCount=0;
+await pool(stocks,4,async stock=>{
+  const companyId=companyIdsBySymbol.get(stock.symbol);if(!companyId)return;
+  const html=await argaamHtml(`${argaamBase}/en/companies/latest-quarter-financial-ratios?companyID=${companyId}&marketID=3&headingWithMoreLink=true`);
+  const row=html.match(/<tr\b[^>]*data-fieldid=["']CurrentDividendYield["'][^>]*>[\s\S]*?<\/tr>/i)?.[0];
+  if(!row)return;
+  ratioCount++;
+  const raw=row.match(/(?:currency-current-value|data-order)=["']\s*([^"']+?)\s*["']/i)?.[1];
+  const value=raw==null?null:Number(raw.replace(/,/g,''));
+  if(Number.isFinite(value)&&value>=0){stock.dividendYield=round(value,2);stock.dividendYieldSource='Argaam Dividend Yield (%) (Last Year)';yieldCount++;}
   else {stock.dividendYield=null;delete stock.dividendYieldSource;}
-}
-console.log(`Argaam-derived dividend yields: ${yieldCount}/${stocks.length}; company pages ${companyPaths.size}, dividend reports ${candidates.length}, companies with parsed reports ${parsedDividendSymbols.size}`);
+});
+console.log(`Argaam financial-indicator dividend yields: ${yieldCount}/${stocks.length}; ratio rows ${ratioCount}/${stocks.length}`);
 
 await writeFile(DATA_FILE, JSON.stringify(data));
 
