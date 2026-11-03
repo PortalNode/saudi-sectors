@@ -17,7 +17,7 @@
       <section class="hero" aria-labelledby="page-title">
         <div class="hero-copy">
           <h1 id="page-title">الشركات السعودية حسب <em>القطاع</em></h1>
-          <div class="hero-date">بيانات الإغلاق <bdi>02.11.2026</bdi> · لقطة إغلاق وليست أسعارًا مباشرة</div>
+          <div class="hero-date">بيانات الإغلاق <bdi id="price-date">02.11.2026</bdi> · لقطة إغلاق وليست أسعارًا مباشرة</div>
         </div>
         <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><span class="hero-art-mark">س</span></div>
       </section>
@@ -34,16 +34,16 @@
           </div>
         </div>
         <nav id="sector-nav" class="sector-nav" aria-label="اختيار القطاع"></nav>
-        <div class="table-note"><span class="note-icon">i</span><span>«جميع القطاعات» جدول واحد مرتب افتراضيًا من الأكبر قيمة سوقية إلى الأصغر. اضغط أي عنوان عمود لتغيير الترتيب. القيمة السوقية بمليون ريال من تقرير تداول بتاريخ 02.11.2026. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم توفر أرقام ربحية متكررة للسهم، ويظهر نوعها أسفل الرقم. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة.</span></div>
+        <div class="table-note"><span class="note-icon">i</span><span>«جميع القطاعات» جدول واحد مرتب افتراضيًا من الأكبر قيمة سوقية إلى الأصغر. اضغط أي عنوان عمود لتغيير الترتيب. تُحدَّث الأسعار والقيمة السوقية آليًا بعد كل جلسة تداول. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم توفر أرقام ربحية متكررة للسهم، ويظهر نوعها أسفل الرقم. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة.</span></div>
         <p id="financial-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات الأرباح…</p>
         <div id="sectors" class="sections"></div>
         <div id="empty" class="empty" hidden><div class="empty-icon">⌕</div><h3>لا توجد نتائج مطابقة</h3><p>جرّب البحث باسم آخر أو برمز السهم.</p></div>
       </section>
 
       <footer class="footer">
-        <div><strong>عن البيانات</strong><p>الأسعار وتغير اليوم لقطة إغلاق 02.11.2026 من الملف المرفق، والقيمة السوقية بمليون ريال من تقرير المؤشرات المالية اليومية لتداول السعودية للتاريخ نفسه. ربحية السهم والقيمة الدفترية تُقرأ من جداول أرقام القطاعية عند فتح الصفحة، وتُحدّث كل ساعة أثناء بقائها مفتوحة. إذا عرضت أرقام تاريخ قطاع يقع في المستقبل، تُستخدم قيم صفوف الشركات مع عرض تاريخ فحص الصفحة بدل تاريخ القطاع غير الصالح. تاريخ الفحص ليس تاريخ إعلان أرباح الشركة. عند غياب الربحية لدى أرقام، تظهر قيمة تقرير تداول للربع الثاني 2026 مع علامة توضح أنها أقدم. مكرر الأرباح ومكرر القيمة الدفترية محسوبان بسعر اللقطة الثابت. أداء 3 أشهر و6 أشهر وسنة من تريدينغ فيو، وهو تغير سعري لا يشمل التوزيعات.</p></div>
-        <div class="footer-links"><a href="https://www.argaam.com/en/financialratios-sector/35/quarter/per-share-data/35" target="_blank" rel="noopener noreferrer">بيانات أرقام ↗</a><a href="https://www.saudiexchange.sa/Resources/Reports-v2/DailyFinancialIndicators_ar.html" target="_blank" rel="noopener noreferrer">تقرير تداول ↗</a><a href="https://www.tradingview.com/support/solutions/43000636536-how-is-performance-calculated-in-the-screener/" target="_blank" rel="noopener noreferrer">طريقة حساب الأداء ↗</a></div>
-        <div class="footer-bottom">آخر سعر في الجدول: <bdi>02.11.2026</bdi> · تاريخ القطاع المعروض أسفل الربحية ليس تاريخ إعلان كل شركة. القيم للمتابعة والمقارنة وليست توصية استثمارية.</div>
+        <div><strong>عن البيانات</strong><p>تُحدَّث الأسعار وتغير اليوم تلقائيًا بعد كل جلسة تداول من <span id="price-source">ياهو فايننس</span>، وآخر لقطة معروضة هي إغلاق <bdi id="price-date-note">02.11.2026</bdi>. القيمة السوقية بمليون ريال محسوبة من عدد الأسهم في تقرير المؤشرات المالية اليومية لتداول السعودية مضروبًا في سعر الإغلاق. ربحية السهم والقيمة الدفترية تُقرأ من جداول أرقام القطاعية عند فتح الصفحة، وتُحدّث كل ساعة أثناء بقائها مفتوحة. إذا عرضت أرقام تاريخ قطاع يقع في المستقبل، تُستخدم قيم صفوف الشركات مع عرض تاريخ فحص الصفحة بدل تاريخ القطاع غير الصالح. تاريخ الفحص ليس تاريخ إعلان أرباح الشركة. عند غياب الربحية لدى أرقام، تظهر قيمة تقرير تداول للربع الثاني 2026 مع علامة توضح أنها أقدم. مكرر الأرباح ومكرر القيمة الدفترية محسوبان بسعر الإغلاق المعروض. أداء 3 أشهر و6 أشهر وسنة من تريدينغ فيو، وهو تغير سعري لا يشمل التوزيعات.</p></div>
+        <div class="footer-links"><a href="https://www.argaam.com/en/financialratios-sector/35/quarter/per-share-data/35" target="_blank" rel="noopener noreferrer">بيانات أرقام ↗</a><a href="https://finance.yahoo.com/quote/2222.SR/" target="_blank" rel="noopener noreferrer">أسعار ياهو ↗</a><a href="https://www.saudiexchange.sa/Resources/Reports-v2/DailyFinancialIndicators_ar.html" target="_blank" rel="noopener noreferrer">تقرير تداول ↗</a><a href="https://www.tradingview.com/support/solutions/43000636536-how-is-performance-calculated-in-the-screener/" target="_blank" rel="noopener noreferrer">طريقة حساب الأداء ↗</a></div>
+        <div class="footer-bottom">آخر سعر في الجدول: <bdi id="price-date-footer">02.11.2026</bdi> · تاريخ القطاع المعروض أسفل الربحية ليس تاريخ إعلان كل شركة. القيم للمتابعة والمقارنة وليست توصية استثمارية.</div>
       </footer>
     </main>
   </div>

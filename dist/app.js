@@ -25,8 +25,18 @@ function periodValid(period){
 function today(){
   return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 }
-function sourceDate(record){
+const sourceDate = record=>{
   return record.dateKind==='checked' ? `فُحصت بيانات الشركة في ${record.period}؛ تاريخ تحديث القطاع لدى أرقام غير صالح` : `آخر تحديث للقطاع ${record.period}`;
+}
+const snapshotLabel = () => data.priceDate || (data.asOf ? data.asOf.split('-').reverse().join('.') : '—');
+function paintSnapshot(){
+  const date=snapshotLabel();
+  for(const id of ['price-date','price-date-note','price-date-footer']){
+    const node=$(id);
+    if(node) node.textContent=date;
+  }
+  const source=$('price-source');
+  if(source) source.textContent=data.priceSource?.provider==='TradingView' ? 'تريدينغ فيو' : 'ياهو فايننس';
 }
 function applyFinancials(){
   for(const stock of allStocks()){
@@ -52,7 +62,7 @@ function applyFinancials(){
 function stats(){
   const stocks=allStocks();
   const updated=stocks.filter(s=>s._hasCurrentEps).length;
-  const values=[['القطاعات',data.sectors.length],['الشركات',stocks.length],['ربحية من أرقام',updated],['تاريخ السعر','02.11.2026']];
+  const values=[['القطاعات',data.sectors.length],['الشركات',stocks.length],['ربحية من أرقام',updated],['تاريخ السعر',snapshotLabel()]];
   $('stats').innerHTML=values.map(([label,value])=>`<div class="stat"><span class="stat-label">${label}</span><strong class="stat-value">${value}</strong></div>`).join('');
 }
 function nav(){
@@ -62,7 +72,7 @@ function nav(){
 function row(stock){
   const source=stock._hasCurrentEps?`أرقام · ${stock._epsKind} · ${stock._epsDateKind==='checked'?'فُحصت '+stock._epsPeriod:'قطاع '+stock._epsPeriod.slice(0,7)}`:'تداول · بيانات أقدم';
   const sourceClass=stock._hasCurrentEps?'fresh':'stale';
-  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="القيمة السوقية بمليون ريال · تداول السعودية 02.11.2026">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
+  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="القيمة السوقية بمليون ريال · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
 }
 function render(){
   nav();
@@ -168,7 +178,7 @@ $('recurring-mode').addEventListener('click',()=>updateMode('recurring'));
 $('reported-mode').addEventListener('click',()=>updateMode('reported'));
 Promise.all([fetch('data.json').then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json').then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
   .then(([result,map])=>{
-    data=result;financialMap=map;
+    data=result;financialMap=map;paintSnapshot();
     for(const [symbol,record] of Object.entries(map.snapshot))if(periodValid(record.period))financials.set(symbol,record);
     applyFinancials();
     refreshFinancials();
