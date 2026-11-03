@@ -1,7 +1,7 @@
 const columns = [
   ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],
   ['eps','ربحية السهم','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
-  ['pb','مكرر القيمة الدفترية','pb'],['marketCap','القيمة السوقية','mcap'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
+  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['marketCap','القيمة السوقية','mcap'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
   ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -50,6 +50,7 @@ function applyFinancials(){
     stock.pe=chosen == null ? fallback.pe : chosen > 0 && stock.price != null ? stock.price/chosen : null;
     stock.bookValue=record?.book == null ? fallback.bookValue : safeNumber(record.book);
     stock.pb=record?.book == null ? fallback.pb : stock.bookValue > 0 && stock.price != null ? stock.price/stock.bookValue : null;
+    stock.dividendYield=record?.dividendYield == null ? null : safeNumber(record.dividendYield);
     stock._epsSource=chosen == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ربحية ${epsKind} · ${sourceDate(record)}`;
     stock._bookSource=record?.book == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ${sourceDate(record)}`;
     stock._hasCurrentEps=chosen != null;
@@ -63,7 +64,12 @@ function stats(){
   const stocks=allStocks();
   const updated=stocks.filter(s=>s._hasCurrentEps).length;
   const values=[['القطاعات',data.sectors.length],['الشركات',stocks.length],['ربحية من أرقام',updated],['تاريخ السعر',snapshotLabel()]];
-  $('stats').innerHTML=values.map(([label,value])=>`<div class="stat"><span class="stat-label">${label}</span><strong class="stat-value">${value}</strong></div>`).join('');
+  const statsNode=$('stats');if(statsNode)statsNode.innerHTML=values.map(([label,value])=>`<div class="stat"><span class="stat-label">${label}</span><strong class="stat-value">${value}</strong></div>`).join('');
+}
+function paintMarketSummary(){
+  const m=data.marketSummary||{}, items=[['قيمة المؤشر',m.value==null?null:numberFormat.format(m.value)],['التغيير اليومي',m.day==null?null:`${m.day>0?'+':''}${numberFormat.format(m.day)}%`],['القيمة المتداولة',m.turnover==null?null:`${numberFormat.format(m.turnover)} مليون ريال`],['3 أشهر',m.month3],['6 أشهر',m.month6],['سنة',m.year1]];
+  const node=$('market-stats');node.innerHTML=items.map(([label,value])=>`<div class="market-card"><span>${label}</span><strong class="${typeof value==='number'?(value>0?'up':value<0?'down':'flat'):''}">${value==null?'—':typeof value==='number'?`${value>0?'+':''}${numberFormat.format(value)}%`:value}</strong></div>`).join('');
+  $('market-date').textContent=m.date?`إغلاق ${m.date}`:'بانتظار تحديث المؤشر';
 }
 function nav(){
   $('sector-nav').innerHTML=`<button class="sector-button ${activeSector===null?'active':''}" data-sector="all" type="button" aria-pressed="${activeSector===null}" title="جميع القطاعات · ${allStocks().length} شركة"><span>جميع القطاعات</span><span class="count">${data.sectors.length}</span></button>`+
@@ -72,7 +78,7 @@ function nav(){
 function row(stock){
   const source=stock._hasCurrentEps?`أرقام · ${stock._epsKind} · ${stock._epsDateKind==='checked'?'فُحصت '+stock._epsPeriod:'قطاع '+stock._epsPeriod.slice(0,7)}`:'تداول · بيانات أقدم';
   const sourceClass=stock._hasCurrentEps?'fresh':'stale';
-  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="القيمة السوقية بمليون ريال · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
+  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="عائد التوزيع من أرقام">${percent(stock.dividendYield)}</td><td title="القيمة السوقية بمليون ريال · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
 }
 function render(){
   nav();
@@ -123,9 +129,9 @@ function readSector(html,sectorId){
     if(!symbol)continue;
     const row=cell.closest('tr');
     const field=key=>safeNumber(row.querySelector(`td[field-column="${key}"]`)?.getAttribute('data-order'));
-    const recurring=field('EPSBeforeXOItems'),reported=field('EarningsPerShare'),book=field('BookValue');
-    if(recurring == null && reported == null && book == null)continue;
-    records.push({symbol,sector:sectorId,period:recordPeriod,dateKind,recurring,reported,book});
+    const recurring=field('EPSBeforeXOItems'),reported=field('EarningsPerShare'),book=field('BookValue'),dividendYield=field('DividendYield');
+    if(recurring == null && reported == null && book == null && dividendYield == null)continue;
+    records.push({symbol,sector:sectorId,period:recordPeriod,dateKind,recurring,reported,book,dividendYield});
   }
   return {records,futureSectorDate};
 }
@@ -178,7 +184,7 @@ $('recurring-mode').addEventListener('click',()=>updateMode('recurring'));
 $('reported-mode').addEventListener('click',()=>updateMode('reported'));
 Promise.all([fetch('data.json').then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json').then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
   .then(([result,map])=>{
-    data=result;financialMap=map;paintSnapshot();
+    data=result;financialMap=map;paintSnapshot();paintMarketSummary();
     for(const [symbol,record] of Object.entries(map.snapshot))if(periodValid(record.period))financials.set(symbol,record);
     applyFinancials();
     refreshFinancials();

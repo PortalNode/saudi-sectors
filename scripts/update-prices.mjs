@@ -249,6 +249,17 @@ data.priceSource = {
   tradingViewSymbols: viaTradingView,
 };
 
+// Daily Tadawul index snapshot from the same TradingView market-data source.
+try {
+  const response = await getJson('https://scanner.tradingview.com/ksa/scan', {
+    method: 'POST',
+    body: JSON.stringify({symbols:{tickers:['TADAWUL:TASI'],query:{types:[]}},columns:['close','change','Perf.3M','Perf.6M','Perf.Y','Value.Traded']})
+  });
+  const row=response?.data?.[0]?.d;
+  if(row && Number.isFinite(row[0])) data.marketSummary={value:round(row[0],2),day:Number.isFinite(row[1])?round(row[1],2):null,month3:Number.isFinite(row[2])?round(row[2],2):null,month6:Number.isFinite(row[3])?round(row[3],2):null,year1:Number.isFinite(row[4])?round(row[4],2):null,turnover:Number.isFinite(row[5])?round(row[5]/1e6,2):null,date:data.priceDate,source:'TradingView'};
+  else console.log('TASI summary unavailable; existing summary retained.');
+} catch(error) { console.log(`TASI summary failed: ${error.message}; existing summary retained.`); }
+
 await writeFile(DATA_FILE, JSON.stringify(data));
 
 console.log(`Snapshot ${data.priceDate} · ${resolved.length}/${stocks.length} symbols updated via ${provider}`);
