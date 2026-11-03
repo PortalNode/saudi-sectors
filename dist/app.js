@@ -77,7 +77,7 @@ function paintMarketSummary(){
     {label:'القيمة المتداولة',value:m.turnover==null?'—':integerFormat.format(m.turnover)},
     {label:'3 أشهر',value:m.month3,percent:true},
     {label:'6 أشهر',value:m.month6,percent:true},
-    {label:'منذ بداية السنة',value:m.ytd,percent:true},
+    {label:'أداء المؤشر منذ بداية السنة',value:m.ytd,percent:true},
     {label:'سنة',value:m.year1,percent:true}
   ];
   $('market-stats').innerHTML=items.map(item=>{
@@ -198,7 +198,7 @@ $('search').addEventListener('input',event=>{query=normalized(event.target.value
 $('clear').addEventListener('click',()=>{$('search').value='';query='';render();$('search').focus();});
 $('recurring-mode').addEventListener('click',()=>updateMode('recurring'));
 $('reported-mode').addEventListener('click',()=>updateMode('reported'));
-Promise.all([fetch('data.json?v=438ddfd',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json?v=438ddfd',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
+Promise.all([fetch('data.json?v=7c75a69',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json?v=7c75a69',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
   .then(([result,map])=>{
     data=result;financialMap=map;paintSnapshot();paintMarketSummary();
     for(const [symbol,record] of Object.entries(map.snapshot))if(periodValid(record.period))financials.set(symbol,record);
