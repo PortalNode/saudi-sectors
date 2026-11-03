@@ -1,7 +1,7 @@
 const columns = [
   ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],
   ['eps','ربحية السهم','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
-  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['marketCap','القيمة السوقية','mcap'],['ytd','الأداء منذ بداية السنة','ytd'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
+  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['marketCap','القيمة السوقية','mcap'],['day','تغير اليوم','day'],['ytd','الأداء منذ بداية السنة','ytd'],['month3','تغير 3 أشهر','3m'],
   ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -79,9 +79,9 @@ function paintMarketSummary(){
     {label:'الشركات المنخفضة',value:integerFormat.format(breadth.down),trend:-1},
     {label:'دون تغيير',value:integerFormat.format(breadth.flat),trend:0},
     {label:'القيمة المتداولة',value:m.turnover==null?'—':integerFormat.format(m.turnover)},
+    {label:'أداء المؤشر منذ بداية السنة',value:m.ytd,percent:true},
     {label:'3 أشهر',value:m.month3,percent:true},
     {label:'6 أشهر',value:m.month6,percent:true},
-    {label:'أداء المؤشر منذ بداية السنة',value:m.ytd,percent:true},
     {label:'سنة',value:m.year1,percent:true}
   ];
   $('market-stats').innerHTML=items.map(item=>{
