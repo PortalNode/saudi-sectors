@@ -325,8 +325,10 @@ await pool([...financialMap.sectorIds],4,async sectorId=>{
 const candidates=[];
 await pool([...companyPaths],8,async([symbol,path])=>{
   const html=await argaamHtml(new URL(path,argaamBase).href);
-  const links=[...html.matchAll(/href=["']([^"']*\/reports\/company-dividend\/\d+[^"']*)["']/gi)].map(x=>x[1]);
-  if(links.length)candidates.push({symbol,url:new URL(links[0].replace(/&amp;/g,'&'),argaamBase).href});
+  const links=[...html.matchAll(/href=["']([^"']*\/reports\/company-dividend\/\d+[^"']*)["']/gi)]
+    .map(x=>new URL(x[1].replace(/&amp;/g,'&'),argaamBase).href);
+  const unique=[...new Set(links)];
+  for(const url of unique)candidates.push({symbol,url});
 });
 // Some Argaam stock pages omit the dividend article link even when their
 // dividend-history table contains the reported fiscal-year distribution.
@@ -335,17 +337,19 @@ const priorFiscalYear=Number((data.asOf||new Date().toISOString().slice(0,10)).s
 if(priorFiscalYear===2025){
   const reportOverrides={1020:'55755',1320:'59359',2082:'61238',2310:'50105',3040:'60900',4144:'54106',7202:'56129'};
   for(const [symbol,reportId] of Object.entries(reportOverrides)){
-    const previous=candidates.findIndex(candidate=>candidate.symbol===symbol);
-    if(previous>=0)candidates.splice(previous,1);
+    for(let index=candidates.length-1;index>=0;index--){
+      if(candidates[index].symbol===symbol)candidates.splice(index,1);
+    }
     candidates.push({symbol,url:`${argaamBase}/en/reports/company-dividend/${reportId}?preview=true`});
   }
 }
 let yieldCount=0;const stocksBySymbol=new Map(stocks.map(stock=>[stock.symbol,stock]));
-for(const stock of stocks){stock.dividendYield=null;delete stock.dividendYieldSource;}
+const parsedDividendSymbols=new Set();
 await pool(candidates,8,async({symbol,url})=>{
   const html=await argaamHtml(url);const stock=stocksBySymbol.get(symbol);if(!stock||!(stock.price>0))return;
   const start=html.indexOf('id="tblCashDivdnds"');if(start<0)return;
   const end=html.indexOf('</table>',start);if(end<0)return;
+  parsedDividendSymbols.add(symbol);
   const table=html.slice(start,end+8),priorYear=Number((data.asOf||new Date().toISOString().slice(0,10)).slice(0,4))-1;
   let totalDividendM=0,totalPerShare=0;
   for(const tr of table.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)){
@@ -358,9 +362,14 @@ await pool(candidates,8,async({symbol,url})=>{
     if(belongsToPriorYear){if(Number.isFinite(amountM)&&amountM>0)totalDividendM+=amountM;if(Number.isFinite(perShare)&&perShare>0)totalPerShare+=perShare;}
   }
   const total=stock.shares>0&&totalDividendM>0?totalDividendM*1e6/stock.shares:totalPerShare;
-  if(total>0){stock.dividendYield=round(total/stock.price*100,2);stock.dividendYieldSource=`Argaam FY${priorYear} dividends / latest close`;yieldCount++;}
+  if(total>0){stock.dividendYield=round(total/stock.price*100,2);stock.dividendYieldSource=`Argaam FY${priorYear} dividends / latest close`;}
 });
-console.log(`Argaam-derived dividend yields: ${yieldCount}/${stocks.length}; company pages ${companyPaths.size}, dividend reports ${candidates.length}`);
+for(const symbol of parsedDividendSymbols){
+  const stock=stocksBySymbol.get(symbol);
+  if(stock?.dividendYield!=null)yieldCount++;
+  else {stock.dividendYield=null;delete stock.dividendYieldSource;}
+}
+console.log(`Argaam-derived dividend yields: ${yieldCount}/${stocks.length}; company pages ${companyPaths.size}, dividend reports ${candidates.length}, companies with parsed reports ${parsedDividendSymbols.size}`);
 
 await writeFile(DATA_FILE, JSON.stringify(data));
 
