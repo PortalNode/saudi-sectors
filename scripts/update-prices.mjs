@@ -44,7 +44,7 @@ for (const stock of stocks) {
   }
 }
 
-async function getJson(url, { method = 'GET', body, timeout = YAHOO_TIMEOUT_MS } = {}) {
+async function getJson(url, { method = 'GET', body, headers = {}, timeout = YAHOO_TIMEOUT_MS } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
@@ -55,6 +55,7 @@ async function getJson(url, { method = 'GET', body, timeout = YAHOO_TIMEOUT_MS }
         'User-Agent': USER_AGENT,
         Accept: 'application/json',
         ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...headers,
       },
       signal: controller.signal,
     });
@@ -66,6 +67,54 @@ async function getJson(url, { method = 'GET', body, timeout = YAHOO_TIMEOUT_MS }
 }
 
 /* ------------------------------- Yahoo ---------------------------------- */
+// Yahoo blocks anonymous server traffic from many hosts, so we first try the
+// cookie + crumb handshake and the batched quote endpoint (a few requests).
+async function yahooSession() {
+  try {
+    const landing = await fetch('https://fc.yahoo.com', {
+      headers: { 'User-Agent': USER_AGENT },
+      redirect: 'manual',
+    });
+    const cookies = new Map();
+    for (const raw of landing.headers.getSetCookie?.() || []) {
+      const pair = raw.split(';')[0];
+      const index = pair.indexOf('=');
+      if (index > 0) cookies.set(pair.slice(0, index), pair.slice(index + 1));
+    }
+    if (!cookies.size) throw new Error('no cookies');
+    const cookieHeader = [...cookies].map(([name, value]) => `${name}=${value}`).join('; ');
+    const crumbResponse = await fetch('https://query1.finance.yahoo.com/v1/test/getcrumb', {
+      headers: { 'User-Agent': USER_AGENT, Cookie: cookieHeader },
+    });
+    if (!crumbResponse.ok) throw new Error(`crumb HTTP ${crumbResponse.status}`);
+    const crumb = (await crumbResponse.text()).trim();
+    if (!crumb || crumb.length > 40) throw new Error(`invalid crumb: ${crumb.slice(0, 20)}`);
+    return { cookieHeader, crumb };
+  } catch (error) {
+    console.log(`Yahoo session failed: ${error.message}`);
+    return null;
+  }
+}
+
+async function yahooBatchQuotes(symbols, session) {
+  const found = new Map();
+  for (let index = 0; index < symbols.length; index += 100) {
+    const chunk = symbols.slice(index, index + 100).map(symbol => `${symbol}.SR`).join(',');
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${chunk}&crumb=${encodeURIComponent(session.crumb)}`;
+    const payload = await getJson(url, { headers: { Cookie: session.cookieHeader } });
+    for (const quote of payload?.quoteResponse?.result || []) {
+      if (!Number.isFinite(quote.regularMarketPrice)) continue;
+      found.set(String(quote.symbol).replace('.SR', ''), {
+        close: quote.regularMarketPrice,
+        previous: Number.isFinite(quote.regularMarketPreviousClose) ? quote.regularMarketPreviousClose : null,
+        date: quote.regularMarketTime ? riyadhFromUnix(quote.regularMarketTime) : null,
+        source: 'yahoo',
+      });
+    }
+  }
+  return found;
+}
+
 async function yahooSeries(symbol, attempt = 0) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.SR?interval=1d&range=1mo`;
   try {
@@ -95,7 +144,18 @@ const failures = [];
 let consecutiveYahooFailures = 0;
 let yahooDisabled = false;
 
-const queue = [...stocks];
+const session = await yahooSession();
+if (session) {
+  try {
+    const batch = await yahooBatchQuotes(stocks.map(stock => stock.symbol), session);
+    for (const [symbol, quote] of batch) quotes.set(symbol, quote);
+    console.log(`Yahoo batch quotes: ${batch.size}/${stocks.length} symbols`);
+  } catch (error) {
+    console.log(`Yahoo batch quotes failed: ${error.message}`);
+  }
+}
+
+const queue = stocks.filter(stock => !quotes.has(stock.symbol));
 async function yahooWorker() {
   while (queue.length && !yahooDisabled) {
     const stock = queue.shift();
@@ -187,7 +247,6 @@ data.priceSource = {
   provider,
   yahooSymbols: viaYahoo,
   tradingViewSymbols: viaTradingView,
-  updatedAt: new Date().toISOString(),
 };
 
 await writeFile(DATA_FILE, JSON.stringify(data));
