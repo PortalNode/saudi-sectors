@@ -290,7 +290,7 @@ async function officialTadawulSummary(){
   const date=html.match(/Market Date\s+(\d{4})\/(\d{2})\/(\d{2})/i);
   const value=num(get('Close')),pointChange=num(get('Change')),day=num(get('% Change')),turnover=num(get('Value Traded (SAR)'));
   if(value==null||pointChange==null||day==null||turnover==null)throw Error('Required fields missing from daily report');
-  return {value:round(value,2),pointChange:round(pointChange,2),day:round(day,2),turnover:round(turnover/1e6,2),date:date?`${date[3]}.${date[2]}.${date[1]}`:data.priceDate,source:'Saudi Exchange'};
+  return {value:round(value,2),pointChange:round(pointChange,2),day:round(day,2),turnover:round(turnover,0),date:date?`${date[3]}.${date[2]}.${date[1]}`:data.priceDate,source:'Saudi Exchange'};
 }
 try{
   const tv=await getJson('https://scanner.tradingview.com/ksa/scan',{method:'POST',body:JSON.stringify({symbols:{tickers:['TADAWUL:TASI'],query:{types:[]}},columns:['Perf.3M','Perf.6M','Perf.Y','Perf.YTD']})});

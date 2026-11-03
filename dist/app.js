@@ -5,6 +5,7 @@ const columns = [
   ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const integerFormat = new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
 const epsFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 let data, financialMap, activeSector = null, query = '', sortBySector = new Map([['all',{key:'marketCap',dir:-1}]]), epsMode = 'recurring', refreshRunning = false;
 const financials = new Map();
@@ -73,9 +74,10 @@ function paintMarketSummary(){
   const items=[
     {label:'قيمة المؤشر',value:m.value==null?'—':numberFormat.format(m.value)},
     {label:'التغيير اليومي',value:daily,trend:m.day},
-    {label:'القيمة المتداولة',value:m.turnover==null?'—':numberFormat.format(m.turnover)},
+    {label:'القيمة المتداولة',value:m.turnover==null?'—':integerFormat.format(m.turnover)},
     {label:'3 أشهر',value:m.month3,percent:true},
     {label:'6 أشهر',value:m.month6,percent:true},
+    {label:'منذ بداية السنة',value:m.ytd,percent:true},
     {label:'سنة',value:m.year1,percent:true}
   ];
   $('market-stats').innerHTML=items.map(item=>{
@@ -196,7 +198,7 @@ $('search').addEventListener('input',event=>{query=normalized(event.target.value
 $('clear').addEventListener('click',()=>{$('search').value='';query='';render();$('search').focus();});
 $('recurring-mode').addEventListener('click',()=>updateMode('recurring'));
 $('reported-mode').addEventListener('click',()=>updateMode('reported'));
-Promise.all([fetch('data.json').then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json').then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
+Promise.all([fetch('data.json?v=438ddfd',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json?v=438ddfd',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
   .then(([result,map])=>{
     data=result;financialMap=map;paintSnapshot();paintMarketSummary();
     for(const [symbol,record] of Object.entries(map.snapshot))if(periodValid(record.period))financials.set(symbol,record);
