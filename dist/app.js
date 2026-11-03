@@ -40,7 +40,7 @@ function paintSnapshot(){
 }
 function applyFinancials(){
   for(const stock of allStocks()){
-    const fallback=stock._fallback || (stock._fallback={eps:stock.eps,pe:stock.pe,bookValue:stock.bookValue,pb:stock.pb});
+    const fallback=stock._fallback || (stock._fallback={eps:stock.eps,pe:stock.pe,bookValue:stock.bookValue,pb:stock.pb,dividendYield:stock.dividendYield ?? null});
     const record=financials.get(stock.symbol);
     const preferred=record && safeNumber(record[epsMode]);
     const reportedFallback=record && epsMode==='recurring' ? safeNumber(record.reported) : null;
@@ -50,7 +50,7 @@ function applyFinancials(){
     stock.pe=chosen == null ? fallback.pe : chosen > 0 && stock.price != null ? stock.price/chosen : null;
     stock.bookValue=record?.book == null ? fallback.bookValue : safeNumber(record.book);
     stock.pb=record?.book == null ? fallback.pb : stock.bookValue > 0 && stock.price != null ? stock.price/stock.bookValue : null;
-    stock.dividendYield=record?.dividendYield == null ? null : safeNumber(record.dividendYield);
+    stock.dividendYield=record?.dividendYield == null ? fallback.dividendYield : safeNumber(record.dividendYield);
     stock._epsSource=chosen == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ربحية ${epsKind} · ${sourceDate(record)}`;
     stock._bookSource=record?.book == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ${sourceDate(record)}`;
     stock._hasCurrentEps=chosen != null;
@@ -67,8 +67,23 @@ function stats(){
   const statsNode=$('stats');if(statsNode)statsNode.innerHTML=values.map(([label,value])=>`<div class="stat"><span class="stat-label">${label}</span><strong class="stat-value">${value}</strong></div>`).join('');
 }
 function paintMarketSummary(){
-  const m=data.marketSummary||{}, items=[['قيمة المؤشر',m.value==null?null:numberFormat.format(m.value)],['التغيير اليومي',m.day==null?null:`${m.day>0?'+':''}${numberFormat.format(m.day)}%`],['القيمة المتداولة',m.turnover==null?null:`${numberFormat.format(m.turnover)} مليون ريال`],['3 أشهر',m.month3],['6 أشهر',m.month6],['سنة',m.year1]];
-  const node=$('market-stats');node.innerHTML=items.map(([label,value])=>`<div class="market-card"><span>${label}</span><strong class="${typeof value==='number'?(value>0?'up':value<0?'down':'flat'):''}">${value==null?'—':typeof value==='number'?`${value>0?'+':''}${numberFormat.format(value)}%`:value}</strong></div>`).join('');
+  const m=data.marketSummary||{};
+  const signed=n=>`${n>0?'+':n<0?'−':''}${numberFormat.format(Math.abs(n))}`;
+  const daily=m.day==null?'—':`${m.pointChange==null?'':`${signed(m.pointChange)} نقطة `}(${signed(m.day)}%)`;
+  const items=[
+    {label:'قيمة المؤشر',value:m.value==null?'—':numberFormat.format(m.value)},
+    {label:'التغيير اليومي',value:daily,trend:m.day},
+    {label:'القيمة المتداولة',value:m.turnover==null?'—':`${numberFormat.format(m.turnover)} مليون ريال`},
+    {label:'3 أشهر',value:m.month3,percent:true},
+    {label:'6 أشهر',value:m.month6,percent:true},
+    {label:'سنة',value:m.year1,percent:true}
+  ];
+  $('market-stats').innerHTML=items.map(item=>{
+    const trend=item.trend ?? (item.percent?item.value:null);
+    const display=item.percent?(item.value==null?'—':`${item.value>0?'+':''}${numberFormat.format(item.value)}%`):item.value;
+    const cls=typeof trend==='number'?(trend>0?'up':trend<0?'down':'flat'):'';
+    return `<div class="market-card"><span>${item.label}</span><strong class="${cls}">${display}</strong></div>`;
+  }).join('');
   $('market-date').textContent=m.date?`إغلاق ${m.date}`:'بانتظار تحديث المؤشر';
 }
 function nav(){

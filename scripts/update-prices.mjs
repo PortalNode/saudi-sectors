@@ -34,6 +34,7 @@ const riyadhFromUnix = seconds => riyadhIso(new Date(seconds * 1000));
 const displayDate = isoDate => isoDate.split('-').reverse().join('.');
 
 const data = JSON.parse(await readFile(DATA_FILE, 'utf8'));
+const financialMap = JSON.parse(await readFile(new URL('../dist/financial-map.json', import.meta.url), 'utf8'));
 const stocks = data.sectors.flatMap(sector => sector.stocks);
 
 // Share counts come from the original Tadawul snapshot (market cap ÷ price) and
@@ -249,16 +250,58 @@ data.priceSource = {
   tradingViewSymbols: viaTradingView,
 };
 
-// Daily Tadawul index snapshot from the same TradingView market-data source.
-try {
-  const response = await getJson('https://scanner.tradingview.com/ksa/scan', {
-    method: 'POST',
-    body: JSON.stringify({symbols:{tickers:['TADAWUL:TASI'],query:{types:[]}},columns:['close','change','Perf.3M','Perf.6M','Perf.Y','Value.Traded']})
-  });
-  const row=response?.data?.[0]?.d;
-  if(row && Number.isFinite(row[0])) data.marketSummary={value:round(row[0],2),day:Number.isFinite(row[1])?round(row[1],2):null,month3:Number.isFinite(row[2])?round(row[2],2):null,month6:Number.isFinite(row[3])?round(row[3],2):null,year1:Number.isFinite(row[4])?round(row[4],2):null,turnover:Number.isFinite(row[5])?round(row[5]/1e6,2):null,date:data.priceDate,source:'TradingView'};
-  else console.log('TASI summary unavailable; existing summary retained.');
-} catch(error) { console.log(`TASI summary failed: ${error.message}; existing summary retained.`); }
+// Refresh TASI value, point move, percentage, and traded turnover from the official exchange report.
+async function officialTadawulSummary(){
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),15000);
+  let html;try{const response=await fetch('https://www.saudiexchange.sa/Resources/Reports-v2/DetailedDaily_en.html',{headers:{'User-Agent':USER_AGENT,'Accept':'text/html'},signal:controller.signal});if(!response.ok)throw Error(`Tadawul HTTP ${response.status}`);html=await response.text();}finally{clearTimeout(timer);}
+  const rows=[];
+  for(const match of html.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)){
+    const td=[...match[1].matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)].map(x=>x[1].replace(/<[^>]*>/g,' ').replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim());
+    if(td.length>=2)rows.push(td);
+  }
+  const get=label=>rows.find(([key])=>key.toLowerCase()===label.toLowerCase())?.[1];
+  const num=value=>{const n=Number(String(value??'').replace(/,/g,'').replace(/[^0-9.+-]/g,''));return Number.isFinite(n)?n:null;};
+  const date=html.match(/Market Date\s+(\d{4})\/(\d{2})\/(\d{2})/i);
+  const value=num(get('Close')),pointChange=num(get('Change')),day=num(get('% Change')),turnover=num(get('Value Traded (SAR)'));
+  if(value==null||pointChange==null||day==null||turnover==null)throw Error('Required fields missing from daily report');
+  return {value:round(value,2),pointChange:round(pointChange,2),day:round(day,2),turnover:round(turnover/1e6,2),date:date?`${date[3]}.${date[2]}.${date[1]}`:data.priceDate,source:'Saudi Exchange'};
+}
+try{
+  const tv=await getJson('https://scanner.tradingview.com/ksa/scan',{method:'POST',body:JSON.stringify({symbols:{tickers:['TADAWUL:TASI'],query:{types:[]}},columns:['Perf.3M','Perf.6M','Perf.Y']})});
+  const performance=tv?.data?.[0]?.d||[];
+  data.marketSummary={...(data.marketSummary||{}),month3:Number.isFinite(performance[0])?round(performance[0],2):data.marketSummary?.month3??null,month6:Number.isFinite(performance[1])?round(performance[1],2):data.marketSummary?.month6??null,year1:Number.isFinite(performance[2])?round(performance[2],2):data.marketSummary?.year1??null};
+}catch(error){console.log(`TASI performance fetch failed: ${error.message}`);}
+try{data.marketSummary={...(data.marketSummary||{}),...await officialTadawulSummary()};}
+catch(error){console.log(`Official Tadawul summary failed: ${error.message}; previous daily summary retained.`);}
+
+// Argaam lists a reported Dividend Yield in each company's latest dividend report.
+// Resolve company URLs from Argaam's sector tables and keep prior data on failed fetches.
+async function argaamHtml(url){
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
+  try{const response=await fetch(url,{headers:{'User-Agent':USER_AGENT,'Accept':'text/html'},signal:controller.signal});if(!response.ok)throw Error(`Argaam HTTP ${response.status}`);return await response.text();}finally{clearTimeout(timer);}
+}
+async function pool(items,limit,worker){let next=0;await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(next<items.length){const i=next++;try{await worker(items[i]);}catch(error){console.log(`Argaam fetch failed: ${error.message}`);}}}));}
+const argaamBase='https://www.argaam.com';const companyPaths=new Map();
+await pool([...financialMap.sectorIds],4,async sectorId=>{
+  const html=await argaamHtml(`${argaamBase}/en/financialratios-sector/${sectorId}/quarter/per-share-data/${sectorId}`);
+  for(const cell of html.matchAll(/<td\b[^>]*compid=["']?(\d+)["']?[^>]*>([\s\S]*?)<\/td>/gi)){
+    const symbol=financialMap.companyIds[cell[1]];const href=cell[2].match(/href=["']([^"']*\/en\/tadawul\/(?:tasi|nomu)\/[^"']+)["']/i)?.[1];
+    if(symbol&&href&&!companyPaths.has(symbol))companyPaths.set(symbol,new URL(href,argaamBase).pathname);
+  }
+});
+const candidates=[];
+await pool([...companyPaths],8,async([symbol,path])=>{
+  const html=await argaamHtml(new URL(path,argaamBase).href);
+  const links=[...html.matchAll(/href=["']([^"']*\/reports\/company-dividend\/\d+[^"']*)["']/gi)].map(x=>x[1]);
+  if(links.length)candidates.push({symbol,url:new URL(links[0].replace(/&amp;/g,'&'),argaamBase).href});
+});
+let yieldCount=0;const stocksBySymbol=new Map(stocks.map(stock=>[stock.symbol,stock]));
+await pool(candidates,8,async({symbol,url})=>{
+  const html=await argaamHtml(url);const row=html.match(/<td[^>]*>\s*Dividend Yield\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/i);
+  const value=row?Number(row[1].replace(/<[^>]*>/g,' ').replace(/,/g,'').replace(/[^0-9.+-]/g,'')):NaN;
+  if(Number.isFinite(value)){const stock=stocksBySymbol.get(symbol);if(stock){stock.dividendYield=round(value,2);stock.dividendYieldSource='Argaam';yieldCount++;}}
+});
+console.log(`Argaam Dividend Yield: ${yieldCount}/${stocks.length}; company pages ${companyPaths.size}, dividend reports ${candidates.length}`);
 
 await writeFile(DATA_FILE, JSON.stringify(data));
 
