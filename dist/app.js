@@ -1,11 +1,11 @@
 const columns = [
   ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],
   ['eps','ربحية السهم','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
-  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['marketCap','القيمة السوقية','mcap'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
+  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['marketCap','القيمة السوقية','mcap'],['ytd','الأداء منذ بداية السنة','ytd'],['day','تغير اليوم','day'],['month3','تغير 3 أشهر','3m'],
   ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const epsFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:3,maximumFractionDigits:3});
+const epsFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 let data, financialMap, activeSector = null, query = '', sortBySector = new Map([['all',{key:'marketCap',dir:-1}]]), epsMode = 'recurring', refreshRunning = false;
 const financials = new Map();
 const $ = id => document.getElementById(id);
@@ -73,7 +73,7 @@ function paintMarketSummary(){
   const items=[
     {label:'قيمة المؤشر',value:m.value==null?'—':numberFormat.format(m.value)},
     {label:'التغيير اليومي',value:daily,trend:m.day},
-    {label:'القيمة المتداولة',value:m.turnover==null?'—':`${numberFormat.format(m.turnover)} مليون ريال`},
+    {label:'القيمة المتداولة',value:m.turnover==null?'—':numberFormat.format(m.turnover)},
     {label:'3 أشهر',value:m.month3,percent:true},
     {label:'6 أشهر',value:m.month6,percent:true},
     {label:'سنة',value:m.year1,percent:true}
@@ -91,9 +91,8 @@ function nav(){
     data.sectors.map((sector,i)=>`<button class="sector-button ${activeSector===i?'active':''}" data-sector="${i}" type="button" aria-pressed="${activeSector===i}" title="${escapeHtml(sector.name)} · ${sector.stocks.length} شركة"><span>${escapeHtml(sector.name)}</span><span class="count">${sector.stocks.length}</span></button>`).join('');
 }
 function row(stock){
-  const source=stock._hasCurrentEps?`أرقام · ${stock._epsKind} · ${stock._epsDateKind==='checked'?'فُحصت '+stock._epsPeriod:'قطاع '+stock._epsPeriod.slice(0,7)}`:'تداول · بيانات أقدم';
-  const sourceClass=stock._hasCurrentEps?'fresh':'stale';
-  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="مجموع توزيعات السنة المالية السابقة في أرقام ÷ آخر إغلاق للسهم">${percent(stock.dividendYield)}</td><td title="القيمة السوقية بمليون ريال · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
+  const dividendTitle=stock.dividendYield==null?'لم يُعثر على توزيع نقدي موثق للسنة المالية السابقة':'مجموع توزيعات السنة المالية السابقة ÷ آخر إغلاق للسهم';
+  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,2)}</td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="${dividendTitle}">${percent(stock.dividendYield)}</td><td title="القيمة السوقية · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.ytd)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
 }
 function render(){
   nav();
@@ -126,7 +125,7 @@ function updateMode(mode){
   $('reported-mode').setAttribute('aria-pressed',String(mode==='reported'));
   applyFinancials();
   const updated=allStocks().filter(s=>s._hasCurrentEps).length;
-  updateStatus(`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض قيمة تداول الأقدم. يظهر نوع الربحية وتاريخ المصدر أو الفحص أسفل القيمة.`);
+  updateStatus(`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض بيانات أقدم. عائد التوزيع يظهر عند العثور على توزيع نقدي موثق.`);
 }
 function readSector(html,sectorId){
   const documentHtml=new DOMParser().parseFromString(html,'text/html');
@@ -179,7 +178,7 @@ async function refreshFinancials(){
   }
   applyFinancials();
   const updated=allStocks().filter(s=>s._hasCurrentEps).length;
-  let message=`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض قيمة تداول الأقدم. آخر فحص ${new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(new Date())}.`;
+  let message=`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض بيانات أقدم. آخر فحص ${new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(new Date())}.`;
   if(invalid)message+=` استُبعدت ${invalid} قطاعات بسبب تاريخ غير صالح.`;
   if(futureHeaders)message+=` تاريخ تحديث ${futureHeaders} قطاع لدى أرقام يقع في المستقبل؛ استُخدمت قيم الشركات مع إظهار تاريخ الفحص بدلًا منه.`;
   if(failed)message+=` تعذر فحص ${failed} قطاعات؛ ستُعاد المحاولة تلقائيًا.`;

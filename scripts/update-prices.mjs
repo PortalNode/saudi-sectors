@@ -189,13 +189,13 @@ for (let index = 0; index < missing.length; index += TV_BATCH) {
   const batch = missing.slice(index, index + TV_BATCH);
   const body = JSON.stringify({
     symbols: { tickers: batch.map(stock => `TADAWUL:${stock.symbol}`), query: { types: [] } },
-    columns: ['close', 'change', 'currency'],
+    columns: ['close', 'change', 'currency', 'Perf.YTD'],
   });
   try {
     const payload = await getJson('https://scanner.tradingview.com/ksa/scan', { method: 'POST', body });
     for (const row of payload?.data || []) {
       const symbol = String(row.s).split(':')[1];
-      const [close, change, currency] = row.d || [];
+      const [close, change, currency, ytd] = row.d || [];
       if (!Number.isFinite(close) || currency !== 'SAR') continue;
       const percent = Number.isFinite(change) ? change : null;
       quotes.set(symbol, {
@@ -203,6 +203,7 @@ for (let index = 0; index < missing.length; index += TV_BATCH) {
         previous: percent == null ? null : close / (1 + percent / 100),
         date: null,
         source: 'tradingview',
+        ytd: Number.isFinite(ytd) ? ytd : null,
       });
       viaTradingView += 1;
     }
@@ -213,6 +214,30 @@ for (let index = 0; index < missing.length; index += TV_BATCH) {
 }
 
 if (viaTradingView) console.log(`TradingView: ${viaTradingView}/${missing.length} remaining symbols`);
+
+// Perf.YTD is fetched separately so it is present even when Yahoo resolves
+// the closing price first (Yahoo's quote endpoint does not expose YTD).
+for (let index = 0; index < stocks.length; index += TV_BATCH) {
+  const batch = stocks.slice(index, index + TV_BATCH);
+  try {
+    const payload = await getJson('https://scanner.tradingview.com/ksa/scan', {
+      method: 'POST',
+      body: JSON.stringify({
+        symbols: { tickers: batch.map(stock => `TADAWUL:${stock.symbol}`), query: { types: [] } },
+        columns: ['Perf.YTD'],
+      }),
+    });
+    for (const row of payload?.data || []) {
+      const symbol = String(row.s).split(':')[1];
+      const ytd = row.d?.[0];
+      const quote = quotes.get(symbol);
+      if (quote && Number.isFinite(ytd)) quote.ytd = ytd;
+    }
+  } catch (error) {
+    console.log(`TradingView YTD batch failed (${batch.length} symbols): ${error.message}`);
+  }
+  await sleep(250);
+}
 
 /* ------------------------------- Apply ---------------------------------- */
 const resolved = stocks.filter(stock => quotes.has(stock.symbol));
@@ -238,6 +263,7 @@ for (const stock of stocks) {
   if (quote.previous > 0) stock.day = round((quote.close / quote.previous - 1) * 100);
   if (stock.shares) stock.marketCap = round((stock.shares * stock.price) / 1e6);
   if (quote.date) stock.priceDate = quote.date;
+  if (Number.isFinite(quote.ytd)) stock.ytd = round(quote.ytd);
 }
 
 const provider = viaTradingView > viaYahoo ? 'TradingView' : 'Yahoo Finance';
@@ -267,9 +293,9 @@ async function officialTadawulSummary(){
   return {value:round(value,2),pointChange:round(pointChange,2),day:round(day,2),turnover:round(turnover/1e6,2),date:date?`${date[3]}.${date[2]}.${date[1]}`:data.priceDate,source:'Saudi Exchange'};
 }
 try{
-  const tv=await getJson('https://scanner.tradingview.com/ksa/scan',{method:'POST',body:JSON.stringify({symbols:{tickers:['TADAWUL:TASI'],query:{types:[]}},columns:['Perf.3M','Perf.6M','Perf.Y']})});
+  const tv=await getJson('https://scanner.tradingview.com/ksa/scan',{method:'POST',body:JSON.stringify({symbols:{tickers:['TADAWUL:TASI'],query:{types:[]}},columns:['Perf.3M','Perf.6M','Perf.Y','Perf.YTD']})});
   const performance=tv?.data?.[0]?.d||[];
-  data.marketSummary={...(data.marketSummary||{}),month3:Number.isFinite(performance[0])?round(performance[0],2):data.marketSummary?.month3??null,month6:Number.isFinite(performance[1])?round(performance[1],2):data.marketSummary?.month6??null,year1:Number.isFinite(performance[2])?round(performance[2],2):data.marketSummary?.year1??null};
+  data.marketSummary={...(data.marketSummary||{}),month3:Number.isFinite(performance[0])?round(performance[0],2):data.marketSummary?.month3??null,month6:Number.isFinite(performance[1])?round(performance[1],2):data.marketSummary?.month6??null,year1:Number.isFinite(performance[2])?round(performance[2],2):data.marketSummary?.year1??null,ytd:Number.isFinite(performance[3])?round(performance[3],2):data.marketSummary?.ytd??null};
 }catch(error){console.log(`TASI performance fetch failed: ${error.message}`);}
 try{data.marketSummary={...(data.marketSummary||{}),...await officialTadawulSummary()};}
 catch(error){console.log(`Official Tadawul summary failed: ${error.message}; previous daily summary retained.`);}
