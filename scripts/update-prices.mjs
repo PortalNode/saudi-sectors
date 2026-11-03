@@ -106,6 +106,7 @@ async function yahooWorker() {
     } catch (error) {
       consecutiveYahooFailures += 1;
       failures.push({ symbol: stock.symbol, source: 'yahoo', reason: error.message });
+      if (consecutiveYahooFailures <= 3) console.log(`Yahoo ${stock.symbol}: ${error.message}`);
       if (consecutiveYahooFailures >= YAHOO_FAIL_FAST && !yahooDisabled) {
         yahooDisabled = true;
         console.log(`Yahoo throttled after ${YAHOO_FAIL_FAST} consecutive failures; switching to TradingView.`);
