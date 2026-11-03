@@ -302,6 +302,18 @@ await pool([...companyPaths],8,async([symbol,path])=>{
   const links=[...html.matchAll(/href=["']([^"']*\/reports\/company-dividend\/\d+[^"']*)["']/gi)].map(x=>x[1]);
   if(links.length)candidates.push({symbol,url:new URL(links[0].replace(/&amp;/g,'&'),argaamBase).href});
 });
+// Some Argaam stock pages omit the dividend article link even when their
+// dividend-history table contains the reported fiscal-year distribution.
+// Use verified report links for FY2025 only; future years must be rediscovered.
+const priorFiscalYear=Number((data.asOf||new Date().toISOString().slice(0,10)).slice(0,4))-1;
+if(priorFiscalYear===2025){
+  const reportOverrides={1020:'55755',1320:'59359',2082:'61238',2310:'50105',3040:'60900',4144:'54106',7202:'56129'};
+  for(const [symbol,reportId] of Object.entries(reportOverrides)){
+    const previous=candidates.findIndex(candidate=>candidate.symbol===symbol);
+    if(previous>=0)candidates.splice(previous,1);
+    candidates.push({symbol,url:`${argaamBase}/en/reports/company-dividend/${reportId}?preview=true`});
+  }
+}
 let yieldCount=0;const stocksBySymbol=new Map(stocks.map(stock=>[stock.symbol,stock]));
 for(const stock of stocks){stock.dividendYield=null;delete stock.dividendYieldSource;}
 await pool(candidates,8,async({symbol,url})=>{
