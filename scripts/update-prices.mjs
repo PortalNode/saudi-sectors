@@ -274,8 +274,8 @@ try{
 try{data.marketSummary={...(data.marketSummary||{}),...await officialTadawulSummary()};}
 catch(error){console.log(`Official Tadawul summary failed: ${error.message}; previous daily summary retained.`);}
 
-// Argaam lists a reported Dividend Yield in each company's latest dividend report.
-// Resolve company URLs from Argaam's sector tables and keep prior data on failed fetches.
+// Build a current dividend yield from Argaam's per-share cash-dividend history
+// and the latest stock close. The report's displayed yield is a stale snapshot.
 async function argaamHtml(url){
   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
   try{const response=await fetch(url,{headers:{'User-Agent':USER_AGENT,'Accept':'text/html'},signal:controller.signal});if(!response.ok)throw Error(`Argaam HTTP ${response.status}`);return await response.text();}finally{clearTimeout(timer);}
@@ -296,12 +296,36 @@ await pool([...companyPaths],8,async([symbol,path])=>{
   if(links.length)candidates.push({symbol,url:new URL(links[0].replace(/&amp;/g,'&'),argaamBase).href});
 });
 let yieldCount=0;const stocksBySymbol=new Map(stocks.map(stock=>[stock.symbol,stock]));
+for(const stock of stocks){stock.dividendYield=null;delete stock.dividendYieldSource;}
 await pool(candidates,8,async({symbol,url})=>{
-  const html=await argaamHtml(url);const row=html.match(/<td[^>]*>\s*Dividend Yield\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/i);
-  const value=row?Number(row[1].replace(/<[^>]*>/g,' ').replace(/,/g,'').replace(/[^0-9.+-]/g,'')):NaN;
-  if(Number.isFinite(value)){const stock=stocksBySymbol.get(symbol);if(stock){stock.dividendYield=round(value,2);stock.dividendYieldSource='Argaam';yieldCount++;}}
+  const html=await argaamHtml(url);const stock=stocksBySymbol.get(symbol);if(!stock||!(stock.price>0))return;
+  const start=html.indexOf('id="tblCashDivdnds"');if(start<0)return;
+  const end=html.indexOf('</table>',start);if(end<0)return;
+  const table=html.slice(start,end+8),payments=[];
+  for(const tr of table.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)){
+    const cells=[...tr[1].matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)].map(cell=>cell[1].replace(/<[^>]*>/g,' ').replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim());
+    if(cells.length<5)continue;
+    const match=cells[1].match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);const amount=Number(cells[4].replace(/,/g,''));
+    if(!match||!Number.isFinite(amount)||amount<=0)continue;
+    payments.push({date:new Date(Date.UTC(Number(match[3]),Number(match[1])-1,Number(match[2]))),amount});
+  }
+  if(!payments.length)return;
+  const asOf=new Date(`${data.asOf||new Date().toISOString().slice(0,10)}T00:00:00Z`);
+  const latest=payments[0];const withinYear=payments.filter(payment=>asOf-payment.date<=366*86400000&&asOf>=payment.date);
+  let selected=withinYear;
+  // Argaam treats recent quarterly distributions as a four-payment annual yield.
+  // Include the fourth payment when those four events form a quarterly cadence.
+  if(withinYear.length>=3&&payments.length>=4){
+    const four=payments.slice(0,4),gaps=four.slice(1).map((payment,i)=>four[i].date-payment.date);
+    const ordered=gaps.every(gap=>gap>0&&gap<=240*86400000);
+    const quarterlyCadence=gaps.filter(gap=>gap<=150*86400000).length>=2;
+    const span=four[0].date-four[3].date;
+    if(ordered&&quarterlyCadence&&span<=450*86400000&&asOf-latest.date<=366*86400000)selected=four;
+  }
+  const total=selected.reduce((sum,payment)=>sum+payment.amount,0);
+  if(total>0){stock.dividendYield=round(total/stock.price*100,2);stock.dividendYieldSource='Argaam dividends / latest close';yieldCount++;}
 });
-console.log(`Argaam Dividend Yield: ${yieldCount}/${stocks.length}; company pages ${companyPaths.size}, dividend reports ${candidates.length}`);
+console.log(`Argaam-derived dividend yields: ${yieldCount}/${stocks.length}; company pages ${companyPaths.size}, dividend reports ${candidates.length}`);
 
 await writeFile(DATA_FILE, JSON.stringify(data));
 

@@ -69,7 +69,7 @@ function stats(){
 function paintMarketSummary(){
   const m=data.marketSummary||{};
   const signed=n=>`${n>0?'+':n<0?'−':''}${numberFormat.format(Math.abs(n))}`;
-  const daily=m.day==null?'—':`${m.pointChange==null?'':`${signed(m.pointChange)} نقطة `}(${signed(m.day)}%)`;
+  const daily=m.day==null?'—':`${m.pointChange==null?'':`${signed(m.pointChange)} `}(${signed(m.day)}%)`;
   const items=[
     {label:'قيمة المؤشر',value:m.value==null?'—':numberFormat.format(m.value)},
     {label:'التغيير اليومي',value:daily,trend:m.day},
@@ -93,7 +93,7 @@ function nav(){
 function row(stock){
   const source=stock._hasCurrentEps?`أرقام · ${stock._epsKind} · ${stock._epsDateKind==='checked'?'فُحصت '+stock._epsPeriod:'قطاع '+stock._epsPeriod.slice(0,7)}`:'تداول · بيانات أقدم';
   const sourceClass=stock._hasCurrentEps?'fresh':'stale';
-  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="عائد التوزيع من أرقام">${percent(stock.dividendYield)}</td><td title="القيمة السوقية بمليون ريال · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
+  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,3)}<span class="source-tag ${sourceClass}">${source}</span></td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="محسوب من مبالغ التوزيعات المنشورة في أرقام وآخر إغلاق للسهم">${percent(stock.dividendYield)}</td><td title="القيمة السوقية بمليون ريال · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
 }
 function render(){
   nav();
