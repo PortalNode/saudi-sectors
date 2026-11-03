@@ -3,3 +3,69 @@
 @media(max-width:760px){.masthead{height:60px}.masthead-inner{padding:0 18px}.masthead-tag{display:none}.page-shell{display:block}.sidebar{min-height:0;padding:16px 17px 9px;border-left:0;border-bottom:1px solid var(--line)}.side-head{display:none}.sector-nav{flex-direction:row;overflow:auto;max-height:none;padding-bottom:4px;scrollbar-width:none}.sector-nav::-webkit-scrollbar{display:none}.sector-button{width:auto;white-space:nowrap;padding:7px 11px;border:1px solid #e2eaea}.sidebar-source{display:none}.main-content{padding:17px 13px 0}.hero{min-height:226px;padding:24px}.hero h1{font-size:30px}.hero p{font-size:12px;max-width:330px}.hero-art{left:-125px;opacity:.45}.stats{gap:8px;margin:12px 0 25px}.stat{min-height:75px;padding:12px}.stat-value{font-size:20px}.toolbar{display:block}.toolbar-heading h2{font-size:23px}.toolbar-actions{margin-top:13px}.search-box{min-width:0;flex:1}.table-note{align-items:start}.sector-heading h3{font-size:15px}.sections{gap:22px}.footer{display:block}.footer-links{margin:15px 0}.footer-bottom{margin-top:14px}}
 .eps-switch{display:inline-flex;align-items:center;gap:2px;padding:3px;background:#e7efef;border:1px solid #d8e5e4;border-radius:10px;white-space:nowrap}.eps-switch button{border:0;background:transparent;color:#507078;border-radius:7px;padding:8px 10px;font-size:11px;font-weight:700}.eps-switch button.selected{background:#fff;color:#087f75;box-shadow:0 1px 5px #0d24321a}.financial-status{margin:0 0 17px;padding:10px 13px;border:1px solid #d9e7e5;border-radius:9px;background:#f0f8f6;color:#47706d;font-size:11px;line-height:1.8}.source-tag{display:block;font-size:9px;font-weight:700;line-height:1.35;margin-top:4px;white-space:nowrap}.source-tag.fresh{color:#0d8d83}.source-tag.stale{color:#9b7245}@media(max-width:760px){.toolbar-actions{flex-wrap:wrap}.eps-switch{order:2;width:100%;justify-content:center}.eps-switch button{flex:1}.financial-status{font-size:10px}}
 table{min-width:1300px}.col-mcap{width:152px}th:has([data-sort="marketCap"]){background:#eef7f4}td[title^="القيمة السوقية"] .num{font-weight:700;color:#176c65}
+
+/* Dark market terminal theme */
+:root{--ink:#f1f5f9;--muted:#98a4b3;--teal:#f59e0b;--dark:#11161d;--line:#2a333e;--bg:#11161d;--white:#171e26;--green:#54e878;--red:#ff6b6b;--font:'SF Arabic','SF Pro Arabic','Helvetica Neue',Arial,sans-serif}
+body{background:var(--bg);color:var(--ink);font-size:13px}
+.topline,.masthead,.sidebar{display:none}
+.page-shell{display:block;min-height:100vh;max-width:none}
+.main-content{max-width:780px;margin:0 auto;padding:42px 16px 26px}
+.hero{min-height:0;padding:0;background:transparent;box-shadow:none;border-radius:0;display:block;text-align:center;overflow:visible}
+.hero:before,.hero-art,.eyebrow.light{display:none}
+.hero-copy{max-width:none}
+.hero h1{font-size:27px;line-height:1.25;letter-spacing:-.7px;margin:0 0 7px;color:#eef2f5}
+.hero h1 em{color:#f1f5f9;font-style:normal}
+.hero p{display:none}
+.hero-date{justify-content:center;margin:0;color:#9da7b2;font-size:10px;gap:5px}
+.hero-date .live-dot,.hero-date .divider{display:none}
+.stats{display:none}
+.workspace{padding-top:18px;padding-bottom:25px}
+.toolbar{display:grid;grid-template-columns:1fr auto;align-items:center;gap:13px;margin-bottom:8px}
+.toolbar-heading{grid-column:1/-1;text-align:right}
+.toolbar-heading .eyebrow{display:none}
+.toolbar-heading h2{font-size:18px;color:#f59e0b;margin:0}
+.toolbar-heading p{color:#9da7b2;font-size:10px;margin-top:3px}
+.toolbar-actions{display:contents}
+.search-box{grid-column:1/-1;grid-row:2;background:#11161d;border:1px solid #303a45;border-radius:2px;height:32px;min-width:0;padding:0 10px;color:#fff}
+.search-box:focus-within{border-color:#f59e0b;box-shadow:0 0 0 2px #f59e0b24}
+.search-box svg{width:14px;height:14px;stroke:#8d98a6}
+.search-box input{color:#f1f5f9;font-size:10px}
+.search-box input::placeholder{color:#788491}
+.eps-switch{grid-row:3;background:transparent;border:1px solid #3a424c;border-radius:1px;padding:0;gap:0}
+.eps-switch button{color:#9ba5b0;border-radius:0;padding:7px 10px;font-size:10px}
+.eps-switch button.selected{background:#f59e0b;color:#15191f;box-shadow:none}
+.clear-button{grid-row:3;background:#1b232d;border-color:#37424d;border-radius:1px;height:31px;color:#b3bcc7;font-size:10px;padding:0 10px}
+.sector-nav{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;gap:13px;max-height:none;overflow:visible;margin:11px 0 18px;padding:0;border-bottom:1px solid #252e38}
+.sector-button{width:auto;padding:0 0 9px;border-radius:0;background:transparent!important;color:#a8b1bc;font-size:10px;font-weight:700;border-bottom:2px solid transparent}
+.sector-button:hover{color:#f7b339!important}
+.sector-button.active{color:#f59e0b!important;border-bottom-color:#f59e0b}
+.sector-button .count{display:none}
+.table-note{display:none}
+.financial-status{background:#151b22;border-color:#27313b;border-radius:2px;color:#aab4be;padding:8px 10px;margin:0 0 20px;font-size:10px;line-height:1.6;text-align:right}
+.sections{gap:27px}
+.sector-section{scroll-margin-top:15px}
+.sector-heading{margin-bottom:8px;border-bottom:1px solid #28313b;padding-bottom:6px}
+.sector-title-wrap{gap:5px}
+.sector-index{display:none}
+.sector-heading h3{font-size:17px;color:#f59e0b;font-weight:800}
+.sector-pill{background:transparent;border:0;color:#9da7b2;padding:0;font-size:10px}
+.table-wrap{background:#151b22;border:0;border-radius:0;box-shadow:none}
+table{min-width:1300px}
+th,td{border-bottom:1px solid #2b3540}
+thead th,thead .sticky-1,thead .sticky-2{background:#242d37;color:#f1f5f9;height:31px;padding:0 9px;font-size:10px}
+thead th button{color:inherit}
+thead th button:hover,thead th button.sorted{color:#f7b43b}
+tbody td{background:#151b22;color:#e5eaf0;font-size:11px;padding:9px;height:43px}
+tbody tr:nth-child(even) td{background:#1b232d}
+tbody tr:hover td,tbody tr:hover .sticky-1,tbody tr:hover .sticky-2{background:#25313d}
+.sticky-1,.sticky-2{background:#151b22}
+tbody tr:nth-child(even) .sticky-1,tbody tr:nth-child(even) .sticky-2{background:#1b232d}
+.company-name{color:#8ab8ff;font-weight:600}
+.symbol-badge{background:transparent;color:#e5eaf0;padding:0;font-weight:600}
+.price{color:#eef2f5}.up{color:#54e878}.down{color:#ff6b6b}.flat{color:#bdc6ce}.missing{color:#7d8894}.loss{color:#ff7d72}.num{font-size:11px}
+th:has([data-sort="marketCap"]){background:#242d37}td[title^="القيمة السوقية"] .num{color:#eef2f5}
+.source-tag{font-size:8px;margin-top:2px}.source-tag.fresh{color:#9da7b2}.source-tag.stale{color:#e7af5c}
+.empty{background:#171e26;border-color:#3b4651;color:#eef2f5}.empty p{color:#9da7b2}
+.footer{border-top:1px solid #28313b;color:#9da7b2;padding:20px 0;display:block;text-align:center}.footer strong{color:#e2e7ec}.footer p{max-width:640px;margin:6px auto;font-size:9px;line-height:1.85}.footer-links{justify-content:center;margin:12px 0}.footer-links a{background:#1d2630;color:#d7dee5;border-radius:2px;padding:6px 8px}.footer-links a:hover{background:#293542}.footer-bottom{border-top:0;padding-top:4px;font-size:9px;color:#808b97}
+button:focus-visible,a:focus-visible,input:focus-visible{outline-color:#f59e0b}
+@media(max-width:760px){.main-content{padding:27px 10px 20px}.hero h1{font-size:22px}.toolbar{gap:8px}.sector-nav{gap:10px}.sector-button{font-size:9px}.financial-status{font-size:9px}.eps-switch{grid-column:1/-1}.clear-button{grid-column:1/-1}.footer-links{gap:6px}}

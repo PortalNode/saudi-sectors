@@ -9,28 +9,15 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="topline"></div>
-  <header class="masthead">
-    <div class="masthead-inner">
-      <div class="brand"><span class="brand-icon" aria-hidden="true"><i></i><i></i><i></i></span><span>السوق <strong>السعودي</strong></span></div>
-      <span class="masthead-tag">لوحة مؤشرات الشركات</span>
-    </div>
-  </header>
-
   <div class="page-shell">
     <aside class="sidebar" aria-label="قائمة القطاعات">
-      <div class="side-head"><span class="eyebrow">استعرض البيانات</span><h2>القطاعات</h2><p>بنفس ترتيب الملف المرفق</p></div>
-      <nav id="sector-nav" class="sector-nav" aria-label="اختيار القطاع"></nav>
-      <div class="sidebar-source"><span class="source-dot"></span><span>بيانات الإغلاق بتاريخ <bdi>02.11.2026</bdi></span></div>
     </aside>
 
     <main id="main-content" class="main-content">
       <section class="hero" aria-labelledby="page-title">
         <div class="hero-copy">
-          <span class="eyebrow light">نظرة شاملة · تداول السعودية</span>
-          <h1 id="page-title">الشركات السعودية،<br><em>قطاعًا بقطاع.</em></h1>
-          <p>استعرض الأسعار، ربحية السهم، مكررات التقييم، وحركة السعر عبر الفترات المختلفة في مكان واحد.</p>
-          <div class="hero-date"><span class="live-dot"></span> لقطة إغلاق <bdi>2 نوفمبر 2026</bdi> <span class="divider"></span> ليست أسعارًا مباشرة</div>
+          <h1 id="page-title">الشركات السعودية حسب <em>القطاع</em></h1>
+          <div class="hero-date">بيانات الإغلاق <bdi>02.11.2026</bdi> · لقطة إغلاق وليست أسعارًا مباشرة</div>
         </div>
         <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><span class="hero-art-mark">س</span></div>
       </section>
@@ -46,6 +33,7 @@
             <button id="clear" class="clear-button" type="button" hidden>مسح البحث</button>
           </div>
         </div>
+        <nav id="sector-nav" class="sector-nav" aria-label="اختيار القطاع"></nav>
         <div class="table-note"><span class="note-icon">i</span><span>«جميع القطاعات» جدول واحد مرتب افتراضيًا من الأكبر قيمة سوقية إلى الأصغر. اضغط أي عنوان عمود لتغيير الترتيب. القيمة السوقية بمليون ريال من تقرير تداول بتاريخ 02.11.2026. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم توفر أرقام ربحية متكررة للسهم، ويظهر نوعها أسفل الرقم. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة.</span></div>
         <p id="financial-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات الأرباح…</p>
         <div id="sectors" class="sections"></div>
