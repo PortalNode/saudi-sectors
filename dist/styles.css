@@ -165,3 +165,13 @@ thead th.sticky-1,thead th.sticky-2{z-index:20}
 .sector-performance strong{margin-right:4px;direction:ltr;display:inline-block}
 .sector-performance.up strong{color:#54e878}.sector-performance.down strong{color:#ff6b6b}.sector-performance.flat strong{color:#bdc6ce}
 @media(max-width:760px){.market-summary h2{justify-content:center}.market-date{position:static;transform:none;margin-right:8px}.market-stats{grid-template-columns:repeat(10,minmax(112px,1fr))}.sector-meta{gap:5px}.sector-performance{font-size:9px;padding:3px 6px}}
+
+/* 52-week price range: high on the left, low on the right. */
+table{min-width:1594px}
+.table-wrap{overflow-x:auto}
+.col-week52{width:160px}
+.range52{width:100%;max-width:144px;direction:ltr;unicode-bidi:isolate;margin:0 auto;padding-top:4px}
+.range52-track{position:relative;height:9px;border:1px solid #66717b;border-radius:3px;background:linear-gradient(90deg,#57442c,#292d31)}
+.range52-marker{position:absolute;top:-1px;height:9px;width:2px;background:#f59e0b;transform:translateX(-50%)}
+.range52-marker:before{content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #f59e0b}
+.range52-labels{display:flex;justify-content:space-between;gap:8px;margin-top:3px;color:#dce3e8;font-size:10.5px;line-height:1;font-variant-numeric:tabular-nums}

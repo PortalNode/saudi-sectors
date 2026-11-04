@@ -7,13 +7,15 @@
  * Fallback source: TradingView   (TADAWUL:SYMBOL scanner, when Yahoo throttles)
  *
  * It updates price, day change and market cap (via the share count derived from
- * the original Tadawul snapshot), then stamps the quote date used by the page.
+ * the original Tadawul snapshot), plus provider-reported 52-week extremes,
+ * then stamps the quote date used by the page.
  * Data is written only when the run resolves most symbols, so a failed run never
  * replaces good prices with partial ones.
  *
  * Local run: node scripts/update-prices.mjs
  */
 import { readFile, writeFile } from 'node:fs/promises';
+import { applyWeek52Range } from './week52-range.mjs';
 
 const DATA_FILE = new URL('../dist/data.json', import.meta.url);
 const YAHOO_CONCURRENCY = Number(process.env.YAHOO_CONCURRENCY || 3);
@@ -112,6 +114,10 @@ async function yahooBatchQuotes(symbols, session) {
         date: quote.regularMarketTime ? riyadhFromUnix(quote.regularMarketTime) : null,
         timestamp: quote.regularMarketTime ? new Date(quote.regularMarketTime * 1000).toISOString() : null,
         source: 'yahoo',
+        week52Candidates: quote.currency === 'SAR' ? [{
+          low: quote.fiftyTwoWeekLow, high: quote.fiftyTwoWeekHigh, referencePrice: quote.regularMarketPrice,
+          source: 'Yahoo Finance', checkedAt: new Date().toISOString(),
+        }] : [],
       });
     }
   }
@@ -132,7 +138,14 @@ async function yahooSeries(symbol, attempt = 0) {
     if (!bars.length) throw new Error('no daily bars');
     const last = bars[bars.length - 1];
     const previous = bars.length > 1 ? bars[bars.length - 2].close : result.meta?.chartPreviousClose ?? null;
-    return { close: last.close, previous, date: riyadhFromUnix(last.time), timestamp: new Date(last.time * 1000).toISOString(), source: 'yahoo' };
+    return {
+      close: last.close, previous, date: riyadhFromUnix(last.time),
+      timestamp: new Date(last.time * 1000).toISOString(), source: 'yahoo',
+      week52Candidates: result.meta?.currency === 'SAR' ? [{
+        low: result.meta.fiftyTwoWeekLow, high: result.meta.fiftyTwoWeekHigh, referencePrice: last.close,
+        source: 'Yahoo Finance', checkedAt: new Date().toISOString(),
+      }] : [],
+    };
   } catch (error) {
     if (attempt < YAHOO_MAX_RETRIES && !/HTTP 404/.test(error.message)) {
       await sleep(1500 * (attempt + 1));
@@ -143,6 +156,7 @@ async function yahooSeries(symbol, attempt = 0) {
 }
 
 const quotes = new Map();
+const tvWeek52 = new Map();
 const failures = [];
 let consecutiveYahooFailures = 0;
 let yahooDisabled = false;
@@ -184,21 +198,45 @@ const viaYahoo = quotes.size;
 console.log(`Yahoo Finance: ${viaYahoo}/${stocks.length} symbols`);
 
 /* ----------------------------- TradingView ------------------------------- */
+// Ask for the optional fields with the existing scanner requests. If an
+// upstream schema change rejects them, retry the original request unchanged so
+// the site's normal price/YTD refresh does not depend on this new indicator.
+async function tradingViewScanWithOptionalRanges(batch, baseColumns, extraColumns) {
+  const scan = columns => getJson('https://scanner.tradingview.com/ksa/scan', {
+    method: 'POST',
+    body: JSON.stringify({
+      symbols: { tickers: batch.map(stock => `TADAWUL:${stock.symbol}`), query: { types: [] } },
+      columns,
+    }),
+  });
+  try {
+    return await scan([...baseColumns, ...extraColumns]);
+  } catch (error) {
+    console.log(`TradingView extended scan failed (${error.message}); retrying original fields.`);
+    return scan(baseColumns);
+  }
+}
+
+function rememberTradingViewRange(symbol, close, currency, low, high) {
+  if (currency !== 'SAR') return;
+  const candidates = tvWeek52.get(symbol) || [];
+  candidates.push({ low, high, referencePrice: close, source: 'TradingView', checkedAt: new Date().toISOString() });
+  tvWeek52.set(symbol, candidates);
+}
+
 const missing = stocks.filter(stock => !quotes.has(stock.symbol));
 let viaTradingView = 0;
 
 for (let index = 0; index < missing.length; index += TV_BATCH) {
   const batch = missing.slice(index, index + TV_BATCH);
-  const body = JSON.stringify({
-    symbols: { tickers: batch.map(stock => `TADAWUL:${stock.symbol}`), query: { types: [] } },
-    columns: ['close', 'change', 'currency', 'Perf.YTD'],
-  });
   try {
-    const payload = await getJson('https://scanner.tradingview.com/ksa/scan', { method: 'POST', body });
+    const payload = await tradingViewScanWithOptionalRanges(batch,
+      ['close', 'change', 'currency', 'Perf.YTD'], ['price_52_week_low', 'price_52_week_high']);
     for (const row of payload?.data || []) {
       const symbol = String(row.s).split(':')[1];
-      const [close, change, currency, ytd] = row.d || [];
+      const [close, change, currency, ytd, low, high] = row.d || [];
       if (!Number.isFinite(close) || currency !== 'SAR') continue;
+      rememberTradingViewRange(symbol, close, currency, low, high);
       const percent = Number.isFinite(change) ? change : null;
       quotes.set(symbol, {
         close,
@@ -223,18 +261,14 @@ if (viaTradingView) console.log(`TradingView: ${viaTradingView}/${missing.length
 for (let index = 0; index < stocks.length; index += TV_BATCH) {
   const batch = stocks.slice(index, index + TV_BATCH);
   try {
-    const payload = await getJson('https://scanner.tradingview.com/ksa/scan', {
-      method: 'POST',
-      body: JSON.stringify({
-        symbols: { tickers: batch.map(stock => `TADAWUL:${stock.symbol}`), query: { types: [] } },
-        columns: ['Perf.YTD'],
-      }),
-    });
+    const payload = await tradingViewScanWithOptionalRanges(batch, ['Perf.YTD'],
+      ['close', 'currency', 'price_52_week_low', 'price_52_week_high']);
     for (const row of payload?.data || []) {
       const symbol = String(row.s).split(':')[1];
-      const ytd = row.d?.[0];
+      const [ytd, close, currency, low, high] = row.d || [];
       const quote = quotes.get(symbol);
       if (quote && Number.isFinite(ytd)) quote.ytd = ytd;
+      rememberTradingViewRange(symbol, close, currency, low, high);
     }
   } catch (error) {
     console.log(`TradingView YTD batch failed (${batch.length} symbols): ${error.message}`);
@@ -259,15 +293,22 @@ if (!snapshotDate) {
   snapshotDate = riyadhIso(new Date());
 }
 
+const week52Counts = { updated: 0, retained: 0, incompatible: 0, unavailable: 0 };
 for (const stock of stocks) {
   const quote = quotes.get(stock.symbol);
-  if (!quote) continue;
-  stock.price = round(quote.close);
-  if (quote.previous > 0) stock.day = round((quote.close / quote.previous - 1) * 100);
-  if (stock.shares) stock.marketCap = round((stock.shares * stock.price) / 1e6);
-  if (quote.date) stock.priceDate = quote.date;
-  if (Number.isFinite(quote.ytd)) stock.ytd = round(quote.ytd);
+  if (quote) {
+    stock.price = round(quote.close);
+    if (quote.previous > 0) stock.day = round((quote.close / quote.previous - 1) * 100);
+    if (stock.shares) stock.marketCap = round((stock.shares * stock.price) / 1e6);
+    if (quote.date) stock.priceDate = quote.date;
+    if (Number.isFinite(quote.ytd)) stock.ytd = round(quote.ytd);
+  }
+  const status = applyWeek52Range(stock, [
+    ...(quote?.week52Candidates || []), ...(tvWeek52.get(stock.symbol) || []),
+  ]);
+  week52Counts[status]++;
 }
+console.log(`52-week ranges: ${week52Counts.updated} updated, ${week52Counts.retained} retained, ${week52Counts.incompatible} incompatible with price, ${week52Counts.unavailable} unavailable`);
 
 const provider = viaTradingView > viaYahoo ? 'TradingView' : 'Yahoo Finance';
 

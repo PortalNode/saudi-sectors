@@ -1,7 +1,7 @@
 const columns = [
   ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],
   ['eps','ربحية السهم','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
-  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['marketCap','القيمة السوقية','mcap'],['day','تغير اليوم','day'],['ytd','الأداء منذ بداية السنة','ytd'],['month3','تغير 3 أشهر','3m'],
+  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['week52Position','آخر 52 أسبوع','week52'],['marketCap','القيمة السوقية','mcap'],['day','تغير اليوم','day'],['ytd','الأداء منذ بداية السنة','ytd'],['month3','تغير 3 أشهر','3m'],
   ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -18,6 +18,25 @@ const percent = n => n == null ? '<span class="missing">—</span>' : `<span cla
 const pe = stock => stock.pe != null ? numeric(stock.pe) : stock.eps != null && stock.eps < 0 ? '<span class="loss">خاسرة</span>' : '<span class="missing">—</span>';
 const allStocks = () => data.sectors.flatMap(s => s.stocks);
 const safeNumber = value => value == null || value === '' || !Number.isFinite(Number(value)) ? null : Number(value);
+
+// The range is displayed high on the left and low on the right, as in the
+// reference. Sorting uses the current price's position from low to high.
+function range52Position(stock){
+  const low=safeNumber(stock.week52Low),high=safeNumber(stock.week52High),price=safeNumber(stock.price);
+  if(low==null||high==null||price==null||low<=0||high<low||price<=0)return null;
+  if(high===low)return price===low?0.5:price>high?1:0;
+  return Math.max(0,Math.min(1,(price-low)/(high-low)));
+}
+function range52(stock){
+  const low=safeNumber(stock.week52Low),high=safeNumber(stock.week52High);
+  if(low==null||high==null||low<=0||high<low)return '<span class="missing" title="نطاق آخر 52 أسبوعًا غير متاح">—</span>';
+  const price=safeNumber(stock.price),position=range52Position(stock);
+  const checked=stock.week52CheckedAt?new Date(stock.week52CheckedAt):null;
+  const checkedLabel=checked&&!Number.isNaN(checked.getTime())?new Intl.DateTimeFormat('ar-SA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(checked):null;
+  const title=`أعلى سعر: ${numberFormat.format(high)}، أدنى سعر: ${numberFormat.format(low)}${position==null?'؛ السعر الحالي غير متاح':`، السعر الحالي: ${numberFormat.format(price)}`}${stock.week52Source?`؛ المصدر: ${stock.week52Source}`:''}${checkedLabel?`؛ آخر فحص: ${checkedLabel}`:''}`;
+  const marker=position==null?'':`<span class="range52-marker" style="left:${((1-position)*100).toFixed(2)}%"></span>`;
+  return `<div class="range52" role="img" aria-label="${escapeHtml(title)}" title="${escapeHtml(title)}"><div class="range52-track">${marker}</div><div class="range52-labels" aria-hidden="true"><span>${numberFormat.format(high)}</span><span>${numberFormat.format(low)}</span></div></div>`;
+}
 
 function periodValid(period){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(period || ''))return false;
@@ -108,7 +127,7 @@ function nav(){
 }
 function row(stock){
   const dividendTitle=stock.dividendYield==null?'لا توجد قيمة متاحة في مؤشر أرقام للسنة السابقة':'مؤشر أرقام: عائد التوزيع (%) (آخر سنة)';
-  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,2)}</td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="${dividendTitle}">${percent(stock.dividendYield)}</td><td title="القيمة السوقية · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.ytd)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
+  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,2)}</td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="${dividendTitle}">${percent(stock.dividendYield)}</td><td>${range52(stock)}</td><td title="القيمة السوقية · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.ytd)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
 }
 function render(){
   nav();
@@ -125,7 +144,7 @@ function render(){
   $('sectors').innerHTML=filtered.map(({name,index,stocks})=>{
     const sort=sortBySector.get(index);
     if(sort){stocks=[...stocks].sort((a,b)=>{
-      const av=a[sort.key],bv=b[sort.key];
+      const av=sort.key==='week52Position'?range52Position(a):a[sort.key],bv=sort.key==='week52Position'?range52Position(b):b[sort.key];
       if(av==null) return 1;if(bv==null)return -1;
       return (typeof av==='string'?av.localeCompare(bv,'ar'):av-bv)*sort.dir || a.symbol.localeCompare(b.symbol,'en');
     });}
