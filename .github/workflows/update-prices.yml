@@ -2,9 +2,11 @@ name: Update market prices
 
 on:
   schedule:
-    # 03/18/33/48 UTC minutes = approximately every 15 minutes,
-    # 10:03–15:48 Riyadh, Sunday–Thursday during the Tadawul session.
+    # Dated delayed prices during the session, including closing auction.
+    # UTC + 3 = Riyadh. Actions schedules are best-effort, not real-time feeds.
     - cron: '3,18,33,48 7-12 * * 0-4'
+    # Retry the official closing report at 16:08, 17:08, 18:08 and 20:08 Riyadh.
+    - cron: '8 13,14,15,17 * * 0-4'
   workflow_dispatch:
 
 permissions:
@@ -12,8 +14,9 @@ permissions:
   pages: write
   id-token: write
 
+# Both workflows share the publication lock. An update is never cancelled midway.
 concurrency:
-  group: update-prices
+  group: github-pages
   cancel-in-progress: false
 
 jobs:
@@ -27,7 +30,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Fetch current market prices (up to 15 minutes delayed)
+      - name: Test price integrity and existing UI
+        run: node --test scripts/*.test.mjs tests/*.test.mjs
+      - name: Fetch dated official closes or explicitly delayed quotes
         run: node scripts/update-prices.mjs
       - name: Commit refreshed data
         run: |
@@ -37,7 +42,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No price changes to commit."
           else
-            git commit -m "Update closing prices $(date -u +%F)"
+            git commit -m "Update dated market snapshot $(date -u +%F)"
             git push
           fi
       - name: Upload website files

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0d2432">
-  <meta name="description" content="الشركات السعودية حسب القطاعات مع أسعار اليوم والمؤشر العام، وقد تتأخر بيانات السوق حتى 15 دقيقة.">
+  <meta name="description" content="الشركات السعودية حسب القطاعات مع إغلاق تداول الرسمي أو أسعار متأخرة غير مؤكدة رسميًا، وتاريخ ومصدر الأسعار والمؤشر العام.">
   <title>قطاعات السوق السعودي | مؤشرات الشركات</title>
   <link rel="stylesheet" href="styles.css?v=52week-20261104">
 </head>
@@ -17,7 +17,7 @@
       <section class="hero" aria-labelledby="page-title">
         <div class="hero-copy">
           <h1 id="page-title">السوق السعودي</h1>
-          <div class="hero-date"><span id="price-mode">أسعار اليوم · قد تتأخر حتى 15 دقيقة</span> · <bdi id="price-date">—</bdi></div>
+          <div class="hero-date"><span id="price-mode">جار تحميل الأسعار</span> · <bdi id="price-date">—</bdi> · <span id="price-source">—</span></div>
         </div>
         <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><span class="hero-art-mark">س</span></div>
       </section>
@@ -37,7 +37,8 @@
           </div>
         </div>
         <nav id="sector-nav" class="sector-nav" aria-label="اختيار القطاع"></nav>
-        <div class="table-note"><span class="note-icon">i</span><span>«جميع القطاعات» جدول واحد مرتب افتراضيًا من الأكبر قيمة سوقية إلى الأصغر. اضغط أي عنوان عمود لتغيير الترتيب. تُحدَّث أسعار الأسهم والمؤشر آليًا أثناء جلسة التداول، وقد تتأخر بيانات المصدر حتى 15 دقيقة. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم تتوفر ربحية متكررة للسهم. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة.</span></div>
+        <div class="table-note"><span class="note-icon">i</span><span>«جميع القطاعات» جدول واحد مرتب افتراضيًا من الأكبر قيمة سوقية إلى الأصغر. اضغط أي عنوان عمود لتغيير الترتيب. تُفحص نسخة الأسعار كل دقيقة وعند العودة للصفحة؛ إغلاق تداول الرسمي منفصل عن الأسعار المتأخرة غير المؤكدة رسميًا، حتى خارج ساعات السوق. يظهر المصدر والتاريخ، ولا تُذكر مدة التأخير إلا إذا وردت من المصدر. تغير القطاع مرجح محسوب لجميع شركاته وليس مؤشرًا رسميًا. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم تتوفر ربحية متكررة للسهم. يُحفظ عائد التوزيع «آخر سنة» من ملف البيانات ولا يُستبدل بنسب القطاع الفصلية. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة.</span></div>
+        <p id="price-status" class="financial-status" role="status" aria-live="polite">جار تحميل الأسعار…</p>
         <p id="financial-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات الأرباح…</p>
         <div id="sectors" class="sections"></div>
         <div id="empty" class="empty" hidden><div class="empty-icon">⌕</div><h3>لا توجد نتائج مطابقة</h3><p>جرّب البحث باسم آخر أو برمز السهم.</p></div>
@@ -45,6 +46,6 @@
 
     </main>
   </div>
-  <script src="app.js?v=52week-20261104" defer></script>
+  <script src="app.js?v=price-status-20261104" defer></script>
 </body>
 </html>

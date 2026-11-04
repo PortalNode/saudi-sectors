@@ -8,7 +8,7 @@ const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maxi
 const integerFormat = new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
 const epsFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const timeFormat = new Intl.DateTimeFormat('ar-SA',{timeZone:'Asia/Riyadh',hour:'2-digit',minute:'2-digit'});
-let data, financialMap, activeSector = null, query = '', sortBySector = new Map([['all',{key:'marketCap',dir:-1}]]), epsMode = 'recurring', refreshRunning = false;
+let data, financialMap, activeSector = null, query = '', sortBySector = new Map([['all',{key:'marketCap',dir:-1}]]), epsMode = 'recurring', refreshRunning = false, pricesRefreshRunning = false, priceRefreshError = '';
 const financials = new Map();
 const $ = id => document.getElementById(id);
 const escapeHtml = value => String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -49,8 +49,30 @@ function today(){
 const sourceDate = record=>{
   return record.dateKind==='checked' ? `فُحصت بيانات الشركة في ${record.period}؛ تاريخ تحديث القطاع لدى أرقام غير صالح` : `آخر تحديث للقطاع ${record.period}`;
 }
-const snapshotLabel = () => data.priceDate || (data.asOf ? data.asOf.split('-').reverse().join('.') : '—');
+const displayDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') ? value.split('-').reverse().join('.') : /^\d{2}\.\d{2}\.\d{4}$/.test(value||'') ? value : null;
+const providerLabel = value => value==='Saudi Exchange'?'تداول السعودية':value==='TradingView'?'تريدينغ فيو':value||'مصدر غير محدد';
+const snapshotLabel = () => displayDate(data.priceSource?.mode==='close' ? data.priceSource.officialDate || data.priceDate : data.priceSource?.observedDate || data.priceDate) || '—';
+const timestamp = value => value ? new Date(value).getTime() : NaN;
 const updateTime = value => {if(!value)return null;const date=new Date(value);return Number.isNaN(date.getTime())?null:timeFormat.format(date)};
+const checkedLabel = value => {const date=new Date(value);return !value||Number.isNaN(date.getTime())?null:`${new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(date)} ${timeFormat.format(date)} بتوقيت الرياض`};
+// Usual Saudi cash-equity hours, including the closing auction / trade-at-last.
+// This is a freshness warning, not a claim that a session is currently open.
+function isMarketHours(now=new Date()){
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Riyadh',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);
+  const part=type=>parts.find(p=>p.type===type)?.value;
+  const minutes=Number(part('hour'))*60+Number(part('minute'));
+  return !['Fri','Sat'].includes(part('weekday')) && minutes>=10*60 && minutes<15*60+20;
+}
+function paintPriceStatus(){
+  const source=data?.priceSource||{},messages=[];
+  if(source.warning)messages.push(source.warning);
+  if(source.unavailableSymbols>0)messages.push(`السعر غير متاح لـ ${source.unavailableSymbols} سهمًا.`);
+  const checked=checkedLabel(source.checkedAt);
+  messages.push(checked?`آخر فحص لنسخة الأسعار: ${checked}.`:'وقت آخر فحص لنسخة الأسعار غير متاح.');
+  if(isMarketHours() && Number.isFinite(timestamp(source.checkedAt)) && Date.now()-timestamp(source.checkedAt)>35*60*1000)messages.push('نسخة الأسعار قديمة: مضى أكثر من 35 دقيقة على آخر فحص خلال ساعات التداول المعتادة.');
+  if(priceRefreshError)messages.push(priceRefreshError);
+  const node=$('price-status');if(node)node.textContent=messages.join(' ');
+}
 function paintSnapshot(){
   const date=snapshotLabel();
   for(const id of ['price-date','price-date-note','price-date-footer']){
@@ -58,25 +80,37 @@ function paintSnapshot(){
     if(node) node.textContent=date;
   }
   const mode=$('price-mode');
-  if(mode)mode.textContent=data.priceSource?.mode==='intraday'?'أسعار اليوم · قد تتأخر حتى 15 دقيقة':'بيانات الإغلاق';
+  const official=data.priceSource?.mode==='close';
+  const delay=safeNumber(data.priceSource?.delayMinutes);
+  if(mode)mode.textContent=official?(date==='—'?'إغلاق رسمي · آخر إغلاق متاح':'إغلاق رسمي'):`أسعار متأخرة · غير مؤكدة رسميًا${delay!=null&&delay>0?` · تأخير المصدر ${delay} دقيقة`:''}`;
   const source=$('price-source');
-  if(source) source.textContent=data.priceSource?.provider==='TradingView' ? 'تريدينغ فيو' : 'ياهو فايننس';
+  if(source)source.textContent=providerLabel(data.priceSource?.provider);
+  paintPriceStatus();
+}
+function stockPriceLabel(stock){
+  const date=displayDate(stock.priceDate);
+  const status=stock.priceStatus==='official_close'?'إغلاق رسمي':stock.priceStatus==='unavailable'||stock.price==null?'السعر غير متاح':'سعر متأخر · غير مؤكد رسميًا';
+  return `${status} · ${date||'تاريخ السعر غير متاح'} · المصدر: ${providerLabel(stock.priceSource || data.priceSource?.provider)}`;
 }
 function applyFinancials(){
   for(const stock of allStocks()){
-    const fallback=stock._fallback || (stock._fallback={eps:stock.eps,pe:stock.pe,bookValue:stock.bookValue,pb:stock.pb,dividendYield:stock.dividendYield ?? null});
+    const fallback=stock._fallback || (stock._fallback={eps:safeNumber(stock.eps),bookValue:safeNumber(stock.bookValue),dividendYield:safeNumber(stock.dividendYield)});
     const record=financials.get(stock.symbol);
     const preferred=record && safeNumber(record[epsMode]);
     const reportedFallback=record && epsMode==='recurring' ? safeNumber(record.reported) : null;
     const chosen=preferred ?? reportedFallback;
     const epsKind=preferred != null ? (epsMode==='recurring'?'متكررة':'معلنة') : reportedFallback != null ? 'معلنة' : null;
     stock.eps=chosen ?? fallback.eps;
-    stock.pe=chosen == null ? fallback.pe : chosen > 0 && stock.price != null ? stock.price/chosen : null;
+    const price=safeNumber(stock.price);
+    stock.pe=stock.eps > 0 && price != null && price > 0 ? price/stock.eps : null;
     stock.bookValue=record?.book == null ? fallback.bookValue : safeNumber(record.book);
-    stock.pb=record?.book == null ? fallback.pb : stock.bookValue > 0 && stock.price != null ? stock.price/stock.bookValue : null;
-    stock.dividendYield=record?.dividendYield == null ? fallback.dividendYield : safeNumber(record.dividendYield);
-    stock._epsSource=chosen == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ربحية ${epsKind} · ${sourceDate(record)}`;
-    stock._bookSource=record?.book == null ? 'تداول السعودية · حتى الربع الثاني 2026' : `أرقام · ${sourceDate(record)}`;
+    stock.pb=stock.bookValue > 0 && price != null && price > 0 ? price/stock.bookValue : null;
+    // data.json's last-year yield has a different definition from sector ratios.
+    // Never replace it with the quarterly sector endpoint's DividendYield field.
+    stock.dividendYield=fallback.dividendYield;
+    const fallbackSource=`تداول السعودية${data.financialPeriod?` · ${data.financialPeriod}`:''}`;
+    stock._epsSource=chosen == null ? fallbackSource : `أرقام · ربحية ${epsKind} · ${sourceDate(record)}`;
+    stock._bookSource=record?.book == null ? fallbackSource : `أرقام · ${sourceDate(record)}`;
     stock._hasCurrentEps=chosen != null;
     stock._epsPeriod=chosen == null ? null : record.period;
     stock._epsDateKind=chosen == null ? null : record.dateKind;
@@ -93,6 +127,9 @@ function stats(){
 function paintMarketSummary(){
   const m=data.marketSummary||{};
   const breadth=allStocks().reduce((counts,stock)=>{const change=safeNumber(stock.day);if(change>0)counts.up++;else if(change<0)counts.down++;else if(change===0)counts.flat++;return counts;},{up:0,down:0,flat:0});
+  const mode=m.mode || (m.isIntraday?'delayed':null);
+  const source=providerLabel(!m.mode&&m.quoteSource?m.quoteSource:m.source);
+  const date=displayDate(m.date);
   const signed=n=>`${n>0?'+':n<0?'−':''}${numberFormat.format(Math.abs(n))}`;
   const daily=m.day==null?'—':`${m.pointChange==null?'':`${signed(m.pointChange)} `}(${signed(m.day)}%)`;
   const items=[
@@ -111,10 +148,13 @@ function paintMarketSummary(){
     const trend=item.trend ?? (item.percent?item.value:null);
     const display=item.percent?(item.value==null?'—':`${item.value>0?'+':''}${numberFormat.format(item.value)}%`):item.value;
     const cls=typeof trend==='number'?(trend>0?'up':trend<0?'down':'flat'):'';
-    return `<div class="market-card"><span>${item.label}</span><strong class="${cls}">${display}</strong></div>`;
+    const itemSource=item.percent?providerLabel(m.performanceSource):source;
+    const title=item.label.startsWith('الشركات')||item.label==='دون تغيير'?`محسوب من بيانات أسهم الجدول · ${providerLabel(data.priceSource?.provider)} · ${snapshotLabel()}`:`المصدر: ${itemSource} · ${item.percent?'تاريخ بيانات الأداء':'تاريخ المؤشر'}: ${item.percent?m.performanceDate||'غير متاح':date||'غير متاح'}`;
+    return `<div class="market-card" title="${escapeHtml(title)}"><span>${item.label}</span><strong class="${cls}">${display}</strong></div>`;
   }).join('');
-  const checked=updateTime(m.updatedAt||data.priceSource?.checkedAt);
-  $('market-date').textContent=m.date?(m.isIntraday?`الآن · آخر فحص ${checked||'—'}`:`إغلاق ${m.date}`):'بانتظار تحديث المؤشر';
+  const checked=checkedLabel(m.updatedAt);
+  const label=mode==='close'?'إغلاق رسمي':mode==='delayed'?'بيانات متأخرة · غير مؤكدة رسميًا':'بيانات المؤشر';
+  $('market-date').textContent=m.date||m.value!=null?`${label} · ${date||(mode==='close'?'آخر إغلاق متاح':'تاريخ غير متاح')} · ${source}${checked?` · آخر فحص ${checked}`:''}`:'بانتظار تحديث المؤشر';
 }
 function sectorChange(stocks){
   let weighted=0,total=0;
@@ -126,8 +166,10 @@ function nav(){
     data.sectors.map((sector,i)=>`<button class="sector-button ${activeSector===i?'active':''}" data-sector="${i}" type="button" aria-pressed="${activeSector===i}" title="${escapeHtml(sector.name)} · ${sector.stocks.length} شركة"><span>${escapeHtml(sector.name)}</span><span class="count">${sector.stocks.length}</span></button>`).join('');
 }
 function row(stock){
-  const dividendTitle=stock.dividendYield==null?'لا توجد قيمة متاحة في مؤشر أرقام للسنة السابقة':'مؤشر أرقام: عائد التوزيع (%) (آخر سنة)';
-  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td>${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,2)}</td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="${dividendTitle}">${percent(stock.dividendYield)}</td><td>${range52(stock)}</td><td title="القيمة السوقية · إغلاق ${snapshotLabel()}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td>${percent(stock.ytd)}</td><td>${percent(stock.month3)}</td><td>${percent(stock.month6)}</td><td>${percent(stock.year1)}</td></tr>`;
+  const dividendTitle=stock.dividendYield==null?'عائد التوزيع (آخر سنة) غير متاح في ملف البيانات':stock.dividendYieldSource==='Argaam Dividend Yield (%) (Last Year)'?'أرقام: عائد التوزيع (%) (آخر سنة)':`عائد التوزيع · المصدر: ${stock.dividendYieldSource||'ملف البيانات؛ المصدر غير محدد'}`;
+  const priceTitle=stockPriceLabel(stock);
+  const performanceTitle=`تاريخ بيانات الأداء: ${stock.performanceDate||'غير متاح'}`;
+  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${escapeHtml(stock.name)}</td><td title="${escapeHtml(priceTitle)}">${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,2)}</td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="${escapeHtml(dividendTitle)}">${percent(stock.dividendYield)}</td><td>${range52(stock)}</td><td title="${escapeHtml(`القيمة السوقية · ${priceTitle}`)}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.ytd)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.month3)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.month6)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.year1)}</td></tr>`;
 }
 function render(){
   nav();
@@ -148,8 +190,8 @@ function render(){
       if(av==null) return 1;if(bv==null)return -1;
       return (typeof av==='string'?av.localeCompare(bv,'ar'):av-bv)*sort.dir || a.symbol.localeCompare(b.symbol,'en');
     });}
-    const change=sectorChange(stocks),changeClass=change==null?'':change>0?'up':change<0?'down':'flat',changeText=change==null?'—':`${change>0?'+':''}${numberFormat.format(change)}%`;
-    return `<section class="sector-section" id="sector-${index}" aria-labelledby="heading-${index}"><div class="sector-heading"><div class="sector-title-wrap">${index==='all'?'':`<span class="sector-index">${String(index+1).padStart(2,'0')}</span>`}<h3 id="heading-${index}">${escapeHtml(name)}</h3></div><div class="sector-meta"><span class="sector-pill">${stocks.length} ${index==='all'||stocks.length===1?'شركة':'شركات'}</span>${index==='all'?'':`<span class="sector-performance ${changeClass}">تغير القطاع <strong>${changeText}</strong></span>`}</div></div><div class="table-wrap" tabindex="0" aria-label="جدول ${escapeHtml(name)}؛ مرر أفقيًا لرؤية كل الأعمدة"><table><colgroup>${columns.map(c=>`<col class="col-${c[2]}">`).join('')}</colgroup><thead><tr>${columns.map(([key,label],ci)=>`<th class="${ci===0?'sticky-1':ci===1?'sticky-2':''}" scope="col"><button type="button" data-sort="${key}" data-index="${index}" class="${sort?.key===key?'sorted':''}" aria-label="ترتيب حسب ${label}">${label}<span class="sort-glyph">${sort?.key===key?(sort.dir===1?'↑':'↓'):'↕'}</span></button></th>`).join('')}</tr></thead><tbody>${stocks.map(row).join('')}</tbody></table></div></section>`;
+    const change=sectorChange(index==='all'?allStocks():data.sectors[index].stocks),changeClass=change==null?'':change>0?'up':change<0?'down':'flat',changeText=change==null?'—':`${change>0?'+':''}${numberFormat.format(change)}%`;
+    return `<section class="sector-section" id="sector-${index}" aria-labelledby="heading-${index}"><div class="sector-heading"><div class="sector-title-wrap">${index==='all'?'':`<span class="sector-index">${String(index+1).padStart(2,'0')}</span>`}<h3 id="heading-${index}">${escapeHtml(name)}</h3></div><div class="sector-meta"><span class="sector-pill">${stocks.length} ${index==='all'||stocks.length===1?'شركة':'شركات'}</span>${index==='all'?'':`<span class="sector-performance ${changeClass}" title="تغير محسوب مرجح بالقيمة السوقية لجميع شركات القطاع؛ ليس مؤشر قطاع رسميًا">تغير مرجح محسوب <strong>${changeText}</strong></span>`}</div></div><div class="table-wrap" tabindex="0" aria-label="جدول ${escapeHtml(name)}؛ مرر أفقيًا لرؤية كل الأعمدة"><table><colgroup>${columns.map(c=>`<col class="col-${c[2]}">`).join('')}</colgroup><thead><tr>${columns.map(([key,label],ci)=>`<th class="${ci===0?'sticky-1':ci===1?'sticky-2':''}" scope="col"><button type="button" data-sort="${key}" data-index="${index}" class="${sort?.key===key?'sorted':''}" aria-label="ترتيب حسب ${label}">${label}<span class="sort-glyph">${sort?.key===key?(sort.dir===1?'↑':'↓'):'↕'}</span></button></th>`).join('')}</tr></thead><tbody>${stocks.map(row).join('')}</tbody></table></div></section>`;
   }).join('');
 }
 function updateStatus(message){$('financial-status').textContent=message;}
@@ -161,7 +203,7 @@ function updateMode(mode){
   $('reported-mode').setAttribute('aria-pressed',String(mode==='reported'));
   applyFinancials();
   const updated=allStocks().filter(s=>s._hasCurrentEps).length;
-  updateStatus(`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض بيانات أقدم. عائد التوزيع يظهر عند العثور على توزيع نقدي موثق.`);
+  updateStatus(`ربحية ${updated} سهمًا من أرقام؛ ${allStocks().length-updated} سهمًا تعرض بيانات أقدم. عائد التوزيع محفوظ من ملف الأسعار وفق مصدره، وليس من نسب القطاع الفصلية.`);
 }
 function readSector(html,sectorId){
   const documentHtml=new DOMParser().parseFromString(html,'text/html');
@@ -196,7 +238,7 @@ async function getSector(sectorId){
   }finally{clearTimeout(timer);}
 }
 async function refreshFinancials(){
-  if(refreshRunning)return;
+  if(refreshRunning||!data||!financialMap)return;
   refreshRunning=true;
   updateStatus('جار فحص الأرباح المعلنة لدى أرقام…');
   const ids=[...financialMap.sectorIds];
@@ -222,6 +264,46 @@ async function refreshFinancials(){
   refreshRunning=false;
 }
 
+async function refreshPrices(){
+  if(pricesRefreshRunning)return false;
+  pricesRefreshRunning=true;
+  try{
+    const response=await fetch(`data.json?v=${Date.now()}`,{cache:'no-store'});
+    if(!response.ok)throw Error(`HTTP ${response.status}`);
+    const result=await response.json();
+    if(!result||!Array.isArray(result.sectors)||result.sectors.some(sector=>!Array.isArray(sector.stocks)))throw Error('invalid price data');
+    const current=timestamp(data?.priceSource?.checkedAt),incoming=timestamp(result.priceSource?.checkedAt);
+    if(data && Number.isFinite(current) && (!Number.isFinite(incoming)||incoming<current)){
+      priceRefreshError='رُفضت نسخة أسعار أقدم أو بلا وقت فحص صالح؛ احتُفظ بالقيم المعروضة.';
+      paintPriceStatus();
+      return false;
+    }
+    const initial=!data;
+    data=result;
+    priceRefreshError='';
+    if(initial)$('empty').querySelector('h3').textContent='لا توجد نتائج مطابقة';
+    paintSnapshot();paintMarketSummary();applyFinancials();
+    if(initial&&financialMap)refreshFinancials();
+    return true;
+  }catch(error){
+    priceRefreshError=data?'تعذر تحديث الأسعار؛ احتُفظ بالقيم المعروضة وستُعاد المحاولة تلقائيًا.':'تعذر تحميل الأسعار؛ ستُعاد المحاولة تلقائيًا.';
+    paintPriceStatus();
+    if(!data){$('result-count').textContent='تعذر تحميل البيانات';$('empty').hidden=false;$('empty').querySelector('h3').textContent='تعذر تحميل البيانات';}
+    return false;
+  }finally{pricesRefreshRunning=false;}
+}
+async function loadFinancialMap(){
+  try{
+    const response=await fetch('financial-map.json?v=live-20261104',{cache:'no-store'});
+    if(!response.ok)throw Error('map unavailable');
+    const map=await response.json();
+    if(!map||!Array.isArray(map.sectorIds))throw Error('invalid map');
+    financialMap=map;
+    for(const [symbol,record] of Object.entries(map.snapshot||{}))if(periodValid(record.period))financials.set(symbol,record);
+    if(data){applyFinancials();refreshFinancials();}
+  }catch(error){updateStatus('تعذر تحميل بيانات الأرباح المحدثة؛ تُعرض القيم المتاحة في ملف الأسعار.');}
+}
+
 document.addEventListener('click',event=>{
   const sectorButton=event.target.closest('[data-sector]');
   if(sectorButton){activeSector=sectorButton.dataset.sector==='all'?null:Number(sectorButton.dataset.sector);if(activeSector===null)sortBySector.set('all',{key:'marketCap',dir:-1});render();$('main-content').scrollIntoView({behavior:'smooth',block:'start'});return;}
@@ -232,13 +314,8 @@ $('search').addEventListener('input',event=>{query=normalized(event.target.value
 $('clear').addEventListener('click',()=>{$('search').value='';query='';render();$('search').focus();});
 $('recurring-mode').addEventListener('click',()=>updateMode('recurring'));
 $('reported-mode').addEventListener('click',()=>updateMode('reported'));
-Promise.all([fetch('data.json?v=live-20261104',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json?v=live-20261104',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
-  .then(([result,map])=>{
-    data=result;financialMap=map;paintSnapshot();paintMarketSummary();
-    for(const [symbol,record] of Object.entries(map.snapshot))if(periodValid(record.period))financials.set(symbol,record);
-    applyFinancials();
-    refreshFinancials();
-    setInterval(refreshFinancials,60*60*1000);
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshFinancials();});
-  })
-  .catch(()=>{$('result-count').textContent='تعذر تحميل البيانات';$('empty').hidden=false;$('empty').querySelector('h3').textContent='تعذر تحميل البيانات';updateStatus('تعذر تحميل بيانات الأرباح.');});
+refreshPrices();
+loadFinancialMap();
+setInterval(refreshPrices,60*1000);
+setInterval(refreshFinancials,60*60*1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshPrices();refreshFinancials();}});
