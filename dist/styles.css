@@ -177,6 +177,9 @@ table{min-width:1594px}
 .range52-labels{display:flex;justify-content:space-between;gap:8px;margin-top:3px;color:#dce3e8;font-size:10.5px;line-height:1;font-variant-numeric:tabular-nums}
 
 /* Keep sortable column headings visible while scrolling through table rows. */
-.table-wrap{overflow:auto;max-height:calc(100vh - 320px);overscroll-behavior:contain}
-thead th{position:sticky;top:0;z-index:8}
-thead th.sticky-1,thead th.sticky-2{z-index:20}
+.sections .table-wrap{overflow:auto;max-height:none;overscroll-behavior:auto}
+.sections .table-wrap thead{position:relative;z-index:30;transform:translateY(var(--table-head-offset,0px))}
+.sections .table-wrap thead th{position:relative;top:auto;z-index:1;background:#242d37}
+.sections .table-wrap thead th.sticky-1,.sections .table-wrap thead th.sticky-2{position:sticky;z-index:2}
+.sections .table-wrap thead th.sticky-1{right:0}
+.sections .table-wrap thead th.sticky-2{right:86px}

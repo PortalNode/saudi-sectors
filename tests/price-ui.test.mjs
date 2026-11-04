@@ -284,7 +284,8 @@ await test('HTML retains existing structure and adds accessible status with cach
   assert.match(index, /<p id="price-status" class="financial-status" role="status" aria-live="polite">/);
   assert.match(index, /id="price-source"/);
   assert.match(index, /app\.js\?v=price-status-20261104/);
-  assert.match(index, /styles\.css\?v=52week-20261104/);
+  assert.match(index, /styles\.css\?v=sticky-page-20261105/);
+  assert.match(index, /sticky-header\.js\?v=20261105/);
   assert.doesNotMatch(index, /15 دقيقة|تُحدَّث أسعار الأسهم والمؤشر آليًا أثناء جلسة التداول/);
   assert.match(index, /حتى خارج ساعات السوق/);
 });
