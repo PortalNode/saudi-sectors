@@ -117,6 +117,27 @@ await test('legacy and new source labels, individual dates, safe unavailable val
   assert.match(h.node('market-stats').innerHTML, /تاريخ بيانات الأداء: 2026-11-01/);
 });
 
+await test('daily index change uses direction triangles and absolute separated values', async () => {
+  const h = harness(); await settle();
+  const up = h.evaluate('marketDailyChange({day:1.65,pointChange:162.76})');
+  assert.match(up, /▲/);
+  assert.match(up, /market-points[^>]*>162\.76<\/bdi>/);
+  assert.match(up, /<bdi>1\.65<\/bdi> %/);
+  assert.doesNotMatch(up, /\+|\(|\)|▼/);
+  const down = h.evaluate('marketDailyChange({day:-1.65,pointChange:-162.76})');
+  assert.match(down, /▼/);
+  assert.match(down, /انخفاض/);
+  assert.match(down, /162\.76/);
+  assert.doesNotMatch(down, /▲|-162\.76|-1\.65/);
+  assert.doesNotMatch(h.evaluate('marketDailyChange({day:0,pointChange:0})'), /▲|▼/);
+  assert.equal(h.evaluate('marketDailyChange({day:null,pointChange:null})'), '—');
+  assert.match(h.evaluate('marketDailyChange({day:1,pointChange:null})'), /التغيير بالنقاط غير متاح/);
+  h.evaluate('data.marketSummary.day=-1.65;data.marketSummary.pointChange=-162.76;paintMarketSummary()');
+  assert.match(h.node('market-stats').innerHTML, /التغيير اليومي<\/span><strong class="down">/);
+  h.evaluate('data.marketSummary.day=1.65;data.marketSummary.pointChange=162.76;paintMarketSummary()');
+  assert.match(h.node('market-stats').innerHTML, /التغيير اليومي<\/span><strong class="up">/);
+});
+
 await test('warning, checkedAt, 35-minute threshold only in usual market hours', async () => {
   const initial = fixture(); initial.priceSource.warning = 'تحذير المصدر <نص>';
   initial.priceSource.unavailableSymbols = 1;

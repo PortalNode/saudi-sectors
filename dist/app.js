@@ -124,14 +124,23 @@ function stats(){
   const values=[['القطاعات',data.sectors.length],['الشركات',stocks.length],['ربحية من أرقام',updated],['تاريخ السعر',snapshotLabel()]];
   const statsNode=$('stats');if(statsNode)statsNode.innerHTML=values.map(([label,value])=>`<div class="stat"><span class="stat-label">${label}</span><strong class="stat-value">${value}</strong></div>`).join('');
 }
+function marketDailyChange(summary){
+  const day=safeNumber(summary.day),points=safeNumber(summary.pointChange);
+  if(day==null)return '—';
+  const direction=day>0?'ارتفاع':day<0?'انخفاض':'دون تغيير';
+  const arrow=day>0?'▲':day<0?'▼':'';
+  const amount=points==null?'—':numberFormat.format(Math.abs(points));
+  const rate=numberFormat.format(Math.abs(day));
+  const label=`${direction}؛ ${points==null?'التغيير بالنقاط غير متاح':`${amount} نقطة`}؛ ${rate} بالمئة`;
+  return `<span class="market-daily-change" role="img" aria-label="${escapeHtml(label)}"><span class="market-direction" aria-hidden="true">${arrow}</span><bdi class="market-points" aria-hidden="true">${amount}</bdi><span class="market-percent" aria-hidden="true"><bdi>${rate}</bdi> %</span></span>`;
+}
 function paintMarketSummary(){
   const m=data.marketSummary||{};
   const breadth=allStocks().reduce((counts,stock)=>{const change=safeNumber(stock.day);if(change>0)counts.up++;else if(change<0)counts.down++;else if(change===0)counts.flat++;return counts;},{up:0,down:0,flat:0});
   const mode=m.mode || (m.isIntraday?'delayed':null);
   const source=providerLabel(!m.mode&&m.quoteSource?m.quoteSource:m.source);
   const date=displayDate(m.date);
-  const signed=n=>`${n>0?'+':n<0?'−':''}${numberFormat.format(Math.abs(n))}`;
-  const daily=m.day==null?'—':`${m.pointChange==null?'':`${signed(m.pointChange)} `}(${signed(m.day)}%)`;
+  const daily=marketDailyChange(m);
   const items=[
     {label:'قيمة المؤشر',value:m.value==null?'—':numberFormat.format(m.value)},
     {label:'التغيير اليومي',value:daily,trend:m.day},

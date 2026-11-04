@@ -186,3 +186,9 @@ table{min-width:1594px}
 
 /* Dividend yield is a neutral percentage, not a positive price change. */
 .dividend-yield{color:#fff;font-weight:700}
+
+/* Daily index move: direction triangle, points, then percentage (right to left). */
+.market-card .market-daily-change{display:inline-flex;direction:rtl;align-items:center;gap:5px;color:inherit;font:inherit;white-space:nowrap;overflow:visible;max-width:none}
+.market-card .market-daily-change span{display:inline;color:inherit;font:inherit;overflow:visible;max-width:none}
+.market-card .market-daily-change .market-direction{font-size:12px;line-height:1}
+.market-card .market-daily-change .market-percent{margin-inline-start:5px}
