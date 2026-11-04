@@ -1,0 +1,132 @@
+/* Theme colors only: preserve the existing terminal layout and type scale. */
+:root{color-scheme:dark}
+.appearance-bar{display:flex;justify-content:flex-end;margin:0 0 10px}
+.theme-switch{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--line);border-radius:5px;background:var(--white)}
+.theme-switch-label{color:var(--muted);font-size:11px;padding:0 8px}
+.theme-switch button{min-height:32px;min-width:52px;padding:5px 10px;border:1px solid transparent;border-radius:3px;background:transparent;color:var(--muted);font-size:12px;font-weight:700}
+.theme-switch button:hover{color:var(--ink);background:#ffffff0d}
+.theme-switch button[aria-pressed="true"]{background:#f59e0b;color:#15191f}
+.theme-switch button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+:root[data-theme="light"]{
+  color-scheme:light;
+  --ink:#172d42;
+  --muted:#5e6e80;
+  --teal:#a45d00;
+  --dark:#e7edf3;
+  --line:#d4dce5;
+  --bg:#f4f6f8;
+  --white:#fff;
+  --green:#16803c;
+  --red:#c63737;
+}
+:root[data-theme="light"] body{background:var(--bg);color:var(--ink)}
+:root[data-theme="light"] .theme-switch button:hover{background:#edf1f5;color:var(--ink)}
+:root[data-theme="light"] .hero h1,
+:root[data-theme="light"] .hero h1 em{color:var(--ink)}
+:root[data-theme="light"] .hero-date,
+:root[data-theme="light"] .toolbar-heading p,
+:root[data-theme="light"] .sector-pill,
+:root[data-theme="light"] .market-date{color:var(--muted)}
+:root[data-theme="light"] .toolbar-heading h2,
+:root[data-theme="light"] .sector-heading h3,
+:root[data-theme="light"] .market-summary h2{color:var(--teal)}
+:root[data-theme="light"] .search-box{background:#fff;border-color:var(--line);color:var(--ink)}
+:root[data-theme="light"] .search-box input{color:var(--ink)}
+:root[data-theme="light"] .search-box input::placeholder{color:#6e7e90}
+:root[data-theme="light"] .search-box svg{stroke:#6e7e90}
+:root[data-theme="light"] .search-box:focus-within{border-color:var(--teal);box-shadow:0 0 0 2px #a45d001a}
+:root[data-theme="light"] .eps-switch{border-color:var(--line)}
+:root[data-theme="light"] .eps-switch button{color:var(--muted)}
+:root[data-theme="light"] .eps-switch button.selected{background:#f59e0b;color:#17222e}
+:root[data-theme="light"] .clear-button{background:#fff;border-color:var(--line);color:var(--ink)}
+:root[data-theme="light"] .sector-button{background:#fff!important;border-color:var(--line)!important;color:#536579}
+:root[data-theme="light"] .sector-button:hover{background:#fff5df!important;border-color:#d5a449!important;color:#885000!important}
+:root[data-theme="light"] .sector-button.active{background:#f59e0b!important;border-color:#e19109!important;color:#17222e!important}
+:root[data-theme="light"] .financial-status,
+:root[data-theme="light"] .market-summary,
+:root[data-theme="light"] .sector-performance{background:#fff;border-color:var(--line);color:var(--muted)}
+:root[data-theme="light"] .market-card{border-color:var(--line)}
+:root[data-theme="light"] .market-card > span{color:var(--muted)}
+:root[data-theme="light"] .market-card strong{color:var(--ink)}
+:root[data-theme="light"] .up,
+:root[data-theme="light"] .market-card strong.up,
+:root[data-theme="light"] .sector-performance.up strong{color:var(--green)}
+:root[data-theme="light"] .down,
+:root[data-theme="light"] .market-card strong.down,
+:root[data-theme="light"] .sector-performance.down strong{color:var(--red)}
+:root[data-theme="light"] .flat,
+:root[data-theme="light"] .market-card strong.flat,
+:root[data-theme="light"] .sector-performance.flat strong{color:#627285}
+:root[data-theme="light"] .market-card .market-daily-change,
+:root[data-theme="light"] .market-card .market-daily-change span{color:inherit}
+:root[data-theme="light"] .sector-heading{border-color:var(--line)}
+:root[data-theme="light"] .table-wrap{background:#fff;scrollbar-color:#9caabc #edf1f5}
+:root[data-theme="light"] .table-wrap::-webkit-scrollbar-track{background:#edf1f5}
+:root[data-theme="light"] .table-wrap::-webkit-scrollbar-thumb{background:#9caabc}
+:root[data-theme="light"] th,
+:root[data-theme="light"] td{border-color:#dce3eb}
+:root[data-theme="light"] thead th,
+:root[data-theme="light"] thead .sticky-1,
+:root[data-theme="light"] thead .sticky-2,
+:root[data-theme="light"] .sections .table-wrap thead th{background:#e7edf3;color:#34485d;box-shadow:0 1px 0 var(--line)}
+:root[data-theme="light"] thead th button:hover,
+:root[data-theme="light"] thead th button.sorted{color:#995700}
+:root[data-theme="light"] tbody td,
+:root[data-theme="light"] .sticky-1,
+:root[data-theme="light"] .sticky-2{background:#fff;color:#243b51}
+:root[data-theme="light"] tbody tr:nth-child(even) td,
+:root[data-theme="light"] tbody tr:nth-child(even) .sticky-1,
+:root[data-theme="light"] tbody tr:nth-child(even) .sticky-2{background:#f1f4f7}
+:root[data-theme="light"] tbody tr:hover td,
+:root[data-theme="light"] tbody tr:hover .sticky-1,
+:root[data-theme="light"] tbody tr:hover .sticky-2{background:#fff3da}
+:root[data-theme="light"] .company-name{color:#1b5f9d}
+:root[data-theme="light"] .company-results-link{text-decoration-color:#1b5f9d55}
+:root[data-theme="light"] .company-results-link:hover{color:#995700}
+:root[data-theme="light"] .symbol-badge,
+:root[data-theme="light"] .price,
+:root[data-theme="light"] .dividend-yield,
+:root[data-theme="light"] td[title^="القيمة السوقية"] .num{color:var(--ink)}
+:root[data-theme="light"] .missing{color:#7d8a9a}
+:root[data-theme="light"] .loss{color:var(--red)}
+:root[data-theme="light"] .source-tag.fresh{color:var(--muted)}
+:root[data-theme="light"] .source-tag.stale{color:#8a590a}
+:root[data-theme="light"] .range52-track{border-color:#a0afbd;background:linear-gradient(90deg,#f6ddb1,#e6ecf2)}
+:root[data-theme="light"] .range52-labels{color:#34485d}
+:root[data-theme="light"] .empty{background:#fff;border-color:var(--line);color:var(--ink)}
+:root[data-theme="light"] .empty p{color:var(--muted)}
+:root[data-theme="light"] .footer{border-color:var(--line);color:var(--muted)}
+:root[data-theme="light"] .footer strong{color:var(--ink)}
+:root[data-theme="light"] .footer-links a{background:#e7edf3;color:#34485d}
+:root[data-theme="light"] .footer-links a:hover{background:#dce4ed}
+:root[data-theme="light"] .footer-bottom{color:var(--muted)}
+
+/* Bank detail pages share the same saved appearance. */
+:root[data-theme="light"] .bank-results-link,
+:root[data-theme="light"] .bank-back{background:#fff;color:var(--teal)}
+:root[data-theme="light"] .bank-results-link:hover,
+:root[data-theme="light"] .bank-back:hover{background:#fff3da;border-color:#d5a449}
+:root[data-theme="light"] .bank-tab{background:#fff;color:#536579}
+:root[data-theme="light"] .bank-tab:hover{background:#fff3da;color:var(--teal)}
+:root[data-theme="light"] .bank-tab[aria-pressed="true"]{background:#f59e0b;color:#17222e;border-color:#e19109}
+:root[data-theme="light"] .annual-table caption{background:#fff;color:var(--teal)}
+:root[data-theme="light"] .annual-table .annual-label{background:#fff;border-color:var(--line);color:var(--ink)}
+:root[data-theme="light"] .annual-table thead .annual-label{background:#e7edf3}
+:root[data-theme="light"] .annual-table thead .annual-change-heading{color:var(--muted)}
+:root[data-theme="light"] .annual-table tbody tr:nth-child(even) .annual-label{background:#f1f4f7}
+:root[data-theme="light"] .annual-table tbody tr:hover .annual-label{background:#fff3da}
+:root[data-theme="light"] .annual-table .annual-group th{background:#e7edf3;color:var(--teal)}
+:root[data-theme="light"] .annual-table .annual-label small{color:var(--muted)}
+:root[data-theme="light"] .bank-notes{background:#fff;color:var(--muted)}
+:root[data-theme="light"] .bank-notes h3{color:var(--teal)}
+:root[data-theme="light"] .bank-notes p{color:var(--muted);border-color:var(--line)}
+:root[data-theme="light"] .bank-chart-card{background:#fff}
+:root[data-theme="light"] .bank-chart-card h4{color:var(--ink)}
+:root[data-theme="light"] .bank-chart-control label,
+:root[data-theme="light"] .bank-chart-legend{color:var(--muted)}
+:root[data-theme="light"] .bank-chart-control select{color-scheme:light;background:#fff;color:var(--ink)}
+:root[data-theme="light"] .bank-chart-svg .chart-bar:focus{stroke:var(--ink)}
+:root[data-theme="light"] .bank-chart-card[data-chart-key="financingMix"] .chart-value[data-series="retailFinancingShare"]{fill:#995700}
+:root[data-theme="light"] .bank-chart-card[data-chart-key="financingMix"] .chart-value[data-series="corporateFinancingShare"]{fill:#1b5f9d}
+@media(max-width:760px){.theme-switch button{min-height:36px}.appearance-bar{margin-bottom:8px}}
