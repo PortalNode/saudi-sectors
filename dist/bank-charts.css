@@ -32,3 +32,22 @@
  .bank-chart-control{display:block}.bank-chart-control label{display:block;margin-bottom:6px;font-size:11px}.bank-chart-control select{width:100%;min-width:0;font-size:12px}.bank-chart-selection-status{font-size:10px}
  .bank-chart-legend{font-size:11px;gap:15px}.bank-charts-footnote{font-size:10px}
 }
+
+/* Current valuation is separate from the historical annual workbook. */
+.bank-current-pe-card{margin:15px 0 6px;padding:15px 18px;border:1px solid var(--line);background:#151b22;color:var(--ink)}
+.bank-current-pe-card h3,.bank-current-pe-card h4{margin:0 0 9px;color:var(--teal);font-size:17px}
+.bank-current-pe-card p{color:var(--muted);font-size:11px;line-height:1.9;margin:6px 0}
+.bank-current-pe-card strong{color:var(--ink);font-size:24px;font-variant-numeric:tabular-nums}
+.bank-current-pe-card .num{font-size:18px}
+.bank-current-pe-card dl{display:flex;gap:24px;flex-wrap:wrap;margin:12px 0}
+.bank-current-pe-card dt{color:var(--muted);font-size:11px}
+.bank-current-pe-card dd{margin:5px 0 0;color:var(--ink)}
+.current-pe-chart-scroll{max-width:100%;overflow-x:auto;scrollbar-width:thin;direction:rtl}
+.current-pe-chart-scroll .bank-chart-canvas{min-width:1050px}
+:root[data-theme="light"] .bank-current-pe-card{background:#fff}
+@media(max-width:760px){.bank-current-pe-card{padding:12px}.bank-current-pe-card dl{gap:16px}.bank-current-pe-card h3{font-size:15px}}
+
+.bank-current-pe-card dl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 24px}
+.bank-current-pe-card dl > div{min-width:0}
+.bank-current-pe-card dd{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+@media(max-width:760px){.bank-current-pe-card dl{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}

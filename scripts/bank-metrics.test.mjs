@@ -59,7 +59,9 @@ test('bank results are local; file source and data limitations are disclosed', (
   const page = readFileSync(new URL('../dist/banks.html', import.meta.url), 'utf8');
   const app = readFileSync(new URL('../dist/app.js', import.meta.url), 'utf8');
   assert.match(script, /fetch\('banks-financials\.json/);
-  assert.doesNotMatch(script, /argaam\.com|setInterval|OPENAI|invokeLLM/);
+  assert.doesNotMatch(script, /argaam\.com|OPENAI|invokeLLM/);
+  assert.match(script, /setInterval\(refreshCurrentPE, 60 \* 1000\)/);
+  assert.match(script, /readCurrentJSON\('data\.json'\)/);
   assert.match(page, /لم تُراجع بمصدر خارجي/);
   assert.match(page, /ليس متوسط حقوق المساهمين/);
   assert.match(page, /لا تغيّر هذه الصفحة أسعار/);

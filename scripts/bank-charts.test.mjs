@@ -124,5 +124,7 @@ test('selector, source isolation and escaped names remain correct',async()=>{
   assert.match(page,/<select id="bank-chart-metric"/);
   assert.match(script,/getChartOptions/);
   assert.match(script,/selectedChartKey/);
-  assert.doesNotMatch(script,/argaam\.com|setInterval|OPENAI|invokeLLM/);
+  assert.doesNotMatch(script,/argaam\.com|OPENAI|invokeLLM/);
+  assert.match(script,/renderCurrentPEComparison/);
+  assert.match(script,/key: 'currentPE'/);
 });

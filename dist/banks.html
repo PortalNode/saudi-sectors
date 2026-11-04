@@ -9,7 +9,7 @@
   <script src="theme.js?v=20261105"></script>
   <link rel="stylesheet" href="styles.css?v=sticky-page-20261105-summary-fit">
   <link rel="stylesheet" href="banks.css?v=compact-columns-20261104">
-  <link rel="stylesheet" href="bank-charts.css?v=metric-selector-20261104">
+  <link rel="stylesheet" href="bank-charts.css?v=current-pe-20261105">
   <link rel="stylesheet" href="theme.css?v=20261105">
 </head>
 <body class="banks-page">
@@ -32,15 +32,17 @@
         <div><h2 id="bank-title"></h2><p id="bank-subtitle"></p></div>
         <span class="bank-period">آخر خمس سنوات في الملف <bdi>2021–2025</bdi></span>
       </div>
+      <div id="bank-current-pe" aria-live="polite"></div>
+      <p id="bank-current-pe-status" class="bank-charts-footnote" role="status">جار تحميل مكرر الربح الحالي…</p>
       <p class="bank-unit-note">المبالغ بمليون ريال؛ ربحية السهم بالريال؛ النسب بالمئة؛ مكرر الأرباح بالمرات.</p>
       <div class="bank-table-hint">اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.</div>
       <div id="bank-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول النتائج السنوية؛ يمكن تمريره أفقيًا وعموديًا"></div>
       <section id="bank-charts" class="bank-charts" aria-labelledby="bank-charts-title">
-        <div class="bank-charts-heading"><h3 id="bank-charts-title">مقارنة السنوات بالأعمدة</h3><p id="bank-charts-context"></p></div>
+        <div class="bank-charts-heading"><h3 id="bank-charts-title">المقارنة بالأعمدة</h3><p id="bank-charts-context"></p></div>
         <div class="bank-chart-control"><label for="bank-chart-metric">البند المراد مقارنته</label><select id="bank-chart-metric" aria-describedby="bank-chart-selection-status"></select></div>
         <p id="bank-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p>
         <div id="bank-charts-grid" class="bank-charts-grid"></div>
-        <p class="bank-charts-footnote">اختر أي بند من القائمة لعرض مقارنة السنوات. المبالغ بالمليار، وربحية السهم بالريال، والمكرر بالمرات، والنسب بالمئة. القيم الأصلية في الجدول؛ «—» تعني أن القيمة غير متاحة. خيار الأفراد والشركات معًا يعرض عمودين لكل سنة دون تعديل النسب.</p>
+        <p class="bank-charts-footnote">اختر أي بند من القائمة لعرض مقارنة السنوات، أو «مكرر الربح الحالي — جميع البنوك» لمقارنة البنوك العشرة بآخر لقطة متاحة. المبالغ بالمليار، وربحية السهم بالريال، والمكرر بالمرات، والنسب بالمئة. القيم التاريخية الأصلية في الجدول؛ «—» تعني أن القيمة غير متاحة. خيار الأفراد والشركات معًا يعرض عمودين لكل سنة دون تعديل النسب.</p>
       </section>
       <section class="bank-notes" aria-labelledby="bank-notes-title">
         <h3 id="bank-notes-title">ملاحظات البيانات</h3>
@@ -48,15 +50,15 @@
           <li>المصدر: ملف «البنوك.xlsx» المقدم من المستخدم. القيم من الجدول السنوي في الملف كما هي؛ لم تُراجع بمصدر خارجي، ولا يوجد جلب تلقائي من أرقام.</li>
           <li>ربحية السهم محفوظة كما وردت في الملف؛ قد تختلف قواعدها أو تعديلات عدد الأسهم بين السنوات، ولا يُفترض أن نموها يطابق نمو صافي الربح.</li>
           <li>نسبة القروض إلى الودائع = التمويل ÷ ودائع العملاء. العائد على حقوق المساهمين = صافي الربح ÷ حقوق المساهمين في نهاية السنة وفق صيغة الملف، وليس متوسط حقوق المساهمين.</li>
-          <li>مكرر الأرباح هنا تاريخي من الملف، وليس مكررًا محسوبًا بسعر السهم الحالي. لا تغيّر هذه الصفحة أسعار أو مؤشرات الجدول الرئيسي.</li>
+          <li>مكرر الأرباح في الجدول السنوي تاريخي من الملف. المكرر الحالي مستقل: سعر آخر لقطة ÷ الربحية المتكررة المتاحة في لقطة أرقام، ثم المعلنة عند غيابها، ثم ربحية ملف الأسعار عند عدم توفر لقطة أرقام؛ يظهر الأساس والمصدر وتاريخهما في البطاقة. لا تغيّر هذه الصفحة أسعار أو مؤشرات الجدول الرئيسي.</li>
           <li>لم تُدرج سنة 2020 أو الصفوف الفصلية، ولا ورقة «الودائع تحت الطلب» لأنها بلا سنة محددة. هذه نسخة ثابتة تُحدّث عند استيراد ملف جديد.</li>
         </ul>
         <p id="bank-import-info"></p>
       </section>
     </section>
-    <footer class="footer"><p>نتائج محفوظة داخل المشروع · لا يحتاج عرضها إلى أرقام أو أي خدمة ذكاء اصطناعي.</p></footer>
+    <footer class="footer"><p>نتائج سنوية محفوظة داخل المشروع · المكرر الحالي من لقطة أسعار وربحية المشروع، وليس أسعارًا مباشرة · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات ملف البنوك.</p></noscript>
   </main>
-  <script type="module" src="banks.js?v=metric-selector-20261104"></script>
+  <script type="module" src="banks.js?v=current-pe-20261105"></script>
 </body>
 </html>
