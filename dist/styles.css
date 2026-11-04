@@ -183,3 +183,6 @@ table{min-width:1594px}
 .sections .table-wrap thead th.sticky-1,.sections .table-wrap thead th.sticky-2{position:sticky;z-index:2}
 .sections .table-wrap thead th.sticky-1{right:0}
 .sections .table-wrap thead th.sticky-2{right:86px}
+
+/* Dividend yield is a neutral percentage, not a positive price change. */
+.dividend-yield{color:#fff;font-weight:700}

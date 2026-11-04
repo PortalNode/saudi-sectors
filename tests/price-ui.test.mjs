@@ -155,6 +155,11 @@ await test('PE/PB always recomputed; sector dividend ratios never replace last-y
   assert.equal(h.evaluate('allStocks()[0].dividendYield'), 3.5);
   assert.equal(h.evaluate('allStocks()[1].dividendYield'), null);
   assert.match(h.evaluate('row(allStocks()[0])'), /أرقام: عائد التوزيع \(%\) \(آخر سنة\)/);
+  assert.match(h.evaluate('row(allStocks()[0])'), /<span class="num dividend-yield">3\.50%<\/span>/);
+  assert.equal(h.evaluate('percent(0,false)'), '<span class="num dividend-yield">0.00%</span>');
+  assert.equal(h.evaluate('percent(null,false)'), '<span class="missing">—</span>');
+  assert.equal(h.evaluate('percent(3.5)'), '<span class="num up">+3.50%</span>');
+  assert.equal(h.evaluate('percent(-3.5)'), '<span class="num down">-3.50%</span>');
   h.evaluate("updateMode('reported')");
   assert.equal(h.evaluate('allStocks()[0].pe'), 4);
   h.evaluate('allStocks()[0].price=30;applyFinancials()');
