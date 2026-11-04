@@ -22,10 +22,10 @@
 .annual-table .annual-col-label{width:250px}.annual-table .annual-col-value{width:110px}.annual-table .annual-col-change{width:92px}
 .annual-table caption{text-align:right;padding:12px;color:#f5b543;font-size:14px;font-weight:700;background:#151b22}
 .annual-table thead th{text-align:center;height:32px;padding:7px 6px;font-size:12px;position:sticky;top:0;z-index:4;border-bottom:1px solid #46515d}
-.annual-table thead tr:nth-child(2) th{top:33px;font-size:10px;height:31px;color:#b6c0cd}
-.annual-table thead th[rowspan]{vertical-align:middle;z-index:5}
+ .annual-table thead .annual-change-heading{font-size:11px;color:#b6c0cd;font-weight:500}
 .annual-table thead .annual-label{z-index:7;text-align:right;right:0}
 .annual-table .annual-label{position:sticky;right:0;white-space:normal;line-height:1.55;font-size:12px;font-weight:600;z-index:2;border-left:1px solid #39434e;background:#151b22;padding:8px 11px;overflow-wrap:break-word}
+ .annual-table thead .annual-label{background:#242d37}
 .annual-table tbody tr:nth-child(even) .annual-label{background:#1b232d}
 .annual-table tbody tr:hover .annual-label{background:#25313d}
 .annual-table tbody td{text-align:center;padding:9px 5px;height:44px}

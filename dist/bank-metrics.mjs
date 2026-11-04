@@ -2,10 +2,7 @@ export const METRIC_GROUPS = [
   { label: 'ملخص النتائج المالية', metrics: [
     { key: 'netFinancingIncome', label: 'صافي الدخل من التمويل والاستثمار', unit: 'million_sar' },
     { key: 'operatingIncome', label: 'دخل العمليات', unit: 'million_sar' },
-    { key: 'provisions', label: 'المخصصات', unit: 'million_sar', missingInWorkbook: true },
     { key: 'netProfit', label: 'صافي الربح', unit: 'million_sar' },
-    { key: 'averageShares', label: 'متوسط عدد الأسهم', unit: 'million_shares', missingInWorkbook: true },
-    { key: 'recurringEps', label: 'ربح السهم قبل البنود الاستثنائية', unit: 'sar', missingInWorkbook: true },
     { key: 'eps', label: 'ربحية السهم', unit: 'sar', note: 'وفق أساس الملف، دون تعديل عدد الأسهم بين السنوات' },
     { key: 'dilutedEps', label: 'ربح السهم المخفض', unit: 'sar' }
   ] },
@@ -69,15 +66,14 @@ export function validateDataset(data) {
 export function renderAnnualTable(bank, years = [2021, 2022, 2023, 2024, 2025]) {
   const records = new Map(bank.years.map(record => [record.year, record.values]));
   const value = (year, key) => records.get(year)?.[key] ?? null;
-  const columns = '<col class="annual-col-label"><col class="annual-col-value">' + years.slice(1).map(() => '<col class="annual-col-value"><col class="annual-col-change">').join('');
-  const firstRow = `<tr><th scope="col" rowspan="2" class="annual-label">البند</th><th scope="col" rowspan="2">${years[0]}</th>${years.slice(1).map(year => `<th scope="colgroup" colspan="2">${year}</th>`).join('')}</tr>`;
-  const secondRow = `<tr>${years.slice(1).map((year, index) => `<th scope="col">القيمة</th><th scope="col">التغير عن ${years[index]}</th>`).join('')}</tr>`;
+  const columns = '<col class="annual-col-label"><col class="annual-col-value">' + years.slice(1).map(() => '<col class="annual-col-change"><col class="annual-col-value">').join('');
+  const header = `<tr><th scope="col" class="annual-label">البند</th><th scope="col">${years[0]}</th>${years.slice(1).map((year, index) => `<th scope="col" class="annual-change-heading" title="نسبة تغير ${year} عن ${years[index]}">نسبة التغير</th><th scope="col">${year}</th>`).join('')}</tr>`;
   const rows = METRIC_GROUPS.map(group => `<tr class="annual-group"><th colspan="10" scope="rowgroup">${escapeHtml(group.label)}</th></tr>` + group.metrics.filter(metric => !metric.optional || years.some(year => value(year, metric.key) !== null)).map(metric => {
     const suffix = metric.unit === 'sar' ? ' (ريال)' : metric.unit === 'times' ? ' (مرة)' : '';
-    const note = metric.missingInWorkbook ? 'غير موجود في الملف' : metric.note;
+    const note = metric.note;
     const label = `<th scope="row" class="annual-label">${escapeHtml(metric.label + suffix)}${note ? `<small>${escapeHtml(note)}</small>` : ''}</th>`;
-    const cells = `<td>${formatValue(value(years[0], metric.key), metric.unit)}</td>` + years.slice(1).map((year, index) => `<td>${formatValue(value(year, metric.key), metric.unit)}</td><td class="annual-change" title="${year} مقارنة بـ ${years[index]}؛ محسوب من القيم المخزنة">${formatChange(value(year, metric.key), value(years[index], metric.key))}</td>`).join('');
+    const cells = `<td>${formatValue(value(years[0], metric.key), metric.unit)}</td>` + years.slice(1).map((year, index) => `<td class="annual-change" title="${year} مقارنة بـ ${years[index]}؛ محسوب من القيم المخزنة">${formatChange(value(year, metric.key), value(years[index], metric.key))}</td><td>${formatValue(value(year, metric.key), metric.unit)}</td>`).join('');
     return `<tr data-metric="${escapeHtml(metric.key)}">${label}${cells}</tr>`;
   }).join('')).join('');
-  return `<table class="annual-table"><caption>${escapeHtml(bank.name)} · السنوات المالية 2021–2025</caption><colgroup>${columns}</colgroup><thead>${firstRow}${secondRow}</thead><tbody>${rows}</tbody></table>`;
+  return `<table class="annual-table"><caption>${escapeHtml(bank.name)} · السنوات المالية 2021–2025</caption><colgroup>${columns}</colgroup><thead>${header}</thead><tbody>${rows}</tbody></table>`;
 }

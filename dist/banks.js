@@ -1,4 +1,4 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './bank-metrics.mjs?v=workbook-20261104';
+import { escapeHtml, validateDataset, renderAnnualTable } from './bank-metrics.mjs?v=compact-columns-20261104';
 
 const element = id => document.getElementById(id);
 let dataset;
