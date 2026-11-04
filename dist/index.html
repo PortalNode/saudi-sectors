@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0d2432">
-  <meta name="description" content="الشركات السعودية حسب ترتيب القطاعات المرفقة، مع السعر والربحية والقيمة الدفترية والأداء التاريخي.">
+  <meta name="description" content="الشركات السعودية حسب القطاعات مع أسعار اليوم والمؤشر العام، وقد تتأخر بيانات السوق حتى 15 دقيقة.">
   <title>قطاعات السوق السعودي | مؤشرات الشركات</title>
   <link rel="stylesheet" href="styles.css?v=4c1a2e1">
 </head>
@@ -17,13 +17,13 @@
       <section class="hero" aria-labelledby="page-title">
         <div class="hero-copy">
           <h1 id="page-title">السوق السعودي</h1>
-          <div class="hero-date">بيانات الإغلاق <bdi id="price-date">—</bdi> · لقطة إغلاق وليست أسعارًا مباشرة</div>
+          <div class="hero-date"><span id="price-mode">أسعار اليوم · قد تتأخر حتى 15 دقيقة</span> · <bdi id="price-date">—</bdi></div>
         </div>
         <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><span class="hero-art-mark">س</span></div>
       </section>
 
       <section class="market-summary" aria-label="ملخص السوق اليومي">
-        <h2>ملخص السوق اليومي <span id="market-date" class="market-date">—</span></h2>
+        <h2>ملخص السوق <span id="market-date" class="market-date">—</span></h2>
         <div id="market-stats" class="market-stats"><div class="market-card"><span>قيمة المؤشر</span><strong>—</strong></div><div class="market-card"><span>التغيير اليومي</span><strong>—</strong></div><div class="market-card"><span>الشركات المرتفعة</span><strong>—</strong></div><div class="market-card"><span>الشركات المنخفضة</span><strong>—</strong></div><div class="market-card"><span>دون تغيير</span><strong>—</strong></div><div class="market-card"><span>القيمة المتداولة</span><strong>—</strong></div><div class="market-card"><span>أداء المؤشر منذ بداية السنة</span><strong>—</strong></div><div class="market-card"><span>3 أشهر</span><strong>—</strong></div><div class="market-card"><span>6 أشهر</span><strong>—</strong></div><div class="market-card"><span>سنة</span><strong>—</strong></div></div>
       </section>
 
@@ -37,7 +37,7 @@
           </div>
         </div>
         <nav id="sector-nav" class="sector-nav" aria-label="اختيار القطاع"></nav>
-        <div class="table-note"><span class="note-icon">i</span><span>«جميع القطاعات» جدول واحد مرتب افتراضيًا من الأكبر قيمة سوقية إلى الأصغر. اضغط أي عنوان عمود لتغيير الترتيب. تُحدَّث الأسعار والقيمة السوقية آليًا بعد كل جلسة تداول. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم تتوفر ربحية متكررة للسهم. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة.</span></div>
+        <div class="table-note"><span class="note-icon">i</span><span>«جميع القطاعات» جدول واحد مرتب افتراضيًا من الأكبر قيمة سوقية إلى الأصغر. اضغط أي عنوان عمود لتغيير الترتيب. تُحدَّث أسعار الأسهم والمؤشر آليًا أثناء جلسة التداول، وقد تتأخر بيانات المصدر حتى 15 دقيقة. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم تتوفر ربحية متكررة للسهم. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة.</span></div>
         <p id="financial-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات الأرباح…</p>
         <div id="sectors" class="sections"></div>
         <div id="empty" class="empty" hidden><div class="empty-icon">⌕</div><h3>لا توجد نتائج مطابقة</h3><p>جرّب البحث باسم آخر أو برمز السهم.</p></div>
@@ -45,6 +45,6 @@
 
     </main>
   </div>
-  <script src="app.js?v=6e3c4a5" defer></script>
+  <script src="app.js?v=live-20261104" defer></script>
 </body>
 </html>

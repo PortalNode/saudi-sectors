@@ -7,6 +7,7 @@ const columns = [
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const integerFormat = new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
 const epsFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const timeFormat = new Intl.DateTimeFormat('ar-SA',{timeZone:'Asia/Riyadh',hour:'2-digit',minute:'2-digit'});
 let data, financialMap, activeSector = null, query = '', sortBySector = new Map([['all',{key:'marketCap',dir:-1}]]), epsMode = 'recurring', refreshRunning = false;
 const financials = new Map();
 const $ = id => document.getElementById(id);
@@ -30,12 +31,15 @@ const sourceDate = record=>{
   return record.dateKind==='checked' ? `فُحصت بيانات الشركة في ${record.period}؛ تاريخ تحديث القطاع لدى أرقام غير صالح` : `آخر تحديث للقطاع ${record.period}`;
 }
 const snapshotLabel = () => data.priceDate || (data.asOf ? data.asOf.split('-').reverse().join('.') : '—');
+const updateTime = value => {if(!value)return null;const date=new Date(value);return Number.isNaN(date.getTime())?null:timeFormat.format(date)};
 function paintSnapshot(){
   const date=snapshotLabel();
   for(const id of ['price-date','price-date-note','price-date-footer']){
     const node=$(id);
     if(node) node.textContent=date;
   }
+  const mode=$('price-mode');
+  if(mode)mode.textContent=data.priceSource?.mode==='intraday'?'أسعار اليوم · قد تتأخر حتى 15 دقيقة':'بيانات الإغلاق';
   const source=$('price-source');
   if(source) source.textContent=data.priceSource?.provider==='TradingView' ? 'تريدينغ فيو' : 'ياهو فايننس';
 }
@@ -90,7 +94,8 @@ function paintMarketSummary(){
     const cls=typeof trend==='number'?(trend>0?'up':trend<0?'down':'flat'):'';
     return `<div class="market-card"><span>${item.label}</span><strong class="${cls}">${display}</strong></div>`;
   }).join('');
-  $('market-date').textContent=m.date?`إغلاق ${m.date}`:'بانتظار تحديث المؤشر';
+  const checked=updateTime(m.updatedAt||data.priceSource?.checkedAt);
+  $('market-date').textContent=m.date?(m.isIntraday?`الآن · آخر فحص ${checked||'—'}`:`إغلاق ${m.date}`):'بانتظار تحديث المؤشر';
 }
 function sectorChange(stocks){
   let weighted=0,total=0;
@@ -208,7 +213,7 @@ $('search').addEventListener('input',event=>{query=normalized(event.target.value
 $('clear').addEventListener('click',()=>{$('search').value='';query='';render();$('search').focus();});
 $('recurring-mode').addEventListener('click',()=>updateMode('recurring'));
 $('reported-mode').addEventListener('click',()=>updateMode('reported'));
-Promise.all([fetch('data.json?v=7c75a69',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json?v=7c75a69',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
+Promise.all([fetch('data.json?v=live-20261104',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data unavailable');return r.json()}),fetch('financial-map.json?v=live-20261104',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('map unavailable');return r.json()})])
   .then(([result,map])=>{
     data=result;financialMap=map;paintSnapshot();paintMarketSummary();
     for(const [symbol,record] of Object.entries(map.snapshot))if(periodValid(record.period))financials.set(symbol,record);

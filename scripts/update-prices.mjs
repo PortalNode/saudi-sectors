@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * Refreshes the Tadawul closing prices in dist/data.json.
+ * Refreshes Tadawul prices in dist/data.json. During the session the values
+ * are current or delayed by the provider (normally no more than 15 minutes).
  *
  * Primary source : Yahoo Finance  (SYMBOL.SR, daily chart series)
  * Fallback source: TradingView   (TADAWUL:SYMBOL scanner, when Yahoo throttles)
  *
  * It updates price, day change and market cap (via the share count derived from
- * the original Tadawul snapshot), then stamps the snapshot date used by the page.
+ * the original Tadawul snapshot), then stamps the quote date used by the page.
  * Data is written only when the run resolves most symbols, so a failed run never
  * replaces good prices with partial ones.
  *
@@ -109,6 +110,7 @@ async function yahooBatchQuotes(symbols, session) {
         close: quote.regularMarketPrice,
         previous: Number.isFinite(quote.regularMarketPreviousClose) ? quote.regularMarketPreviousClose : null,
         date: quote.regularMarketTime ? riyadhFromUnix(quote.regularMarketTime) : null,
+        timestamp: quote.regularMarketTime ? new Date(quote.regularMarketTime * 1000).toISOString() : null,
         source: 'yahoo',
       });
     }
@@ -130,7 +132,7 @@ async function yahooSeries(symbol, attempt = 0) {
     if (!bars.length) throw new Error('no daily bars');
     const last = bars[bars.length - 1];
     const previous = bars.length > 1 ? bars[bars.length - 2].close : result.meta?.chartPreviousClose ?? null;
-    return { close: last.close, previous, date: riyadhFromUnix(last.time), source: 'yahoo' };
+    return { close: last.close, previous, date: riyadhFromUnix(last.time), timestamp: new Date(last.time * 1000).toISOString(), source: 'yahoo' };
   } catch (error) {
     if (attempt < YAHOO_MAX_RETRIES && !/HTTP 404/.test(error.message)) {
       await sleep(1500 * (attempt + 1));
@@ -202,6 +204,7 @@ for (let index = 0; index < missing.length; index += TV_BATCH) {
         close,
         previous: percent == null ? null : close / (1 + percent / 100),
         date: null,
+        timestamp: null,
         source: 'tradingview',
         ytd: Number.isFinite(ytd) ? ytd : null,
       });
@@ -250,10 +253,10 @@ const yahooDates = [...quotes.values()].filter(quote => quote.date).map(quote =>
 let snapshotDate = yahooDates.at(-1) || null;
 
 if (!snapshotDate) {
-  // TradingView carries no trade date: treat a broad price move as a new session,
-  // otherwise keep the date of the snapshot already on disk.
-  const moved = resolved.filter(stock => Math.abs((quotes.get(stock.symbol).close - stock.price) / stock.price) > 0.001).length;
-  snapshotDate = moved > resolved.length * 0.1 ? riyadhIso(new Date()) : data.asOf || data.priceDate.split('.').reverse().join('-');
+  // TradingView does not return a trade timestamp, but it is the live/fallback
+  // feed used during the session. Stamp the Riyadh date of this refresh instead
+  // of retaining the previous closing date.
+  snapshotDate = riyadhIso(new Date());
 }
 
 for (const stock of stocks) {
@@ -274,9 +277,43 @@ data.priceSource = {
   provider,
   yahooSymbols: viaYahoo,
   tradingViewSymbols: viaTradingView,
+  mode: 'intraday',
+  delayMinutes: 15,
+  checkedAt: new Date().toISOString(),
 };
 
-// Refresh TASI value, point move, percentage, and traded turnover from the official exchange report.
+// Refresh TASI value and point move from the intraday feed. The official report
+// remains the source for traded turnover when it is available for the same date.
+async function tradingViewIndexSummary() {
+  const payload = await getJson('https://scanner.tradingview.com/ksa/scan', {
+    method: 'POST',
+    body: JSON.stringify({
+      symbols: { tickers: ['TADAWUL:TASI'], query: { types: [] } },
+      columns: ['close', 'change', 'change_abs'],
+    }),
+  });
+  const values = payload?.data?.[0]?.d || [];
+  const [value, day, pointChange] = values;
+  if (![value, day, pointChange].every(Number.isFinite)) throw new Error('TASI quote missing');
+  return {
+    value: round(value, 2),
+    pointChange: round(pointChange, 2),
+    day: round(day, 2),
+    date: displayDate(riyadhIso(new Date())),
+    quoteSource: 'TradingView',
+    isIntraday: true,
+    updatedAt: data.priceSource.checkedAt,
+  };
+}
+
+let liveIndex = null;
+try {
+  liveIndex = await tradingViewIndexSummary();
+} catch (error) {
+  console.log(`TradingView TASI quote failed: ${error.message}`);
+}
+
+// Refresh the official daily turnover report as a supplement to the live quote.
 async function officialTadawulSummary(){
   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),15000);
   let html;try{const response=await fetch('https://www.saudiexchange.sa/Resources/Reports-v2/DetailedDaily_en.html',{headers:{'User-Agent':USER_AGENT,'Accept':'text/html'},signal:controller.signal});if(!response.ok)throw Error(`Tadawul HTTP ${response.status}`);html=await response.text();}finally{clearTimeout(timer);}
@@ -297,8 +334,15 @@ try{
   const performance=tv?.data?.[0]?.d||[];
   data.marketSummary={...(data.marketSummary||{}),month3:Number.isFinite(performance[0])?round(performance[0],2):data.marketSummary?.month3??null,month6:Number.isFinite(performance[1])?round(performance[1],2):data.marketSummary?.month6??null,year1:Number.isFinite(performance[2])?round(performance[2],2):data.marketSummary?.year1??null,ytd:Number.isFinite(performance[3])?round(performance[3],2):data.marketSummary?.ytd??null};
 }catch(error){console.log(`TASI performance fetch failed: ${error.message}`);}
-try{data.marketSummary={...(data.marketSummary||{}),...await officialTadawulSummary()};}
-catch(error){console.log(`Official Tadawul summary failed: ${error.message}; previous daily summary retained.`);}
+try{
+  const daily = await officialTadawulSummary();
+  const sameDate = !liveIndex || daily.date === liveIndex.date;
+  data.marketSummary = { ...(data.marketSummary || {}), ...daily };
+  if (liveIndex) data.marketSummary = { ...data.marketSummary, ...liveIndex, turnover: sameDate ? data.marketSummary.turnover : null };
+}catch(error){
+  if (liveIndex) data.marketSummary = { ...(data.marketSummary || {}), ...liveIndex, turnover: null };
+  else console.log(`Official Tadawul summary failed: ${error.message}; previous daily summary retained.`);
+}
 
 // Read Argaam's own financial indicator instead of rebuilding the yield from
 // dividend-history reports. This is the same value shown on the company page:
