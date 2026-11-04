@@ -175,3 +175,8 @@ table{min-width:1594px}
 .range52-marker{position:absolute;top:-1px;height:9px;width:2px;background:#f59e0b;transform:translateX(-50%)}
 .range52-marker:before{content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #f59e0b}
 .range52-labels{display:flex;justify-content:space-between;gap:8px;margin-top:3px;color:#dce3e8;font-size:10.5px;line-height:1;font-variant-numeric:tabular-nums}
+
+/* Keep sortable column headings visible while scrolling through table rows. */
+.table-wrap{overflow:auto;max-height:calc(100vh - 320px);overscroll-behavior:contain}
+thead th{position:sticky;top:0;z-index:8}
+thead th.sticky-1,thead th.sticky-2{z-index:20}
