@@ -192,3 +192,14 @@ table{min-width:1594px}
 .market-card .market-daily-change span{display:inline;color:inherit;font:inherit;overflow:visible;max-width:none}
 .market-card .market-daily-change .market-direction{font-size:12px;line-height:1}
 .market-card .market-daily-change .market-percent{margin-inline-start:5px}
+
+/* Let summary columns fit complete numbers instead of crossing separators. */
+.market-stats{
+  grid-template-columns:minmax(max-content,1fr) minmax(max-content,1.6fr) repeat(3,minmax(max-content,.75fr)) minmax(max-content,1.4fr) repeat(4,minmax(max-content,1fr));
+  gap:0;
+  overflow-x:auto;
+  padding-bottom:4px;
+  scrollbar-width:thin;
+}
+.market-card{min-width:0;padding:3px 10px}
+.market-card > span{max-width:none}
