@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d2432">
+  <meta name="description" content="الشركات السعودية حسب القطاعات مع إغلاق تداول الرسمي أو أسعار متأخرة غير مؤكدة رسميًا، وتاريخ ومصدر الأسعار والمؤشر العام.">
+  <title>قطاعات السوق السعودي | مؤشرات الشركات</title>
+  <link rel="stylesheet" href="styles.css?v=52week-20261104">
+  <link rel="stylesheet" href="banks.css?v=workbook-20261104">
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="قائمة القطاعات">
+    </aside>
+
+    <main id="main-content" class="main-content">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <h1 id="page-title">السوق السعودي</h1>
+          <div class="hero-date"><span id="price-mode">جار تحميل الأسعار</span> · <bdi id="price-date">—</bdi> · <span id="price-source">—</span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><span class="hero-art-mark">س</span></div>
+      </section>
+
+      <section class="market-summary" aria-label="ملخص السوق اليومي">
+        <h2>ملخص السوق <span id="market-date" class="market-date">—</span></h2>
+        <div id="market-stats" class="market-stats"><div class="market-card"><span>قيمة المؤشر</span><strong>—</strong></div><div class="market-card"><span>التغيير اليومي</span><strong>—</strong></div><div class="market-card"><span>الشركات المرتفعة</span><strong>—</strong></div><div class="market-card"><span>الشركات المنخفضة</span><strong>—</strong></div><div class="market-card"><span>دون تغيير</span><strong>—</strong></div><div class="market-card"><span>القيمة المتداولة</span><strong>—</strong></div><div class="market-card"><span>أداء المؤشر منذ بداية السنة</span><strong>—</strong></div><div class="market-card"><span>3 أشهر</span><strong>—</strong></div><div class="market-card"><span>6 أشهر</span><strong>—</strong></div><div class="market-card"><span>سنة</span><strong>—</strong></div></div>
+      </section>
+
+      <section class="workspace" aria-label="جدول الشركات">
+        <div class="toolbar">
+          <div class="toolbar-heading"><span class="eyebrow">دليل الشركات</span><h2 id="view-title">جميع القطاعات</h2><p id="result-count" role="status" aria-live="polite"></p></div>
+          <div class="toolbar-actions">
+            <div class="eps-switch" role="group" aria-label="نوع ربحية السهم"><button id="recurring-mode" type="button" class="selected" aria-pressed="true">الربحية المتكررة</button><button id="reported-mode" type="button" aria-pressed="false">الربحية المعلنة</button></div>
+            <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.4 4.4"/></svg><span class="sr-only">البحث عن شركة أو رمز</span><input id="search" type="search" placeholder="ابحث باسم الشركة أو الرمز" autocomplete="off"></label>
+            <button id="clear" class="clear-button" type="button" hidden>مسح البحث</button>
+          </div>
+        </div>
+        <nav id="sector-nav" class="sector-nav" aria-label="اختيار القطاع"></nav>
+        <div class="table-note"><span class="note-icon">i</span><span>«جميع القطاعات» جدول واحد مرتب افتراضيًا من الأكبر قيمة سوقية إلى الأصغر. اضغط أي عنوان عمود لتغيير الترتيب. تُفحص نسخة الأسعار كل دقيقة وعند العودة للصفحة؛ إغلاق تداول الرسمي منفصل عن الأسعار المتأخرة غير المؤكدة رسميًا، حتى خارج ساعات السوق. يظهر المصدر والتاريخ، ولا تُذكر مدة التأخير إلا إذا وردت من المصدر. تغير القطاع مرجح محسوب لجميع شركاته وليس مؤشرًا رسميًا. في الوضع المتكرر تُعرض الربحية المعلنة إذا لم تتوفر ربحية متكررة للسهم. يُحفظ عائد التوزيع «آخر سنة» من ملف البيانات ولا يُستبدل بنسب القطاع الفصلية. تعني «—» أن القيمة غير متاحة، ويُعرض المكرر «خاسرة» عندما تكون الربحية سالبة.</span></div>
+        <p id="price-status" class="financial-status" role="status" aria-live="polite">جار تحميل الأسعار…</p>
+        <p id="financial-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات الأرباح…</p>
+        <div id="sectors" class="sections"></div>
+        <div id="empty" class="empty" hidden><div class="empty-icon">⌕</div><h3>لا توجد نتائج مطابقة</h3><p>جرّب البحث باسم آخر أو برمز السهم.</p></div>
+      </section>
+
+    </main>
+  </div>
+  <script src="app.js?v=price-status-20261104-banks" defer></script>
+</body>
+</html>

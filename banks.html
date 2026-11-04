@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11161d">
+  <meta name="description" content="النتائج السنوية للبنوك السعودية 2021–2025 ونسب التغير، من ملف البيانات المقدم من المستخدم.">
+  <title>نتائج البنوك 2021–2025 | السوق السعودي</title>
+  <link rel="stylesheet" href="styles.css?v=52week-20261104">
+  <link rel="stylesheet" href="banks.css?v=compact-columns-20261104">
+  <link rel="stylesheet" href="bank-charts.css?v=metric-selector-20261104">
+</head>
+<body class="banks-page">
+  <main class="main-content" id="bank-main">
+    <header class="hero">
+      <div class="hero-copy">
+        <h1>السوق السعودي</h1>
+        <div class="hero-date">النتائج السنوية لقطاع البنوك · <bdi>2021–2025</bdi></div>
+      </div>
+    </header>
+    <div class="bank-breadcrumb">
+      <p><a href="index.html">السوق السعودي</a><span aria-hidden="true"> / </span><span>نتائج البنوك</span></p>
+      <a href="index.html" class="bank-back">العودة إلى الشركات</a>
+    </div>
+    <nav id="bank-nav" class="bank-nav" aria-label="اختيار البنك"></nav>
+    <p id="bank-load-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات البنوك من ملف المشروع…</p>
+    <section id="bank-panel" class="bank-panel" aria-labelledby="bank-title" hidden>
+      <div class="bank-heading">
+        <div><h2 id="bank-title"></h2><p id="bank-subtitle"></p></div>
+        <span class="bank-period">آخر خمس سنوات في الملف <bdi>2021–2025</bdi></span>
+      </div>
+      <p class="bank-unit-note">المبالغ بمليون ريال؛ ربحية السهم بالريال؛ النسب بالمئة؛ مكرر الأرباح بالمرات.</p>
+      <div class="bank-table-hint">اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.</div>
+      <div id="bank-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول النتائج السنوية؛ يمكن تمريره أفقيًا وعموديًا"></div>
+      <section id="bank-charts" class="bank-charts" aria-labelledby="bank-charts-title">
+        <div class="bank-charts-heading"><h3 id="bank-charts-title">مقارنة السنوات بالأعمدة</h3><p id="bank-charts-context"></p></div>
+        <div class="bank-chart-control"><label for="bank-chart-metric">البند المراد مقارنته</label><select id="bank-chart-metric" aria-describedby="bank-chart-selection-status"></select></div>
+        <p id="bank-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p>
+        <div id="bank-charts-grid" class="bank-charts-grid"></div>
+        <p class="bank-charts-footnote">اختر أي بند من القائمة لعرض مقارنة السنوات. المبالغ بالمليار، وربحية السهم بالريال، والمكرر بالمرات، والنسب بالمئة. القيم الأصلية في الجدول؛ «—» تعني أن القيمة غير متاحة. خيار الأفراد والشركات معًا يعرض عمودين لكل سنة دون تعديل النسب.</p>
+      </section>
+      <section class="bank-notes" aria-labelledby="bank-notes-title">
+        <h3 id="bank-notes-title">ملاحظات البيانات</h3>
+        <ul>
+          <li>المصدر: ملف «البنوك.xlsx» المقدم من المستخدم. القيم من الجدول السنوي في الملف كما هي؛ لم تُراجع بمصدر خارجي، ولا يوجد جلب تلقائي من أرقام.</li>
+          <li>ربحية السهم محفوظة كما وردت في الملف؛ قد تختلف قواعدها أو تعديلات عدد الأسهم بين السنوات، ولا يُفترض أن نموها يطابق نمو صافي الربح.</li>
+          <li>نسبة القروض إلى الودائع = التمويل ÷ ودائع العملاء. العائد على حقوق المساهمين = صافي الربح ÷ حقوق المساهمين في نهاية السنة وفق صيغة الملف، وليس متوسط حقوق المساهمين.</li>
+          <li>مكرر الأرباح هنا تاريخي من الملف، وليس مكررًا محسوبًا بسعر السهم الحالي. لا تغيّر هذه الصفحة أسعار أو مؤشرات الجدول الرئيسي.</li>
+          <li>لم تُدرج سنة 2020 أو الصفوف الفصلية، ولا ورقة «الودائع تحت الطلب» لأنها بلا سنة محددة. هذه نسخة ثابتة تُحدّث عند استيراد ملف جديد.</li>
+        </ul>
+        <p id="bank-import-info"></p>
+      </section>
+    </section>
+    <footer class="footer"><p>نتائج محفوظة داخل المشروع · لا يحتاج عرضها إلى أرقام أو أي خدمة ذكاء اصطناعي.</p></footer>
+    <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات ملف البنوك.</p></noscript>
+  </main>
+  <script type="module" src="banks.js?v=metric-selector-20261104"></script>
+</body>
+</html>
