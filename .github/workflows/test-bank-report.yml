@@ -1,0 +1,32 @@
+name: Test bank annual report access
+
+on:
+  push:
+    branches: [banks-auto-test]
+    paths:
+      - scripts/probe-bank-report.mjs
+      - .github/workflows/test-bank-report.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check out test branch
+        uses: actions/checkout@v6
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test one unauthenticated bank report
+        run: node scripts/probe-bank-report.mjs
+      - name: Save test result
+        uses: actions/upload-artifact@v4
+        with:
+          name: bank-report-access-test
+          path: bank-report-access-test.json
+          retention-days: 3
