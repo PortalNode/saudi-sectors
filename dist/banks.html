@@ -8,6 +8,7 @@
   <title>نتائج البنوك 2021–2025 | السوق السعودي</title>
   <link rel="stylesheet" href="styles.css?v=52week-20261104">
   <link rel="stylesheet" href="banks.css?v=compact-columns-20261104">
+  <link rel="stylesheet" href="bank-charts.css?v=annual-charts-20261104">
 </head>
 <body class="banks-page">
   <main class="main-content" id="bank-main">
@@ -31,6 +32,11 @@
       <p class="bank-unit-note">المبالغ بمليون ريال؛ ربحية السهم بالريال؛ النسب بالمئة؛ مكرر الأرباح بالمرات.</p>
       <div class="bank-table-hint">اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.</div>
       <div id="bank-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول النتائج السنوية؛ يمكن تمريره أفقيًا وعموديًا"></div>
+      <section id="bank-charts" class="bank-charts" aria-labelledby="bank-charts-title">
+        <div class="bank-charts-heading"><h3 id="bank-charts-title">مقارنة السنوات بالأعمدة</h3><p id="bank-charts-context"></p></div>
+        <div id="bank-charts-grid" class="bank-charts-grid"></div>
+        <p class="bank-charts-footnote">المبالغ في الرسوم بالمليار لتسهيل القراءة، وربحية السهم بالريال. القيم المعروضة مقربة؛ القيم الأصلية في الجدول. عمودا التمويل يمثلان الأفراد والشركات لكل سنة، دون تعديل النسب لتصبح مجموعًا قدره 100%.</p>
+      </section>
       <section class="bank-notes" aria-labelledby="bank-notes-title">
         <h3 id="bank-notes-title">ملاحظات البيانات</h3>
         <ul>
@@ -46,6 +52,6 @@
     <footer class="footer"><p>نتائج محفوظة داخل المشروع · لا يحتاج عرضها إلى أرقام أو أي خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات ملف البنوك.</p></noscript>
   </main>
-  <script type="module" src="banks.js?v=compact-columns-20261104"></script>
+  <script type="module" src="banks.js?v=annual-charts-20261104"></script>
 </body>
 </html>

@@ -1,0 +1,28 @@
+/* Local SVG financial comparisons: existing dark/gold theme, no third-party assets. */
+.bank-charts{margin-top:26px;scroll-margin-top:20px}
+.bank-charts-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:0 0 13px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+.bank-charts-heading h3{margin:0;color:var(--teal);font-size:18px}
+.bank-charts-heading p{margin:0;color:var(--muted);font-size:11px}
+.bank-charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.bank-chart-card{min-width:0;background:#151b22;border:1px solid var(--line);padding:15px 15px 8px;overflow:hidden}
+.bank-chart-card h4{font-size:15px;color:#edf2f6;margin:0 0 5px;line-height:1.5}
+.bank-chart-unit{color:var(--muted);font-size:11px;line-height:1.6;margin:0 0 5px}
+.bank-chart-wide{grid-column:1/-1}
+.bank-chart-legend{display:flex;align-items:center;gap:18px;flex-wrap:wrap;line-height:1.8;color:#bdc6ce;font-size:12px;margin:8px 0 4px}
+.bank-chart-key{display:inline-flex;align-items:center;gap:6px}
+.bank-chart-key::before{content:"";width:10px;height:10px;display:inline-block;background:var(--series-color,#f59e0b);flex:none}
+.bank-chart-canvas{width:100%;min-width:0;direction:ltr;unicode-bidi:isolate}
+.bank-chart-svg{width:100%;height:280px;display:block;overflow:visible;font-family:var(--font)}
+.bank-chart-svg text{font-family:var(--font);font-variant-numeric:tabular-nums}
+.bank-chart-svg .chart-bar{transition:opacity .12s}
+.bank-chart-svg .chart-bar:hover{opacity:.82}
+.bank-chart-card[data-chart-key="financingMix"] .chart-value[data-series="retailFinancingShare"]{fill:#f59e0b}
+.bank-chart-card[data-chart-key="financingMix"] .chart-value[data-series="corporateFinancingShare"]{fill:#8ab8ff}
+.bank-chart-svg .chart-bar:focus{stroke:#f1f5f9;stroke-width:2;outline:none}
+.bank-charts-footnote{font-size:10.5px;line-height:1.9;color:var(--muted);margin:11px 0 0}
+@media(max-width:760px){
+ .bank-charts{margin-top:22px}.bank-charts-heading{display:block}.bank-charts-heading h3{font-size:16px}.bank-charts-heading p{font-size:10px;margin-top:6px}
+ .bank-charts-grid{grid-template-columns:minmax(0,1fr);gap:11px}.bank-chart-wide{grid-column:auto}
+ .bank-chart-card{padding:12px 9px 7px}.bank-chart-card h4{font-size:14px}.bank-chart-unit{font-size:10px}
+ .bank-chart-legend{font-size:11px;gap:15px}.bank-charts-footnote{font-size:10px}
+}

@@ -1,7 +1,8 @@
 import { escapeHtml, validateDataset, renderAnnualTable } from './bank-metrics.mjs?v=compact-columns-20261104';
+import { renderBankCharts, fitBankCharts } from './bank-charts.mjs?v=annual-charts-20261104';
 
 const element = id => document.getElementById(id);
-let dataset;
+let dataset, activeChartBank;
 function selectBank(symbol, replaceHistory = false) {
   const bank = dataset.banks.find(item => item.symbol === symbol) || dataset.banks.find(item => item.symbol === '1120') || dataset.banks[0];
   element('bank-nav').innerHTML = dataset.banks.map(item => `<button type="button" class="bank-tab" data-bank="${escapeHtml(item.symbol)}" aria-pressed="${item.symbol === bank.symbol}" title="نتائج ${escapeHtml(item.name)} ${escapeHtml(item.symbol)}">${escapeHtml(item.name)}</button>`).join('');
@@ -11,6 +12,10 @@ function selectBank(symbol, replaceHistory = false) {
   element('bank-table-wrap').scrollLeft = 0;
   element('bank-table-wrap').scrollTop = 0;
   element('bank-panel').hidden = false;
+  activeChartBank = bank;
+  element('bank-charts-context').textContent = `${bank.name} · 2021–2025 · من بيانات الملف المحفوظ`;
+  element('bank-charts-grid').innerHTML = renderBankCharts(bank, dataset.years);
+  fitBankCharts(element('bank-charts-grid'), bank, dataset.years);
   element('bank-load-status').textContent = 'المصدر: ملف البنوك.xlsx · بيانات ثابتة 2021–2025 · نسب التغير محسوبة من قيم الملف';
   document.title = `${bank.name} | النتائج السنوية 2021–2025 | السوق السعودي`;
   const url = new URL(window.location.href);
@@ -41,4 +46,13 @@ element('bank-nav').addEventListener('click', event => {
 window.addEventListener('popstate', () => {
   if (dataset) selectBank(new URLSearchParams(window.location.search).get('symbol'), true);
 });
+const resizeCharts = () => {
+  if (dataset && activeChartBank) fitBankCharts(element('bank-charts-grid'), activeChartBank, dataset.years);
+};
+if (typeof ResizeObserver === 'function') {
+  const chartObserver = new ResizeObserver(resizeCharts);
+  chartObserver.observe(element('bank-charts-grid'));
+} else {
+  window.addEventListener('resize', resizeCharts);
+}
 load();
