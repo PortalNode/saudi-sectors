@@ -1,8 +1,27 @@
 import { escapeHtml, validateDataset, renderAnnualTable } from './bank-metrics.mjs?v=compact-columns-20261104';
-import { renderBankCharts, fitBankCharts } from './bank-charts.mjs?v=annual-charts-20261104';
+import { renderBankCharts, fitBankCharts, getChartOptions } from './bank-charts.mjs?v=metric-selector-20261104';
 
 const element = id => document.getElementById(id);
 let dataset, activeChartBank;
+let selectedChartKey = 'netProfit';
+function drawSelectedChart() {
+  if (!dataset || !activeChartBank) return;
+  const option = getChartOptions(activeChartBank, dataset.years).find(item => item.key === selectedChartKey);
+  element('bank-chart-selection-status').textContent = option?.available
+    ? `مقارنة ${option.label} للأعوام 2021–2025. يمكنك اختيار أي بند آخر من القائمة.`
+    : 'هذا البند غير متاح لهذا البنك في الملف؛ تظهر السنوات بعلامة «—» دون أرقام افتراضية.';
+  element('bank-charts-grid').innerHTML = renderBankCharts(activeChartBank, dataset.years, selectedChartKey);
+  fitBankCharts(element('bank-charts-grid'), activeChartBank, dataset.years);
+}
+function populateChartOptions(bank) {
+  const grouped = new Map();
+  for (const option of getChartOptions(bank, dataset.years)) {
+    if (!grouped.has(option.group)) grouped.set(option.group, []);
+    grouped.get(option.group).push(option);
+  }
+  element('bank-chart-metric').innerHTML = [...grouped].map(([group, options]) => `<optgroup label="${escapeHtml(group)}">${options.map(option => `<option value="${escapeHtml(option.key)}"${option.key === selectedChartKey ? ' selected' : ''}>${escapeHtml(option.label + (option.available ? '' : ' (غير متاح لهذا البنك)'))}</option>`).join('')}</optgroup>`).join('');
+  if (element('bank-chart-metric').value !== selectedChartKey) selectedChartKey = element('bank-chart-metric').value;
+}
 function selectBank(symbol, replaceHistory = false) {
   const bank = dataset.banks.find(item => item.symbol === symbol) || dataset.banks.find(item => item.symbol === '1120') || dataset.banks[0];
   element('bank-nav').innerHTML = dataset.banks.map(item => `<button type="button" class="bank-tab" data-bank="${escapeHtml(item.symbol)}" aria-pressed="${item.symbol === bank.symbol}" title="نتائج ${escapeHtml(item.name)} ${escapeHtml(item.symbol)}">${escapeHtml(item.name)}</button>`).join('');
@@ -14,8 +33,8 @@ function selectBank(symbol, replaceHistory = false) {
   element('bank-panel').hidden = false;
   activeChartBank = bank;
   element('bank-charts-context').textContent = `${bank.name} · 2021–2025 · من بيانات الملف المحفوظ`;
-  element('bank-charts-grid').innerHTML = renderBankCharts(bank, dataset.years);
-  fitBankCharts(element('bank-charts-grid'), bank, dataset.years);
+  populateChartOptions(bank);
+  drawSelectedChart();
   element('bank-load-status').textContent = 'المصدر: ملف البنوك.xlsx · بيانات ثابتة 2021–2025 · نسب التغير محسوبة من قيم الملف';
   document.title = `${bank.name} | النتائج السنوية 2021–2025 | السوق السعودي`;
   const url = new URL(window.location.href);
@@ -42,6 +61,10 @@ async function load() {
 element('bank-nav').addEventListener('click', event => {
   const button = event.target.closest('[data-bank]');
   if (button && dataset) selectBank(button.dataset.bank);
+});
+element('bank-chart-metric').addEventListener('change', () => {
+  selectedChartKey = element('bank-chart-metric').value;
+  drawSelectedChart();
 });
 window.addEventListener('popstate', () => {
   if (dataset) selectBank(new URLSearchParams(window.location.search).get('symbol'), true);

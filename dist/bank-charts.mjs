@@ -1,4 +1,4 @@
-import { escapeHtml, numericValue } from './bank-metrics.mjs';
+import { escapeHtml, numericValue, METRIC_GROUPS } from './bank-metrics.mjs';
 
 const DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025];
 const HEIGHT = 280;
@@ -6,12 +6,18 @@ const GOLD = '#f59e0b';
 const BLUE = '#8ab8ff';
 const decimal = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const compactPercent = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const CHART_UNITS = {
+  million_sar: { unit: 'مليار ريال', factor: 1 / 1000 },
+  sar: { unit: 'ريال', factor: 1 },
+  times: { unit: 'مرة', factor: 1 },
+  ratio: { unit: 'نسبة مئوية (%)', factor: 100, percentage: true }
+};
 const DEFINITIONS = [
-  { key: 'netProfit', title: 'صافي الربح', unit: 'مليار ريال', factor: 1 / 1000 },
-  { key: 'eps', title: 'ربحية السهم', unit: 'ريال', factor: 1 },
-  { key: 'assets', title: 'الموجودات', unit: 'مليار ريال', factor: 1 / 1000 },
-  { key: 'equity', title: 'حقوق المساهمين', unit: 'مليار ريال', factor: 1 / 1000 },
-  { key: 'financingMix', title: 'نسب تمويل الأفراد والشركات', unit: 'نسبة مئوية (%)', factor: 100 }
+  ...METRIC_GROUPS.flatMap(group => group.metrics.map(metric => ({
+    key: metric.key, title: metric.label, group: group.label, note: metric.note,
+    ...CHART_UNITS[metric.unit]
+  }))),
+  { key: 'financingMix', title: 'تمويل الأفراد والشركات معًا', group: 'مقارنة الفئات', unit: 'نسبة مئوية (%)', factor: 100, percentage: true }
 ];
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const plotWidth = width => Math.max(300, Math.round(numericValue(width) > 0 ? width : 600));
@@ -39,6 +45,14 @@ export function getChartModels(bank, years = DEFAULT_YEARS) {
       }))
     };
   });
+}
+
+/** Keep every table item available to select; missing data is disclosed, never invented. */
+export function getChartOptions(bank, years = DEFAULT_YEARS) {
+  return getChartModels(bank, years).map(model => ({
+    key: model.key, label: model.title, group: model.group,
+    available: model.series.some(series => series.points.some(point => point.rawValue !== null))
+  }));
 }
 
 function niceQuantum(target) {
@@ -70,7 +84,7 @@ function tickLabel(value, axis, percentage) {
 
 function pointTitle(model, series, point) {
   if (point.value === null) return `${series.title} · ${point.year}: غير متاح (—)`;
-  const display = `${decimal.format(point.value)}${model.key === 'financingMix' ? '%' : ''}`;
+  const display = `${decimal.format(point.value)}${model.percentage ? '%' : ''}`;
   const original = model.unit === 'مليار ريال' ? `؛ الأصل: ${decimal.format(point.rawValue)} مليون ريال` : '';
   return `${series.title} · ${point.year}: ${display} ${model.unit}${original}`;
 }
@@ -80,7 +94,7 @@ export function renderChartSvg(model, width = 600) {
   const W = plotWidth(width);
   const paired = model.key === 'financingMix';
   const axis = chartAxis(model);
-  const axisLabels = axis.ticks.map(value => tickLabel(value, axis, paired));
+  const axisLabels = axis.ticks.map(value => tickLabel(value, axis, model.percentage));
   const left = Math.max(paired ? 44 : 46, ...axisLabels.map(label => label.length * 6.6 + 12));
   const right = 16;
   const top = paired ? 54 : 36;
@@ -122,7 +136,7 @@ export function renderChartSvg(model, width = 600) {
       bars.push(`<rect class="chart-bar" ${attributes} data-chart-value="${escapeHtml(point.value)}" x="${coordinate(x)}" y="${coordinate(y)}" width="${coordinate(barWidth)}" height="${coordinate(height)}" fill="${series.color}" aria-label="${title}"><title>${title}</title></rect>`);
       // Narrow paired charts use one decimal and staggered heights; tooltips always use two.
       const narrow = paired && groupWidth < 90;
-      const label = `${(narrow ? compactPercent : decimal).format(point.value)}${paired ? '%' : ''}`;
+      const label = `${(narrow ? compactPercent : decimal).format(point.value)}${model.percentage ? '%' : ''}`;
       let labelY = point.value < 0 ? endpoint + 16 : narrow ? pairLabelTop - seriesIndex * 16 : y - 8;
       const halfWidth = label.length * 3.3;
       if (point.value >= 0) {
@@ -139,11 +153,13 @@ export function renderChartSvg(model, width = 600) {
 
 const signature = model => JSON.stringify(model);
 
-/** Five cards, with a real 600×280 default plot inside each canvas. */
-export function renderBankCharts(bank, years = DEFAULT_YEARS) {
-  return getChartModels(bank, years).map(model => {
+/** One selected item, with a real 600×280 default plot inside its canvas. */
+export function renderBankCharts(bank, years = DEFAULT_YEARS, selectedKey = 'netProfit') {
+  const models = getChartModels(bank, years);
+  const selected = models.find(model => model.key === selectedKey) || models.find(model => model.key === 'netProfit');
+  return [selected].map(model => {
     const paired = model.key === 'financingMix';
-    const unit = model.key === 'eps' ? 'ريال للسهم · وفق أرقام الملف دون تعديل أساس الأسهم' : model.unit;
+    const unit = model.unit + (model.note ? ` · ${model.note}` : '');
     const legend = paired ? `<div class="bank-chart-legend" dir="rtl">${model.series.map(series => `<span><i class="bank-chart-key" style="--series-color: ${series.color}" aria-hidden="true"></i>${escapeHtml(series.title)}</span>`).join('')}</div>` : '';
     return `<article class="bank-chart-card${paired ? ' bank-chart-wide' : ''}" data-chart-key="${escapeHtml(model.key)}" dir="rtl"><h4>${escapeHtml(model.title)}</h4><p class="bank-chart-unit">${escapeHtml(unit)}</p>${legend}<div class="bank-chart-canvas" data-chart-canvas="${escapeHtml(model.key)}" data-plot-width="600" data-bank-symbol="${escapeHtml(bank.symbol)}" data-plot-signature="${escapeHtml(signature(model))}">${renderChartSvg(model)}</div></article>`;
   }).join('\n');
