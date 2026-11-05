@@ -17,7 +17,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('mining-financials.json?v=20261105');
+    const response = await fetch('mining-financials.json?v=mining-amak-2020-20261105');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('mining-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;
