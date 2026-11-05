@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "sector": "التعدين والمعادن",
+  "years": [2020, 2021, 2022, 2023, 2024, 2025],
+  "source": {
+    "name": "قطاعالتعدين.txt",
+    "provider": "أرقام",
+    "importedAt": "2026-11-05T00:00:00Z",
+    "note": "النتائج المالية السنوية فقط؛ لم تُدرج أرباح الربع الرابع أو أي بيانات ربع سنوية."
+  },
+  "companies": [
+    {
+      "symbol": "1211",
+      "name": "معادن",
+      "fullName": "شركة التعدين العربية السعودية",
+      "sourceUrl": "https://www.argaam.com/ar/company-results-summary/listing/836",
+      "years": [
+        {"year": 2020, "period": "FY", "values": {"revenue": 18579.82, "grossIncome": 2567.00, "operatingIncome": 810.60, "netProfit": -208.98, "eps": -0.0566}},
+        {"year": 2021, "period": "FY", "values": {"revenue": 26769.01, "grossIncome": 9471.09, "operatingIncome": 7730.07, "netProfit": 5227.70, "eps": 1.42}},
+        {"year": 2022, "period": "FY", "values": {"revenue": 40277.12, "grossIncome": 16248.95, "operatingIncome": 13536.81, "netProfit": 9319.05, "eps": 2.52}},
+        {"year": 2023, "period": "FY", "values": {"revenue": 29271.93, "grossIncome": 6914.41, "operatingIncome": 3816.16, "netProfit": 1577.33, "eps": 0.43}},
+        {"year": 2024, "period": "FY", "values": {"revenue": 32546.16, "grossIncome": 10688.62, "operatingIncome": 7158.02, "netProfit": 2871.54, "eps": 0.76}},
+        {"year": 2025, "period": "FY", "values": {"revenue": 38577.73, "grossIncome": 14791.90, "operatingIncome": 10614.54, "netProfit": 7347.88, "eps": 1.89}}
+      ]
+    },
+    {
+      "symbol": "1322",
+      "name": "أماك",
+      "fullName": "شركة المصانع الكبرى للتعدين",
+      "sourceUrl": "https://www.argaam.com/ar/company-results-summary/listing/13986",
+      "years": [
+        {"year": 2021, "period": "FY", "values": {"revenue": 586.65, "grossIncome": 267.70, "operatingIncome": 216.61, "netProfit": 197.27, "eps": 2.99}},
+        {"year": 2022, "period": "FY", "values": {"revenue": 582.77, "grossIncome": 208.36, "operatingIncome": 150.68, "netProfit": 126.33, "eps": 1.91}},
+        {"year": 2023, "period": "FY", "values": {"revenue": 487.90, "grossIncome": 123.44, "operatingIncome": 64.01, "netProfit": 54.58, "eps": 0.61}},
+        {"year": 2024, "period": "FY", "values": {"revenue": 780.65, "grossIncome": 288.33, "operatingIncome": 222.35, "netProfit": 177.90, "eps": 1.98}},
+        {"year": 2025, "period": "FY", "values": {"revenue": 1026.08, "grossIncome": 422.43, "operatingIncome": 354.48, "netProfit": 280.60, "eps": 3.12}}
+      ]
+    }
+  ]
+}
