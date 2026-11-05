@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { strictNumber, validDate, marketSession, parseOfficialDaily, normalizeTradingView,
+import { strictNumber, validDate, marketSession, parseOfficialDaily, parseOfficialMarketPage, normalizeTradingView,
   selectQuote, applyQuote, TV_COLUMNS } from './price-integrity.mjs';
 const now = new Date('2026-11-04T18:00:00Z');
 const timestamp = new Date('2026-11-04T07:00:00Z').getTime() / 1000;
@@ -40,6 +40,13 @@ test('Duplicate symbols fail closed; invalid prices and missing day are not acce
   const duplicated = cells(['1120', 'ALRAJHI', '60', '62', '59', '61.5', '2.24 %', '100', '6150', '12', '369000000000']);
   assert.throws(() => parseOfficialDaily(report(duplicated), now), /Duplicate/);
   assert.throws(() => parseOfficialDaily(report().replace('61.50', '0.00'), now), /no usable/);
+});
+test('Parse dated official market-page turnover fallback', () => {
+  const html = `<script>var main_market_graph=JSON.parse('[{"dateTime":"2026-11-04 12:00:00","indexPrice":10038.89}]');</script><span class="valueTradedMain">4,484,633,652.75</span>`;
+  const parsed = parseOfficialMarketPage(html, now);
+  assert.equal(parsed.date, '2026-11-04');
+  assert.equal(parsed.turnover, 4484633652.75);
+  assert.throws(() => parseOfficialMarketPage('<span class="valueTradedMain">1</span>', now), /dated/);
 });
 test('Dated TradingView fallback does not invent a trade timestamp or official close', () => {
   const quote = normalizeTradingView(row, now);

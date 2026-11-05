@@ -7,7 +7,7 @@
  */
 import { readFile, writeFile, rename, unlink } from 'node:fs/promises';
 import { applyWeek52Range } from './week52-range.mjs';
-import { OFFICIAL_URL, TV_COLUMNS, isoDate, displayDate, round, validDate, parseOfficialDaily,
+import { OFFICIAL_URL, OFFICIAL_HOME_URL, TV_COLUMNS, isoDate, displayDate, round, validDate, parseOfficialDaily, parseOfficialMarketPage,
   normalizeTradingView, selectQuote, applyQuote } from './price-integrity.mjs';
 
 const DATA_FILE = new URL('../dist/data.json', import.meta.url);
@@ -44,6 +44,10 @@ async function officialReport() {
   console.warn(`Official close unavailable: ${error.message}`);
   return null;
 }
+async function officialMarketPage() {
+  try { return parseOfficialMarketPage(await request(OFFICIAL_HOME_URL, { accept: 'text/html' }), now); }
+  catch (error) { console.warn(`Official market summary unavailable: ${error.message}`); return null; }
+}
 async function delayedQuotes() {
   const found = new Map();
   const tickers = [...stocks.map(stock => `TADAWUL:${stock.symbol}`), 'TADAWUL:TASI'];
@@ -75,7 +79,7 @@ async function delayedQuotes() {
   }
   return found;
 }
-const [official, delayed] = await Promise.all([officialReport(), delayedQuotes()]);
+const [official, officialMarket, delayed] = await Promise.all([officialReport(), officialMarketPage(), delayedQuotes()]);
 const observedDates = stocks.map(stock => delayed.get(stock.symbol)?.date).filter(validDate);
 if (official) observedDates.push(official.date);
 const targetDate = observedDates.sort().at(-1);
@@ -146,6 +150,10 @@ if (indexQuote && indexQuote.source === 'Saudi Exchange') {
 } else {
   data.marketSummary = { value: null, day: null, pointChange: null, turnover: null, date: null,
     source: null, mode: 'unavailable', isIntraday: false, updatedAt: checkedAt };
+}
+if (data.marketSummary.turnover == null && officialMarket?.date === targetDate) {
+  data.marketSummary.turnover = round(officialMarket.turnover);
+  data.marketSummary.turnoverSource = officialMarket.source;
 }
 for (const field of ['ytd', 'month3', 'month6', 'year1']) {
   const value = indexPerformance?.performance?.[field];

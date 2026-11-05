@@ -1,6 +1,7 @@
 // Price dates refer to a market observation, never to the time of a download.
 export const RIYADH = 'Asia/Riyadh';
 export const OFFICIAL_URL = 'https://www.saudiexchange.sa/Resources/Reports-v2/DetailedDaily_en.html';
+export const OFFICIAL_HOME_URL = 'https://www.saudiexchange.sa/wps/portal/saudiexchange/home/';
 export const round = (n, digits = 2) => Number(n.toFixed(digits));
 export const isoDate = date => new Intl.DateTimeFormat('en-CA', {
   timeZone: RIYADH, year: 'numeric', month: '2-digit', day: '2-digit',
@@ -70,7 +71,19 @@ export function parseOfficialDaily(html, now = new Date()) {
     throw new Error('Official index summary missing required values');
   }
   return { date, quotes, summary: { value, pointChange, day, turnover, date: displayDate(date),
-    source: 'Saudi Exchange', mode: 'close', isIntraday: false } };
+    source: 'Saudi Exchange', turnoverSource: 'Saudi Exchange', mode: 'close', isIntraday: false } };
+}
+function classValue(html, className) {
+  const match = html.match(new RegExp(`class\\s*=\\s*["'][^"']*\\b${className}\\b[^"']*["'][^>]*>\\s*([^<]+)`, 'i'));
+  return strictNumber(match?.[1]);
+}
+export function parseOfficialMarketPage(html, now = new Date()) {
+  const date = html.match(/dateTime"\s*:\s*"(\d{4}-\d{2}-\d{2})/i)?.[1] || null;
+  const turnover = classValue(html, 'valueTradedMain');
+  if (!validDate(date) || date > isoDate(now) || turnover == null || turnover < 0) {
+    throw new Error('Official market page missing dated value traded');
+  }
+  return { date, turnover, source: 'Saudi Exchange' };
 }
 export const TV_COLUMNS = ['close', 'change', 'currency', 'time', 'update_mode', 'market_cap_basic',
   'Perf.YTD', 'Perf.3M', 'Perf.6M', 'Perf.Y', 'price_52_week_low', 'price_52_week_high'];
