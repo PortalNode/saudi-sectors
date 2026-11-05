@@ -4,7 +4,6 @@ export const METRICS = [
   { key: 'grossIncome', label: 'إجمالي الدخل' },
   { key: 'operatingIncome', label: 'دخل العمليات' },
   { key: 'netProfit', label: 'صافي الدخل' },
-  { key: 'averageShares', label: 'متوسط عدد الأسهم', unit: 'million_shares' },
   { key: 'epsBeforeExceptional', label: 'ربح السهم قبل البنود الاستثنائية', unit: 'sar' },
   { key: 'eps', label: 'ربح السهم', unit: 'sar' }
 ];

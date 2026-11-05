@@ -29,8 +29,8 @@
       "fullName": "شركة المصانع الكبرى للتعدين",
       "sourceUrl": "https://www.argaam.com/ar/company-results-summary/listing/13986",
       "years": [
-        {"year": 2020, "period": "FY", "values": {"revenue": 375.15, "grossIncome": 125.26, "operatingIncome": 88.74, "netProfit": 88.80, "averageShares": 90.00, "epsBeforeExceptional": 0.99, "eps": 0.99}},
-        {"year": 2021, "period": "FY", "values": {"revenue": 586.65, "grossIncome": 267.70, "operatingIncome": 216.61, "netProfit": 197.27, "averageShares": 90.00, "epsBeforeExceptional": 2.19, "eps": 2.19}},
+        {"year": 2020, "period": "FY", "values": {"revenue": 375.15, "grossIncome": 125.26, "operatingIncome": 88.74, "netProfit": 88.80, "epsBeforeExceptional": 0.99, "eps": 0.99}},
+        {"year": 2021, "period": "FY", "values": {"revenue": 586.65, "grossIncome": 267.70, "operatingIncome": 216.61, "netProfit": 197.27, "epsBeforeExceptional": 2.19, "eps": 2.19}},
         {"year": 2022, "period": "FY", "values": {"revenue": 582.77, "grossIncome": 208.36, "operatingIncome": 150.68, "netProfit": 126.33, "eps": 1.91}},
         {"year": 2023, "period": "FY", "values": {"revenue": 487.90, "grossIncome": 123.44, "operatingIncome": 64.01, "netProfit": 54.58, "eps": 0.61}},
         {"year": 2024, "period": "FY", "values": {"revenue": 780.65, "grossIncome": 288.33, "operatingIncome": 222.35, "netProfit": 177.90, "eps": 1.98}},
