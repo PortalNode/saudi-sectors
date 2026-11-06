@@ -52,18 +52,16 @@ export function renderAnnualTable(company, years) {
   const financialMetrics = METRICS.filter(metric => metric.unit !== 'percent');
   const marginMetrics = METRICS.filter(metric => metric.unit === 'percent');
   const renderTable = (metrics, includeChanges, caption, tableClass = '') => {
-    const columns = includeChanges
-      ? '<col class="annual-col-label"><col class="annual-col-value">' + years.slice(1).map(() => '<col class="annual-col-change"><col class="annual-col-value">').join('')
-      : '<col class="annual-col-label">' + years.map(() => '<col class="annual-col-value">').join('');
+    const columns = '<col class="annual-col-label"><col class="annual-col-value">' + years.slice(1).map(() => '<col class="annual-col-change"><col class="annual-col-value">').join('');
     const header = includeChanges
       ? `<tr><th scope="col" class="annual-label">البند</th><th scope="col">${years[0]}</th>${years.slice(1).map(year => `<th scope="col" class="annual-change-heading">نسبة التغير</th><th scope="col">${year}</th>`).join('')}</tr>`
-      : `<tr><th scope="col" class="annual-label">البند</th>${years.map(year => `<th scope="col">${year}</th>`).join('')}</tr>`;
+      : `<tr><th scope="col" class="annual-label">البند</th><th scope="col">${years[0]}</th>${years.slice(1).map(year => '<th scope="col" class="annual-change-heading annual-change-spacer" aria-label="فاصل محاذاة"></th><th scope="col">'+year+'</th>').join('')}</tr>`;
     const rows = metrics.map(metric => {
       const suffix = metric.unit === 'sar' ? ' (ريال)' : metric.unit === 'percent' ? ' (%)' : metric.unit === 'million_shares' ? ' (مليون سهم)' : ' (مليون ريال)';
       const label = `<th scope="row" class="annual-label">${escapeHtml(metric.label + suffix)}</th>`;
       const cells = includeChanges
         ? `<td>${formatValue(value(years[0], metric.key), metric.unit)}</td>` + years.slice(1).map((year, index) => `<td class="annual-change">${formatChange(value(year, metric.key), value(years[index], metric.key))}</td><td>${formatValue(value(year, metric.key), metric.unit)}</td>`).join('')
-        : years.map(year => `<td>${formatValue(value(year, metric.key), metric.unit)}</td>`).join('');
+        : `<td>${formatValue(value(years[0], metric.key), metric.unit)}</td>` + years.slice(1).map(year => `<td class="annual-change annual-change-spacer" aria-hidden="true"></td><td>${formatValue(value(year, metric.key), metric.unit)}</td>`).join('');
       return `<tr data-metric="${metric.key}">${label}${cells}</tr>`;
     }).join('');
     return `<table class="annual-table ${tableClass}"><caption>${escapeHtml(caption)}</caption><colgroup>${columns}</colgroup><thead>${header}</thead><tbody>${rows}</tbody></table>`;

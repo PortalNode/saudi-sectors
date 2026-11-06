@@ -1,4 +1,4 @@
-import { escapeHtml, numericValue, METRICS } from './mining-metrics.mjs?v=mining-charts-20261106-mining-v3';
+import { escapeHtml, numericValue, METRICS } from './mining-metrics.mjs?v=mining-charts-20261106-v4';
 
 const HEIGHT = 280;
 const GOLD = '#f59e0b';
