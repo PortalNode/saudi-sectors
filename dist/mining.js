@@ -1,5 +1,5 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './mining-metrics.mjs?v=mining-charts-20261106-mining-v1';
-import { renderMiningCharts, fitMiningCharts, getChartOptions } from './mining-charts.mjs?v=mining-charts-20261106-mining-v1';
+import { escapeHtml, validateDataset, renderAnnualTable } from './mining-metrics.mjs?v=mining-charts-20261106-mining-v2';
+import { renderMiningCharts, fitMiningCharts, getChartOptions } from './mining-charts.mjs?v=mining-charts-20261106-mining-v2';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, selectedChartKey = 'netProfit';
 function drawSelectedChart() {
@@ -40,7 +40,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('mining-financials.json?v=mining-charts-20261106-mining-v1');
+    const response = await fetch('mining-financials.json?v=mining-charts-20261106-mining-v2');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('mining-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;
