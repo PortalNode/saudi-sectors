@@ -1,0 +1,56 @@
+const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export const METRICS = [
+  { key: 'revenue', label: 'الإيرادات' },
+  { key: 'grossIncome', label: 'إجمالي الدخل' },
+  { key: 'operatingIncome', label: 'دخل العمليات' },
+  { key: 'netProfit', label: 'صافي الدخل' },
+  { key: 'eps', label: 'ربح السهم', unit: 'sar' }
+];
+export function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+}
+export function numericValue(value) { return typeof value === 'number' && Number.isFinite(value) ? value : null; }
+export function annualChange(current, previous) {
+  current = numericValue(current); previous = numericValue(previous);
+  if (current === null || previous === null || previous === 0) return null;
+  const result = (current - previous) / Math.abs(previous) * 100;
+  return Number.isFinite(result) ? result : null;
+}
+function formatValue(value, unit) {
+  value = numericValue(value);
+  if (value === null) return '<span class="missing" title="غير متاح في الجدول السنوي">—</span>';
+  return `<span class="num${value < 0 ? ' down' : ''}">${formatter.format(value)}${unit === 'sar' ? '' : ''}</span>`;
+}
+function formatChange(current, previous) {
+  const value = annualChange(current, previous);
+  if (value === null) return '<span class="missing" title="لا يمكن حساب التغير">—</span>';
+  const zero = Math.abs(value) < 0.005;
+  const trend = zero ? 'flat' : value > 0 ? 'up' : 'down';
+  return `<span class="num ${trend}">${!zero && value > 0 ? '+' : ''}${formatter.format(zero ? 0 : value)}%</span>`;
+}
+export function validateDataset(data) {
+  if (data?.schemaVersion !== 1 || data.sector !== 'الاتصالات' || !Array.isArray(data.years) || JSON.stringify(data.years) !== JSON.stringify([2021, 2022, 2023, 2024, 2025]) || !Array.isArray(data.companies) || data.companies.length !== 4) throw new Error('invalid annual telecom dataset');
+  const symbols = new Set();
+  for (const company of data.companies) {
+    if (!/^\d{4}$/.test(company.symbol) || symbols.has(company.symbol) || typeof company.name !== 'string' || !Array.isArray(company.years)) throw new Error('invalid telecom company');
+    symbols.add(company.symbol);
+    for (const record of company.years) {
+      if (!data.years.includes(record.year) || record.period !== 'FY' || !record.values || typeof record.values !== 'object') throw new Error('nonannual telecom record');
+      for (const value of Object.values(record.values)) if (value !== null && numericValue(value) === null) throw new Error('nonnumeric telecom value');
+    }
+  }
+  return data;
+}
+export function renderAnnualTable(company, years) {
+  const records = new Map(company.years.map(record => [record.year, record.values]));
+  const value = (year, key) => records.get(year)?.[key] ?? null;
+  const columns = '<col class="annual-col-label"><col class="annual-col-value">' + years.slice(1).map(() => '<col class="annual-col-change"><col class="annual-col-value">').join('');
+  const header = `<tr><th scope="col" class="annual-label">البند</th><th scope="col">${years[0]}</th>${years.slice(1).map((year, index) => `<th scope="col" class="annual-change-heading">نسبة التغير</th><th scope="col">${year}</th>`).join('')}</tr>`;
+  const rows = METRICS.map(metric => {
+    const suffix = metric.unit === 'sar' ? ' (ريال)' : metric.unit === 'million_shares' ? ' (مليون سهم)' : ' (مليون ريال)';
+    const label = `<th scope="row" class="annual-label">${escapeHtml(metric.label + suffix)}</th>`;
+    const cells = `<td>${formatValue(value(years[0], metric.key), metric.unit)}</td>` + years.slice(1).map((year, index) => `<td class="annual-change">${formatChange(value(year, metric.key), value(years[index], metric.key))}</td><td>${formatValue(value(year, metric.key), metric.unit)}</td>`).join('');
+    return `<tr data-metric="${metric.key}">${label}${cells}</tr>`;
+  }).join('');
+  return `<table class="annual-table"><caption>${escapeHtml(company.name)} · السنوات المالية ${years[0]}–${years.at(-1)}</caption><colgroup>${columns}</colgroup><thead>${header}</thead><tbody>${rows}</tbody></table>`;
+}
