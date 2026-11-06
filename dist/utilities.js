@@ -1,20 +1,20 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './utilities-metrics.mjs?v=utilities-charts-20261106-v8';
-import { renderUtilitiesCharts, fitUtilitiesCharts, getChartOptions } from './utilities-charts.mjs?v=utilities-charts-20261106-v8';
+import { escapeHtml, validateDataset, renderAnnualTable } from './utilities-metrics.mjs?v=utilities-charts-20261106-v9';
+import { renderUtilitiesCharts, fitUtilitiesCharts, getChartOptions } from './utilities-charts.mjs?v=utilities-charts-20261106-v9';
 const $ = id => document.getElementById(id);
-let dataset, activeCompany, selectedChartKey = 'netProfit';
+let dataset, activeCompany, activeYears = [], selectedChartKey = 'netProfit';
 function drawSelectedChart() {
   if (!dataset || !activeCompany) return;
-  const option = getChartOptions(activeCompany, dataset.years).find(item => item.key === selectedChartKey);
-  $('utilities-charts-context').textContent = `${activeCompany.name} · 2021–2025 · من بيانات الملف المحفوظ`;
+  const option = getChartOptions(activeCompany, activeYears).find(item => item.key === selectedChartKey);
+  $('utilities-charts-context').textContent = `${activeCompany.name} · ${activeYears[0]}–${activeYears.at(-1)} · من بيانات الملف المحفوظ`;
   $('utilities-chart-selection-status').textContent = option?.available
-    ? `مقارنة ${option.label} للأعوام 2021–2025. يمكنك اختيار أي بند آخر من القائمة.`
+    ? `مقارنة ${option.label} للأعوام ${activeYears[0]}–${activeYears.at(-1)}. يمكنك اختيار أي بند آخر من القائمة.`
     : 'هذا البند غير متاح لبعض السنوات في الملف؛ تظهر السنوات بعلامة «—» دون أرقام افتراضية.';
-  $('utilities-charts-grid').innerHTML = renderUtilitiesCharts(activeCompany, dataset.years, selectedChartKey);
-  fitUtilitiesCharts($('utilities-charts-grid'), activeCompany, dataset.years);
+  $('utilities-charts-grid').innerHTML = renderUtilitiesCharts(activeCompany, activeYears, selectedChartKey);
+  fitUtilitiesCharts($('utilities-charts-grid'), activeCompany, activeYears);
 }
 function populateChartOptions(company) {
   const grouped = new Map();
-  for (const option of getChartOptions(company, dataset.years)) {
+  for (const option of getChartOptions(company, activeYears)) {
     if (!grouped.has(option.group)) grouped.set(option.group, []);
     grouped.get(option.group).push(option);
   }
@@ -27,6 +27,7 @@ function selectCompany(symbol, replaceHistory = false) {
   $('utilities-title').innerHTML = `${escapeHtml(company.name)} <span class="symbol-badge">${escapeHtml(company.symbol)}</span>`;
   $('utilities-subtitle').textContent = `${company.fullName || company.name} · قطاع المرافق والطاقة · نتائج سنوية فقط`;
   const availableYears = company.years.map(record => record.year).sort((a, b) => a - b);
+  activeYears = availableYears;
   $('utilities-table-wrap').innerHTML = renderAnnualTable(company, availableYears);
   $('utilities-table-wrap').scrollLeft = 0;
   $('utilities-panel').hidden = false;
@@ -41,7 +42,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('utilities-financials.json?v=utilities-charts-20261106-v8');
+    const response = await fetch('utilities-financials.json?v=utilities-charts-20261106-v9');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('utilities-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;
@@ -55,6 +56,6 @@ async function load() {
 $('utilities-nav').addEventListener('click', event => { const button = event.target.closest('[data-company]'); if (button && dataset) selectCompany(button.dataset.company); });
 $('utilities-chart-metric').addEventListener('change', () => { selectedChartKey = $('utilities-chart-metric').value; drawSelectedChart(); });
 window.addEventListener('popstate', () => { if (dataset) selectCompany(new URLSearchParams(window.location.search).get('symbol'), true); });
-const resizeCharts = () => { if (dataset && activeCompany) fitUtilitiesCharts($('utilities-charts-grid'), activeCompany, dataset.years); };
+const resizeCharts = () => { if (dataset && activeCompany) fitUtilitiesCharts($('utilities-charts-grid'), activeCompany, activeYears); };
 if (typeof ResizeObserver === 'function') { const observer = new ResizeObserver(resizeCharts); observer.observe($('utilities-charts-grid')); } else window.addEventListener('resize', resizeCharts);
 load();
