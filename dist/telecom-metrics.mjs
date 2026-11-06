@@ -52,7 +52,7 @@ export function renderAnnualTable(company, years) {
   const columns = '<col class="annual-col-label"><col class="annual-col-value">' + years.slice(1).map(() => '<col class="annual-col-change"><col class="annual-col-value">').join('');
   const header = `<tr><th scope="col" class="annual-label">البند</th><th scope="col">${years[0]}</th>${years.slice(1).map((year, index) => `<th scope="col" class="annual-change-heading">نسبة التغير</th><th scope="col">${year}</th>`).join('')}</tr>`;
   const rows = METRICS.map(metric => {
-    const suffix = metric.unit === 'sar' ? ' (ريال)' : metric.unit === 'million_shares' ? ' (مليون سهم)' : ' (مليون ريال)';
+    const suffix = metric.unit === 'sar' ? ' (ريال)' : metric.unit === 'percent' ? ' (%)' : metric.unit === 'million_shares' ? ' (مليون سهم)' : ' (مليون ريال)';
     const label = `<th scope="row" class="annual-label">${escapeHtml(metric.label + suffix)}</th>`;
     const cells = `<td>${formatValue(value(years[0], metric.key), metric.unit)}</td>` + years.slice(1).map((year, index) => `<td class="annual-change">${formatChange(value(year, metric.key), value(years[index], metric.key))}</td><td>${formatValue(value(year, metric.key), metric.unit)}</td>`).join('');
     return `<tr data-metric="${metric.key}">${label}${cells}</tr>`;
