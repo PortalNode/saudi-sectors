@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "sector": "السلع الاستهلاكية",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_consumer.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-06T04:48:25Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "6017",
+      "name": "جاهز",
+      "fullName": "جاهز (6017) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "جاهز",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 1159.57,
+            "grossIncome": 245.53,
+            "operatingIncome": 119.29,
+            "netProfit": 117.07,
+            "epsBeforeExceptional": 60.97,
+            "eps": 60.97,
+            "grossMargin": 0.21174228377760723,
+            "operatingMargin": 0.10287434135067311,
+            "netMargin": 0.10095983856084582
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1602.48,
+            "grossIncome": 359.18,
+            "operatingIncome": 140.85,
+            "netProfit": 58.98,
+            "epsBeforeExceptional": 66.01,
+            "eps": 28.11,
+            "grossMargin": 0.2241400828715491,
+            "operatingMargin": 0.08789501273026808,
+            "netMargin": 0.036805451550097346
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1784.76,
+            "grossIncome": 405.88,
+            "operatingIncome": 102.82,
+            "netProfit": 125.34,
+            "epsBeforeExceptional": 59.73,
+            "eps": 59.73,
+            "grossMargin": 0.22741433021806853,
+            "operatingMargin": 0.05760998677693359,
+            "netMargin": 0.07022792980568816
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 2218.66,
+            "grossIncome": 541.16,
+            "operatingIncome": 169.17,
+            "netProfit": 187.98,
+            "epsBeforeExceptional": 89.58,
+            "eps": 89.58,
+            "grossMargin": 0.2439129925270208,
+            "operatingMargin": 0.07624872670891439,
+            "netMargin": 0.08472681708779173
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 2323.64,
+            "grossIncome": 530.09,
+            "operatingIncome": 84.36,
+            "netProfit": 72.97,
+            "epsBeforeExceptional": 55.36,
+            "eps": 34.78,
+            "grossMargin": 0.2281291422079152,
+            "operatingMargin": 0.036305107503744126,
+            "netMargin": 0.031403315487769194
+          }
+        }
+      ]
+    }
+  ]
+}
