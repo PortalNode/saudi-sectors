@@ -7,13 +7,14 @@ const decimal = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maxim
 const CHART_UNITS = {
   million_sar: { unit: 'مليار ريال', factor: 1 / 1000 },
   million_shares: { unit: 'مليون سهم', factor: 1 },
-  sar: { unit: 'ريال', factor: 1 }
+  sar: { unit: 'ريال', factor: 1 },
+  percent: { unit: '%', factor: 100 }
 };
 const DEFINITIONS = METRICS.map(metric => ({
   key: metric.key,
   title: metric.label,
-  group: metric.unit === 'sar' ? 'ربحية السهم' : 'ملخص النتائج المالية',
-  ...(metric.unit === 'sar' ? CHART_UNITS.sar : metric.unit === 'million_shares' ? CHART_UNITS.million_shares : { unit: 'مليار ريال', factor: 1 / 1000 })
+  group: metric.unit === 'sar' ? 'ربحية السهم' : metric.unit === 'percent' ? 'الهوامش' : 'ملخص النتائج المالية',
+  ...(metric.unit === 'sar' ? CHART_UNITS.sar : metric.unit === 'percent' ? CHART_UNITS.percent : metric.unit === 'million_shares' ? CHART_UNITS.million_shares : { unit: 'مليار ريال', factor: 1 / 1000 })
 }));
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const plotWidth = width => Math.max(300, Math.round(numericValue(width) > 0 ? width : 600));

@@ -28,7 +28,11 @@
             "grossIncome": 33794.03,
             "operatingIncome": 13127.76,
             "netProfit": 11311.34,
-            "eps": 2.26
+            "eps": 2.26,
+            "epsBeforeExceptional": 2.21,
+            "grossMargin": 0.536345152416384,
+            "operatingMargin": 0.20835071869456556,
+            "netMargin": 0.17952231137670002
           }
         },
         {
@@ -39,7 +43,11 @@
             "grossIncome": 36314.26,
             "operatingIncome": 14009.44,
             "netProfit": 12170.54,
-            "eps": 2.43
+            "eps": 2.43,
+            "epsBeforeExceptional": 2.41,
+            "grossMargin": 0.538535151572224,
+            "operatingMargin": 0.20775794120111432,
+            "netMargin": 0.18048732381207314
           }
         },
         {
@@ -50,7 +58,11 @@
             "grossIncome": 34016.07,
             "operatingIncome": 12437.29,
             "netProfit": 13295.38,
-            "eps": 2.66
+            "eps": 2.66,
+            "epsBeforeExceptional": 2.23,
+            "grossMargin": 0.47391217484782067,
+            "operatingMargin": 0.1732764294379995,
+            "netMargin": 0.1852313465731996
           }
         },
         {
@@ -61,7 +73,11 @@
             "grossIncome": 35825.92,
             "operatingIncome": 12946.94,
             "netProfit": 24134.65,
-            "eps": 4.83
+            "eps": 4.83,
+            "epsBeforeExceptional": 2.22,
+            "grossMargin": 0.47205574238922715,
+            "operatingMargin": 0.17059373139248848,
+            "netMargin": 0.31800718929351046
           }
         },
         {
@@ -72,7 +88,11 @@
             "grossIncome": 37699.69,
             "operatingIncome": 14438.26,
             "netProfit": 14828.03,
-            "eps": 2.97
+            "eps": 2.97,
+            "epsBeforeExceptional": 2.86,
+            "grossMargin": 0.4844555317566426,
+            "operatingMargin": 0.18553720006558838,
+            "netMargin": 0.19054589463609511
           }
         }
       ]
@@ -90,7 +110,11 @@
             "grossIncome": 8671.52,
             "operatingIncome": 1654,
             "netProfit": 1071.54,
-            "eps": 1.39
+            "eps": 1.39,
+            "epsBeforeExceptional": 1.39,
+            "grossMargin": 0.5845682166581503,
+            "operatingMargin": 0.11150015572270842,
+            "netMargin": 0.0722351129764879
           }
         },
         {
@@ -101,7 +125,11 @@
             "grossIncome": 9381.34,
             "operatingIncome": 2328.02,
             "netProfit": 1656.94,
-            "eps": 2.15
+            "eps": 2.15,
+            "epsBeforeExceptional": 2.15,
+            "grossMargin": 0.5968753141418884,
+            "operatingMargin": 0.1481171846269935,
+            "netMargin": 0.10542060974383836
           }
         },
         {
@@ -112,7 +140,11 @@
             "grossIncome": 9253.49,
             "operatingIncome": 2977.26,
             "netProfit": 2231.98,
-            "eps": 2.9
+            "eps": 2.9,
+            "epsBeforeExceptional": 2.98,
+            "grossMargin": 0.5520292697826361,
+            "operatingMargin": 0.1776124104260178,
+            "netMargin": 0.13315173945932274
           }
         },
         {
@@ -123,7 +155,11 @@
             "grossIncome": 9610.03,
             "operatingIncome": 3246.42,
             "netProfit": 3106.85,
-            "eps": 4.03
+            "eps": 4.03,
+            "epsBeforeExceptional": 3.67,
+            "grossMargin": 0.5278365634157126,
+            "operatingMargin": 0.17831153245141146,
+            "netMargin": 0.1706455679168646
           }
         },
         {
@@ -134,7 +170,11 @@
             "grossIncome": 10741.5,
             "operatingIncome": 3796.87,
             "netProfit": 3466.42,
-            "eps": 4.5
+            "eps": 4.5,
+            "epsBeforeExceptional": 4.44,
+            "grossMargin": 0.5468719373211396,
+            "operatingMargin": 0.1933064890989634,
+            "netMargin": 0.1764825974927845
           }
         }
       ]
@@ -152,7 +192,11 @@
             "grossIncome": 4884.6,
             "operatingIncome": 698.74,
             "netProfit": 214.3,
-            "eps": 0.24
+            "eps": 0.24,
+            "epsBeforeExceptional": 0.24,
+            "grossMargin": 0.6182529285565113,
+            "operatingMargin": 0.08844082448912431,
+            "netMargin": 0.027124350528121108
           }
         },
         {
@@ -163,7 +207,11 @@
             "grossIncome": 5315.37,
             "operatingIncome": 1065.7,
             "netProfit": 549.67,
-            "eps": 0.61
+            "eps": 0.61,
+            "epsBeforeExceptional": 0.56,
+            "grossMargin": 0.5857047306000879,
+            "operatingMargin": 0.11743030709066607,
+            "netMargin": 0.06056856235200001
           }
         },
         {
@@ -174,7 +222,11 @@
             "grossIncome": 5857.25,
             "operatingIncome": 871.33,
             "netProfit": 1267.01,
-            "eps": 1.41
+            "eps": 1.41,
+            "epsBeforeExceptional": 0.14,
+            "grossMargin": 0.5926801009850597,
+            "operatingMargin": 0.08816764734155313,
+            "netMargin": 0.12820549144207272
           }
         },
         {
@@ -185,7 +237,11 @@
             "grossIncome": 6314.52,
             "operatingIncome": 1042.56,
             "netProfit": 596.37,
-            "eps": 0.66
+            "eps": 0.66,
+            "epsBeforeExceptional": 0.33,
+            "grossMargin": 0.6091885936562392,
+            "operatingMargin": 0.10058019615144914,
+            "netMargin": 0.057534349657419936
           }
         },
         {
@@ -196,7 +252,11 @@
             "grossIncome": 6573.51,
             "operatingIncome": 1312.79,
             "netProfit": 603.53,
-            "eps": 0.67
+            "eps": 0.67,
+            "epsBeforeExceptional": 0.67,
+            "grossMargin": 0.598502630366576,
+            "operatingMargin": 0.11952644296866322,
+            "netMargin": 0.0549499875264721
           }
         }
       ]
@@ -214,7 +274,11 @@
             "grossIncome": 91.84,
             "operatingIncome": -44.85,
             "netProfit": -37.4,
-            "eps": -1.26
+            "eps": -1.26,
+            "epsBeforeExceptional": -1.26,
+            "grossMargin": 0.2426099590542861,
+            "operatingMargin": -0.11847840443798706,
+            "netMargin": -0.09879804517236825
           }
         },
         {
@@ -225,7 +289,11 @@
             "grossIncome": 182.69,
             "operatingIncome": 43.43,
             "netProfit": 42.47,
-            "eps": 1.43
+            "eps": 1.43,
+            "epsBeforeExceptional": 1.43,
+            "grossMargin": 0.2898277120284291,
+            "operatingMargin": 0.06889932417425516,
+            "netMargin": 0.06737633658025827
           }
         },
         {
@@ -236,7 +304,11 @@
             "grossIncome": 305.47,
             "operatingIncome": 144.87,
             "netProfit": 194.68,
-            "eps": 5.73
+            "eps": 5.73,
+            "epsBeforeExceptional": 4.09,
+            "grossMargin": 0.3006239420540881,
+            "operatingMargin": 0.14257174349486282,
+            "netMargin": 0.19159154430579067
           }
         },
         {
@@ -247,7 +319,11 @@
             "grossIncome": 431.13,
             "operatingIncome": 217.68,
             "netProfit": 219.58,
-            "eps": 6.46
+            "eps": 6.46,
+            "epsBeforeExceptional": 6.36,
+            "grossMargin": 0.29486232508514915,
+            "operatingMargin": 0.1488776724527063,
+            "netMargin": 0.15017713762020052
           }
         },
         {
@@ -258,7 +334,11 @@
             "grossIncome": 521.66,
             "operatingIncome": 282.2,
             "netProfit": 259.07,
-            "eps": 7.62
+            "eps": 7.62,
+            "epsBeforeExceptional": 7.62,
+            "grossMargin": 0.27198264850181697,
+            "operatingMargin": 0.14713319673199546,
+            "netMargin": 0.13507369694315402
           }
         }
       ]

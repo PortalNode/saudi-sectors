@@ -4,7 +4,11 @@ export const METRICS = [
   { key: 'grossIncome', label: 'إجمالي الدخل' },
   { key: 'operatingIncome', label: 'دخل العمليات' },
   { key: 'netProfit', label: 'صافي الدخل' },
-  { key: 'eps', label: 'ربح السهم', unit: 'sar' }
+  { key: 'epsBeforeExceptional', label: 'ربح السهم قبل البنود الاستثنائية', unit: 'sar' },
+  { key: 'eps', label: 'ربح السهم', unit: 'sar' },
+  { key: 'grossMargin', label: 'هامش إجمالي الربح', unit: 'percent' },
+  { key: 'operatingMargin', label: 'هامش دخل العمليات', unit: 'percent' },
+  { key: 'netMargin', label: 'هامش صافي الربح', unit: 'percent' }
 ];
 export function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
@@ -19,7 +23,8 @@ export function annualChange(current, previous) {
 function formatValue(value, unit) {
   value = numericValue(value);
   if (value === null) return '<span class="missing" title="غير متاح في الجدول السنوي">—</span>';
-  return `<span class="num${value < 0 ? ' down' : ''}">${formatter.format(value)}${unit === 'sar' ? '' : ''}</span>`;
+  const displayValue = unit === 'percent' ? value * 100 : value;
+  return `<span class="num${value < 0 ? ' down' : ''}">${formatter.format(displayValue)}${unit === 'percent' ? '%' : ''}</span>`;
 }
 function formatChange(current, previous) {
   const value = annualChange(current, previous);
