@@ -1,13 +1,13 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './mining-metrics.mjs?v=mining-charts-final-20261105';
-import { renderMiningCharts, fitMiningCharts, getChartOptions } from './mining-charts.mjs?v=mining-charts-final-20261105';
+import { escapeHtml, validateDataset, renderAnnualTable } from './mining-metrics.mjs?v=mining-charts-20261106-mining-v1';
+import { renderMiningCharts, fitMiningCharts, getChartOptions } from './mining-charts.mjs?v=mining-charts-20261106-mining-v1';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, selectedChartKey = 'netProfit';
 function drawSelectedChart() {
   if (!dataset || !activeCompany) return;
   const option = getChartOptions(activeCompany, dataset.years).find(item => item.key === selectedChartKey);
-  $('mining-charts-context').textContent = `${activeCompany.name} · 2020–2025 · من بيانات الملف المحفوظ`;
+  $('mining-charts-context').textContent = `${activeCompany.name} · 2021–2025 · من بيانات الملف المحفوظ`;
   $('mining-chart-selection-status').textContent = option?.available
-    ? `مقارنة ${option.label} للأعوام 2020–2025. يمكنك اختيار أي بند آخر من القائمة.`
+    ? `مقارنة ${option.label} للأعوام 2021–2025. يمكنك اختيار أي بند آخر من القائمة.`
     : 'هذا البند غير متاح لبعض السنوات في الملف؛ تظهر السنوات بعلامة «—» دون أرقام افتراضية.';
   $('mining-charts-grid').innerHTML = renderMiningCharts(activeCompany, dataset.years, selectedChartKey);
   fitMiningCharts($('mining-charts-grid'), activeCompany, dataset.years);
@@ -32,7 +32,7 @@ function selectCompany(symbol, replaceHistory = false) {
   activeCompany = company;
   populateChartOptions(company);
   drawSelectedChart();
-  document.title = `${company.name} | النتائج السنوية 2020–2025 | السوق السعودي`;
+  document.title = `${company.name} | النتائج السنوية 2021–2025 | السوق السعودي`;
   const url = new URL(window.location.href); url.searchParams.set('symbol', company.symbol);
   const next = `${url.pathname}${url.search}${url.hash}`;
   if (replaceHistory) window.history.replaceState({ symbol: company.symbol }, '', next);
@@ -40,14 +40,14 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('mining-financials.json?v=mining-charts-final-20261105');
+    const response = await fetch('mining-financials.json?v=mining-charts-20261106-mining-v1');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('mining-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;
     selectCompany(new URLSearchParams(window.location.search).get('symbol'), true);
-    $('mining-load-status').textContent = 'المصدر: ملف قطاعالتعدين.txt · بيانات ثابتة 2020–2025 · نسب التغير محسوبة من القيم السنوية المخزنة';
+    $('mining-load-status').textContent = 'المصدر: ملف argaam_mining.xlsx · بيانات ثابتة 2021–2025 · نسب التغير محسوبة من القيم السنوية المخزنة';
   } catch (error) {
-    $('mining-load-status').textContent = 'تعذر تحميل ملف نتائج التعدين. أعد تحميل الصفحة؛ لم تُستبدل البيانات بأرقام افتراضية.';
+    $('mining-load-status').textContent = 'تعذر تحميل ملف نتائج التعدين والمعادن. أعد تحميل الصفحة؛ لم تُستبدل البيانات بأرقام افتراضية.';
     console.error('Mining annual data could not be loaded:', error);
   }
 }

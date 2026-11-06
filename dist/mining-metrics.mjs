@@ -4,7 +4,11 @@ export const METRICS = [
   { key: 'grossIncome', label: 'إجمالي الدخل' },
   { key: 'operatingIncome', label: 'دخل العمليات' },
   { key: 'netProfit', label: 'صافي الدخل' },
-  { key: 'eps', label: 'ربح السهم', unit: 'sar' }
+  { key: 'epsBeforeExceptional', label: 'ربح السهم قبل البنود الاستثنائية', unit: 'sar' },
+  { key: 'eps', label: 'ربح السهم', unit: 'sar' },
+  { key: 'grossMargin', label: 'هامش إجمالي الربح', unit: 'percent' },
+  { key: 'operatingMargin', label: 'هامش دخل العمليات', unit: 'percent' },
+  { key: 'netMargin', label: 'هامش صافي الربح', unit: 'percent' }
 ];
 export function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
@@ -19,7 +23,8 @@ export function annualChange(current, previous) {
 function formatValue(value, unit) {
   value = numericValue(value);
   if (value === null) return '<span class="missing" title="غير متاح في الجدول السنوي">—</span>';
-  return `<span class="num${value < 0 ? ' down' : ''}">${formatter.format(value)}${unit === 'sar' ? '' : ''}</span>`;
+  const displayValue = unit === 'percent' ? value * 100 : value;
+  return `<span class="num${value < 0 ? ' down' : ''}">${formatter.format(displayValue)}${unit === 'percent' ? '%' : ''}</span>`;
 }
 function formatChange(current, previous) {
   const value = annualChange(current, previous);
@@ -29,7 +34,7 @@ function formatChange(current, previous) {
   return `<span class="num ${trend}">${!zero && value > 0 ? '+' : ''}${formatter.format(zero ? 0 : value)}%</span>`;
 }
 export function validateDataset(data) {
-  if (data?.schemaVersion !== 1 || data.sector !== 'التعدين والمعادن' || !Array.isArray(data.years) || JSON.stringify(data.years) !== JSON.stringify([2020, 2021, 2022, 2023, 2024, 2025]) || !Array.isArray(data.companies) || data.companies.length !== 2) throw new Error('invalid annual mining dataset');
+  if (data?.schemaVersion !== 1 || data.sector !== 'التعدين والمعادن' || !Array.isArray(data.years) || JSON.stringify(data.years) !== JSON.stringify([2021, 2022, 2023, 2024, 2025]) || !Array.isArray(data.companies) || data.companies.length !== 2) throw new Error('invalid annual mining dataset');
   const symbols = new Set();
   for (const company of data.companies) {
     if (!/^\d{4}$/.test(company.symbol) || symbols.has(company.symbol) || typeof company.name !== 'string' || !Array.isArray(company.years)) throw new Error('invalid mining company');
@@ -47,7 +52,7 @@ export function renderAnnualTable(company, years) {
   const columns = '<col class="annual-col-label"><col class="annual-col-value">' + years.slice(1).map(() => '<col class="annual-col-change"><col class="annual-col-value">').join('');
   const header = `<tr><th scope="col" class="annual-label">البند</th><th scope="col">${years[0]}</th>${years.slice(1).map((year, index) => `<th scope="col" class="annual-change-heading">نسبة التغير</th><th scope="col">${year}</th>`).join('')}</tr>`;
   const rows = METRICS.map(metric => {
-    const suffix = metric.unit === 'sar' ? ' (ريال)' : metric.unit === 'million_shares' ? ' (مليون سهم)' : ' (مليون ريال)';
+    const suffix = metric.unit === 'sar' ? ' (ريال)' : metric.unit === 'percent' ? ' (%)' : metric.unit === 'million_shares' ? ' (مليون سهم)' : ' (مليون ريال)';
     const label = `<th scope="row" class="annual-label">${escapeHtml(metric.label + suffix)}</th>`;
     const cells = `<td>${formatValue(value(years[0], metric.key), metric.unit)}</td>` + years.slice(1).map((year, index) => `<td class="annual-change">${formatChange(value(year, metric.key), value(years[index], metric.key))}</td><td>${formatValue(value(year, metric.key), metric.unit)}</td>`).join('');
     return `<tr data-metric="${metric.key}">${label}${cells}</tr>`;

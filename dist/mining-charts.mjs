@@ -1,19 +1,20 @@
-import { escapeHtml, numericValue, METRICS } from './mining-metrics.mjs';
+import { escapeHtml, numericValue, METRICS } from './mining-metrics.mjs?v=mining-charts-20261106-mining-v1';
 
 const HEIGHT = 280;
 const GOLD = '#f59e0b';
-const DEFAULT_YEARS = [2020, 2021, 2022, 2023, 2024, 2025];
+const DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025];
 const decimal = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const CHART_UNITS = {
   million_sar: { unit: 'مليار ريال', factor: 1 / 1000 },
   million_shares: { unit: 'مليون سهم', factor: 1 },
-  sar: { unit: 'ريال', factor: 1 }
+  sar: { unit: 'ريال', factor: 1 },
+  percent: { unit: '%', factor: 100 }
 };
 const DEFINITIONS = METRICS.map(metric => ({
   key: metric.key,
   title: metric.label,
-  group: metric.unit === 'sar' ? 'ربحية السهم' : 'ملخص النتائج المالية',
-  ...(metric.unit === 'sar' ? CHART_UNITS.sar : metric.unit === 'million_shares' ? CHART_UNITS.million_shares : { unit: 'مليار ريال', factor: 1 / 1000 })
+  group: metric.unit === 'sar' ? 'ربحية السهم' : metric.unit === 'percent' ? 'الهوامش' : 'ملخص النتائج المالية',
+  ...(metric.unit === 'sar' ? CHART_UNITS.sar : metric.unit === 'percent' ? CHART_UNITS.percent : metric.unit === 'million_shares' ? CHART_UNITS.million_shares : { unit: 'مليار ريال', factor: 1 / 1000 })
 }));
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const plotWidth = width => Math.max(300, Math.round(numericValue(width) > 0 ? width : 600));

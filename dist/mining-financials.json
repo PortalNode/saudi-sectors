@@ -1,40 +1,182 @@
 {
   "schemaVersion": 1,
   "sector": "التعدين والمعادن",
-  "years": [2020, 2021, 2022, 2023, 2024, 2025],
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
   "source": {
-    "name": "قطاعالتعدين.txt",
+    "name": "argaam_mining.xlsx",
     "provider": "أرقام",
-    "importedAt": "2026-11-05T00:00:00Z",
+    "importedAt": "2026-11-06T00:00:00Z",
     "note": "النتائج المالية السنوية فقط؛ لم تُدرج أرباح الربع الرابع أو أي بيانات ربع سنوية."
   },
   "companies": [
     {
-      "symbol": "1211",
-      "name": "معادن",
-      "fullName": "شركة التعدين العربية السعودية",
-      "sourceUrl": "https://www.argaam.com/ar/company-results-summary/listing/836",
+      "symbol": "1322",
+      "name": "أماك",
+      "fullName": "أماك",
       "years": [
-        {"year": 2020, "period": "FY", "values": {"revenue": 18579.82, "grossIncome": 2567.00, "operatingIncome": 810.60, "netProfit": -208.98, "eps": -0.0566}},
-        {"year": 2021, "period": "FY", "values": {"revenue": 26769.01, "grossIncome": 9471.09, "operatingIncome": 7730.07, "netProfit": 5227.70, "eps": 1.42}},
-        {"year": 2022, "period": "FY", "values": {"revenue": 40277.12, "grossIncome": 16248.95, "operatingIncome": 13536.81, "netProfit": 9319.05, "eps": 2.52}},
-        {"year": 2023, "period": "FY", "values": {"revenue": 29271.93, "grossIncome": 6914.41, "operatingIncome": 3816.16, "netProfit": 1577.33, "eps": 0.43}},
-        {"year": 2024, "period": "FY", "values": {"revenue": 32546.16, "grossIncome": 10688.62, "operatingIncome": 7158.02, "netProfit": 2871.54, "eps": 0.76}},
-        {"year": 2025, "period": "FY", "values": {"revenue": 38577.73, "grossIncome": 14791.90, "operatingIncome": 10614.54, "netProfit": 7347.88, "eps": 1.89}}
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 586.65,
+            "grossIncome": 267.7,
+            "operatingIncome": 216.61,
+            "netProfit": 197.27,
+            "epsBeforeExceptional": 2.19,
+            "eps": 2.19,
+            "grossMargin": 0.4563197818119833,
+            "operatingMargin": 0.3692320804568312,
+            "netMargin": 0.33626523480780707
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 582.77,
+            "grossIncome": 208.36,
+            "operatingIncome": 143.95,
+            "netProfit": 126.33,
+            "epsBeforeExceptional": 1.4,
+            "eps": 1.4,
+            "grossMargin": 0.3575338469722189,
+            "operatingMargin": 0.247009969627812,
+            "netMargin": 0.21677505705509892
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 487.9,
+            "grossIncome": 123.44,
+            "operatingIncome": 64.01,
+            "netProfit": 54.58,
+            "epsBeforeExceptional": 0.56,
+            "eps": 0.61,
+            "grossMargin": 0.2530026644804263,
+            "operatingMargin": 0.13119491699118674,
+            "netMargin": 0.11186718589874975
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 780.65,
+            "grossIncome": 288.33,
+            "operatingIncome": 222.35,
+            "netProfit": 177.9,
+            "epsBeforeExceptional": 1.98,
+            "eps": 1.98,
+            "grossMargin": 0.3693460577723692,
+            "operatingMargin": 0.28482674694165117,
+            "netMargin": 0.22788701722923208
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1026.08,
+            "grossIncome": 422.43,
+            "operatingIncome": 354.48,
+            "netProfit": 280.6,
+            "epsBeforeExceptional": 2.97,
+            "eps": 3.12,
+            "grossMargin": 0.41169304537657886,
+            "operatingMargin": 0.34547013878060195,
+            "netMargin": 0.273467955714954
+          }
+        }
       ]
     },
     {
-      "symbol": "1322",
-      "name": "أماك",
-      "fullName": "شركة المصانع الكبرى للتعدين",
-      "sourceUrl": "https://www.argaam.com/ar/company-results-summary/listing/13986",
+      "symbol": "1211",
+      "name": "معادن",
+      "fullName": "معادن",
       "years": [
-        {"year": 2020, "period": "FY", "values": {"revenue": 375.15, "grossIncome": 125.26, "operatingIncome": 88.74, "netProfit": 88.80, "eps": 0.99}},
-        {"year": 2021, "period": "FY", "values": {"revenue": 586.65, "grossIncome": 267.70, "operatingIncome": 216.61, "netProfit": 197.27, "eps": 2.19}},
-        {"year": 2022, "period": "FY", "values": {"revenue": 582.77, "grossIncome": 208.36, "operatingIncome": 150.68, "netProfit": 126.33, "eps": 1.91}},
-        {"year": 2023, "period": "FY", "values": {"revenue": 487.90, "grossIncome": 123.44, "operatingIncome": 64.01, "netProfit": 54.58, "eps": 0.61}},
-        {"year": 2024, "period": "FY", "values": {"revenue": 780.65, "grossIncome": 288.33, "operatingIncome": 222.35, "netProfit": 177.90, "eps": 1.98}},
-        {"year": 2025, "period": "FY", "values": {"revenue": 1026.08, "grossIncome": 422.43, "operatingIncome": 354.48, "netProfit": 280.60, "eps": 3.12}}
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 26769.01,
+            "grossIncome": 9471.09,
+            "operatingIncome": 7730.07,
+            "netProfit": 5227.7,
+            "epsBeforeExceptional": 1.5,
+            "eps": 1.42,
+            "grossMargin": 0.3538080041062408,
+            "operatingMargin": 0.28876936427607897,
+            "netMargin": 0.1952892542533325
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 40277.12,
+            "grossIncome": 16248.95,
+            "operatingIncome": 13536.81,
+            "netProfit": 9319.05,
+            "epsBeforeExceptional": 2.47,
+            "eps": 2.52,
+            "grossMargin": 0.4034287953061192,
+            "operatingMargin": 0.3360918059682519,
+            "netMargin": 0.23137329580665147
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 29271.93,
+            "grossIncome": 6914.41,
+            "operatingIncome": 3816.16,
+            "netProfit": 1577.33,
+            "epsBeforeExceptional": 0.5,
+            "eps": 0.43,
+            "grossMargin": 0.2362129862977945,
+            "operatingMargin": 0.1303692650262555,
+            "netMargin": 0.053885411723791354
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 32546.16,
+            "grossIncome": 10688.62,
+            "operatingIncome": 7158.02,
+            "netProfit": 2871.54,
+            "epsBeforeExceptional": 0.97,
+            "eps": 0.76,
+            "grossMargin": 0.32841416621807307,
+            "operatingMargin": 0.21993439471814802,
+            "netMargin": 0.08822976351127138
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 38577.73,
+            "grossIncome": 14791.9,
+            "operatingIncome": 10614.54,
+            "netProfit": 7347.88,
+            "epsBeforeExceptional": 1.89,
+            "eps": 1.89,
+            "grossMargin": 0.38343106242902314,
+            "operatingMargin": 0.2751468269387546,
+            "netMargin": 0.190469475523832
+          }
+        }
       ]
     }
   ]
