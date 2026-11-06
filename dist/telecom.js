@@ -1,5 +1,5 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './telecom-metrics.mjs?v=telecom-charts-20261106-v4';
-import { renderTelecomCharts, fitTelecomCharts, getChartOptions } from './telecom-charts.mjs?v=telecom-charts-20261106-v4';
+import { escapeHtml, validateDataset, renderAnnualTable } from './telecom-metrics.mjs?v=telecom-charts-20261106-v5';
+import { renderTelecomCharts, fitTelecomCharts, getChartOptions } from './telecom-charts.mjs?v=telecom-charts-20261106-v5';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, selectedChartKey = 'netProfit';
 function drawSelectedChart() {
@@ -40,7 +40,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('telecom-financials.json?v=telecom-charts-20261106-v4');
+    const response = await fetch('telecom-financials.json?v=telecom-charts-20261106-v5');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('telecom-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;
