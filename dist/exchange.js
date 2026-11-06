@@ -1,5 +1,5 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './exchange-metrics.mjs?v=exchange-charts-20261106-v11';
-import { renderExchangeCharts, fitExchangeCharts, getChartOptions } from './exchange-charts.mjs?v=exchange-charts-20261106-v11';
+import { escapeHtml, validateDataset, renderAnnualTable } from './exchange-metrics.mjs?v=exchange-value-labels-20261106-v12';
+import { renderExchangeCharts, fitExchangeCharts, getChartOptions } from './exchange-charts.mjs?v=exchange-value-labels-20261106-v12';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, activeYears = [], selectedChartKey = 'netProfit';
 function drawSelectedChart() {
@@ -42,7 +42,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('exchange-financials.json?v=exchange-charts-20261106-v11');
+    const response = await fetch('exchange-financials.json?v=exchange-value-labels-20261106-v12');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('exchange-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;

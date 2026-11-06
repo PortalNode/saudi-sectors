@@ -1,5 +1,5 @@
 import { escapeHtml, validateDataset, renderAnnualTable } from './bank-metrics.mjs?v=compact-columns-20261104';
-import { renderBankCharts, fitBankCharts, getChartOptions } from './bank-charts.mjs?v=metric-selector-20261104';
+import { renderBankCharts, fitBankCharts, getChartOptions } from './bank-charts.mjs?v=value-labels-20261106';
 import { buildCurrentBankPE, renderCurrentBankPECard } from './bank-current-pe.mjs?v=20261105';
 import { renderCurrentPEComparison, fitCurrentPEComparison } from './bank-current-pe-chart.mjs?v=20261105';
 

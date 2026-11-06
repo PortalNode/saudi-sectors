@@ -4,6 +4,14 @@ const HEIGHT = 280;
 const GOLD = '#f59e0b';
 const DEFAULT_YEARS = [2021, 2022, 2023, 2024, 2025];
 const decimal = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Value labels above bars: SAR money shows billions with three decimals when >= 1 billion, else millions with one decimal.
+const billionValue = new Intl.NumberFormat('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+const millionValue = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const isMoneyModel = model => model.unit === 'مليار ريال';
+const barLabel = (model, point) => !isMoneyModel(model) ? decimal.format(point.value) : Math.abs(point.rawValue) >= 1000 ? billionValue.format(point.rawValue / 1000) : millionValue.format(point.rawValue);
+const barUnit = (model, point) => isMoneyModel(model) ? (Math.abs(point.rawValue) >= 1000 ? 'مليار ريال' : 'مليون ريال') : model.unit;
+
+
 const CHART_UNITS = {
   million_sar: { unit: 'مليار ريال', factor: 1 / 1000 },
   million_shares: { unit: 'مليون سهم', factor: 1 },
@@ -70,9 +78,7 @@ function tickLabel(value, axis) {
 }
 function pointTitle(model, series, point) {
   if (point.value === null) return `${series.title} · ${point.year}: غير متاح (—)`;
-  const display = decimal.format(point.value);
-  const original = model.unit === 'مليار ريال' ? `؛ الأصل: ${decimal.format(point.rawValue)} مليون ريال` : '';
-  return `${series.title} · ${point.year}: ${display} ${model.unit}${original}`;
+  return `${series.title} · ${point.year}: ${barLabel(model, point)} ${barUnit(model, point)}`;
 }
 export function renderChartSvg(model, width = 600) {
   const W = plotWidth(width), axis = chartAxis(model), axisLabels = axis.ticks.map(value => tickLabel(value, axis));
@@ -96,7 +102,7 @@ export function renderChartSvg(model, width = 600) {
     } else {
       const endpoint = scale(point.value), y = Math.min(zero, endpoint), height = Math.abs(endpoint - zero);
       bars.push(`<rect class="chart-bar" ${attributes} data-chart-value="${escapeHtml(point.value)}" x="${coordinate(x)}" y="${coordinate(y)}" width="${coordinate(barWidth)}" height="${coordinate(height)}" fill="${GOLD}" aria-label="${title}"><title>${title}</title></rect>`);
-      const label = decimal.format(point.value), halfWidth = label.length * 3.3;
+      const label = barLabel(model, point), halfWidth = label.length * 3.3;
       let labelY = point.value < 0 ? endpoint + 16 : y - 8;
       if (point.value >= 0) while (labelY > 26 && occupied.some(other => Math.abs(other.x - labelX) < other.halfWidth + halfWidth + 2 && Math.abs(other.y - labelY) < 15)) labelY -= 16;
       labelY = clamp(labelY, 12, HEIGHT - 28);

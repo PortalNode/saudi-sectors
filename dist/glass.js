@@ -1,5 +1,5 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './glass-metrics.mjs?v=glass-charts-20261106-v11';
-import { renderGlassCharts, fitGlassCharts, getChartOptions } from './glass-charts.mjs?v=glass-charts-20261106-v11';
+import { escapeHtml, validateDataset, renderAnnualTable } from './glass-metrics.mjs?v=glass-value-labels-20261106-v12';
+import { renderGlassCharts, fitGlassCharts, getChartOptions } from './glass-charts.mjs?v=glass-value-labels-20261106-v12';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, activeYears = [], selectedChartKey = 'netProfit';
 function drawSelectedChart() {
@@ -42,7 +42,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('glass-financials.json?v=glass-charts-20261106-v11');
+    const response = await fetch('glass-financials.json?v=glass-value-labels-20261106-v12');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('glass-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;

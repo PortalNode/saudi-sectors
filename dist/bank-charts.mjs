@@ -5,6 +5,14 @@ const HEIGHT = 280;
 const GOLD = '#f59e0b';
 const BLUE = '#8ab8ff';
 const decimal = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Value labels above bars: SAR money shows billions with three decimals when >= 1 billion, else millions with one decimal.
+const billionValue = new Intl.NumberFormat('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+const millionValue = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const isMoneyModel = model => model.unit === 'مليار ريال';
+const barLabel = (model, point) => !isMoneyModel(model) ? decimal.format(point.value) : Math.abs(point.rawValue) >= 1000 ? billionValue.format(point.rawValue / 1000) : millionValue.format(point.rawValue);
+const barUnit = (model, point) => isMoneyModel(model) ? (Math.abs(point.rawValue) >= 1000 ? 'مليار ريال' : 'مليون ريال') : model.unit;
+
+
 const compactPercent = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const CHART_UNITS = {
   million_sar: { unit: 'مليار ريال', factor: 1 / 1000 },
@@ -84,9 +92,8 @@ function tickLabel(value, axis, percentage) {
 
 function pointTitle(model, series, point) {
   if (point.value === null) return `${series.title} · ${point.year}: غير متاح (—)`;
-  const display = `${decimal.format(point.value)}${model.percentage ? '%' : ''}`;
-  const original = model.unit === 'مليار ريال' ? `؛ الأصل: ${decimal.format(point.rawValue)} مليون ريال` : '';
-  return `${series.title} · ${point.year}: ${display} ${model.unit}${original}`;
+  const display = isMoneyModel(model) ? barLabel(model, point) : `${decimal.format(point.value)}${model.percentage ? '%' : ''}`;
+  return `${series.title} · ${point.year}: ${display} ${barUnit(model, point)}`;
 }
 
 /** Self-contained, inline SVG; widths are CSS pixels so text stays 12px on mobile. */
@@ -136,7 +143,7 @@ export function renderChartSvg(model, width = 600) {
       bars.push(`<rect class="chart-bar" ${attributes} data-chart-value="${escapeHtml(point.value)}" x="${coordinate(x)}" y="${coordinate(y)}" width="${coordinate(barWidth)}" height="${coordinate(height)}" fill="${series.color}" aria-label="${title}"><title>${title}</title></rect>`);
       // Narrow paired charts use one decimal and staggered heights; tooltips always use two.
       const narrow = paired && groupWidth < 90;
-      const label = `${(narrow ? compactPercent : decimal).format(point.value)}${model.percentage ? '%' : ''}`;
+      const label = isMoneyModel(model) ? barLabel(model, point) : `${(narrow ? compactPercent : decimal).format(point.value)}${model.percentage ? '%' : ''}`;
       let labelY = point.value < 0 ? endpoint + 16 : narrow ? pairLabelTop - seriesIndex * 16 : y - 8;
       const halfWidth = label.length * 3.3;
       if (point.value >= 0) {
