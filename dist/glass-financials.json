@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "sector": "المنتجات الزجاجية",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_glass.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-06T04:31:40Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "2150",
+      "name": "زجاج",
+      "fullName": "زجاج (2150) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "زجاج",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 86.93,
+            "grossIncome": 2.79,
+            "operatingIncome": -14.27,
+            "netProfit": 51.12,
+            "epsBeforeExceptional": 1.55,
+            "eps": 1.55,
+            "grossMargin": 0.03209478891061773,
+            "operatingMargin": -0.16415506729552512,
+            "netMargin": 0.5880593581042217
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 112.32,
+            "grossIncome": 3.43,
+            "operatingIncome": -11.3,
+            "netProfit": 104.33,
+            "epsBeforeExceptional": 3.31,
+            "eps": 3.17,
+            "grossMargin": 0.030537749287749293,
+            "operatingMargin": -0.10060541310541311,
+            "netMargin": 0.9288639601139601
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 153.92,
+            "grossIncome": 35.19,
+            "operatingIncome": 18.05,
+            "netProfit": 47.88,
+            "epsBeforeExceptional": 1.46,
+            "eps": 1.46,
+            "grossMargin": 0.2286252598752599,
+            "operatingMargin": 0.11726871101871103,
+            "netMargin": 0.3110706860706861
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 138.93,
+            "grossIncome": 33.98,
+            "operatingIncome": 12.5,
+            "netProfit": 96.83,
+            "epsBeforeExceptional": 2.94,
+            "eps": 2.94,
+            "grossMargin": 0.24458360325343695,
+            "operatingMargin": 0.0899733678831066,
+            "netMargin": 0.6969696969696969
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 128.57,
+            "grossIncome": 20.72,
+            "operatingIncome": -3.75,
+            "netProfit": 83.66,
+            "epsBeforeExceptional": 2.54,
+            "eps": 2.54,
+            "grossMargin": 0.16115734619273547,
+            "operatingMargin": -0.029166990744341606,
+            "netMargin": 0.650696118845765
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4145",
+      "name": "أو جي سي",
+      "fullName": "أو جي سي (4145) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أو جي سي",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 463.24,
+            "grossIncome": 251.45,
+            "operatingIncome": 186.23,
+            "netProfit": 173.68,
+            "epsBeforeExceptional": 5.52,
+            "eps": 5.43,
+            "grossMargin": 0.5428071841809861,
+            "operatingMargin": 0.402016233485882,
+            "netMargin": 0.37492444521198515
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 502.18,
+            "grossIncome": 256.2,
+            "operatingIncome": 187.8,
+            "netProfit": 177.65,
+            "epsBeforeExceptional": 5.55,
+            "eps": 5.55,
+            "grossMargin": 0.5101756342347366,
+            "operatingMargin": 0.37396949301047433,
+            "netMargin": 0.35375761679079215
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 393.98,
+            "grossIncome": 149.7,
+            "operatingIncome": 76.81,
+            "netProfit": 67.66,
+            "epsBeforeExceptional": 2.33,
+            "eps": 2.11,
+            "grossMargin": 0.379968526321133,
+            "operatingMargin": 0.19495913498147113,
+            "netMargin": 0.17173460581755418
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 327.12,
+            "grossIncome": 105.06,
+            "operatingIncome": 39.97,
+            "netProfit": 1.32,
+            "epsBeforeExceptional": 1.23,
+            "eps": 0.04,
+            "grossMargin": 0.3211665443873808,
+            "operatingMargin": 0.12218757642455368,
+            "netMargin": 0.004035216434336023
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 354.67,
+            "grossIncome": 120.03,
+            "operatingIncome": 32.54,
+            "netProfit": 63.16,
+            "epsBeforeExceptional": 1.05,
+            "eps": 1.97,
+            "grossMargin": 0.3384272704203908,
+            "operatingMargin": 0.09174725801449234,
+            "netMargin": 0.1780810330729974
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4144",
+      "name": "رؤوم",
+      "fullName": "رؤوم (4144) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "رؤوم",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 110.19,
+            "grossIncome": 38.0,
+            "operatingIncome": 27.58,
+            "netProfit": 24.88,
+            "epsBeforeExceptional": 1.99,
+            "eps": 1.99,
+            "grossMargin": 0.344858880116163,
+            "operatingMargin": 0.2502949450948362,
+            "netMargin": 0.2257918141392141
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 135.23,
+            "grossIncome": 43.71,
+            "operatingIncome": 34.14,
+            "netProfit": 30.74,
+            "epsBeforeExceptional": 2.46,
+            "eps": 2.46,
+            "grossMargin": 0.32322709457960513,
+            "operatingMargin": 0.25245877394069366,
+            "netMargin": 0.22731642387044296
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 135.04,
+            "grossIncome": 42.57,
+            "operatingIncome": 30.87,
+            "netProfit": 46.58,
+            "epsBeforeExceptional": 3.73,
+            "eps": 3.73,
+            "grossMargin": 0.3152399289099526,
+            "operatingMargin": 0.22859893364928913,
+            "netMargin": 0.34493483412322273
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 116.04,
+            "grossIncome": 37.06,
+            "operatingIncome": 23.74,
+            "netProfit": 42.86,
+            "epsBeforeExceptional": 3.43,
+            "eps": 3.43,
+            "grossMargin": 0.31937263012754225,
+            "operatingMargin": 0.20458462599103755,
+            "netMargin": 0.36935539469148565
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 103.62,
+            "grossIncome": 26.67,
+            "operatingIncome": 13.47,
+            "netProfit": -4.64,
+            "epsBeforeExceptional": -0.37,
+            "eps": -0.37,
+            "grossMargin": 0.25738274464389116,
+            "operatingMargin": 0.129994209612044,
+            "netMargin": -0.044779000193012924
+          }
+        }
+      ]
+    }
+  ]
+}
