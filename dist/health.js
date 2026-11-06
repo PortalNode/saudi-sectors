@@ -1,5 +1,5 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './health-metrics.mjs?v=health-charts-20261106-v10';
-import { renderHealthCharts, fitHealthCharts, getChartOptions } from './health-charts.mjs?v=health-charts-20261106-v10';
+import { escapeHtml, validateDataset, renderAnnualTable } from './health-metrics.mjs?v=health-charts-20261106-v11';
+import { renderHealthCharts, fitHealthCharts, getChartOptions } from './health-charts.mjs?v=health-charts-20261106-v11';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, activeYears = [], selectedChartKey = 'netProfit';
 function drawSelectedChart() {
@@ -42,7 +42,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('health-financials.json?v=health-charts-20261106-v10');
+    const response = await fetch('health-financials.json?v=health-charts-20261106-v11');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('health-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;

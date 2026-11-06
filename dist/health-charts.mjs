@@ -1,4 +1,4 @@
-import { escapeHtml, numericValue, METRICS } from './health-metrics.mjs?v=health-charts-20261106-v10';
+import { escapeHtml, numericValue, METRICS } from './health-metrics.mjs?v=health-charts-20261106-v11';
 
 const HEIGHT = 280;
 const GOLD = '#f59e0b';
