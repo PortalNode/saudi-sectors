@@ -1,15 +1,15 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './telecom-metrics.mjs?v=telecom-charts-20261106-v6';
-import { renderTelecomCharts, fitTelecomCharts, getChartOptions } from './telecom-charts.mjs?v=telecom-charts-20261106-v6';
+import { escapeHtml, validateDataset, renderAnnualTable } from './telecom-metrics.mjs?v=telecom-charts-context';
+import { renderTelecomCharts, fitTelecomCharts, getChartOptions } from './telecom-charts.mjs?v=telecom-charts-grid';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, selectedChartKey = 'netProfit';
 function drawSelectedChart() {
   if (!dataset || !activeCompany) return;
   const option = getChartOptions(activeCompany, dataset.years).find(item => item.key === selectedChartKey);
-  $('telecom-charts-20261106-v6').textContent = `${activeCompany.name} · 2021–2025 · من بيانات الملف المحفوظ`;
+  $('telecom-charts-grid').textContent = `${activeCompany.name} · 2021–2025 · من بيانات الملف المحفوظ`;
   $('telecom-chart-selection-status').textContent = option?.available
     ? `مقارنة ${option.label} للأعوام 2021–2025. يمكنك اختيار أي بند آخر من القائمة.`
     : 'هذا البند غير متاح لبعض السنوات في الملف؛ تظهر السنوات بعلامة «—» دون أرقام افتراضية.';
-  $('telecom-charts-20261106-v6').innerHTML = renderTelecomCharts(activeCompany, dataset.years, selectedChartKey);
+  $('telecom-charts-grid').innerHTML = renderTelecomCharts(activeCompany, dataset.years, selectedChartKey);
   fitTelecomCharts($('telecom-charts-20261106-v6'), activeCompany, dataset.years);
 }
 function populateChartOptions(company) {

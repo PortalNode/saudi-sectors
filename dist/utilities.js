@@ -1,15 +1,15 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './utilities-metrics.mjs?v=utilities-charts-20261106-v6';
-import { renderUtilitiesCharts, fitUtilitiesCharts, getChartOptions } from './utilities-charts.mjs?v=utilities-charts-20261106-v6';
+import { escapeHtml, validateDataset, renderAnnualTable } from './utilities-metrics.mjs?v=utilities-charts-context';
+import { renderUtilitiesCharts, fitUtilitiesCharts, getChartOptions } from './utilities-charts.mjs?v=utilities-charts-grid';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, selectedChartKey = 'netProfit';
 function drawSelectedChart() {
   if (!dataset || !activeCompany) return;
   const option = getChartOptions(activeCompany, dataset.years).find(item => item.key === selectedChartKey);
-  $('utilities-charts-20261106-v6').textContent = `${activeCompany.name} · 2021–2025 · من بيانات الملف المحفوظ`;
+  $('utilities-charts-grid').textContent = `${activeCompany.name} · 2021–2025 · من بيانات الملف المحفوظ`;
   $('utilities-chart-selection-status').textContent = option?.available
     ? `مقارنة ${option.label} للأعوام 2021–2025. يمكنك اختيار أي بند آخر من القائمة.`
     : 'هذا البند غير متاح لبعض السنوات في الملف؛ تظهر السنوات بعلامة «—» دون أرقام افتراضية.';
-  $('utilities-charts-20261106-v6').innerHTML = renderUtilitiesCharts(activeCompany, dataset.years, selectedChartKey);
+  $('utilities-charts-grid').innerHTML = renderUtilitiesCharts(activeCompany, dataset.years, selectedChartKey);
   fitUtilitiesCharts($('utilities-charts-20261106-v6'), activeCompany, dataset.years);
 }
 function populateChartOptions(company) {
