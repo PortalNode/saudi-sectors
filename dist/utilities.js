@@ -1,5 +1,5 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './utilities-metrics.mjs?v=utilities-charts-20261106-v6';
-import { renderUtilitiesCharts, fitUtilitiesCharts, getChartOptions } from './utilities-charts.mjs?v=utilities-charts-20261106-v6';
+import { escapeHtml, validateDataset, renderAnnualTable } from './utilities-metrics.mjs?v=utilities-charts-20261106-v7';
+import { renderUtilitiesCharts, fitUtilitiesCharts, getChartOptions } from './utilities-charts.mjs?v=utilities-charts-20261106-v7';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, selectedChartKey = 'netProfit';
 function drawSelectedChart() {
@@ -40,7 +40,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('utilities-financials.json?v=utilities-charts-20261106-v6');
+    const response = await fetch('utilities-financials.json?v=utilities-charts-20261106-v7');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('utilities-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;
