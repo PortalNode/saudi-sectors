@@ -108,12 +108,12 @@ export function renderChartSvg(model, width = 600) {
   return `<svg xmlns="http://www.w3.org/2000/svg" class="bank-chart-svg" width="${W}" height="${HEIGHT}" viewBox="0 0 ${W} ${HEIGHT}" role="img" aria-label="${escapeHtml(description)}" data-axis-min="${escapeHtml(axis.min)}" data-axis-max="${escapeHtml(axis.max)}" data-axis-step="${escapeHtml(axis.step)}" data-zero-y="${coordinate(zero)}" style="width:100%;height:280px;display:block;font-family:inherit;font-size:12px;direction:ltr"><title>${escapeHtml(description)}</title><g font-family="inherit" font-size="12" direction="ltr" style="unicode-bidi:isolate">${grid}<line class="chart-zero-baseline" x1="${coordinate(left)}" x2="${W - right}" y1="${coordinate(zero)}" y2="${coordinate(zero)}" stroke="var(--muted, #98a4b3)" stroke-width="1.3"/>${bars.join('')}${labels.join('')}${yearLabels.join('')}</g></svg>`;
 }
 const signature = model => JSON.stringify(model);
-export function renderUtilitiesCharts(company, years = DEFAULT_YEARS, selectedKey = 'netProfit') {
+export function renderHealthCharts(company, years = DEFAULT_YEARS, selectedKey = 'netProfit') {
   const models = getChartModels(company, years);
   const selected = models.find(model => model.key === selectedKey) || models.find(model => model.key === 'netProfit');
   return `<article class="bank-chart-card" data-chart-key="${escapeHtml(selected.key)}" dir="rtl"><h4>${escapeHtml(selected.title)}</h4><p class="bank-chart-unit">${escapeHtml(selected.unit)}</p><div class="bank-chart-canvas" data-chart-canvas="${escapeHtml(selected.key)}" data-plot-width="600" data-company-symbol="${escapeHtml(company.symbol)}" data-plot-signature="${escapeHtml(signature(selected))}">${renderChartSvg(selected)}</div></article>`;
 }
-export function fitUtilitiesCharts(container, company, years = DEFAULT_YEARS) {
+export function fitHealthCharts(container, company, years = DEFAULT_YEARS) {
   if (!container?.querySelectorAll) return;
   const models = new Map(getChartModels(company, years).map(model => [model.key, model]));
   for (const canvas of container.querySelectorAll('[data-chart-canvas]')) {
