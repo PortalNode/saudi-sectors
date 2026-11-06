@@ -1,4 +1,4 @@
-import { escapeHtml, numericValue, METRICS } from './telecom-metrics.mjs?v=telecom-charts-20261106-v5';
+import { escapeHtml, numericValue, METRICS } from './telecom-metrics.mjs?v=telecom-charts-20261106-v6';
 
 const HEIGHT = 280;
 const GOLD = '#f59e0b';

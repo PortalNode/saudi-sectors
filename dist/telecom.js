@@ -1,16 +1,16 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './telecom-metrics.mjs?v=telecom-charts-20261106-v5';
-import { renderTelecomCharts, fitTelecomCharts, getChartOptions } from './telecom-charts.mjs?v=telecom-charts-20261106-v5';
+import { escapeHtml, validateDataset, renderAnnualTable } from './telecom-metrics.mjs?v=telecom-charts-20261106-v6';
+import { renderTelecomCharts, fitTelecomCharts, getChartOptions } from './telecom-charts.mjs?v=telecom-charts-20261106-v6';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, selectedChartKey = 'netProfit';
 function drawSelectedChart() {
   if (!dataset || !activeCompany) return;
   const option = getChartOptions(activeCompany, dataset.years).find(item => item.key === selectedChartKey);
-  $('telecom-charts-context').textContent = `${activeCompany.name} · 2021–2025 · من بيانات الملف المحفوظ`;
+  $('telecom-charts-20261106-v6').textContent = `${activeCompany.name} · 2021–2025 · من بيانات الملف المحفوظ`;
   $('telecom-chart-selection-status').textContent = option?.available
     ? `مقارنة ${option.label} للأعوام 2021–2025. يمكنك اختيار أي بند آخر من القائمة.`
     : 'هذا البند غير متاح لبعض السنوات في الملف؛ تظهر السنوات بعلامة «—» دون أرقام افتراضية.';
-  $('telecom-charts-grid').innerHTML = renderTelecomCharts(activeCompany, dataset.years, selectedChartKey);
-  fitTelecomCharts($('telecom-charts-grid'), activeCompany, dataset.years);
+  $('telecom-charts-20261106-v6').innerHTML = renderTelecomCharts(activeCompany, dataset.years, selectedChartKey);
+  fitTelecomCharts($('telecom-charts-20261106-v6'), activeCompany, dataset.years);
 }
 function populateChartOptions(company) {
   const grouped = new Map();
@@ -40,7 +40,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('telecom-financials.json?v=telecom-charts-20261106-v5');
+    const response = await fetch('telecom-financials.json?v=telecom-charts-20261106-v6');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('telecom-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;
@@ -54,6 +54,6 @@ async function load() {
 $('telecom-nav').addEventListener('click', event => { const button = event.target.closest('[data-company]'); if (button && dataset) selectCompany(button.dataset.company); });
 $('telecom-chart-metric').addEventListener('change', () => { selectedChartKey = $('telecom-chart-metric').value; drawSelectedChart(); });
 window.addEventListener('popstate', () => { if (dataset) selectCompany(new URLSearchParams(window.location.search).get('symbol'), true); });
-const resizeCharts = () => { if (dataset && activeCompany) fitTelecomCharts($('telecom-charts-grid'), activeCompany, dataset.years); };
-if (typeof ResizeObserver === 'function') { const observer = new ResizeObserver(resizeCharts); observer.observe($('telecom-charts-grid')); } else window.addEventListener('resize', resizeCharts);
+const resizeCharts = () => { if (dataset && activeCompany) fitTelecomCharts($('telecom-charts-20261106-v6'), activeCompany, dataset.years); };
+if (typeof ResizeObserver === 'function') { const observer = new ResizeObserver(resizeCharts); observer.observe($('telecom-charts-20261106-v6')); } else window.addEventListener('resize', resizeCharts);
 load();

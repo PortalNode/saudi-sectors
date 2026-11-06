@@ -1,4 +1,4 @@
-import { escapeHtml, numericValue, METRICS } from './utilities-metrics.mjs?v=utilities-charts-20261106-utilities-v1';
+import { escapeHtml, numericValue, METRICS } from './utilities-metrics.mjs?v=utilities-charts-20261106-v6';
 
 const HEIGHT = 280;
 const GOLD = '#f59e0b';
