@@ -1,5 +1,5 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './utilities-metrics.mjs?v=utilities-charts-20261106-v7';
-import { renderUtilitiesCharts, fitUtilitiesCharts, getChartOptions } from './utilities-charts.mjs?v=utilities-charts-20261106-v7';
+import { escapeHtml, validateDataset, renderAnnualTable } from './utilities-metrics.mjs?v=utilities-charts-20261106-v8';
+import { renderUtilitiesCharts, fitUtilitiesCharts, getChartOptions } from './utilities-charts.mjs?v=utilities-charts-20261106-v8';
 const $ = id => document.getElementById(id);
 let dataset, activeCompany, selectedChartKey = 'netProfit';
 function drawSelectedChart() {
@@ -26,7 +26,8 @@ function selectCompany(symbol, replaceHistory = false) {
   $('utilities-nav').innerHTML = dataset.companies.map(item => `<button type="button" class="bank-tab" data-company="${escapeHtml(item.symbol)}" aria-pressed="${item.symbol === company.symbol}" title="نتائج ${escapeHtml(item.name)} ${escapeHtml(item.symbol)}">${escapeHtml(item.name)}</button>`).join('');
   $('utilities-title').innerHTML = `${escapeHtml(company.name)} <span class="symbol-badge">${escapeHtml(company.symbol)}</span>`;
   $('utilities-subtitle').textContent = `${company.fullName || company.name} · قطاع المرافق والطاقة · نتائج سنوية فقط`;
-  $('utilities-table-wrap').innerHTML = renderAnnualTable(company, dataset.years);
+  const availableYears = company.years.map(record => record.year).sort((a, b) => a - b);
+  $('utilities-table-wrap').innerHTML = renderAnnualTable(company, availableYears);
   $('utilities-table-wrap').scrollLeft = 0;
   $('utilities-panel').hidden = false;
   activeCompany = company;
@@ -40,7 +41,7 @@ function selectCompany(symbol, replaceHistory = false) {
 }
 async function load() {
   try {
-    const response = await fetch('utilities-financials.json?v=utilities-charts-20261106-v7');
+    const response = await fetch('utilities-financials.json?v=utilities-charts-20261106-v8');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
     $('utilities-import-info').textContent = `المصدر المحفوظ: ${dataset.source.name} · ${dataset.source.provider} · بيانات سنوية فقط.`;
