@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "sector": "المرافق والطاقة",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_utilities.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-06T00:00:00Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "2082",
+      "name": "أكوا",
+      "fullName": "أكوا",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 5235.39,
+            "grossIncome": 2851.72,
+            "operatingIncome": 1793.6,
+            "netProfit": 758.8,
+            "epsBeforeExceptional": 1.53,
+            "eps": 1.03,
+            "grossMargin": 0.5447005858207316,
+            "operatingMargin": 0.3425914783807892,
+            "netMargin": 0.14493667138455776
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 5275.93,
+            "grossIncome": 2865.35,
+            "operatingIncome": 1800.57,
+            "netProfit": 1540.04,
+            "epsBeforeExceptional": 1.46,
+            "eps": 2.09,
+            "grossMargin": 0.5430985627178525,
+            "operatingMargin": 0.34128011554361026,
+            "netMargin": 0.2918992480946487
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 6095.01,
+            "grossIncome": 3495.18,
+            "operatingIncome": 2188.91,
+            "netProfit": 1661.71,
+            "epsBeforeExceptional": 2.09,
+            "eps": 2.25,
+            "grossMargin": 0.5734494283028247,
+            "operatingMargin": 0.35913148624858693,
+            "netMargin": 0.27263449936915607
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 6297.3,
+            "grossIncome": 3330.59,
+            "operatingIncome": 1357.51,
+            "netProfit": 1757.06,
+            "epsBeforeExceptional": 1.33,
+            "eps": 2.38,
+            "grossMargin": 0.5288917472567608,
+            "operatingMargin": 0.2155701649913455,
+            "netMargin": 0.2790179918377717
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 7413.5,
+            "grossIncome": 3764.57,
+            "operatingIncome": 1837.38,
+            "netProfit": 1852.23,
+            "epsBeforeExceptional": 2.07,
+            "eps": 2.42,
+            "grossMargin": 0.5077992850880151,
+            "operatingMargin": 0.24784244958521617,
+            "netMargin": 0.2498455520334525
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "2083",
+      "name": "مرافق",
+      "fullName": "مرافق",
+      "years": [
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 6505.09,
+            "grossIncome": 1148.2,
+            "operatingIncome": 873.81,
+            "netProfit": 845.65,
+            "epsBeforeExceptional": 2.9,
+            "eps": 3.38,
+            "grossMargin": 0.1765079345558632,
+            "operatingMargin": 0.1343271192250991,
+            "netMargin": 0.12999820140843554
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 6383.33,
+            "grossIncome": 1712.14,
+            "operatingIncome": 1425.18,
+            "netProfit": 587,
+            "epsBeforeExceptional": 2.35,
+            "eps": 2.35,
+            "grossMargin": 0.2682205055981753,
+            "operatingMargin": 0.22326591293259163,
+            "netMargin": 0.09195827256306661
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 6883.21,
+            "grossIncome": 1522.64,
+            "operatingIncome": 1222.5,
+            "netProfit": 17.15,
+            "epsBeforeExceptional": 1.85,
+            "eps": 0.07,
+            "grossMargin": 0.22121074324334142,
+            "operatingMargin": 0.17760608785726428,
+            "netMargin": 0.0024915700668728686
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 6945.62,
+            "grossIncome": 817.48,
+            "operatingIncome": 493.68,
+            "netProfit": 449.43,
+            "epsBeforeExceptional": -0.38,
+            "eps": 1.8,
+            "grossMargin": 0.11769719621862411,
+            "operatingMargin": 0.07107788793513034,
+            "netMargin": 0.064706966404727
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4146",
+      "name": "جاز",
+      "fullName": "جاز",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 386.46,
+            "grossIncome": 104.7,
+            "operatingIncome": 37.36,
+            "netProfit": 60.06,
+            "epsBeforeExceptional": 0.38,
+            "eps": 0.38,
+            "grossMargin": 0.27092066449309116,
+            "operatingMargin": 0.09667235936448793,
+            "netMargin": 0.15541065052010558
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 496.04,
+            "grossIncome": 115.14,
+            "operatingIncome": 42.62,
+            "netProfit": 67.38,
+            "epsBeforeExceptional": 0.43,
+            "eps": 0.43,
+            "grossMargin": 0.23211837755019757,
+            "operatingMargin": 0.08592049028304168,
+            "netMargin": 0.13583581969196032
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 721.51,
+            "grossIncome": 123.13,
+            "operatingIncome": 45.11,
+            "netProfit": 81.47,
+            "epsBeforeExceptional": 0.52,
+            "eps": 0.52,
+            "grossMargin": 0.1706559853640282,
+            "operatingMargin": 0.0625216559715042,
+            "netMargin": 0.1129159679006528
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1093.04,
+            "grossIncome": 172.41,
+            "operatingIncome": 82.84,
+            "netProfit": 113.96,
+            "epsBeforeExceptional": 0.72,
+            "eps": 0.72,
+            "grossMargin": 0.15773439215399254,
+            "operatingMargin": 0.07578862621678988,
+            "netMargin": 0.10425967942618751
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1440.33,
+            "grossIncome": 226.22,
+            "operatingIncome": 106.36,
+            "netProfit": 150.79,
+            "epsBeforeExceptional": 0.95,
+            "eps": 0.95,
+            "grossMargin": 0.15706122902390426,
+            "operatingMargin": 0.07384418848458339,
+            "netMargin": 0.10469128602473045
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "2081",
+      "name": "الخريف",
+      "fullName": "الخريف",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 569.04,
+            "grossIncome": 151.46,
+            "operatingIncome": 112.59,
+            "netProfit": 103.33,
+            "epsBeforeExceptional": 2.95,
+            "eps": 2.95,
+            "grossMargin": 0.2661675804864333,
+            "operatingMargin": 0.19785955293125265,
+            "netMargin": 0.18158653170251654
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 822.03,
+            "grossIncome": 187.12,
+            "operatingIncome": 133.74,
+            "netProfit": 107.44,
+            "epsBeforeExceptional": 3.07,
+            "eps": 3.07,
+            "grossMargin": 0.22763159495395546,
+            "operatingMargin": 0.16269479216087004,
+            "netMargin": 0.13070082600391714
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1679.81,
+            "grossIncome": 264.09,
+            "operatingIncome": 193.32,
+            "netProfit": 140.02,
+            "epsBeforeExceptional": 4,
+            "eps": 4,
+            "grossMargin": 0.15721420874979908,
+            "operatingMargin": 0.11508444407403218,
+            "netMargin": 0.08335466511093517
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1952.15,
+            "grossIncome": 384.32,
+            "operatingIncome": 279.69,
+            "netProfit": 230,
+            "epsBeforeExceptional": 6.57,
+            "eps": 6.57,
+            "grossMargin": 0.19687011756268727,
+            "operatingMargin": 0.1432728017826499,
+            "netMargin": 0.11781881515252414
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 2473.95,
+            "grossIncome": 460.9,
+            "operatingIncome": 287.02,
+            "netProfit": 255.74,
+            "epsBeforeExceptional": 7.14,
+            "eps": 7.31,
+            "grossMargin": 0.18630125912003073,
+            "operatingMargin": 0.11601689605691304,
+            "netMargin": 0.1033731482042887
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "2084",
+      "name": "مياهنا",
+      "fullName": "مياهنا",
+      "years": [
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 324.46,
+            "grossIncome": 90.95,
+            "operatingIncome": 69.78,
+            "netProfit": 56.72,
+            "epsBeforeExceptional": 0.35,
+            "eps": 0.35,
+            "grossMargin": 0.2803119028539728,
+            "operatingMargin": 0.21506503112864453,
+            "netMargin": 0.1748135363372989
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 385.09,
+            "grossIncome": 86.46,
+            "operatingIncome": 47.82,
+            "netProfit": 40.73,
+            "epsBeforeExceptional": 0.21,
+            "eps": 0.25,
+            "grossMargin": 0.2245189436235685,
+            "operatingMargin": 0.12417876340595706,
+            "netMargin": 0.10576748292606923
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 699.65,
+            "grossIncome": 113.66,
+            "operatingIncome": 71.04,
+            "netProfit": 72.42,
+            "epsBeforeExceptional": 0.45,
+            "eps": 0.45,
+            "grossMargin": 0.162452654898878,
+            "operatingMargin": 0.10153648252697779,
+            "netMargin": 0.10350889730579577
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "5110",
+      "name": "السعودية للطاقة",
+      "fullName": "السعودية للطاقة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 69338.04,
+            "grossIncome": 20541.96,
+            "operatingIncome": 18582.12,
+            "netProfit": 14390.87,
+            "epsBeforeExceptional": 3.45,
+            "eps": 1.62,
+            "grossMargin": 0.2962581578596684,
+            "operatingMargin": 0.2679931535416923,
+            "netMargin": 0.20754653578324397
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 72079.42,
+            "grossIncome": 19759.82,
+            "operatingIncome": 16771.82,
+            "netProfit": 15135.22,
+            "epsBeforeExceptional": 3.63,
+            "eps": 1.79,
+            "grossMargin": 0.27413955328719347,
+            "operatingMargin": 0.23268527965402608,
+            "netMargin": 0.2099797695375462
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 75329.67,
+            "grossIncome": 15521.38,
+            "operatingIncome": 14119.15,
+            "netProfit": 10249.3,
+            "epsBeforeExceptional": 2.46,
+            "eps": 0.62,
+            "grossMargin": 0.20604603737146332,
+            "operatingMargin": 0.18743145960947394,
+            "netMargin": 0.1360592712008429
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 88665.64,
+            "grossIncome": 17486.27,
+            "operatingIncome": 16126.82,
+            "netProfit": 6866.94,
+            "epsBeforeExceptional": 1.65,
+            "eps": -0.46,
+            "grossMargin": 0.19721585498057648,
+            "operatingMargin": 0.1818835345913028,
+            "netMargin": 0.07744758849087426
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 102217.78,
+            "grossIncome": 20785.93,
+            "operatingIncome": 18286.48,
+            "netProfit": 12974.81,
+            "epsBeforeExceptional": 3.11,
+            "eps": 0.96,
+            "grossMargin": 0.20334945642529118,
+            "operatingMargin": 0.17889725251321248,
+            "netMargin": 0.12693300519733455
+          }
+        }
+      ]
+    }
+  ]
+}
