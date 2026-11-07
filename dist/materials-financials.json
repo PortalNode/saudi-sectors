@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "sector": "المواد الاساسية",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_materials.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-07T00:23:32Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "1325",
+      "name": "حديد وطني",
+      "fullName": "حديد وطني (1325) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "حديد وطني",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 622.89,
+            "grossIncome": 68.42,
+            "operatingIncome": 54.12,
+            "netProfit": 47.06,
+            "epsBeforeExceptional": 0.26,
+            "eps": 0.26,
+            "grossMargin": 0.1098428293920275,
+            "operatingMargin": 0.08688532485671627,
+            "netMargin": 0.07555106037984236
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 595.64,
+            "grossIncome": 71.37,
+            "operatingIncome": 56.62,
+            "netProfit": 49.55,
+            "epsBeforeExceptional": 0.27,
+            "eps": 0.27,
+            "grossMargin": 0.11982069706534149,
+            "operatingMargin": 0.09505741723188503,
+            "netMargin": 0.0831878315761198
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 370.11,
+            "grossIncome": 24.43,
+            "operatingIncome": 10.63,
+            "netProfit": 4.24,
+            "epsBeforeExceptional": 0.02,
+            "eps": 0.02,
+            "grossMargin": 0.06600740320445272,
+            "operatingMargin": 0.028721190997271082,
+            "netMargin": 0.011456053605684796
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 553.31,
+            "grossIncome": 33.68,
+            "operatingIncome": 15.76,
+            "netProfit": 9.87,
+            "epsBeforeExceptional": 0.05,
+            "eps": 0.05,
+            "grossMargin": 0.06087003668829409,
+            "operatingMargin": 0.028483128806636428,
+            "netMargin": 0.01783810160669426
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 428.7,
+            "grossIncome": 8.1,
+            "operatingIncome": -10.32,
+            "netProfit": -14.87,
+            "epsBeforeExceptional": -0.08,
+            "eps": -0.08,
+            "grossMargin": 0.018894331700489854,
+            "operatingMargin": -0.024072778166550037,
+            "netMargin": -0.03468626078843014
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "1324",
+      "name": "صالح الراشد",
+      "fullName": "صالح الراشد (1324) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "صالح الراشد",
+      "years": [
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 739.52,
+            "grossIncome": 163.96,
+            "operatingIncome": 104.22,
+            "netProfit": 91.66,
+            "epsBeforeExceptional": 4.93,
+            "eps": 4.93,
+            "grossMargin": 0.22171138035482477,
+            "operatingMargin": 0.14092925140631762,
+            "netMargin": 0.12394526179143228
+          }
+        }
+      ]
+    }
+  ]
+}
