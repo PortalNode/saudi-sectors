@@ -1,0 +1,1151 @@
+{
+  "schemaVersion": 1,
+  "sector": "الاسمنت",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_cement.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-07T00:40:27Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "3092",
+      "name": "أسمنت الرياض",
+      "fullName": "أسمنت الرياض (3092) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت الرياض",
+      "years": [
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 643.38,
+            "grossIncome": 236.9,
+            "operatingIncome": 199.61,
+            "netProfit": 188.77,
+            "epsBeforeExceptional": 1.57,
+            "eps": 1.57,
+            "grossMargin": 0.36821163231682674,
+            "operatingMargin": 0.31025210606484505,
+            "netMargin": 0.29340358730454785
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 789.4,
+            "grossIncome": 328.77,
+            "operatingIncome": 292.94,
+            "netProfit": 310.44,
+            "epsBeforeExceptional": 2.38,
+            "eps": 2.59,
+            "grossMargin": 0.4164808715480111,
+            "operatingMargin": 0.3710919685837345,
+            "netMargin": 0.39326070433240434
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 787.63,
+            "grossIncome": 257.82,
+            "operatingIncome": 216.25,
+            "netProfit": 207.83,
+            "epsBeforeExceptional": 1.73,
+            "eps": 1.73,
+            "grossMargin": 0.32733643969884335,
+            "operatingMargin": 0.27455785076749234,
+            "netMargin": 0.2638675520231581
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3005",
+      "name": "أسمنت ام القرى",
+      "fullName": "أسمنت أم القرى (3005) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت أم القرى",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 278.83,
+            "grossIncome": 119.14,
+            "operatingIncome": 105.62,
+            "netProfit": 81.44,
+            "epsBeforeExceptional": 1.48,
+            "eps": 1.48,
+            "grossMargin": 0.42728544274289,
+            "operatingMargin": 0.3787971165226124,
+            "netMargin": 0.29207761001326976
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 221.22,
+            "grossIncome": 70.83,
+            "operatingIncome": 56.2,
+            "netProfit": 22.99,
+            "epsBeforeExceptional": 0.63,
+            "eps": 0.42,
+            "grossMargin": 0.32017900732302684,
+            "operatingMargin": 0.25404574631588467,
+            "netMargin": 0.10392369586836632
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 168.95,
+            "grossIncome": 32.89,
+            "operatingIncome": 15.13,
+            "netProfit": 3.95,
+            "epsBeforeExceptional": -0.09,
+            "eps": 0.07,
+            "grossMargin": 0.19467298017164844,
+            "operatingMargin": 0.08955312222551051,
+            "netMargin": 0.023379698135543064
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 265.59,
+            "grossIncome": 82.92,
+            "operatingIncome": 65.27,
+            "netProfit": 47.72,
+            "epsBeforeExceptional": 0.87,
+            "eps": 0.87,
+            "grossMargin": 0.3122105500960127,
+            "operatingMargin": 0.2457547347415189,
+            "netMargin": 0.17967543958733387
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 279.06,
+            "grossIncome": 76.97,
+            "operatingIncome": 60.2,
+            "netProfit": 45.78,
+            "epsBeforeExceptional": 0.83,
+            "eps": 0.83,
+            "grossMargin": 0.275818820325378,
+            "operatingMargin": 0.21572421701426217,
+            "netMargin": 0.16405074177596216
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3010",
+      "name": "أسمنت العربية",
+      "fullName": "أسمنت العربية (3010) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت العربية",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 1033.21,
+            "grossIncome": 308.94,
+            "operatingIncome": 205.21,
+            "netProfit": 161.52,
+            "epsBeforeExceptional": 1.72,
+            "eps": 1.62,
+            "grossMargin": 0.29900988182460486,
+            "operatingMargin": 0.19861402812593762,
+            "netMargin": 0.15632833596267942
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 970.95,
+            "grossIncome": 274.63,
+            "operatingIncome": 193.45,
+            "netProfit": 181.01,
+            "epsBeforeExceptional": 1.81,
+            "eps": 1.81,
+            "grossMargin": 0.28284669653432204,
+            "operatingMargin": 0.1992378598280035,
+            "netMargin": 0.18642566558525153
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 875.76,
+            "grossIncome": 207.07,
+            "operatingIncome": 135.41,
+            "netProfit": 139.63,
+            "epsBeforeExceptional": 1.22,
+            "eps": 1.4,
+            "grossMargin": 0.23644605828080753,
+            "operatingMargin": 0.15461998721110806,
+            "netMargin": 0.1594386589933315
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 857.86,
+            "grossIncome": 240.47,
+            "operatingIncome": 174.05,
+            "netProfit": 160.1,
+            "epsBeforeExceptional": 1.6,
+            "eps": 1.6,
+            "grossMargin": 0.2803138041172219,
+            "operatingMargin": 0.20288858321870704,
+            "netMargin": 0.18662718858555008
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1062.2,
+            "grossIncome": 255.75,
+            "operatingIncome": 183.72,
+            "netProfit": 165.02,
+            "epsBeforeExceptional": 1.65,
+            "eps": 1.65,
+            "grossMargin": 0.24077386556204103,
+            "operatingMargin": 0.17296177744304272,
+            "netMargin": 0.15535680662775372
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3080",
+      "name": "أسمنت الشرقية",
+      "fullName": "أسمنت الشرقية (3080) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت الشرقية",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 757.73,
+            "grossIncome": 260.98,
+            "operatingIncome": 206.4,
+            "netProfit": 192.85,
+            "epsBeforeExceptional": 2.24,
+            "eps": 2.24,
+            "grossMargin": 0.34442347538041257,
+            "operatingMargin": 0.2723925408786771,
+            "netMargin": 0.25451018172700035
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 784.2,
+            "grossIncome": 247.71,
+            "operatingIncome": 180.77,
+            "netProfit": 143.3,
+            "epsBeforeExceptional": 1.82,
+            "eps": 1.67,
+            "grossMargin": 0.315876052027544,
+            "operatingMargin": 0.23051517470033156,
+            "netMargin": 0.18273399642948226
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 995.67,
+            "grossIncome": 293.17,
+            "operatingIncome": 224.71,
+            "netProfit": 196.49,
+            "epsBeforeExceptional": 2.5,
+            "eps": 2.28,
+            "grossMargin": 0.29444494661885967,
+            "operatingMargin": 0.2256872256872257,
+            "netMargin": 0.19734450169232778
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1210.65,
+            "grossIncome": 373.73,
+            "operatingIncome": 297.49,
+            "netProfit": 247.88,
+            "epsBeforeExceptional": 3.34,
+            "eps": 2.88,
+            "grossMargin": 0.3087019369760046,
+            "operatingMargin": 0.24572750175525543,
+            "netMargin": 0.20474951472349562
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1261.99,
+            "grossIncome": 339.25,
+            "operatingIncome": 245.44,
+            "netProfit": 202.47,
+            "epsBeforeExceptional": 2.65,
+            "eps": 2.35,
+            "grossMargin": 0.2688214645123971,
+            "operatingMargin": 0.19448648562983858,
+            "netMargin": 0.16043708745711138
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3040",
+      "name": "أسمنت القصيم",
+      "fullName": "أسمنت القصيم (3040) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت القصيم",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 722.8,
+            "grossIncome": 285.95,
+            "operatingIncome": 263.83,
+            "netProfit": 291.87,
+            "epsBeforeExceptional": 3.24,
+            "eps": 3.24,
+            "grossMargin": 0.39561427780852243,
+            "operatingMargin": 0.36501106806862205,
+            "netMargin": 0.40380464858882126
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 678.46,
+            "grossIncome": 188.49,
+            "operatingIncome": 143.55,
+            "netProfit": 130.51,
+            "epsBeforeExceptional": 1.45,
+            "eps": 1.45,
+            "grossMargin": 0.2778203578692922,
+            "operatingMargin": 0.21158211243109395,
+            "netMargin": 0.19236211419980542
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 583.56,
+            "grossIncome": 152.39,
+            "operatingIncome": 113.76,
+            "netProfit": 141.97,
+            "epsBeforeExceptional": 1.58,
+            "eps": 1.58,
+            "grossMargin": 0.26113852902872026,
+            "operatingMargin": 0.19494139420111045,
+            "netMargin": 0.24328261018575642
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 967.58,
+            "grossIncome": 325.36,
+            "operatingIncome": 227.04,
+            "netProfit": 287.49,
+            "epsBeforeExceptional": 2.34,
+            "eps": 2.73,
+            "grossMargin": 0.33626160110791875,
+            "operatingMargin": 0.23464726430889435,
+            "netMargin": 0.2971227185349015
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1133.3,
+            "grossIncome": 260.63,
+            "operatingIncome": 191.55,
+            "netProfit": 259.93,
+            "epsBeforeExceptional": 1.71,
+            "eps": 2.35,
+            "grossMargin": 0.2299744110120886,
+            "operatingMargin": 0.169019677049325,
+            "netMargin": 0.2293567457866408
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3030",
+      "name": "أسمنت السعودية",
+      "fullName": "أسمنت السعودية (3030) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت السعودية",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 1409.57,
+            "grossIncome": 530.39,
+            "operatingIncome": 344.3,
+            "netProfit": 331.92,
+            "epsBeforeExceptional": 2.17,
+            "eps": 2.17,
+            "grossMargin": 0.37627787197514134,
+            "operatingMargin": 0.24425888746213387,
+            "netMargin": 0.2354760671694205
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1419.82,
+            "grossIncome": 568.88,
+            "operatingIncome": 403.91,
+            "netProfit": 398.84,
+            "epsBeforeExceptional": 2.61,
+            "eps": 2.61,
+            "grossMargin": 0.4006705075291234,
+            "operatingMargin": 0.2844797227817611,
+            "netMargin": 0.2809088476004
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1461.83,
+            "grossIncome": 572.93,
+            "operatingIncome": 362.39,
+            "netProfit": 381.03,
+            "epsBeforeExceptional": 2.43,
+            "eps": 2.49,
+            "grossMargin": 0.3919265578076794,
+            "operatingMargin": 0.24790160278554962,
+            "netMargin": 0.2606527434790639
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1675.81,
+            "grossIncome": 667.36,
+            "operatingIncome": 428.49,
+            "netProfit": 421.87,
+            "epsBeforeExceptional": 2.76,
+            "eps": 2.76,
+            "grossMargin": 0.3982313030713506,
+            "operatingMargin": 0.2556912776508077,
+            "netMargin": 0.2517409491529469
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1671.2,
+            "grossIncome": 602.97,
+            "operatingIncome": 379.69,
+            "netProfit": 363.68,
+            "epsBeforeExceptional": 2.38,
+            "eps": 2.38,
+            "grossMargin": 0.36080062230732407,
+            "operatingMargin": 0.22719602680708473,
+            "netMargin": 0.21761608425083773
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3050",
+      "name": "أسمنت الجنوب",
+      "fullName": "أسمنت الجنوب (3050) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت الجنوب",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 1339.35,
+            "grossIncome": 505.41,
+            "operatingIncome": 453.22,
+            "netProfit": 429.15,
+            "epsBeforeExceptional": 3.14,
+            "eps": 3.07,
+            "grossMargin": 0.3773546869750252,
+            "operatingMargin": 0.3383880240415127,
+            "netMargin": 0.3204166200022399
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1222.41,
+            "grossIncome": 361.06,
+            "operatingIncome": 297.96,
+            "netProfit": 300.71,
+            "epsBeforeExceptional": 1.97,
+            "eps": 2.15,
+            "grossMargin": 0.2953673481074271,
+            "operatingMargin": 0.24374800598817087,
+            "netMargin": 0.24599766035945383
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1070.26,
+            "grossIncome": 276.51,
+            "operatingIncome": 199.99,
+            "netProfit": 195.4,
+            "epsBeforeExceptional": 1.27,
+            "eps": 1.4,
+            "grossMargin": 0.25835778222114253,
+            "operatingMargin": 0.1868611365462598,
+            "netMargin": 0.18257245902864724
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 935.03,
+            "grossIncome": 309.01,
+            "operatingIncome": 227.29,
+            "netProfit": 193.03,
+            "epsBeforeExceptional": 1.34,
+            "eps": 1.38,
+            "grossMargin": 0.33048137492914664,
+            "operatingMargin": 0.24308310963284602,
+            "netMargin": 0.2064425740350577
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 867.34,
+            "grossIncome": 32.11,
+            "operatingIncome": -40.82,
+            "netProfit": -48.51,
+            "epsBeforeExceptional": -0.56,
+            "eps": -0.35,
+            "grossMargin": 0.037021237346369355,
+            "operatingMargin": -0.04706343533101206,
+            "netMargin": -0.05592962390757949
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3090",
+      "name": "أسمنت تبوك",
+      "fullName": "أسمنت تبوك (3090) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت تبوك",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 228.53,
+            "grossIncome": 48.61,
+            "operatingIncome": 23.91,
+            "netProfit": 17.76,
+            "epsBeforeExceptional": 0.09,
+            "eps": 0.2,
+            "grossMargin": 0.21270730319870476,
+            "operatingMargin": 0.10462521331991423,
+            "netMargin": 0.07771408567802915
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 297.55,
+            "grossIncome": 63.43,
+            "operatingIncome": 36.18,
+            "netProfit": 20.97,
+            "epsBeforeExceptional": 0.23,
+            "eps": 0.23,
+            "grossMargin": 0.21317425642749116,
+            "operatingMargin": 0.12159300957822214,
+            "netMargin": 0.07047555032767601
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 265.08,
+            "grossIncome": 53.16,
+            "operatingIncome": 21.8,
+            "netProfit": 15.01,
+            "epsBeforeExceptional": 0.17,
+            "eps": 0.17,
+            "grossMargin": 0.20054323223177908,
+            "operatingMargin": 0.08223932397766713,
+            "netMargin": 0.05662441527086163
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 343.36,
+            "grossIncome": 96.55,
+            "operatingIncome": 60.55,
+            "netProfit": 79.56,
+            "epsBeforeExceptional": 0.88,
+            "eps": 0.88,
+            "grossMargin": 0.2811917520969245,
+            "operatingMargin": 0.1763455265610438,
+            "netMargin": 0.23171015843429638
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 287.04,
+            "grossIncome": 63.8,
+            "operatingIncome": 28.0,
+            "netProfit": 37.29,
+            "epsBeforeExceptional": 0.41,
+            "eps": 0.41,
+            "grossMargin": 0.22226867335562986,
+            "operatingMargin": 0.09754738015607581,
+            "netMargin": 0.12991220735785952
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3020",
+      "name": "أسمنت اليمامة",
+      "fullName": "أسمنت اليمامة (3020) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت اليمامة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 735.84,
+            "grossIncome": 220.41,
+            "operatingIncome": 156.85,
+            "netProfit": 153.67,
+            "epsBeforeExceptional": 0.76,
+            "eps": 0.76,
+            "grossMargin": 0.29953522504892366,
+            "operatingMargin": 0.21315775168514892,
+            "netMargin": 0.20883616003479014
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1008.11,
+            "grossIncome": 408.65,
+            "operatingIncome": 332.04,
+            "netProfit": 355.8,
+            "epsBeforeExceptional": 1.59,
+            "eps": 1.76,
+            "grossMargin": 0.4053625100435468,
+            "operatingMargin": 0.3293688188788922,
+            "netMargin": 0.3529376754520836
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 935.19,
+            "grossIncome": 335.36,
+            "operatingIncome": 263.56,
+            "netProfit": 304.25,
+            "epsBeforeExceptional": 1.25,
+            "eps": 1.5,
+            "grossMargin": 0.35860092601503435,
+            "operatingMargin": 0.28182508367283654,
+            "netMargin": 0.32533495867149986
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1172.98,
+            "grossIncome": 534.17,
+            "operatingIncome": 448.76,
+            "netProfit": 420.71,
+            "epsBeforeExceptional": 1.98,
+            "eps": 2.08,
+            "grossMargin": 0.45539565892001566,
+            "operatingMargin": 0.382581118177633,
+            "netMargin": 0.3586676669678937
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1423.22,
+            "grossIncome": 533.61,
+            "operatingIncome": 418.69,
+            "netProfit": 482.88,
+            "epsBeforeExceptional": 1.73,
+            "eps": 2.38,
+            "grossMargin": 0.3749314933741797,
+            "operatingMargin": 0.29418501707395905,
+            "netMargin": 0.3392869689858209
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3060",
+      "name": "أسمنت ينبع",
+      "fullName": "أسمنت ينبع (3060) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت ينبع",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 934.03,
+            "grossIncome": 223.61,
+            "operatingIncome": 129.38,
+            "netProfit": 159.56,
+            "epsBeforeExceptional": 0.74,
+            "eps": 1.01,
+            "grossMargin": 0.23940344528548335,
+            "operatingMargin": 0.13851803475263108,
+            "netMargin": 0.170829630739912
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 981.17,
+            "grossIncome": 276.44,
+            "operatingIncome": 225.0,
+            "netProfit": 215.41,
+            "epsBeforeExceptional": 1.37,
+            "eps": 1.37,
+            "grossMargin": 0.28174526330809135,
+            "operatingMargin": 0.2293180590519482,
+            "netMargin": 0.2195440137794674
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 827.22,
+            "grossIncome": 235.87,
+            "operatingIncome": 126.21,
+            "netProfit": 119.92,
+            "epsBeforeExceptional": 0.66,
+            "eps": 0.76,
+            "grossMargin": 0.2851357559053214,
+            "operatingMargin": 0.1525712627837818,
+            "netMargin": 0.14496748144387225
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 876.75,
+            "grossIncome": 292.62,
+            "operatingIncome": 179.65,
+            "netProfit": 157.12,
+            "epsBeforeExceptional": 1.0,
+            "eps": 1.0,
+            "grossMargin": 0.33375534644995725,
+            "operatingMargin": 0.2049044767607642,
+            "netMargin": 0.1792072996863416
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1083.96,
+            "grossIncome": 283.31,
+            "operatingIncome": 128.44,
+            "netProfit": 104.47,
+            "epsBeforeExceptional": 0.66,
+            "eps": 0.66,
+            "grossMargin": 0.2613657330528802,
+            "operatingMargin": 0.11849145724934498,
+            "netMargin": 0.09637809513266171
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3091",
+      "name": "أسمنت الجوف",
+      "fullName": "أسمنت الجوف (3091) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت الجوف",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 226.52,
+            "grossIncome": 20.99,
+            "operatingIncome": -2.0,
+            "netProfit": -92.64,
+            "epsBeforeExceptional": -0.24,
+            "eps": -0.85,
+            "grossMargin": 0.09266289952322089,
+            "operatingMargin": -0.008829242450997704,
+            "netMargin": -0.40897051033021364
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 251.86,
+            "grossIncome": 73.43,
+            "operatingIncome": 61.85,
+            "netProfit": 30.89,
+            "epsBeforeExceptional": 0.23,
+            "eps": 0.28,
+            "grossMargin": 0.2915508615897721,
+            "operatingMargin": 0.2455729373461447,
+            "netMargin": 0.12264750258079886
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 269.28,
+            "grossIncome": 69.8,
+            "operatingIncome": 44.83,
+            "netProfit": 37.68,
+            "epsBeforeExceptional": -0.06,
+            "eps": 0.35,
+            "grossMargin": 0.2592097445038622,
+            "operatingMargin": 0.16648098633392752,
+            "netMargin": 0.1399286987522282
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 256.5,
+            "grossIncome": 34.84,
+            "operatingIncome": -17.33,
+            "netProfit": -27.73,
+            "epsBeforeExceptional": -0.71,
+            "eps": -0.26,
+            "grossMargin": 0.13582846003898638,
+            "operatingMargin": -0.06756335282651071,
+            "netMargin": -0.10810916179337232
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 244.31,
+            "grossIncome": 3.37,
+            "operatingIncome": -40.44,
+            "netProfit": -206.56,
+            "epsBeforeExceptional": -0.97,
+            "eps": -1.9,
+            "grossMargin": 0.013793950309033605,
+            "operatingMargin": -0.16552740370840324,
+            "netMargin": -0.8454831975768491
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3004",
+      "name": "أسمنت الشمالية",
+      "fullName": "أسمنت الشمالية (3004) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت الشمالية",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 561.91,
+            "grossIncome": 199.85,
+            "operatingIncome": 120.77,
+            "netProfit": 106.06,
+            "epsBeforeExceptional": 0.55,
+            "eps": 0.59,
+            "grossMargin": 0.3556619387446388,
+            "operatingMargin": 0.2149276574540407,
+            "netMargin": 0.18874908793223116
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 617.96,
+            "grossIncome": 224.03,
+            "operatingIncome": 140.18,
+            "netProfit": 112.02,
+            "epsBeforeExceptional": 0.62,
+            "eps": 0.62,
+            "grossMargin": 0.36253155544048155,
+            "operatingMargin": 0.22684316136966795,
+            "netMargin": 0.1812738688588258
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 689.55,
+            "grossIncome": 226.28,
+            "operatingIncome": 127.32,
+            "netProfit": 56.26,
+            "epsBeforeExceptional": 0.54,
+            "eps": 0.31,
+            "grossMargin": 0.328156043796679,
+            "operatingMargin": 0.1846421579290842,
+            "netMargin": 0.08158944238996448
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 622.52,
+            "grossIncome": 199.15,
+            "operatingIncome": 116.72,
+            "netProfit": 100.8,
+            "epsBeforeExceptional": 0.31,
+            "eps": 0.56,
+            "grossMargin": 0.3199094005011887,
+            "operatingMargin": 0.187495984064769,
+            "netMargin": 0.1619225085137827
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 683.52,
+            "grossIncome": 210.0,
+            "operatingIncome": 118.36,
+            "netProfit": 56.06,
+            "epsBeforeExceptional": 0.27,
+            "eps": 0.31,
+            "grossMargin": 0.30723314606741575,
+            "operatingMargin": 0.1731624531835206,
+            "netMargin": 0.08201661985018727
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3002",
+      "name": "أسمنت نجران",
+      "fullName": "أسمنت نجران (3002) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت نجران",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 581.55,
+            "grossIncome": 230.32,
+            "operatingIncome": 180.94,
+            "netProfit": 165.55,
+            "epsBeforeExceptional": 1.0,
+            "eps": 0.97,
+            "grossMargin": 0.39604505201616375,
+            "operatingMargin": 0.31113403834580006,
+            "netMargin": 0.28467027770613024
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 535.69,
+            "grossIncome": 170.77,
+            "operatingIncome": 127.44,
+            "netProfit": 112.81,
+            "epsBeforeExceptional": 0.66,
+            "eps": 0.66,
+            "grossMargin": 0.3187851182586944,
+            "operatingMargin": 0.23789878474490841,
+            "netMargin": 0.2105882133323377
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 485.65,
+            "grossIncome": 128.16,
+            "operatingIncome": 83.46,
+            "netProfit": 55.16,
+            "epsBeforeExceptional": 0.32,
+            "eps": 0.32,
+            "grossMargin": 0.26389375064346754,
+            "operatingMargin": 0.17185215690311953,
+            "netMargin": 0.11357973849480078
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 534.51,
+            "grossIncome": 145.23,
+            "operatingIncome": 97.95,
+            "netProfit": 68.43,
+            "epsBeforeExceptional": 0.4,
+            "eps": 0.4,
+            "grossMargin": 0.2717067968793848,
+            "operatingMargin": 0.1832519503844643,
+            "netMargin": 0.12802379749677276
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 516.13,
+            "grossIncome": 110.08,
+            "operatingIncome": 63.89,
+            "netProfit": 36.75,
+            "epsBeforeExceptional": 0.22,
+            "eps": 0.22,
+            "grossMargin": 0.2132796001007498,
+            "operatingMargin": 0.12378664290004457,
+            "netMargin": 0.07120299149439095
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "3003",
+      "name": "أسمنت المدينة",
+      "fullName": "أسمنت المدينة (3003) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أسمنت المدينة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 496.73,
+            "grossIncome": 207.87,
+            "operatingIncome": 174.12,
+            "netProfit": 160.28,
+            "epsBeforeExceptional": 1.14,
+            "eps": 1.14,
+            "grossMargin": 0.4184768385239466,
+            "operatingMargin": 0.3505324824351257,
+            "netMargin": 0.3226702635234433
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 431.38,
+            "grossIncome": 145.44,
+            "operatingIncome": 110.57,
+            "netProfit": 115.01,
+            "epsBeforeExceptional": 0.79,
+            "eps": 0.82,
+            "grossMargin": 0.33715054012703416,
+            "operatingMargin": 0.2563169363438268,
+            "netMargin": 0.26660948583615374
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 356.47,
+            "grossIncome": 110.43,
+            "operatingIncome": 72.62,
+            "netProfit": 82.0,
+            "epsBeforeExceptional": 0.59,
+            "eps": 0.59,
+            "grossMargin": 0.3097876399135972,
+            "operatingMargin": 0.20371980811849524,
+            "netMargin": 0.23003338289337108
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 520.84,
+            "grossIncome": 188.54,
+            "operatingIncome": 135.65,
+            "netProfit": 144.12,
+            "epsBeforeExceptional": 1.03,
+            "eps": 1.03,
+            "grossMargin": 0.3619921665002688,
+            "operatingMargin": 0.26044466630827123,
+            "netMargin": 0.27670685815221563
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 519.64,
+            "grossIncome": 163.92,
+            "operatingIncome": 112.96,
+            "netProfit": 128.93,
+            "epsBeforeExceptional": 0.92,
+            "eps": 0.92,
+            "grossMargin": 0.3154491571087676,
+            "operatingMargin": 0.21738126395196675,
+            "netMargin": 0.24811407897775384
+          }
+        }
+      ]
+    }
+  ]
+}
