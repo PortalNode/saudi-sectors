@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "sector": "خدمات الرعاية الصحية",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_healthservices.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-07T00:18:55Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "4021",
+      "name": "المركز الكندي الطبي",
+      "fullName": "المركز الكندي الطبي (4021) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "المركز الكندي الطبي",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 70.64,
+            "grossIncome": 25.19,
+            "operatingIncome": 16.3,
+            "netProfit": 14.06,
+            "epsBeforeExceptional": 0.18,
+            "eps": 0.18,
+            "grossMargin": 0.3565968289920725,
+            "operatingMargin": 0.2307474518686297,
+            "netMargin": 0.1990373725934315
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 81.23,
+            "grossIncome": 24.97,
+            "operatingIncome": 17.26,
+            "netProfit": 15.65,
+            "epsBeforeExceptional": 0.2,
+            "eps": 0.2,
+            "grossMargin": 0.30739874430629077,
+            "operatingMargin": 0.2124830727563708,
+            "netMargin": 0.19266280930690632
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 100.34,
+            "grossIncome": 31.54,
+            "operatingIncome": 15.9,
+            "netProfit": 15.71,
+            "epsBeforeExceptional": 0.2,
+            "eps": 0.2,
+            "grossMargin": 0.3143312736695236,
+            "operatingMargin": 0.15846123181183974,
+            "netMargin": 0.1565676699222643
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 110.8,
+            "grossIncome": 28.45,
+            "operatingIncome": 11.67,
+            "netProfit": 10.27,
+            "epsBeforeExceptional": 0.13,
+            "eps": 0.13,
+            "grossMargin": 0.25676895306859204,
+            "operatingMargin": 0.10532490974729242,
+            "netMargin": 0.09268953068592058
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 148.23,
+            "grossIncome": 43.49,
+            "operatingIncome": 22.21,
+            "netProfit": 10.5,
+            "epsBeforeExceptional": 0.25,
+            "eps": 0.14,
+            "grossMargin": 0.2933953990420293,
+            "operatingMargin": 0.14983471631923365,
+            "netMargin": 0.07083586318558997
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4014",
+      "name": "دار المعدات",
+      "fullName": "دار المعدات (4014) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "دار المعدات",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 699.45,
+            "grossIncome": 152.98,
+            "operatingIncome": 83.42,
+            "netProfit": 77.52,
+            "epsBeforeExceptional": 2.46,
+            "eps": 2.58,
+            "grossMargin": 0.2187147044106083,
+            "operatingMargin": 0.11926513689327328,
+            "netMargin": 0.11082993780827792
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 713.82,
+            "grossIncome": 154.85,
+            "operatingIncome": 74.24,
+            "netProfit": 17.57,
+            "epsBeforeExceptional": 1.81,
+            "eps": 0.59,
+            "grossMargin": 0.21693143929842254,
+            "operatingMargin": 0.10400381048443584,
+            "netMargin": 0.024614048359530412
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 776.67,
+            "grossIncome": 129.16,
+            "operatingIncome": 54.37,
+            "netProfit": 40.06,
+            "epsBeforeExceptional": 0.58,
+            "eps": 1.34,
+            "grossMargin": 0.166299715451865,
+            "operatingMargin": 0.07000399139917854,
+            "netMargin": 0.05157917777176923
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 877.23,
+            "grossIncome": 133.59,
+            "operatingIncome": 57.54,
+            "netProfit": 26.17,
+            "epsBeforeExceptional": 0.87,
+            "eps": 0.87,
+            "grossMargin": 0.15228617352347731,
+            "operatingMargin": 0.06559283198249034,
+            "netMargin": 0.029832541066766985
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 876.71,
+            "grossIncome": 122.11,
+            "operatingIncome": 39.84,
+            "netProfit": 28.44,
+            "epsBeforeExceptional": 1.1,
+            "eps": 0.95,
+            "grossMargin": 0.13928208871804815,
+            "operatingMargin": 0.045442620706961256,
+            "netMargin": 0.032439461167318724
+          }
+        }
+      ]
+    }
+  ]
+}
