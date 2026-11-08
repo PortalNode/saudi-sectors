@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "sector": "المراكز الرياضية",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_sports.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-08T17:33:03Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "6018",
+      "name": "الأندية للرياضة",
+      "fullName": "الأندية للرياضة (6018) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "الأندية للرياضة",
+      "years": [
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 376.24,
+            "grossIncome": 112.47,
+            "operatingIncome": 79.11,
+            "netProfit": 41.17,
+            "epsBeforeExceptional": 0.4,
+            "eps": 0.36,
+            "grossMargin": 0.29893153306400166,
+            "operatingMargin": 0.21026472464384435,
+            "netMargin": 0.10942483521156708
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "6022",
+      "name": "أرماح",
+      "fullName": "أرماح (6022) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أرماح",
+      "years": [
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 13.19,
+            "grossIncome": -1.87,
+            "operatingIncome": -24.92,
+            "netProfit": -25.24,
+            "epsBeforeExceptional": -0.75,
+            "eps": -0.88,
+            "grossMargin": -0.1417740712661107,
+            "operatingMargin": -1.8893100833965126,
+            "netMargin": -1.913570887035633
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 80.11,
+            "grossIncome": 28.48,
+            "operatingIncome": 10.63,
+            "netProfit": 0.76,
+            "epsBeforeExceptional": 0.02,
+            "eps": 0.02,
+            "grossMargin": 0.35551117213830985,
+            "operatingMargin": 0.1326925477468481,
+            "netMargin": 0.009486955436275122
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 177.46,
+            "grossIncome": 84.37,
+            "operatingIncome": 61.39,
+            "netProfit": 38.25,
+            "epsBeforeExceptional": 1.03,
+            "eps": 1.16,
+            "grossMargin": 0.4754310830609715,
+            "operatingMargin": 0.34593711258875237,
+            "netMargin": 0.21554153048574326
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 224.9,
+            "grossIncome": 110.82,
+            "operatingIncome": 77.15,
+            "netProfit": 62.01,
+            "epsBeforeExceptional": 1.62,
+            "eps": 1.89,
+            "grossMargin": 0.49275233437083144,
+            "operatingMargin": 0.34304135171187194,
+            "netMargin": 0.27572254335260116
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "1830",
+      "name": "لجام للرياضة",
+      "fullName": "لجام للرياضة (1830) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "لجام للرياضة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 885.28,
+            "grossIncome": 373.04,
+            "operatingIncome": 259.53,
+            "netProfit": 206.02,
+            "epsBeforeExceptional": 3.93,
+            "eps": 3.93,
+            "grossMargin": 0.421380806072655,
+            "operatingMargin": 0.29316148563166455,
+            "netMargin": 0.23271733236941985
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1065.79,
+            "grossIncome": 433.62,
+            "operatingIncome": 314.43,
+            "netProfit": 254.76,
+            "epsBeforeExceptional": 4.75,
+            "eps": 4.86,
+            "grossMargin": 0.40685313241820625,
+            "operatingMargin": 0.29502059505155803,
+            "netMargin": 0.2390339560326143
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1325.41,
+            "grossIncome": 584.55,
+            "operatingIncome": 448.35,
+            "netProfit": 356.24,
+            "epsBeforeExceptional": 7.02,
+            "eps": 6.8,
+            "grossMargin": 0.44103334062667393,
+            "operatingMargin": 0.3382726854331867,
+            "netMargin": 0.268777208561879
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1501.37,
+            "grossIncome": 623.39,
+            "operatingIncome": 447.21,
+            "netProfit": 456.98,
+            "epsBeforeExceptional": 6.71,
+            "eps": 8.72,
+            "grossMargin": 0.4152141044512679,
+            "operatingMargin": 0.29786794727482235,
+            "netMargin": 0.3043753371920313
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1614.33,
+            "grossIncome": 615.18,
+            "operatingIncome": 422.94,
+            "netProfit": 304.87,
+            "epsBeforeExceptional": 5.72,
+            "eps": 5.82,
+            "grossMargin": 0.38107450149597666,
+            "operatingMargin": 0.2619910427236067,
+            "netMargin": 0.18885234121895772
+          }
+        }
+      ]
+    }
+  ]
+}
