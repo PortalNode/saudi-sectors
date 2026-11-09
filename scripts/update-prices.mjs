@@ -43,7 +43,9 @@ async function request(url, { body, accept = 'application/json', timeout = 20000
 // (curl, Node undici) with 403 while accepting real browsers. When a
 // curl-impersonate binary is available it is tried first; plain fetch remains
 // the fallback so behaviour never regresses where the report is reachable.
-const IMPERSONATE = process.env.CURL_IMPERSONATE || null;
+// NB: deliberately NOT named CURL_IMPERSONATE — that variable selects the
+// impersonation target inside the binary, and a path there fails with exit 43.
+const IMPERSONATE = process.env.CURL_IMPERSONATE_BIN || null;
 async function browserFingerprintHtml(url) {
   if (!IMPERSONATE) return null;
   try {
