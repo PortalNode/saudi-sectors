@@ -47,8 +47,9 @@ const IMPERSONATE = process.env.CURL_IMPERSONATE || null;
 async function browserFingerprintHtml(url) {
   if (!IMPERSONATE) return null;
   try {
-    const { stdout } = await execFile(IMPERSONATE, [url, '--silent', '--fail', '--max-time', '40', '--compressed',
-      '-H', 'Accept: text/html,application/xhtml+xml;q=0.9,*/*;q=0.8', '-H', 'Accept-Language: en-US,en;q=0.9'],
+    // No custom headers: Akamai matches the header set against the impersonated
+    // Chrome fingerprint exactly, and any extra header earns a 403.
+    const { stdout } = await execFile(IMPERSONATE, [url, '--silent', '--fail', '--max-time', '40', '--compressed'],
       { encoding: 'utf8', maxBuffer: 128 * 1024 * 1024, timeout: 60000 });
     return stdout;
   } catch (error) {
