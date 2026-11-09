@@ -44,8 +44,10 @@ jobs:
           sudo tar xzf /tmp/ci.tgz -C /opt/curl-impersonate
           /opt/curl-impersonate/curl_chrome116 --version
           # Diagnostic: does the Chrome fingerprint pass Akamai right now?
-          /opt/curl-impersonate/curl_chrome116 -sS -o /dev/null -w 'report HTTP %{http_code}\n' \
-            https://www.saudiexchange.sa/Resources/Reports-v2/DetailedDaily_en.html || true
+          U=https://www.saudiexchange.sa/Resources/Reports-v2/DetailedDaily_en.html
+          /opt/curl-impersonate/curl_chrome116 -sS -o /dev/null -w 'report HTTP %{http_code}\n' $U || true
+          node -e "require('child_process').execFile('/opt/curl-impersonate/curl_chrome116',['$U','--silent','--fail','--max-time','40','--compressed'],{encoding:'utf8',maxBuffer:1e8},(e,o)=>console.log('execfile err',e&&e.code,'outlen',o&&o.length))"
+          node -e "require('child_process').execFileSync('/opt/curl-impersonate/curl_chrome116',['-sS','$U','--fail','--max-time','40','--compressed'],{encoding:'utf8',maxBuffer:1e8});console.log('execFileSync sS ok')"
       - name: Test price integrity and existing UI
         run: node --test scripts/*.test.mjs tests/*.test.mjs
       - name: Fetch dated official closes or explicitly delayed quotes
