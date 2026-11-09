@@ -46,6 +46,13 @@ jobs:
           # Diagnostic: does the Chrome fingerprint pass Akamai right now?
           /opt/curl-impersonate/curl_chrome116 -sS -o /dev/null -w 'report HTTP %{http_code}\n' \
             https://www.saudiexchange.sa/Resources/Reports-v2/DetailedDaily_en.html || true
+          d() { echo "== $1"; shift; /opt/curl-impersonate/curl_chrome116 -sS "$@" -o /dev/null -w 'HTTP %{http_code}\n' https://www.saudiexchange.sa/Resources/Reports-v2/DetailedDaily_en.html || echo "exit $?"; }
+          d fail --fail
+          d compressed --compressed
+          d maxtime --max-time 40
+          d accept -H 'Accept: text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'
+          d alang -H 'Accept-Language: en-US,en;q=0.9'
+          d all --silent --fail --max-time 40 --compressed -H 'Accept: text/html,application/xhtml+xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.9'
       - name: Test price integrity and existing UI
         run: node --test scripts/*.test.mjs tests/*.test.mjs
       - name: Fetch dated official closes or explicitly delayed quotes
