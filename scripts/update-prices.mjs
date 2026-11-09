@@ -6,9 +6,13 @@
  * Usage: node scripts/update-prices.mjs [--prices-only] [--dry-run]
  */
 import { readFile, writeFile, rename, unlink } from 'node:fs/promises';
+import { execFile as execFileCallback } from 'node:child_process';
+import { promisify } from 'node:util';
 import { applyWeek52Range } from './week52-range.mjs';
 import { OFFICIAL_URL, OFFICIAL_HOME_URL, TV_COLUMNS, isoDate, displayDate, round, validDate, parseOfficialDaily, parseOfficialMarketPage,
-  normalizeTradingView, selectQuote, applyQuote } from './price-integrity.mjs';
+  normalizeTradingView, selectQuote, applyQuote, estimateTurnover } from './price-integrity.mjs';
+
+const execFile = promisify(execFileCallback);
 
 const DATA_FILE = new URL('../dist/data.json', import.meta.url);
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
@@ -35,17 +39,35 @@ async function request(url, { body, accept = 'application/json', timeout = 20000
   } finally { clearTimeout(timer); }
 }
 
+// Akamai in front of saudiexchange.sa rejects non-browser TLS fingerprints
+// (curl, Node undici) with 403 while accepting real browsers. When a
+// curl-impersonate binary is available it is tried first; plain fetch remains
+// the fallback so behaviour never regresses where the report is reachable.
+const IMPERSONATE = process.env.CURL_IMPERSONATE || null;
+async function browserFingerprintHtml(url) {
+  if (!IMPERSONATE) return null;
+  try {
+    const { stdout } = await execFile(IMPERSONATE, [url, '--silent', '--fail', '--max-time', '40', '--compressed',
+      '-H', 'Accept: text/html,application/xhtml+xml;q=0.9,*/*;q=0.8', '-H', 'Accept-Language: en-US,en;q=0.9'],
+      { encoding: 'utf8', maxBuffer: 128 * 1024 * 1024, timeout: 60000 });
+    return stdout;
+  } catch { return null; }
+}
+async function officialHtml(url) {
+  return (await browserFingerprintHtml(url)) ?? await request(url, { accept: 'text/html' });
+}
+
 async function officialReport() {
   let error;
   for (let attempt = 0; attempt < 2; attempt++) {
-    try { return parseOfficialDaily(await request(OFFICIAL_URL, { accept: 'text/html' }), now); }
+    try { return parseOfficialDaily(await officialHtml(OFFICIAL_URL), now); }
     catch (failure) { error = failure; if (attempt === 0 && !/HTTP 403/.test(failure.message)) await sleep(1000); }
   }
   console.warn(`Official close unavailable: ${error.message}`);
   return null;
 }
 async function officialMarketPage() {
-  try { return parseOfficialMarketPage(await request(OFFICIAL_HOME_URL, { accept: 'text/html' }), now); }
+  try { return parseOfficialMarketPage(await officialHtml(OFFICIAL_HOME_URL), now); }
   catch (error) { console.warn(`Official market summary unavailable: ${error.message}`); return null; }
 }
 async function delayedQuotes() {
@@ -58,7 +80,7 @@ async function delayedQuotes() {
     });
     let payload;
     try {
-      try { payload = await scan([...TV_COLUMNS, 'change_abs']); }
+      try { payload = await scan([...TV_COLUMNS, 'change_abs', 'volume']); }
       catch (error) {
         console.warn(`Optional TV fields rejected: ${error.message}; retrying dated base fields.`);
         // Preserve performance when only ranges fail. If performance also fails,
@@ -72,6 +94,7 @@ async function delayedQuotes() {
         const quote = normalizeTradingView(row, now, symbol === 'TASI');
         if (!quote) continue;
         quote.pointChange = Number.isFinite(row.d?.[12]) ? row.d[12] : null;
+        quote.volume = Number.isFinite(row.d?.[13]) && row.d[13] >= 0 ? row.d[13] : null;
         found.set(symbol, quote);
       }
     } catch (error) { console.warn(`TV batch unavailable: ${error.message}`); }
@@ -155,6 +178,18 @@ if (data.marketSummary.turnover == null && officialMarket?.date === targetDate) 
   data.marketSummary.turnover = round(officialMarket.turnover);
   data.marketSummary.turnoverSource = officialMarket.source;
 }
+// During the session the official pages may be unreachable; keep the traded
+// value moving with the market using a clearly labelled estimate from
+// per-stock delayed volume. The official report replaces it at close.
+if (data.marketSummary.turnover == null) {
+  const estimated = estimateTurnover(stocks, delayed, selected, targetDate);
+  if (estimated != null) {
+    data.marketSummary.turnover = estimated;
+    data.marketSummary.turnoverSource = 'TradingView';
+    data.marketSummary.turnoverEstimated = true;
+  }
+}
+data.marketSummary.turnoverEstimated = data.marketSummary.turnoverEstimated === true;
 for (const field of ['ytd', 'month3', 'month6', 'year1']) {
   const value = indexPerformance?.performance?.[field];
   data.marketSummary[field] = indexPerformance?.date === targetDate && Number.isFinite(value) ? round(value) : null;

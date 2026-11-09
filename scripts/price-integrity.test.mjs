@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { strictNumber, validDate, marketSession, parseOfficialDaily, parseOfficialMarketPage, normalizeTradingView,
-  selectQuote, applyQuote, TV_COLUMNS } from './price-integrity.mjs';
+  selectQuote, applyQuote, estimateTurnover, TV_COLUMNS } from './price-integrity.mjs';
 const now = new Date('2026-11-04T18:00:00Z');
 const timestamp = new Date('2026-11-04T07:00:00Z').getTime() / 1000;
 const official = { close: 61.5, day: 2.24, marketCap: 369000, date: '2026-11-04', status: 'official_close', source: 'Saudi Exchange', timestamp: null };
@@ -47,6 +47,22 @@ test('Parse dated official market-page turnover fallback', () => {
   assert.equal(parsed.date, '2026-11-04');
   assert.equal(parsed.turnover, 4484633652.75);
   assert.throws(() => parseOfficialMarketPage('<span class="valueTradedMain">1</span>', now), /dated/);
+});
+test('Turnover estimate requires broad same-session dated volume coverage', () => {
+  const stocks = [{ symbol: '1120' }, { symbol: '2222' }];
+  const selected = new Map([['1120', { close: 61.5 }], ['2222', { close: 26.18 }]]);
+  const delayed = new Map([['1120', { date: '2026-11-04', volume: 100 }],
+    ['2222', { date: '2026-11-04', volume: 200 }]]);
+  assert.equal(estimateTurnover(stocks, delayed, selected, '2026-11-04'), 11386);
+  // One stock without dated volume -> 50% coverage is not enough for a market figure.
+  assert.equal(estimateTurnover(stocks, new Map([['1120', delayed.get('1120')]]), selected, '2026-11-04'), null);
+  // Volume dated to an older session never enters the current-day estimate.
+  assert.equal(estimateTurnover(stocks, new Map([['1120', { date: '2026-11-03', volume: 100 }],
+    ['2222', delayed.get('2222')]]), selected, '2026-11-04'), null);
+  assert.equal(estimateTurnover([], delayed, selected, '2026-11-04'), null);
+  // A zero price on one stock drops it from coverage instead of skewing the sum.
+  const zeroed = new Map(selected); zeroed.set('1120', { close: 0 });
+  assert.equal(estimateTurnover(stocks, delayed, zeroed, '2026-11-04'), null);
 });
 test('Dated TradingView fallback does not invent a trade timestamp or official close', () => {
   const quote = normalizeTradingView(row, now);

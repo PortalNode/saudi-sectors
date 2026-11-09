@@ -147,7 +147,7 @@ function paintMarketSummary(){
     {label:'الشركات المرتفعة',value:integerFormat.format(breadth.up),trend:1},
     {label:'الشركات المنخفضة',value:integerFormat.format(breadth.down),trend:-1},
     {label:'دون تغيير',value:integerFormat.format(breadth.flat),trend:0},
-    {label:'القيمة المتداولة',value:m.turnover==null?'—':integerFormat.format(m.turnover),source:m.turnoverSource},
+    {label:'القيمة المتداولة',value:m.turnover==null?'—':integerFormat.format(m.turnover),source:m.turnoverSource,estimated:m.turnoverEstimated===true},
     {label:'أداء المؤشر منذ بداية السنة',value:m.ytd,percent:true},
     {label:'3 أشهر',value:m.month3,percent:true},
     {label:'6 أشهر',value:m.month6,percent:true},
@@ -157,9 +157,10 @@ function paintMarketSummary(){
     const trend=item.trend ?? (item.percent?item.value:null);
     const display=item.percent?(item.value==null?'—':`${item.value>0?'+':''}${numberFormat.format(item.value)}%`):item.value;
     const cls=typeof trend==='number'?(trend>0?'up':trend<0?'down':'flat'):'';
+    const estimatedMark=item.estimated&&item.value!=='—'?' <small>(تقديري)</small>':'';
     const itemSource=item.percent?providerLabel(m.performanceSource):item.source?providerLabel(item.source):source;
-    const title=item.label.startsWith('الشركات')||item.label==='دون تغيير'?`محسوب من بيانات أسهم الجدول · ${providerLabel(data.priceSource?.provider)} · ${snapshotLabel()}`:`المصدر: ${itemSource} · ${item.percent?'تاريخ بيانات الأداء':'تاريخ المؤشر'}: ${item.percent?m.performanceDate||'غير متاح':date||'غير متاح'}`;
-    return `<div class="market-card" title="${escapeHtml(title)}"><span>${item.label}</span><strong class="${cls}">${display}</strong></div>`;
+    const title=item.label.startsWith('الشركات')||item.label==='دون تغيير'?`محسوب من بيانات أسهم الجدول · ${providerLabel(data.priceSource?.provider)} · ${snapshotLabel()}`:`المصدر: ${itemSource} · ${item.percent?'تاريخ بيانات الأداء':'تاريخ المؤشر'}: ${item.percent?m.performanceDate||'غير متاح':date||'غير متاح'}${item.estimated?' · تقدير من أحجام الأسهم المتأخرة ويُستبدل بالقيمة الرسمية عند الإغلاق':''}`;
+    return `<div class="market-card" title="${escapeHtml(title)}"><span>${item.label}</span><strong class="${cls}">${display}${estimatedMark}</strong></div>`;
   }).join('');
   const checked=checkedLabel(m.updatedAt);
   const label=mode==='close'?'إغلاق رسمي':mode==='delayed'?'بيانات متأخرة · غير مؤكدة رسميًا':'بيانات المؤشر';

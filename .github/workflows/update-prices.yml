@@ -5,6 +5,9 @@ on:
     # Dated delayed prices during the session, including closing auction.
     # UTC + 3 = Riyadh. Actions schedules are best-effort, not real-time feeds.
     - cron: '3,18,33,48 7-12 * * 0-4'
+    # A second staggered slot: GitHub drops or delays scheduled runs under
+    # load, and two independent offsets make a total miss far less likely.
+    - cron: '8,23,38,53 7-12 * * 0-4'
     # Retry the official closing report at 16:08, 17:08, 18:08 and 20:08 Riyadh.
     - cron: '8 13,14,15,17 * * 0-4'
   workflow_dispatch:
@@ -30,10 +33,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      # saudiexchange.sa sits behind Akamai, which rejects non-browser TLS
+      # fingerprints with 403. curl-impersonate speaks Chrome's fingerprint so
+      # the official daily report and market page stay reachable; the update
+      # script falls back to plain fetch when this binary is unavailable.
+      - name: Install curl-impersonate
+        run: |
+          curl -sSL -o /tmp/ci.tgz https://github.com/lwthiker/curl-impersonate/releases/download/v0.6.1/curl-impersonate-v0.6.1.x86_64-linux-gnu.tar.gz
+          mkdir /tmp/ci && tar xzf /tmp/ci.tgz -C /tmp/ci
+          sudo install /tmp/ci/curl-impersonate-chrome /usr/local/bin/curl-impersonate-chrome
+          /usr/local/bin/curl-impersonate-chrome --version
       - name: Test price integrity and existing UI
         run: node --test scripts/*.test.mjs tests/*.test.mjs
       - name: Fetch dated official closes or explicitly delayed quotes
         run: node scripts/update-prices.mjs
+        env:
+          CURL_IMPERSONATE: curl-impersonate-chrome
       - name: Commit refreshed data
         run: |
           git config user.name "price-bot"

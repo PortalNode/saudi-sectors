@@ -110,6 +110,22 @@ export function selectQuote(official, delayed, targetDate, now = new Date()) {
   if (delayed?.date === targetDate) return delayed;
   return null;
 }
+
+// Intraday market-turnover estimate: per-stock delayed volume x last price.
+// Only with broad same-session coverage; always displayed labelled as an
+// estimate, and replaced by the official traded value at close.
+export function estimateTurnover(stocks, delayed, selected, targetDate) {
+  let sum = 0, counted = 0;
+  for (const stock of stocks) {
+    const quote = selected.get(stock.symbol), supplemental = delayed.get(stock.symbol);
+    if (quote?.close > 0 && supplemental?.date === targetDate &&
+        Number.isFinite(supplemental.volume) && supplemental.volume > 0) {
+      sum += quote.close * supplemental.volume;
+      counted++;
+    }
+  }
+  return stocks.length && counted / stocks.length >= 0.9 && sum > 0 ? round(sum) : null;
+}
 export function applyQuote(stock, quote, performance, checkedAt) {
   if (!quote) {
     stock.priceStatus = 'unavailable';
