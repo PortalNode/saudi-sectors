@@ -1,0 +1,389 @@
+{
+  "schemaVersion": 1,
+  "sector": "وسائل الاعلام",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_media.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-09T07:30:14Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "4071",
+      "name": "العربية",
+      "fullName": "العربية (4071) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "العربية",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 720.63,
+            "grossIncome": 330.28,
+            "operatingIncome": 261.33,
+            "netProfit": 206.25,
+            "epsBeforeExceptional": 3.75,
+            "eps": 3.75,
+            "grossMargin": 0.45832119117993975,
+            "operatingMargin": 0.36264102243869945,
+            "netMargin": 0.2862079014195912
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1126.18,
+            "grossIncome": 486.99,
+            "operatingIncome": 383.96,
+            "netProfit": 274.7,
+            "epsBeforeExceptional": 5.44,
+            "eps": 4.99,
+            "grossMargin": 0.4324264327194587,
+            "operatingMargin": 0.3409401694222948,
+            "netMargin": 0.2439219307748317
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1637.05,
+            "grossIncome": 760.36,
+            "operatingIncome": 589.55,
+            "netProfit": 284.59,
+            "epsBeforeExceptional": 5.59,
+            "eps": 5.17,
+            "grossMargin": 0.46446962524052415,
+            "operatingMargin": 0.3601295012369811,
+            "netMargin": 0.17384319354937233
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1952.06,
+            "grossIncome": 789.47,
+            "operatingIncome": 543.08,
+            "netProfit": 188.04,
+            "epsBeforeExceptional": 2.69,
+            "eps": 3.42,
+            "grossMargin": 0.4044291671362561,
+            "operatingMargin": 0.27820866161900765,
+            "netMargin": 0.09632900628054465
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4072",
+      "name": "مجموعة إم بي سي",
+      "fullName": "مجموعة إم بي سي (4072) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "مجموعة إم بي سي",
+      "years": [
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 3711.78,
+            "grossIncome": 921.27,
+            "operatingIncome": -87.31,
+            "netProfit": 65.29,
+            "epsBeforeExceptional": 0.04,
+            "eps": 0.22,
+            "grossMargin": 0.24820167143526822,
+            "operatingMargin": -0.023522407039210297,
+            "netMargin": 0.017589943369488496
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 4196.37,
+            "grossIncome": 1206.02,
+            "operatingIncome": 117.22,
+            "netProfit": 399.96,
+            "epsBeforeExceptional": 0.49,
+            "eps": 1.2,
+            "grossMargin": 0.2873960113145409,
+            "operatingMargin": 0.02793366647840872,
+            "netMargin": 0.09531094731875406
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 5390.87,
+            "grossIncome": 1265.9,
+            "operatingIncome": 197.92,
+            "netProfit": 382.53,
+            "epsBeforeExceptional": 0.6,
+            "eps": 1.15,
+            "grossMargin": 0.23482295065546008,
+            "operatingMargin": 0.03671392558158516,
+            "netMargin": 0.0709588619276666
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4210",
+      "name": "الأبحاث والإعلام",
+      "fullName": "الأبحاث والإعلام (4210) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "الأبحاث والإعلام",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 3045.97,
+            "grossIncome": 1082.14,
+            "operatingIncome": 620.81,
+            "netProfit": 537.02,
+            "epsBeforeExceptional": 6.71,
+            "eps": 6.71,
+            "grossMargin": 0.3552694215635742,
+            "operatingMargin": 0.20381356349537258,
+            "netMargin": 0.1763050850796298
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 3709.84,
+            "grossIncome": 1252.77,
+            "operatingIncome": 728.94,
+            "netProfit": 648.79,
+            "epsBeforeExceptional": 8.11,
+            "eps": 8.11,
+            "grossMargin": 0.33768841782934034,
+            "operatingMargin": 0.19648825825372523,
+            "netMargin": 0.1748835529295064
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 3746.23,
+            "grossIncome": 1147.3,
+            "operatingIncome": 605.7,
+            "netProfit": 559.62,
+            "epsBeforeExceptional": 7.16,
+            "eps": 7.0,
+            "grossMargin": 0.30625455457886996,
+            "operatingMargin": 0.16168254485175765,
+            "netMargin": 0.1493821788838379
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 3263.35,
+            "grossIncome": 855.57,
+            "operatingIncome": 336.87,
+            "netProfit": 201.69,
+            "epsBeforeExceptional": 3.45,
+            "eps": 2.52,
+            "grossMargin": 0.26217537193374907,
+            "operatingMargin": 0.10322827769010373,
+            "netMargin": 0.061804587310585746
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 2672.99,
+            "grossIncome": 275.84,
+            "operatingIncome": -317.19,
+            "netProfit": -366.28,
+            "epsBeforeExceptional": -3.58,
+            "eps": -4.58,
+            "grossMargin": 0.10319529814926356,
+            "operatingMargin": -0.11866486593664774,
+            "netMargin": -0.13703006745255314
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4270",
+      "name": "طباعة وتغليف",
+      "fullName": "طباعة وتغليف (4270) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "طباعة وتغليف",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 783.64,
+            "grossIncome": 88.98,
+            "operatingIncome": -23.19,
+            "netProfit": -59.3,
+            "epsBeforeExceptional": -9.34,
+            "eps": -9.34,
+            "grossMargin": 0.11354703690470115,
+            "operatingMargin": -0.02959267010361901,
+            "netMargin": -0.07567250267980195
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1000.09,
+            "grossIncome": 142.39,
+            "operatingIncome": 19.71,
+            "netProfit": -9.22,
+            "epsBeforeExceptional": -2.82,
+            "eps": -1.45,
+            "grossMargin": 0.1423771860532552,
+            "operatingMargin": 0.019708226259636634,
+            "netMargin": -0.00921917027467528
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 779.16,
+            "grossIncome": 67.14,
+            "operatingIncome": -37.31,
+            "netProfit": -132.3,
+            "epsBeforeExceptional": -15.17,
+            "eps": -20.85,
+            "grossMargin": 0.08616972123825659,
+            "operatingMargin": -0.047884901688998414,
+            "netMargin": -0.16979824426305254
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 721.2,
+            "grossIncome": 31.21,
+            "operatingIncome": -80.97,
+            "netProfit": -219.41,
+            "epsBeforeExceptional": -23.43,
+            "eps": -34.57,
+            "grossMargin": 0.0432750970604548,
+            "operatingMargin": -0.11227121464226289,
+            "netMargin": -0.3042290626733222
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 560.34,
+            "grossIncome": 18.65,
+            "operatingIncome": -95.95,
+            "netProfit": -267.34,
+            "epsBeforeExceptional": -22.38,
+            "eps": -42.12,
+            "grossMargin": 0.03328336367205625,
+            "operatingMargin": -0.17123532141199985,
+            "netMargin": -0.4771031873505371
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4070",
+      "name": "تهامة",
+      "fullName": "تهامة (4070) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "تهامة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 76.39,
+            "grossIncome": 15.23,
+            "operatingIncome": -44.48,
+            "netProfit": -35.5,
+            "epsBeforeExceptional": -3.73,
+            "eps": -3.28,
+            "grossMargin": 0.19937164550333814,
+            "operatingMargin": -0.5822751669066631,
+            "netMargin": -0.46472051315617224
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 81.83,
+            "grossIncome": 31.64,
+            "operatingIncome": -34.29,
+            "netProfit": -60.5,
+            "epsBeforeExceptional": -3.38,
+            "eps": -5.59,
+            "grossMargin": 0.38665526090675795,
+            "operatingMargin": -0.41903947207625564,
+            "netMargin": -0.739337651228156
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 68.11,
+            "grossIncome": 22.72,
+            "operatingIncome": -59.71,
+            "netProfit": -56.45,
+            "epsBeforeExceptional": -2.25,
+            "eps": -2.46,
+            "grossMargin": 0.33357803553075904,
+            "operatingMargin": -0.8766700924974307,
+            "netMargin": -0.8288063426809573
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 25.9,
+            "grossIncome": 3.33,
+            "operatingIncome": -26.86,
+            "netProfit": -9.63,
+            "epsBeforeExceptional": -0.86,
+            "eps": -0.42,
+            "grossMargin": 0.1285714285714286,
+            "operatingMargin": -1.037065637065637,
+            "netMargin": -0.37181467181467187
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 33.06,
+            "grossIncome": -1.04,
+            "operatingIncome": -32.69,
+            "netProfit": -52.79,
+            "epsBeforeExceptional": -1.41,
+            "eps": -2.3,
+            "grossMargin": -0.03145795523290986,
+            "operatingMargin": -0.9888082274652146,
+            "netMargin": -1.5967937084089532
+          }
+        }
+      ]
+    }
+  ]
+}
