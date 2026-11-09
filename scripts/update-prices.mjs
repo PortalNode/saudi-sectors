@@ -51,7 +51,11 @@ async function browserFingerprintHtml(url) {
       '-H', 'Accept: text/html,application/xhtml+xml;q=0.9,*/*;q=0.8', '-H', 'Accept-Language: en-US,en;q=0.9'],
       { encoding: 'utf8', maxBuffer: 128 * 1024 * 1024, timeout: 60000 });
     return stdout;
-  } catch { return null; }
+  } catch (error) {
+    // curl exits 22 on HTTP errors with --fail; anything else is an exec/library failure.
+    console.warn(`Browser-fingerprint fetch ${/^\d+$/.test(String(error.code)) ? `rejected (curl exit ${error.code})` : `failed: ${error.message?.split('\n')[0]}`}`);
+    return null;
+  }
 }
 async function officialHtml(url) {
   return (await browserFingerprintHtml(url)) ?? await request(url, { accept: 'text/html' });
