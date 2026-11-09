@@ -11,9 +11,14 @@ on:
     # Retry the official closing report at 16:08, 17:08, 18:08 and 20:08 Riyadh.
     - cron: '8 13,14,15,17 * * 0-4'
   workflow_dispatch:
+    inputs:
+      sleepMinutes:
+        description: 'Minutes to wait before fetching (self-chained runs)'
+        default: '0'
 
 permissions:
   contents: write
+  actions: write
   pages: write
   id-token: write
 
@@ -25,10 +30,17 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Check out source
         uses: actions/checkout@v6
+      - name: Wait for the next slot (self-chained run)
+        run: |
+          MINUTES="${{ github.event.inputs.sleepMinutes || '0' }}"
+          if [ "$MINUTES" != "0" ]; then
+            echo "Chained run: sleeping $MINUTES minutes until the next slot."
+            sleep $(( MINUTES * 60 ))
+          fi
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -78,3 +90,28 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      # GitHub silently drops scheduled runs under load; a chain that re-triggers
+      # the next slot makes one morning start enough for the whole session.
+      - name: Chain the next update slot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          MINUTES=$(node -e '
+            const parts = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Riyadh",weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date());
+            const get = k => parts.find(p=>p.type===k)?.value;
+            const now = Number(get("hour"))*60+Number(get("minute"));
+            const weekday = !["Fri","Sat"].includes(get("weekday"));
+            const slots = [];
+            if (weekday) {
+              for (let m = 603; m <= 948; m += 15) slots.push(m); // 10:03–15:48
+              slots.push(968, 1028, 1088, 1208);                  // 16:08, 17:08, 18:08, 20:08
+            }
+            const next = slots.find(m => m > now + 2);
+            console.log(next == null ? 0 : next - now);
+          ')
+          if [ "$MINUTES" = "0" ] || [ "$MINUTES" -gt 22 ]; then
+            echo "No next slot within reach today; chain ends."
+          else
+            gh workflow run update-prices.yml --repo "${{ github.repository }}" -f sleepMinutes=$MINUTES
+            echo "Chained the next slot in $MINUTES minutes."
+          fi

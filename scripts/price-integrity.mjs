@@ -49,6 +49,7 @@ export function parseOfficialDaily(html, now = new Date()) {
   const index = name => header.findIndex(v => key(v) === name);
   const symbolIndex = index('symbol'), closeIndex = index('close (sar)'), dayIndex = index('% change');
   const capIndex = index('market cap (sar)'), companyIndex = index('company'), volumeIndex = index('volume traded');
+  const tradedIndex = index('value traded (sar)');
   if ([symbolIndex, closeIndex, dayIndex, capIndex, companyIndex, volumeIndex].some(i => i < 0)) {
     throw new Error('Official company-table required columns missing');
   }
@@ -60,9 +61,10 @@ export function parseOfficialDaily(html, now = new Date()) {
     const close = strictNumber(row[closeIndex]), day = strictNumber(row[dayIndex]);
     const cap = strictNumber(row[capIndex]), volume = strictNumber(row[volumeIndex]);
     if (!(close > 0) || !(cap > 0) || day == null || volume == null || volume < 0) continue;
+    const tradedValue = tradedIndex >= 0 ? strictNumber(row[tradedIndex]) : null;
     quotes.set(symbol, { close, day, marketCap: cap / 1e6, date, source: 'Saudi Exchange',
       status: 'official_close', suspended: /\*/.test(row[companyIndex]) && volume === 0,
-      timestamp: null, currency: 'SAR' });
+      timestamp: null, currency: 'SAR', tradedValue: tradedValue != null && tradedValue > 0 ? tradedValue : null });
   }
   if (!quotes.size) throw new Error('Official report contains no usable company prices');
   const get = name => strictNumber(rows.find(row => row.length === 2 && key(row[0]) === name)?.[1]);
@@ -84,6 +86,22 @@ export function parseOfficialMarketPage(html, now = new Date()) {
     throw new Error('Official market page missing dated value traded');
   }
   return { date, turnover, source: 'Saudi Exchange' };
+}
+// Argaam companies-prices page: one <li data-market="3"> per main-market stock
+// carrying the delayed price, change and exact per-stock traded value (SAR).
+export const ARGAAM_PRICES_URL = 'https://www.argaam.com/ar/company/companies-prices';
+export function parseArgaamPrices(html) {
+  const rows = new Map();
+  for (const block of html.matchAll(/relf-Stocksymbol="(\d{4})"[\s\S]*?<\/li>/g)) {
+    const symbol = block[1], seg = block[0];
+    if (rows.has(symbol)) continue;
+    const attr = name => strictNumber(seg.match(new RegExp(`relf-${name}="([^"]+)"`))?.[1]);
+    const close = attr('close'), change = attr('change'), day = attr('change-percantage');
+    if (!(close > 0) || change == null || day == null) continue;
+    rows.set(symbol, { close, change, day, prevClose: attr('prev-close'),
+      volume: attr('volume'), amount: attr('amount') });
+  }
+  return rows;
 }
 export const TV_COLUMNS = ['close', 'change', 'currency', 'time', 'update_mode', 'market_cap_basic',
   'Perf.YTD', 'Perf.3M', 'Perf.6M', 'Perf.Y', 'price_52_week_low', 'price_52_week_high'];
@@ -130,6 +148,7 @@ export function applyQuote(stock, quote, performance, checkedAt) {
   if (!quote) {
     stock.priceStatus = 'unavailable';
     stock.price = stock.day = stock.marketCap = stock.pe = stock.pb = null;
+    stock.tradedValue = null;
     stock.priceDate = stock.priceTimestamp = null;
     delete stock.priceSource;
   } else {
@@ -141,6 +160,8 @@ export function applyQuote(stock, quote, performance, checkedAt) {
     stock.priceStatus = quote.status;
     stock.marketCap = quote.marketCap == null ? null : round(quote.marketCap);
     stock.marketCapSource = quote.marketCap == null ? null : quote.source;
+    stock.tradedValue = quote.tradedValue == null ? null : round(quote.tradedValue);
+    stock.tradedValueSource = quote.tradedValue == null ? null : quote.source;
     if (quote.source === 'Saudi Exchange' && quote.marketCap > 0) {
       stock.shares = Math.round(quote.marketCap * 1e6 / quote.close);
       stock.sharesDate = quote.date;

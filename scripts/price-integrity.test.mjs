@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { strictNumber, validDate, marketSession, parseOfficialDaily, parseOfficialMarketPage, normalizeTradingView,
+import { strictNumber, validDate, marketSession, parseOfficialDaily, parseOfficialMarketPage, parseArgaamPrices, normalizeTradingView,
   selectQuote, applyQuote, estimateTurnover, TV_COLUMNS } from './price-integrity.mjs';
 const now = new Date('2026-11-04T18:00:00Z');
 const timestamp = new Date('2026-11-04T07:00:00Z').getTime() / 1000;
@@ -77,6 +77,22 @@ test('Dated TradingView fallback does not invent a trade timestamp or official c
     for (const [i, value] of Object.entries(changed)) values[i] = value;
     assert.equal(normalizeTradingView({ ...row, d: values }, now), null);
   }
+});
+test('Argaam prices parse per-stock traded value and skip malformed rows', () => {
+  const html = `<li class="Labelssearch_main" data-company="3509" data-market="3">
+    <span id="3509_companylist" relf-Stocksymbol="2222" relf-fav="False" relf-companyName="أرامكو السعودية"
+      value="3509" relf-close="26.1600" relf-change="0.0800" relf-change-percantage="0.3100"
+      relf-tickerid="12434" relf-prev-close="26.0800" relf-volume="4483688.0000" relf-amount="117206251.0000">
+      <a href="/ar/company/companyoverview/marketid/3/companyid/3509">2222 - أرامكو السعودية</a></span></li>
+    <li><span relf-Stocksymbol="9999" relf-close="0" relf-change="x" relf-change-percantage="y"></span></li>
+    <li><span relf-Stocksymbol="8888" relf-close="10.00" relf-change="0.10" relf-change-percantage="1.00"
+      relf-prev-close="9.90" relf-volume="500.0000" relf-amount="5000.0000"></span></li>`;
+  const parsed = parseArgaamPrices(html);
+  assert.equal(parsed.size, 2);
+  assert.deepEqual(parsed.get('2222'), { close: 26.16, change: 0.08, day: 0.31,
+    prevClose: 26.08, volume: 4483688, amount: 117206251 });
+  assert.deepEqual(parsed.get('8888'), { close: 10, change: 0.1, day: 1,
+    prevClose: 9.9, volume: 500, amount: 5000 });
 });
 test('Official same-session close wins, but never before closing or over newer observations', () => {
   const delayed = normalizeTradingView(row, now);

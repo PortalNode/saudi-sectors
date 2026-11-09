@@ -9,7 +9,7 @@ import { readFile, writeFile, rename, unlink } from 'node:fs/promises';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { applyWeek52Range } from './week52-range.mjs';
-import { OFFICIAL_URL, OFFICIAL_HOME_URL, TV_COLUMNS, isoDate, displayDate, round, validDate, parseOfficialDaily, parseOfficialMarketPage,
+import { OFFICIAL_URL, OFFICIAL_HOME_URL, TV_COLUMNS, ARGAAM_PRICES_URL, isoDate, displayDate, round, validDate, parseOfficialDaily, parseOfficialMarketPage, parseArgaamPrices,
   normalizeTradingView, selectQuote, applyQuote, estimateTurnover } from './price-integrity.mjs';
 
 const execFile = promisify(execFileCallback);
@@ -77,8 +77,17 @@ async function officialMarketPage() {
   try { return parseOfficialMarketPage(await officialHtml(OFFICIAL_HOME_URL), now); }
   catch (error) { console.warn(`Official market summary unavailable: ${error.message}`); return null; }
 }
-async function delayedQuotes() {
-  const found = new Map();
+async function argaamPrices() {
+  let error;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try { return parseArgaamPrices(await request(ARGAAM_PRICES_URL, { accept: 'text/html' })); }
+    catch (failure) { error = failure; if (attempt < 2) await sleep(700 * (attempt + 1)); }
+  }
+  console.warn(`Argaam prices unavailable: ${error.message}`);
+  return new Map();
+}
+
+async function delayedQuotes() {  const found = new Map();
   const tickers = [...stocks.map(stock => `TADAWUL:${stock.symbol}`), 'TADAWUL:TASI'];
   for (let index = 0; index < tickers.length; index += 100) {
     const batch = tickers.slice(index, index + 100);
@@ -109,7 +118,7 @@ async function delayedQuotes() {
   }
   return found;
 }
-const [official, officialMarket, delayed] = await Promise.all([officialReport(), officialMarketPage(), delayedQuotes()]);
+const [official, officialMarket, delayed, argaam] = await Promise.all([officialReport(), officialMarketPage(), delayedQuotes(), argaamPrices()]);
 const observedDates = stocks.map(stock => delayed.get(stock.symbol)?.date).filter(validDate);
 if (official) observedDates.push(official.date);
 const targetDate = observedDates.sort().at(-1);
@@ -123,11 +132,23 @@ function cachedOfficial(stock) {
       stock.priceDate !== targetDate || stock.lastOfficialClose?.date !== targetDate ||
       stock.lastOfficialClose?.price !== stock.price || !(stock.price > 0) || !Number.isFinite(stock.day)) return null;
   return { close: stock.price, day: stock.day, marketCap: stock.marketCap, date: stock.priceDate,
-    status: 'official_close', source: 'Saudi Exchange', timestamp: null, suspended: stock.suspended || false };
+    status: 'official_close', source: 'Saudi Exchange', timestamp: null, suspended: stock.suspended || false,
+    tradedValue: stock.tradedValue ?? null };
 }
-const selected = new Map(stocks.map(stock => [stock.symbol,
-  selectQuote((official?.date === targetDate ? official.quotes.get(stock.symbol) : null) || cachedOfficial(stock),
-    delayed.get(stock.symbol), targetDate, now)]));
+const selected = new Map(stocks.map(stock => {
+  const tvQuote = delayed.get(stock.symbol);
+  let quote = selectQuote((official?.date === targetDate ? official.quotes.get(stock.symbol) : null) || cachedOfficial(stock),
+    tvQuote, targetDate, now);
+  // Intraday stock prices come from Argaam when both sources describe the same
+  // session: Argaam adds the exact per-stock traded value, TradingView keeps
+  // supplying market cap, performance and 52-week ranges. Official closes win.
+  const ag = argaam.get(stock.symbol);
+  if (quote?.source === 'TradingView' && ag) {
+    quote = { ...quote, close: ag.close, day: ag.day, pointChange: ag.change,
+      tradedValue: ag.amount, source: 'Argaam' };
+  }
+  return [stock.symbol, quote];
+}));
 const resolved = [...selected.values()].filter(Boolean).length;
 // A partial result is explicitly unavailable, never a silently retained old price.
 // Permit at most 2% unavailable rows, with their price and day cleared and labelled.
@@ -135,8 +156,9 @@ const minimum = Math.ceil(stocks.length * 0.98);
 if (resolved < minimum) throw new Error(`Only ${resolved}/${stocks.length} same-session prices; data.json left untouched`);
 const officialCount = [...selected.values()].filter(quote => quote?.status === 'official_close').length;
 const delayedCount = resolved - officialCount;
+const argaamCount = [...selected.values()].filter(quote => quote?.source === 'Argaam').length;
 const mode = officialCount === stocks.length ? 'close' : 'delayed';
-const provider = mode === 'close' ? 'Saudi Exchange' : 'TradingView';
+const provider = mode === 'close' ? 'Saudi Exchange' : argaamCount > 0 ? 'Argaam' : 'TradingView';
 const week52Counts = { updated: 0, retained: 0, incompatible: 0, unavailable: 0 };
 for (const stock of stocks) {
   const quote = selected.get(stock.symbol), supplemental = delayed.get(stock.symbol);
@@ -185,6 +207,20 @@ if (data.marketSummary.turnover == null && officialMarket?.date === targetDate) 
   data.marketSummary.turnover = round(officialMarket.turnover);
   data.marketSummary.turnoverSource = officialMarket.source;
 }
+// Argaam per-stock traded value sums to the exact market turnover, no estimate.
+if (data.marketSummary.turnover == null) {
+  let sum = 0, counted = 0;
+  for (const stock of stocks) {
+    const quote = selected.get(stock.symbol);
+    if (quote?.source === 'Argaam' && Number.isFinite(quote.tradedValue) && quote.tradedValue > 0) {
+      sum += quote.tradedValue; counted++;
+    }
+  }
+  if (stocks.length && counted / stocks.length >= 0.9 && sum > 0) {
+    data.marketSummary.turnover = round(sum);
+    data.marketSummary.turnoverSource = 'Argaam';
+  }
+}
 // During the session the official pages may be unreachable; keep the traded
 // value moving with the market using a clearly labelled estimate from
 // per-stock delayed volume. The official report replaces it at close.
@@ -205,7 +241,8 @@ data.marketSummary.performanceDate = indexPerformance?.date === targetDate ? tar
 data.marketSummary.performanceSource = data.marketSummary.performanceDate ? 'TradingView' : null;
 data.sources ??= {};
 data.sources.closingPrices = OFFICIAL_URL;
-data.sources.delayedPrices = 'https://www.tradingview.com/markets/stocks-ksa/market-movers-all-stocks/';
+data.sources.delayedPrices = provider === 'Argaam' ? ARGAAM_PRICES_URL
+  : 'https://www.tradingview.com/markets/stocks-ksa/market-movers-all-stocks/';
 
 // Keep the existing Argaam last-year dividend-yield definition and update path.
 async function argaamHtml(url) {
