@@ -79,7 +79,10 @@ test('all 10 repository banks match the real app default recurring hierarchy and
     assert.equal(record.epsDateKind, 'sector');
     assert.equal(record.priceDate, stock.priceDate);
     assert.equal(record.priceStatus, stock.priceStatus);
-    assert.equal(record.priceSource, 'تريدينغ فيو');
+    // The price source label follows whatever provider the snapshot used.
+    assert.equal(record.priceSource,
+      prices.priceSource?.provider === 'Argaam' ? 'أرقام'
+        : prices.priceSource?.provider === 'Saudi Exchange' ? 'تداول السعودية' : 'تريدينغ فيو');
     assert.equal(record.checkedAt, stock.priceCheckedAt);
     assert.equal(peText(renderCurrentBankPECard(record)), `${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(record.pe)} مرة`);
   }

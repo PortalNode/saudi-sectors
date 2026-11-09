@@ -23,6 +23,7 @@ function validPeriod(period, now) {
 function providerLabel(provider) {
   if (provider === 'Saudi Exchange') return 'تداول السعودية';
   if (provider === 'TradingView') return 'تريدينغ فيو';
+  if (provider === 'Argaam') return 'أرقام';
   return provider || null;
 }
 
