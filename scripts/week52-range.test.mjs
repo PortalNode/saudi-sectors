@@ -117,6 +117,10 @@ test('dated fallback refreshes prices, preserves compatible ranges and clears in
     assert.equal(data.priceSource.mode, 'delayed');
     assert.equal(data.priceSource.officialDate, null);
     assert.equal(data.marketSummary.source, 'TradingView');
+    assert.equal(data.marketSummary.turnover, null, 'after-hours fallback must not show a provisional value as official');
+    assert.equal(data.marketSummary.turnoverEstimated, false);
+    assert.ok(stocks.every(stock => stock.priceSource === 'TradingView'));
+    assert.ok(stocks.every(stock => stock.tradedValue == null), 'undated aggregator turnover must not be attached to the dated snapshot');
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 test('official completed same-day report wins and has an unmixed index summary', async () => {
