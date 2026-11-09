@@ -1,0 +1,706 @@
+{
+  "schemaVersion": 1,
+  "sector": "متعددة الأنشطة",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "argaam_multi.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-09T07:13:58Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "4140",
+      "name": "صادرات",
+      "fullName": "صادرات (4140) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "صادرات",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 15.79,
+            "grossIncome": 2.02,
+            "operatingIncome": -14.78,
+            "netProfit": -14.88,
+            "epsBeforeExceptional": -0.09,
+            "eps": -0.09,
+            "grossMargin": 0.1279290690310323,
+            "operatingMargin": -0.9360354654844839,
+            "netMargin": -0.942368587713743
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 0.27,
+            "grossIncome": 0.24,
+            "operatingIncome": -15.97,
+            "netProfit": -21.09,
+            "epsBeforeExceptional": -0.09,
+            "eps": -0.11,
+            "grossMargin": 0.8888888888888888,
+            "operatingMargin": -59.148148148148145,
+            "netMargin": -78.1111111111111
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 13.23,
+            "grossIncome": -0.34,
+            "operatingIncome": -24.39,
+            "netProfit": -15.6,
+            "epsBeforeExceptional": -0.08,
+            "eps": -0.08,
+            "grossMargin": -0.025699168556311415,
+            "operatingMargin": -1.8435374149659864,
+            "netMargin": -1.1791383219954648
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 22.98,
+            "grossIncome": -2.95,
+            "operatingIncome": -20.6,
+            "netProfit": -19.57,
+            "epsBeforeExceptional": -0.1,
+            "eps": -0.1,
+            "grossMargin": -0.12837249782419496,
+            "operatingMargin": -0.896431679721497,
+            "netMargin": -0.8516100957354221
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": null,
+            "grossIncome": null,
+            "operatingIncome": -14.41,
+            "netProfit": -24.92,
+            "epsBeforeExceptional": -0.09,
+            "eps": -0.13,
+            "grossMargin": null,
+            "operatingMargin": null,
+            "netMargin": null
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4080",
+      "name": "سناد القابضة",
+      "fullName": "سناد القابضة (4080) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "سناد القابضة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 1711.31,
+            "grossIncome": 486.09,
+            "operatingIncome": 61.22,
+            "netProfit": -63.49,
+            "epsBeforeExceptional": -0.5,
+            "eps": -0.5,
+            "grossMargin": 0.2840455557438454,
+            "operatingMargin": 0.035773763958604814,
+            "netMargin": -0.037100233154717735
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1757.56,
+            "grossIncome": 496.7,
+            "operatingIncome": 31.32,
+            "netProfit": 10.12,
+            "epsBeforeExceptional": -0.44,
+            "eps": 0.08,
+            "grossMargin": 0.282607706138055,
+            "operatingMargin": 0.017820159766949634,
+            "netMargin": 0.005757982657775552
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1639.83,
+            "grossIncome": 372.66,
+            "operatingIncome": -90.04,
+            "netProfit": -132.65,
+            "epsBeforeExceptional": -0.87,
+            "eps": -1.05,
+            "grossMargin": 0.22725526426519824,
+            "operatingMargin": -0.054908130720867414,
+            "netMargin": -0.08089253154290385
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1743.38,
+            "grossIncome": 521.85,
+            "operatingIncome": 106.44,
+            "netProfit": -3.87,
+            "epsBeforeExceptional": -0.16,
+            "eps": -0.03,
+            "grossMargin": 0.29933233144810656,
+            "operatingMargin": 0.061053815003040066,
+            "netMargin": -0.002219825855522032
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1694.38,
+            "grossIncome": 498.57,
+            "operatingIncome": 78.68,
+            "netProfit": -15.65,
+            "epsBeforeExceptional": -0.25,
+            "eps": -0.12,
+            "grossMargin": 0.29424922390490915,
+            "operatingMargin": 0.04643586444599204,
+            "netMargin": -0.009236416860444527
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4130",
+      "name": "درب السعودية",
+      "fullName": "درب السعودية (4130) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "درب السعودية",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 11.41,
+            "grossIncome": 6.37,
+            "operatingIncome": -7.47,
+            "netProfit": -8.34,
+            "epsBeforeExceptional": -0.04,
+            "eps": -0.04,
+            "grossMargin": 0.558282208588957,
+            "operatingMargin": -0.6546888694127958,
+            "netMargin": -0.7309377738825591
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 11.52,
+            "grossIncome": 5.82,
+            "operatingIncome": -1.6,
+            "netProfit": -7.98,
+            "epsBeforeExceptional": -0.02,
+            "eps": -0.04,
+            "grossMargin": 0.5052083333333334,
+            "operatingMargin": -0.1388888888888889,
+            "netMargin": -0.6927083333333334
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 16.06,
+            "grossIncome": 11.67,
+            "operatingIncome": 10.79,
+            "netProfit": 3.5,
+            "epsBeforeExceptional": 0.02,
+            "eps": 0.02,
+            "grossMargin": 0.7266500622665006,
+            "operatingMargin": 0.6718555417185554,
+            "netMargin": 0.21793275217932753
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 18.1,
+            "grossIncome": 13.6,
+            "operatingIncome": 8.59,
+            "netProfit": 8.38,
+            "epsBeforeExceptional": 0.04,
+            "eps": 0.04,
+            "grossMargin": 0.7513812154696132,
+            "operatingMargin": 0.47458563535911596,
+            "netMargin": 0.46298342541436466
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 18.27,
+            "grossIncome": 13.94,
+            "operatingIncome": 7.12,
+            "netProfit": 6.78,
+            "epsBeforeExceptional": 0.03,
+            "eps": 0.03,
+            "grossMargin": 0.7629994526546251,
+            "operatingMargin": 0.38970990695128627,
+            "netMargin": 0.3711001642036125
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "2030",
+      "name": "المصافي",
+      "fullName": "المصافي (2030) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "المصافي",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": null,
+            "grossIncome": null,
+            "operatingIncome": -1.33,
+            "netProfit": 6.59,
+            "epsBeforeExceptional": 0.44,
+            "eps": 0.44,
+            "grossMargin": null,
+            "operatingMargin": null,
+            "netMargin": null
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": null,
+            "grossIncome": null,
+            "operatingIncome": -5.04,
+            "netProfit": 28.23,
+            "epsBeforeExceptional": 1.88,
+            "eps": 1.88,
+            "grossMargin": null,
+            "operatingMargin": null,
+            "netMargin": null
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": null,
+            "grossIncome": null,
+            "operatingIncome": -4.71,
+            "netProfit": 7.7,
+            "epsBeforeExceptional": 0.69,
+            "eps": 0.51,
+            "grossMargin": null,
+            "operatingMargin": null,
+            "netMargin": null
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": null,
+            "grossIncome": null,
+            "operatingIncome": -12.65,
+            "netProfit": -53.49,
+            "epsBeforeExceptional": -0.57,
+            "eps": -3.57,
+            "grossMargin": null,
+            "operatingMargin": null,
+            "netMargin": null
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": null,
+            "grossIncome": null,
+            "operatingIncome": -12.28,
+            "netProfit": -60.18,
+            "epsBeforeExceptional": -0.58,
+            "eps": -4.01,
+            "grossMargin": null,
+            "operatingMargin": null,
+            "netMargin": null
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "2120",
+      "name": "متطورة",
+      "fullName": "متطورة (2120) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "متطورة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 101.48,
+            "grossIncome": 101.48,
+            "operatingIncome": 92.58,
+            "netProfit": 91.13,
+            "epsBeforeExceptional": 1.52,
+            "eps": 1.52,
+            "grossMargin": 1.0,
+            "operatingMargin": 0.9122979897516752,
+            "netMargin": 0.8980094599921166
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 116.05,
+            "grossIncome": 116.05,
+            "operatingIncome": 102.71,
+            "netProfit": 100.21,
+            "epsBeforeExceptional": 1.67,
+            "eps": 1.67,
+            "grossMargin": 1.0,
+            "operatingMargin": 0.8850495476087893,
+            "netMargin": 0.8635071090047393
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 180.16,
+            "grossIncome": 180.16,
+            "operatingIncome": 162.23,
+            "netProfit": 148.8,
+            "epsBeforeExceptional": 2.54,
+            "eps": 2.48,
+            "grossMargin": 1.0,
+            "operatingMargin": 0.9004773534635879,
+            "netMargin": 0.8259325044404974
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 342.44,
+            "grossIncome": 342.44,
+            "operatingIncome": 315.56,
+            "netProfit": 295.06,
+            "epsBeforeExceptional": 4.92,
+            "eps": 4.92,
+            "grossMargin": 1.0,
+            "operatingMargin": 0.9215044971381848,
+            "netMargin": 0.8616399953276487
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": -123.45,
+            "grossIncome": -123.45,
+            "operatingIncome": -146.33,
+            "netProfit": -162.51,
+            "epsBeforeExceptional": -2.71,
+            "eps": -2.71,
+            "grossMargin": 1.0,
+            "operatingMargin": 1.1853381936006482,
+            "netMargin": 1.3164034021871203
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "2140",
+      "name": "أيان",
+      "fullName": "أيان (2140) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "أيان",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 287.98,
+            "grossIncome": 82.97,
+            "operatingIncome": 8.3,
+            "netProfit": 4.29,
+            "epsBeforeExceptional": 0.05,
+            "eps": 0.05,
+            "grossMargin": 0.28811028543648864,
+            "operatingMargin": 0.028821445933745398,
+            "netMargin": 0.014896867838044307
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 277.44,
+            "grossIncome": 28.04,
+            "operatingIncome": -45.93,
+            "netProfit": -44.77,
+            "epsBeforeExceptional": -0.51,
+            "eps": -0.51,
+            "grossMargin": 0.10106689734717417,
+            "operatingMargin": -0.1655493079584775,
+            "netMargin": -0.16136822376009227
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 23.91,
+            "grossIncome": 7.49,
+            "operatingIncome": -4.8,
+            "netProfit": -216.3,
+            "epsBeforeExceptional": -2.45,
+            "eps": -2.45,
+            "grossMargin": 0.31325805102467585,
+            "operatingMargin": -0.20075282308657463,
+            "netMargin": -9.046424090338771
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 23.15,
+            "grossIncome": 10.16,
+            "operatingIncome": -5.42,
+            "netProfit": -164.41,
+            "epsBeforeExceptional": -1.63,
+            "eps": -1.63,
+            "grossMargin": 0.4388768898488121,
+            "operatingMargin": -0.23412526997840175,
+            "netMargin": -7.101943844492441
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 8.69,
+            "grossIncome": -1.25,
+            "operatingIncome": -21.86,
+            "netProfit": 359.73,
+            "epsBeforeExceptional": -0.79,
+            "eps": 3.57,
+            "grossMargin": -0.14384349827387802,
+            "operatingMargin": -2.515535097813579,
+            "netMargin": 41.39585730724972
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4280",
+      "name": "المملكة",
+      "fullName": "المملكة (4280) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "المملكة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 1508.35,
+            "grossIncome": 878.08,
+            "operatingIncome": 497.42,
+            "netProfit": 1017.43,
+            "epsBeforeExceptional": 0.27,
+            "eps": 0.27,
+            "grossMargin": 0.5821460536347666,
+            "operatingMargin": 0.3297775715185468,
+            "netMargin": 0.6745317731295787
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 2492.12,
+            "grossIncome": 1590.52,
+            "operatingIncome": 1152.33,
+            "netProfit": 6957.87,
+            "epsBeforeExceptional": 0.29,
+            "eps": 1.88,
+            "grossMargin": 0.6382196683947804,
+            "operatingMargin": 0.46238945155128963,
+            "netMargin": 2.7919482207919364
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 2703.37,
+            "grossIncome": 1519.5,
+            "operatingIncome": 1002.42,
+            "netProfit": 1013.24,
+            "epsBeforeExceptional": 0.18,
+            "eps": 0.27,
+            "grossMargin": 0.5620762233804474,
+            "operatingMargin": 0.370803848529798,
+            "netMargin": 0.37480626033432346
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 2390.52,
+            "grossIncome": 1335.19,
+            "operatingIncome": 836.42,
+            "netProfit": 1236.97,
+            "epsBeforeExceptional": 0.25,
+            "eps": 0.33,
+            "grossMargin": 0.5585353814232887,
+            "operatingMargin": 0.34989040041497244,
+            "netMargin": 0.5174480866087713
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 2692.17,
+            "grossIncome": 1593.37,
+            "operatingIncome": 1077.54,
+            "netProfit": 2143.29,
+            "epsBeforeExceptional": 0.31,
+            "eps": 0.58,
+            "grossMargin": 0.5918534119316388,
+            "operatingMargin": 0.40024961276591,
+            "netMargin": 0.7961198587013449
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "1832",
+      "name": "صدر",
+      "fullName": "صدر (1832) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "صدر",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 73.23,
+            "grossIncome": 21.34,
+            "operatingIncome": 5.53,
+            "netProfit": 3.6,
+            "epsBeforeExceptional": 0.02,
+            "eps": 0.02,
+            "grossMargin": 0.29141062406117707,
+            "operatingMargin": 0.07551549911238563,
+            "netMargin": 0.04916018025399426
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 110.82,
+            "grossIncome": 15.51,
+            "operatingIncome": -4.62,
+            "netProfit": -7.22,
+            "epsBeforeExceptional": -0.04,
+            "eps": -0.04,
+            "grossMargin": 0.13995668651867896,
+            "operatingMargin": -0.04168922577152139,
+            "netMargin": -0.06515069482042952
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 104.04,
+            "grossIncome": 18.02,
+            "operatingIncome": -3.18,
+            "netProfit": -4.25,
+            "epsBeforeExceptional": -0.02,
+            "eps": -0.02,
+            "grossMargin": 0.17320261437908496,
+            "operatingMargin": -0.030565167243367934,
+            "netMargin": -0.04084967320261438
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 111.84,
+            "grossIncome": 24.17,
+            "operatingIncome": -0.07,
+            "netProfit": -3.75,
+            "epsBeforeExceptional": -0.02,
+            "eps": -0.02,
+            "grossMargin": 0.2161123032904149,
+            "operatingMargin": -0.0006258941344778255,
+            "netMargin": -0.03353004291845493
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 143.42,
+            "grossIncome": 37.61,
+            "operatingIncome": 9.39,
+            "netProfit": -3.38,
+            "epsBeforeExceptional": 0.03,
+            "eps": -0.02,
+            "grossMargin": 0.2622367870589876,
+            "operatingMargin": 0.06547204016176267,
+            "netMargin": -0.02356714544693906
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "4147",
+      "name": "سي جي إس",
+      "fullName": "سي جي إس (4147) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "سي جي إس",
+      "years": [
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 477.14,
+            "grossIncome": 104.21,
+            "operatingIncome": 54.33,
+            "netProfit": 46.6,
+            "epsBeforeExceptional": 0.47,
+            "eps": 0.47,
+            "grossMargin": 0.21840549943412835,
+            "operatingMargin": 0.11386595129312152,
+            "netMargin": 0.09766525548057174
+          }
+        }
+      ]
+    }
+  ]
+}
