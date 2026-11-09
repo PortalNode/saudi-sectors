@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11161d"><title>مقارنة الشركات | السوق السعودي</title>
+  <script src="theme.js?v=comparison-v2"></script>
+  <link rel="stylesheet" href="styles.css?v=comparison-v2"><link rel="stylesheet" href="banks.css?v=comparison-v2"><link rel="stylesheet" href="theme.css?v=comparison-v2"><link rel="stylesheet" href="comparison-page.css?v=comparison-v2">
+</head>
+<body class="banks-page comparison-page"><main class="main-content">
+  <div class="appearance-bar"><div class="theme-switch" role="group" aria-label="اختيار مظهر الموقع"><span class="theme-switch-label">المظهر</span><button type="button" data-theme-option="light" aria-pressed="false">فاتح</button><button type="button" data-theme-option="dark" aria-pressed="true">داكن</button></div></div>
+  <header class="hero"><div class="hero-copy"><h1>السوق السعودي</h1><div class="hero-date">مقارنة النتائج المالية بين الشركات</div></div></header>
+  <div class="bank-breadcrumb"><p><a href="index.html">السوق السعودي</a><span aria-hidden="true"> / </span><span>مقارنة الشركات</span></p><a href="index.html" class="bank-back">العودة إلى الشركات</a></div>
+  <section class="comparison-panel" aria-labelledby="comparison-title">
+    <div class="comparison-heading"><div><h2 id="comparison-title">مقارنة الشركات</h2><p>اختر القطاع والبند ثم حدد شركتين أو أكثر من القطاع نفسه.</p></div><span id="period-badge" class="comparison-period"></span></div>
+    <div class="comparison-selectors"><div><label for="sector-select">القطاع</label><select id="sector-select"></select></div><div><label for="metric-select">البند المراد مقارنته</label><select id="metric-select"></select></div></div>
+    <div class="years-control"><div class="years-heading"><span>السنوات المراد مقارنتها</span><small>اختر سنة واحدة أو عدة سنوات</small></div><div id="year-options" class="year-options"></div></div>
+    <div class="companies-heading"><span>الشركات المختارة <small id="selection-count"></small></span><span class="selection-hint">اختر شركتين على الأقل، ويمكن إضافة المزيد</span></div>
+    <div id="company-options" class="company-options"></div>
+    <p id="comparison-status" class="comparison-status" role="status" aria-live="polite"></p>
+    <div class="comparison-table-wrap" tabindex="0" aria-label="جدول المقارنة السنوية"><table id="comparison-table" class="comparison-table"></table></div>
+    <div id="comparison-bars" class="comparison-bars" aria-label="رسم أعمدة المقارنة"></div>
+    <p class="comparison-footnote">القيم من ملفات النتائج السنوية داخل المشروع. العمود الموجب يبدأ من خط الصفر إلى الأعلى، والعمود السالب يبدأ من خط الصفر إلى الأسفل. تظهر «—» للقيم غير المتاحة.</p>
+  </section>
+</main><script type="module" src="comparison-page.js?v=comparison-v3"></script></body></html>
