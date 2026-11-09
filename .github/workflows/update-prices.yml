@@ -40,15 +40,18 @@ jobs:
       - name: Install curl-impersonate
         run: |
           curl -sSL -o /tmp/ci.tgz https://github.com/lwthiker/curl-impersonate/releases/download/v0.6.1/curl-impersonate-v0.6.1.x86_64-linux-gnu.tar.gz
-          mkdir /tmp/ci && tar xzf /tmp/ci.tgz -C /tmp/ci
-          sudo install /tmp/ci/curl-impersonate-chrome /usr/local/bin/curl-impersonate-chrome
-          /usr/local/bin/curl-impersonate-chrome --version
+          sudo mkdir -p /opt/curl-impersonate
+          sudo tar xzf /tmp/ci.tgz -C /opt/curl-impersonate
+          /opt/curl-impersonate/curl_chrome116 --version
+          # Diagnostic: does the Chrome fingerprint pass Akamai right now?
+          /opt/curl-impersonate/curl_chrome116 -sS -o /dev/null -w 'report HTTP %{http_code}\n' \
+            https://www.saudiexchange.sa/Resources/Reports-v2/DetailedDaily_en.html || true
       - name: Test price integrity and existing UI
         run: node --test scripts/*.test.mjs tests/*.test.mjs
       - name: Fetch dated official closes or explicitly delayed quotes
         run: node scripts/update-prices.mjs
         env:
-          CURL_IMPERSONATE: curl-impersonate-chrome
+          CURL_IMPERSONATE: /opt/curl-impersonate/curl_chrome116
       - name: Commit refreshed data
         run: |
           git config user.name "price-bot"
