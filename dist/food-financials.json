@@ -11,7 +11,7 @@
   "source": {
     "name": "argaam_food.xlsx",
     "provider": "أرقام",
-    "importedAt": "2026-11-08T17:50:53Z",
+    "importedAt": "2026-11-09T16:33:55Z",
     "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
   },
   "companies": [
@@ -1190,6 +1190,21 @@
             "grossMargin": 0.3106899143130124,
             "operatingMargin": 0.1394292317627199,
             "netMargin": 0.11660454454477134
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 2111.48,
+            "grossIncome": 750.67,
+            "operatingIncome": 339.331,
+            "netProfit": 324.982,
+            "epsBeforeExceptional": 10.24,
+            "eps": 10.24,
+            "grossMargin": 0.35551840415253755,
+            "operatingMargin": 0.16070765529391706,
+            "netMargin": 0.15391194801750432
           }
         },
         {
