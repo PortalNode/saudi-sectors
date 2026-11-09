@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "sector": "خدمات الاعمال",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source": {
+    "name": "business_services.xlsx",
+    "provider": "أرقام",
+    "importedAt": "2026-11-09T08:15:26Z",
+    "note": "النتائج المالية السنوية فقط؛ السنوات غير المتاحة لبعض الشركات تظهر بعلامة —."
+  },
+  "companies": [
+    {
+      "symbol": "1833",
+      "name": "الموارد",
+      "fullName": "الموارد (1833) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "الموارد",
+      "years": [
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 944.73,
+            "grossIncome": 129.69,
+            "operatingIncome": 83.48,
+            "netProfit": 75.99,
+            "epsBeforeExceptional": 3.8,
+            "eps": 3.8,
+            "grossMargin": 0.13727731732876058,
+            "operatingMargin": 0.08836387115895547,
+            "netMargin": 0.08043568003556571
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1446.01,
+            "grossIncome": 147.24,
+            "operatingIncome": 98.29,
+            "netProfit": 88.77,
+            "epsBeforeExceptional": 4.44,
+            "eps": 4.44,
+            "grossMargin": 0.10182502195697125,
+            "operatingMargin": 0.06797325053077088,
+            "netMargin": 0.061389616945940896
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 2027.75,
+            "grossIncome": 184.85,
+            "operatingIncome": 103.14,
+            "netProfit": 95.42,
+            "epsBeforeExceptional": 4.77,
+            "eps": 4.77,
+            "grossMargin": 0.09116015287880655,
+            "operatingMargin": 0.05086425841449883,
+            "netMargin": 0.04705708297373937
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 2610.99,
+            "grossIncome": 235.87,
+            "operatingIncome": 147.11,
+            "netProfit": 138.47,
+            "epsBeforeExceptional": 6.92,
+            "eps": 6.92,
+            "grossMargin": 0.09033738160621069,
+            "operatingMargin": 0.056342613338235696,
+            "netMargin": 0.05303352368258783
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "1834",
+      "name": "سماسكو",
+      "fullName": "سماسكو (1834) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "سماسكو",
+      "years": [
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1827.19,
+            "grossIncome": 243.37,
+            "operatingIncome": 166.38,
+            "netProfit": 166.29,
+            "epsBeforeExceptional": 0.42,
+            "eps": 0.42,
+            "grossMargin": 0.13319359234671818,
+            "operatingMargin": 0.09105785386303558,
+            "netMargin": 0.09100859790169603
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 1892.89,
+            "grossIncome": 210.96,
+            "operatingIncome": 132.43,
+            "netProfit": 126.42,
+            "epsBeforeExceptional": 0.32,
+            "eps": 0.32,
+            "grossMargin": 0.11144863145771809,
+            "operatingMargin": 0.06996180443660223,
+            "netMargin": 0.06678676521086803
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 2094.59,
+            "grossIncome": 298.34,
+            "operatingIncome": 180.74,
+            "netProfit": 150.64,
+            "epsBeforeExceptional": 0.39,
+            "eps": 0.38,
+            "grossMargin": 0.1424336027575802,
+            "operatingMargin": 0.08628896347256504,
+            "netMargin": 0.0719186093698528
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "1835",
+      "name": "تمكين",
+      "fullName": "تمكين (1835) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "تمكين",
+      "years": [
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 721.64,
+            "grossIncome": 134.56,
+            "operatingIncome": 70.39,
+            "netProfit": 85.51,
+            "epsBeforeExceptional": 2.77,
+            "eps": 3.23,
+            "grossMargin": 0.1864641649575966,
+            "operatingMargin": 0.09754171054819578,
+            "netMargin": 0.11849398592095783
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 1014.12,
+            "grossIncome": 180.1,
+            "operatingIncome": 93.81,
+            "netProfit": 95.1,
+            "epsBeforeExceptional": 3.49,
+            "eps": 3.59,
+            "grossMargin": 0.1775923953772729,
+            "operatingMargin": 0.09250384569873388,
+            "netMargin": 0.09377588451070878
+          }
+        }
+      ]
+    },
+    {
+      "symbol": "1831",
+      "name": "مهارة",
+      "fullName": "مهارة (1831) — الأرقام بالمليون ريال، وربح السهم بالريال",
+      "sourceSheet": "مهارة",
+      "years": [
+        {
+          "year": 2021,
+          "period": "FY",
+          "values": {
+            "revenue": 1318.73,
+            "grossIncome": 219.9,
+            "operatingIncome": 146.03,
+            "netProfit": 144.93,
+            "epsBeforeExceptional": 0.22,
+            "eps": 0.24,
+            "grossMargin": 0.16675134409621378,
+            "operatingMargin": 0.11073532868744929,
+            "netMargin": 0.10990119281429861
+          }
+        },
+        {
+          "year": 2022,
+          "period": "FY",
+          "values": {
+            "revenue": 1683.6,
+            "grossIncome": 229.22,
+            "operatingIncome": 108.2,
+            "netProfit": 113.46,
+            "epsBeforeExceptional": 0.19,
+            "eps": 0.19,
+            "grossMargin": 0.1361487289142314,
+            "operatingMargin": 0.06426704680446663,
+            "netMargin": 0.06739130434782609
+          }
+        },
+        {
+          "year": 2023,
+          "period": "FY",
+          "values": {
+            "revenue": 1890.02,
+            "grossIncome": 244.28,
+            "operatingIncome": 96.7,
+            "netProfit": 100.23,
+            "epsBeforeExceptional": 0.17,
+            "eps": 0.17,
+            "grossMargin": 0.12924730955227987,
+            "operatingMargin": 0.051163479751537025,
+            "netMargin": 0.05303118485518672
+          }
+        },
+        {
+          "year": 2024,
+          "period": "FY",
+          "values": {
+            "revenue": 2235.43,
+            "grossIncome": 258.62,
+            "operatingIncome": 127.64,
+            "netProfit": 175.28,
+            "epsBeforeExceptional": 0.29,
+            "eps": 0.29,
+            "grossMargin": 0.11569138823403105,
+            "operatingMargin": 0.057098634267232704,
+            "netMargin": 0.07840997034127663
+          }
+        },
+        {
+          "year": 2025,
+          "period": "FY",
+          "values": {
+            "revenue": 3112.46,
+            "grossIncome": 327.49,
+            "operatingIncome": 166.13,
+            "netProfit": 272.77,
+            "epsBeforeExceptional": 0.27,
+            "eps": 0.45,
+            "grossMargin": 0.10521902289507336,
+            "operatingMargin": 0.0533757863554873,
+            "netMargin": 0.08763807406360241
+          }
+        }
+      ]
+    }
+  ]
+}
