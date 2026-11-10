@@ -377,7 +377,7 @@ async function getTradingViewLiveQuotes(symbols){
     try{
       const response=await fetch('https://scanner.tradingview.com/ksa/scan',{
         method:'POST', mode:'cors', cache:'no-store',
-        headers:{'Content-Type':'application/json',Accept:'application/json'},
+        headers:{'Content-Type':'text/plain;charset=UTF-8',Accept:'application/json'},
         body:JSON.stringify({symbols:{tickers,query:{types:[]}},columns}),
         signal:AbortSignal.timeout(12000)
       });
@@ -494,9 +494,8 @@ async function refreshPrices(){
     // عرض آخر لقطة موثوقة من data.json ولا يغيّرها.
     if(isMarketHours()){
       try{
-        let liveUpdated=await applyTradingViewLivePrices(data);
-        if(!liveUpdated) liveUpdated=await applyYahooLivePrices(data);
-        if(!liveUpdated) priceRefreshError='تعذر الحصول على أسعار مباشرة من TradingView أو Yahoo Finance؛ احتُفظ بلقطة المصدر المنشورة.';
+        const liveUpdated=await applyTradingViewLivePrices(data);
+        if(!liveUpdated) priceRefreshError='تعذر الحصول على أسعار مباشرة من TradingView؛ احتُفظ بلقطة المصدر المنشورة.';
       }
       catch(error){ priceRefreshError='تعذر تحديث السعر المباشر؛ احتُفظ بلقطة المصدر المنشورة.'; }
     }
