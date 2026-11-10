@@ -317,6 +317,10 @@ const yahooProxies = [
   url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url)
 ];
 let yahooWorkingProxy = null;
+const fetchTimed = (input, options, milliseconds) => Promise.race([
+  fetch(input, options),
+  new Promise((_, reject) => setTimeout(() => reject(Error('انتهت مهلة الطلب')), milliseconds))
+]);
 const yahooPayload = text => {
   const value = String(text || '').trim();
   if (value.startsWith('{')) return JSON.parse(value);
@@ -333,7 +337,7 @@ async function fetchYahooJson(url){
     : [yahooProxies[yahooWorkingProxy], ...yahooProxies.filter((_, index) => index !== yahooWorkingProxy)];
   for (const proxy of order) {
     try {
-      const response = await fetch(proxy(url), {cache:'no-store', signal:AbortSignal.timeout(8000)});
+      const response = await fetchTimed(proxy(url), {cache:'no-store'}, 8000);
       if (!response.ok) continue;
       const payload = yahooPayload(await response.text());
       if (payload && (payload.spark || payload.chart)) {
@@ -375,12 +379,11 @@ async function getTradingViewLiveQuotes(symbols){
   for(let i=0;i<unique.length;i+=300){
     const tickers=unique.slice(i,i+100).map(symbol=>`TADAWUL:${symbol}`);
     try{
-      const response=await fetch('https://scanner.tradingview.com/ksa/scan',{
+      const response=await fetchTimed('https://scanner.tradingview.com/ksa/scan',{
         method:'POST', mode:'cors', cache:'no-store',
         headers:{'Content-Type':'text/plain;charset=UTF-8',Accept:'application/json'},
         body:JSON.stringify({symbols:{tickers,query:{types:[]}},columns}),
-        signal:AbortSignal.timeout(12000)
-      });
+      }, 12000);
       if(!response.ok) continue;
       const payload=await response.json();
       for(const row of payload.data||[]){
