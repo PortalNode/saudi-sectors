@@ -375,9 +375,9 @@ function liveDate(){
 }
 async function getTradingViewLiveQuotes(symbols){
   const unique=[...new Set(symbols.filter(Boolean))], result=new Map();
-  const columns=['close','change','currency','time','update_mode','market_cap_basic'];
+  const columns=['close','change','currency','time','update_mode','market_cap_basic','Value.Traded'];
   for(let i=0;i<unique.length;i+=300){
-    const tickers=unique.slice(i,i+100).map(symbol=>`TADAWUL:${symbol}`);
+    const tickers=unique.slice(i,i+300).map(symbol=>`TADAWUL:${symbol}`);
     try{
       const response=await fetchTimed('https://scanner.tradingview.com/ksa/scan',{
         method:'POST', mode:'cors', cache:'no-store',
@@ -388,13 +388,13 @@ async function getTradingViewLiveQuotes(symbols){
       const payload=await response.json();
       for(const row of payload.data||[]){
         const symbol=String(row.s||'').replace(/^TADAWUL:/,'');
-        const [price,day,currency,barTime,updateMode,marketCap]=row.d||[];
+        const [price,day,currency,barTime,updateMode,marketCap,tradedValue]=row.d||[];
         const observedDate=Number.isFinite(Number(barTime))
           ? new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(Number(barTime)*1000)) : null;
         if(!unique.includes(symbol) || !(Number(price)>0) || !Number.isFinite(Number(day)) ||
            (currency && currency!=='SAR') || observedDate!==liveDate()) continue;
         result.set(symbol,{price:Number(price),day:Number(day),marketCap:Number(marketCap),
-          updateMode: String(updateMode||'delayed'),date:observedDate});
+          updateMode: String(updateMode||'delayed'), tradedValue:Number(tradedValue), date:observedDate});
       }
     }catch(error){ /* انتقل إلى Yahoo إذا لم يتوفر TradingView */ }
   }
@@ -406,7 +406,7 @@ async function applyTradingViewLivePrices(snapshot){
   const symbols=['TASI',...stocks.map(stock=>stock.symbol)];
   const quotes=await getTradingViewLiveQuotes(symbols);
   const index=quotes.get('TASI');
-  let changed=0;
+  let changed=0, turnover=0, turnoverStocks=0;
   const checkedAt=new Date().toISOString(), date=liveDate();
   for(const stock of stocks){
     const quote=quotes.get(stock.symbol);
@@ -414,6 +414,7 @@ async function applyTradingViewLivePrices(snapshot){
     stock.price=quote.price;
     stock.day=quote.day;
     if(Number.isFinite(quote.marketCap) && quote.marketCap>0) stock.marketCap=quote.marketCap/1e6;
+    if(Number.isFinite(quote.tradedValue) && quote.tradedValue>=0){ stock.tradedValue=quote.tradedValue; turnover+=quote.tradedValue; turnoverStocks++; }
     stock.priceDate=date;
     stock.priceCheckedAt=checkedAt;
     stock.priceTimestamp=null;
@@ -430,9 +431,13 @@ async function applyTradingViewLivePrices(snapshot){
       day:index.day, date, source:'TradingView', mode:'delayed',
       isIntraday:true, updatedAt:checkedAt};
   }
+  if(turnoverStocks){
+    snapshot.marketSummary={...snapshot.marketSummary, turnover, turnoverSource:'TradingView',
+      turnoverEstimated:turnoverStocks<stocks.length, turnoverStocks, turnoverUpdatedAt:checkedAt};
+  }
   if(changed || index){
     snapshot.priceSource={...snapshot.priceSource, provider:'TradingView', mode:'delayed',
-      observedDate:date, checkedAt, live:true, liveSymbols:changed,
+      observedDate:date, checkedAt, live:true, liveSymbols:changed, liveTurnover:turnover, liveTurnoverStocks:turnoverStocks,
       warning:'الأسعار المتأخرة من TradingView مؤرخة بجلسة اليوم وغير مؤكدة رسميًا كإغلاق؛ سيُستبدل بها الإغلاق الرسمي بعد تحديث المصدر.'};
     snapshot.priceDate=date;
     return true;
