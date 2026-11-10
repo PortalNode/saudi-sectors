@@ -50,7 +50,7 @@ const sourceDate = record=>{
   return record.dateKind==='checked' ? `فُحصت بيانات الشركة في ${record.period}؛ تاريخ تحديث القطاع لدى أرقام غير صالح` : `آخر تحديث للقطاع ${record.period}`;
 }
 const displayDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') ? value.split('-').reverse().join('.') : /^\d{2}\.\d{2}\.\d{4}$/.test(value||'') ? value : null;
-const providerLabel = value => value==='Saudi Exchange'?'تداول السعودية':value==='TradingView'?'تريدينغ فيو':value==='Argaam'?'أرقام':value||'مصدر غير محدد';
+const providerLabel = value => value==='Saudi Exchange'?'تداول السعودية':value==='TradingView'?'تريدينغ فيو':value==='Yahoo Finance'?'Yahoo Finance':value==='Argaam'?'أرقام':value||'مصدر غير محدد';
 const snapshotLabel = () => displayDate(data.priceSource?.mode==='close' ? data.priceSource.officialDate || data.priceDate : data.priceSource?.observedDate || data.priceDate) || '—';
 const timestamp = value => value ? new Date(value).getTime() : NaN;
 const updateTime = value => {if(!value)return null;const date=new Date(value);return Number.isNaN(date.getTime())?null:timeFormat.format(date)};
@@ -303,6 +303,109 @@ async function refreshFinancials(){
   refreshRunning=false;
 }
 
+/*
+ * تحديث مباشر أثناء جلسة السوق.
+ *
+ * ملف data.json يبقى المرجع الرسمي المنشور، لكن GitHub Actions قد يتأخر.
+ * لذلك نستخدم Yahoo Finance داخل المتصفح أثناء الجلسة فقط، ونضع الأسعار
+ * في الذاكرة مع وسم واضح بأنها متأخرة وغير مؤكدة كإغلاق رسمي. عند انتهاء
+ * الجلسة أو إعادة فتح الصفحة يعود الموقع تلقائياً إلى لقطة data.json الرسمية.
+ */
+const yahooProxies = [
+  url => 'https://r.jina.ai/' + url,
+  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+  url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url)
+];
+let yahooWorkingProxy = null;
+const yahooPayload = text => {
+  const value = String(text || '').trim();
+  if (value.startsWith('{')) return JSON.parse(value);
+  const marker = 'Markdown Content:';
+  const start = value.indexOf(marker);
+  const payload = start >= 0 ? value.slice(start + marker.length).trim() : value;
+  const first = payload.indexOf('{'), last = payload.lastIndexOf('}');
+  if (first < 0 || last < first) throw Error('استجابة Yahoo غير صالحة');
+  return JSON.parse(payload.slice(first, last + 1));
+};
+async function fetchYahooJson(url){
+  const order = yahooWorkingProxy == null
+    ? yahooProxies
+    : [yahooProxies[yahooWorkingProxy], ...yahooProxies.filter((_, index) => index !== yahooWorkingProxy)];
+  for (const proxy of order) {
+    try {
+      const response = await fetch(proxy(url), {cache:'no-store', signal:AbortSignal.timeout(8000)});
+      if (!response.ok) continue;
+      const payload = yahooPayload(await response.text());
+      if (payload && (payload.spark || payload.chart)) {
+        yahooWorkingProxy = yahooProxies.indexOf(proxy);
+        return payload;
+      }
+    } catch (error) { /* تجربة المسار التالي */ }
+  }
+  throw Error('تعذر الوصول إلى Yahoo Finance');
+}
+function yahooQuote(meta){
+  const price=Number(meta?.regularMarketPrice), previous=Number(meta?.chartPreviousClose ?? meta?.previousClose);
+  if (!(price > 0) || !(previous > 0)) return null;
+  const timestamp=Number(meta?.regularMarketTime);
+  return {price, previous, timestamp:Number.isFinite(timestamp)&&timestamp>0?timestamp:null,
+    currency:meta?.currency||null};
+}
+async function getYahooLiveQuotes(symbols){
+  const unique=[...new Set(symbols.filter(Boolean))], result=new Map();
+  for(let i=0;i<unique.length;i+=40){
+    const chunk=unique.slice(i,i+40), encoded=chunk.map(encodeURIComponent).join('%2C');
+    const url=`https://query2.finance.yahoo.com/v7/finance/spark?symbols=${encoded}&range=1d&interval=1d`;
+    try{
+      const payload=await fetchYahooJson(url);
+      for(const item of payload.spark?.result||[]){
+        const quote=yahooQuote(item.response?.[0]?.meta);
+        if(quote) result.set(item.symbol,quote);
+      }
+    }catch(error){ /* الدفعات الأخرى قد تنجح */ }
+  }
+  return result;
+}
+function liveDate(){
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+}
+async function applyYahooLivePrices(snapshot){
+  if(!isMarketHours() || !snapshot?.sectors?.length) return false;
+  const stocks=snapshot.sectors.flatMap(sector=>sector.stocks);
+  const symbols=stocks.map(stock=>`${stock.symbol}.SR`);
+  const quotes=await getYahooLiveQuotes(['^TASI.SR',...symbols]);
+  const index=quotes.get('^TASI.SR');
+  let changed=0;
+  const checkedAt=new Date().toISOString(), date=liveDate();
+  for(const stock of stocks){
+    const quote=quotes.get(`${stock.symbol}.SR`);
+    if(!quote || (quote.currency && quote.currency!=='SAR')) continue;
+    stock.price=quote.price;
+    stock.day=(quote.price/quote.previous-1)*100;
+    if(Number.isFinite(stock.shares) && stock.shares>0) stock.marketCap=quote.price*stock.shares/1e6;
+    stock.priceDate=date;
+    stock.priceCheckedAt=checkedAt;
+    stock.priceTimestamp=quote.timestamp ? new Date(quote.timestamp*1000).toISOString() : null;
+    stock.priceSource='Yahoo Finance';
+    stock.priceStatus='delayed';
+    stock._livePrice=true;
+    changed++;
+  }
+  if(index){
+    snapshot.marketSummary={...snapshot.marketSummary,
+      value:index.price, pointChange:index.price-index.previous,
+      day:(index.price/index.previous-1)*100, date, source:'Yahoo Finance',
+      mode:'delayed', isIntraday:true, updatedAt:checkedAt};
+  }
+  if(changed || index){
+    snapshot.priceSource={...snapshot.priceSource, provider:'Yahoo Finance', mode:'delayed',
+      observedDate:date, checkedAt, live:true, liveSymbols:changed,
+      warning:'الأسعار المباشرة من Yahoo Finance متأخرة وغير مؤكدة رسميًا؛ سيُستبدل بها الإغلاق الرسمي بعد تحديث المصدر.'};
+    snapshot.priceDate=date;
+    return true;
+  }
+  return false;
+}
 async function refreshPrices(){
   if(pricesRefreshRunning)return false;
   pricesRefreshRunning=true;
@@ -320,6 +423,15 @@ async function refreshPrices(){
     const initial=!data;
     data=result;
     priceRefreshError='';
+    // لا نستخدم Yahoo إلا داخل جلسة السوق. فشل المسار المباشر لا يمنع
+    // عرض آخر لقطة موثوقة من data.json ولا يغيّرها.
+    if(isMarketHours()){
+      try{
+        const liveUpdated=await applyYahooLivePrices(data);
+        if(!liveUpdated) priceRefreshError='تعذر الحصول على أسعار مباشرة من Yahoo Finance؛ احتُفظ بلقطة المصدر المنشورة.';
+      }
+      catch(error){ priceRefreshError='تعذر تحديث السعر المباشر؛ احتُفظ بلقطة المصدر المنشورة.'; }
+    }
     if(initial)$('empty').querySelector('h3').textContent='لا توجد نتائج مطابقة';
     paintSnapshot();paintMarketSummary();applyFinancials();
     if(initial&&financialMap)refreshFinancials();
