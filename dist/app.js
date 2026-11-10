@@ -369,6 +369,73 @@ async function getYahooLiveQuotes(symbols){
 function liveDate(){
   return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 }
+async function getTradingViewLiveQuotes(symbols){
+  const unique=[...new Set(symbols.filter(Boolean))], result=new Map();
+  const columns=['close','change','currency','time','update_mode','market_cap_basic'];
+  for(let i=0;i<unique.length;i+=100){
+    const tickers=unique.slice(i,i+100).map(symbol=>`TADAWUL:${symbol}`);
+    try{
+      const response=await fetch('https://scanner.tradingview.com/ksa/scan',{
+        method:'POST', mode:'cors', cache:'no-store',
+        headers:{'Content-Type':'application/json',Accept:'application/json'},
+        body:JSON.stringify({symbols:{tickers,query:{types:[]}},columns}),
+        signal:AbortSignal.timeout(12000)
+      });
+      if(!response.ok) continue;
+      const payload=await response.json();
+      for(const row of payload.data||[]){
+        const symbol=String(row.s||'').replace(/^TADAWUL:/,'');
+        const [price,day,currency,barTime,updateMode,marketCap]=row.d||[];
+        const observedDate=Number.isFinite(Number(barTime))
+          ? new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(Number(barTime)*1000)) : null;
+        if(!unique.includes(symbol) || !(Number(price)>0) || !Number.isFinite(Number(day)) ||
+           (currency && currency!=='SAR') || observedDate!==liveDate()) continue;
+        result.set(symbol,{price:Number(price),day:Number(day),marketCap:Number(marketCap),
+          updateMode: String(updateMode||'delayed'),date:observedDate});
+      }
+    }catch(error){ /* انتقل إلى Yahoo إذا لم يتوفر TradingView */ }
+  }
+  return result;
+}
+async function applyTradingViewLivePrices(snapshot){
+  if(!isMarketHours() || !snapshot?.sectors?.length) return false;
+  const stocks=snapshot.sectors.flatMap(sector=>sector.stocks);
+  const symbols=['TASI',...stocks.map(stock=>stock.symbol)];
+  const quotes=await getTradingViewLiveQuotes(symbols);
+  const index=quotes.get('TASI');
+  let changed=0;
+  const checkedAt=new Date().toISOString(), date=liveDate();
+  for(const stock of stocks){
+    const quote=quotes.get(stock.symbol);
+    if(!quote) continue;
+    stock.price=quote.price;
+    stock.day=quote.day;
+    if(Number.isFinite(quote.marketCap) && quote.marketCap>0) stock.marketCap=quote.marketCap/1e6;
+    stock.priceDate=date;
+    stock.priceCheckedAt=checkedAt;
+    stock.priceTimestamp=null;
+    stock.priceSource='TradingView';
+    stock.priceStatus='delayed';
+    stock._livePrice=true;
+    changed++;
+  }
+  if(index){
+    const previous=Number(snapshot.marketSummary?.value);
+    snapshot.marketSummary={...snapshot.marketSummary,
+      value:index.price,
+      pointChange:Number.isFinite(previous)?index.price-previous:null,
+      day:index.day, date, source:'TradingView', mode:'delayed',
+      isIntraday:true, updatedAt:checkedAt};
+  }
+  if(changed || index){
+    snapshot.priceSource={...snapshot.priceSource, provider:'TradingView', mode:'delayed',
+      observedDate:date, checkedAt, live:true, liveSymbols:changed,
+      warning:'الأسعار المتأخرة من TradingView مؤرخة بجلسة اليوم وغير مؤكدة رسميًا كإغلاق؛ سيُستبدل بها الإغلاق الرسمي بعد تحديث المصدر.'};
+    snapshot.priceDate=date;
+    return true;
+  }
+  return false;
+}
 async function applyYahooLivePrices(snapshot){
   if(!isMarketHours() || !snapshot?.sectors?.length) return false;
   const stocks=snapshot.sectors.flatMap(sector=>sector.stocks);
@@ -427,8 +494,9 @@ async function refreshPrices(){
     // عرض آخر لقطة موثوقة من data.json ولا يغيّرها.
     if(isMarketHours()){
       try{
-        const liveUpdated=await applyYahooLivePrices(data);
-        if(!liveUpdated) priceRefreshError='تعذر الحصول على أسعار مباشرة من Yahoo Finance؛ احتُفظ بلقطة المصدر المنشورة.';
+        let liveUpdated=await applyTradingViewLivePrices(data);
+        if(!liveUpdated) liveUpdated=await applyYahooLivePrices(data);
+        if(!liveUpdated) priceRefreshError='تعذر الحصول على أسعار مباشرة من TradingView أو Yahoo Finance؛ احتُفظ بلقطة المصدر المنشورة.';
       }
       catch(error){ priceRefreshError='تعذر تحديث السعر المباشر؛ احتُفظ بلقطة المصدر المنشورة.'; }
     }
