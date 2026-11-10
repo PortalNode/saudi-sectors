@@ -372,7 +372,7 @@ function liveDate(){
 async function getTradingViewLiveQuotes(symbols){
   const unique=[...new Set(symbols.filter(Boolean))], result=new Map();
   const columns=['close','change','currency','time','update_mode','market_cap_basic'];
-  for(let i=0;i<unique.length;i+=100){
+  for(let i=0;i<unique.length;i+=300){
     const tickers=unique.slice(i,i+100).map(symbol=>`TADAWUL:${symbol}`);
     try{
       const response=await fetch('https://scanner.tradingview.com/ksa/scan',{
