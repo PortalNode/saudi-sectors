@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#11161d">
-  <meta name="description" content="النتائج المالية السنوية لشركات قطاع تجارة و تجزئة السعودي 2021–2025.">
-  <title>نتائج تجارة و تجزئة 2021–2025 | السوق السعودي</title>
+  <meta name="description" content="النتائج المالية الربعية والتراكمية والسنوية لشركات قطاع تجارة و تجزئة السعودي.">
+  <title>نتائج تجارة و تجزئة | السوق السعودي</title>
   <script src="theme.js?v=20261105"></script>
   <link rel="stylesheet" href="styles.css?v=sticky-page-20261105-summary-fit">
   <link rel="stylesheet" href="banks.css?v=retail-annual-20261105">
   <link rel="stylesheet" href="bank-charts.css?v=retail-value-labels-20261106-v12">
   <link rel="stylesheet" href="theme.css?v=20261105">
-<style>.annual-margin-section{margin-top:32px;padding-top:18px;border-top:1px solid var(--line)}.annual-margin-section h3{margin:0 0 10px;color:#f5b543;font-size:14px}.annual-margin-table{min-width:1170px}.annual-margin-table .annual-col-value{width:110px}</style>  <link rel="stylesheet" href="layout.css?v=20261113">  <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
+<style>.annual-margin-section{margin-top:32px;padding-top:18px;border-top:1px solid var(--line)}.annual-margin-section h3{margin:0 0 10px;color:#f5b543;font-size:14px}.annual-margin-table{min-width:1170px}.annual-margin-table .annual-col-value{width:110px}.period-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px 0 8px;padding:12px;border:1px solid var(--line);background:#151b22}.period-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.period-group[hidden]{display:none}.period-group>span{font-size:11.5px;color:var(--muted)}.period-seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}.period-seg button{border:0;border-inline-start:1px solid var(--line);background:transparent;color:#bdc6ce;padding:8px 14px;font-size:12.5px;font-weight:700;min-height:36px;cursor:pointer}.period-seg button:first-child{border-inline-start:0}.period-seg button:hover{color:#f5b543}.period-seg button[aria-pressed="true"]{background:var(--teal);color:#15191f}.period-seg button:disabled{opacity:.35;cursor:not-allowed}.period-seg.small button{padding:6px 11px;font-size:12px;min-height:32px;font-weight:600}.period-desc{margin:0 auto 0 0;font-size:11.5px;color:var(--muted)}.period-desc b{color:#f5b543}.period-table{min-width:0;width:max-content;table-layout:auto}.period-table .annual-label{min-width:210px}.period-table th.period-latest{color:#f5b543}.period-table .period-sub{display:block;font-size:10px;font-weight:400;color:var(--muted)}:root[data-theme="light"] .period-bar{background:#fff}:root[data-theme="light"] .period-seg button{color:#536579}:root[data-theme="light"] .period-seg button[aria-pressed="true"]{color:#15191f}@media (max-width:640px){.period-desc{margin:0;width:100%}.period-seg button{padding:7px 10px}}</style>  <link rel="stylesheet" href="layout.css?v=20261113">  <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261109-favicon1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20261109-favicon1">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20261109-favicon1">
@@ -20,7 +20,7 @@
   <main class="main-content" id="retail-main">
     <header class="site-bar">
       <h1 class="site-name"><a href="index.html">السوق السعودي</a></h1>
-      <div class="hero-date">النتائج السنوية لقطاع تجارة و تجزئة · <bdi>2021–2025</bdi></div>
+      <div class="hero-date">نتائج قطاع تجارة و تجزئة · ربعية وتراكمية وسنوية</div>
       <nav class="site-nav" aria-label="صفحات الموقع"><a href="index.html" aria-current="page">الشركات</a><a href="comparison.html">مقارنة النتائج المالية</a></nav>
       <div class="theme-switch" role="group" aria-label="اختيار مظهر الموقع"><span class="theme-switch-label">المظهر</span><button type="button" data-theme-option="light" aria-pressed="false">فاتح</button><button type="button" data-theme-option="dark" aria-pressed="true">داكن</button></div>
     </header>
@@ -28,17 +28,18 @@
     <nav id="retail-nav" class="bank-nav" aria-label="اختيار شركة تجارة و تجزئة"></nav>
     <p id="retail-load-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات قطاع تجارة و تجزئة…</p>
     <section id="retail-panel" class="bank-panel" aria-labelledby="retail-title" hidden>
-      <div class="bank-heading"><div><h2 id="retail-title"></h2><p id="retail-subtitle"></p></div><span class="bank-period">السنوات المتاحة في الملف <bdi>2021–2025</bdi></span></div>
+      <div class="bank-heading"><div><h2 id="retail-title"></h2><p id="retail-subtitle"></p></div><span class="bank-period" id="retail-latest-quarter">السنوات المتاحة <bdi>2021–2025</bdi></span></div>
+      <div class="period-bar"><div class="period-group"><span>الفترة</span><div class="period-seg" id="retail-period" role="group" aria-label="نوع الفترة"><button type="button" data-period="q" aria-pressed="false">ربع</button><button type="button" data-period="h1" aria-pressed="false">6 أشهر</button><button type="button" data-period="m9" aria-pressed="false">9 أشهر</button><button type="button" data-period="fy" aria-pressed="true">سنوي</button></div></div><div class="period-group" id="retail-quarter-group" hidden><span>الربع</span><div class="period-seg small" id="retail-quarter" role="group" aria-label="اختيار الربع"><button type="button" data-quarter="1" aria-pressed="false">Q1</button><button type="button" data-quarter="2" aria-pressed="false">Q2</button><button type="button" data-quarter="3" aria-pressed="true">Q3</button><button type="button" data-quarter="4" aria-pressed="false">Q4</button><button type="button" data-quarter="seq" aria-pressed="false">متتالية</button></div></div><p class="period-desc" id="retail-period-desc"></p></div>
       <p class="bank-unit-note">المبالغ بمليون ريال؛ ربح السهم بالريال.</p>
-      <div class="bank-table-hint">اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.</div>
-      <div id="retail-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول النتائج السنوية لتجارة و تجزئة"></div>
-      <section id="retail-charts" class="bank-charts" aria-labelledby="retail-charts-title"><div class="bank-charts-heading"><h3 id="retail-charts-title">المقارنة بالأعمدة</h3><p id="retail-charts-context"></p></div><div class="bank-chart-control"><label for="retail-chart-metric">البند المراد مقارنته</label><select id="retail-chart-metric" aria-describedby="retail-chart-selection-status"></select></div><p id="retail-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p><div id="retail-charts-grid" class="bank-charts-grid"></div><p class="bank-charts-footnote">اختر أي بند لعرض مقارنة السنوات السنوية بين 2021 و2025. المبالغ بالمليار ريال بعد تحويلها من القيم الأصلية بالمليون ريال، وربحية السهم بالريال. «—» تعني أن القيمة غير متاحة.</p></section>
-      <details class="bank-notes"><summary id="retail-notes-title">ملاحظات البيانات</summary><ul><li>المصدر: ملف «argaam_retail.xlsx» المقدم من المستخدم، والروابط المرجعية لأرقام محفوظة لكل شركة.</li><li>البيانات المعروضة سنوية فقط (FY) للأعوام 2021–2025؛ لم تُدرج أرباح الربع الرابع ولا أي بيانات ربع سنوية.</li><li>تغطي البيانات 18 شركة مدرجة في قطاع تجارة و تجزئة؛ وتظهر السنوات غير المتاحة بعلامة «—».</li></ul><p id="retail-import-info"></p></details>
+      <div class="bank-table-hint">اسحب الجدول أفقيًا لرؤية الفترات كاملة. «التغير» هو نسبة التغير مقارنةً بنفس الفترة من العام السابق، وليس فرق النسب بالنقاط المئوية.</div>
+      <div id="retail-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول نتائج تجارة و تجزئة"></div>
+      <section id="retail-charts" class="bank-charts" aria-labelledby="retail-charts-title"><div class="bank-charts-heading"><h3 id="retail-charts-title">المقارنة بالأعمدة</h3><p id="retail-charts-context"></p></div><div class="bank-chart-control"><label for="retail-chart-metric">البند المراد مقارنته</label><select id="retail-chart-metric" aria-describedby="retail-chart-selection-status"></select></div><p id="retail-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p><div id="retail-charts-grid" class="bank-charts-grid"></div><p class="bank-charts-footnote">اختر أي بند لعرض المقارنة للفترة المختارة. المبالغ بالمليار ريال بعد تحويلها من القيم الأصلية بالمليون ريال، وربحية السهم بالريال. «—» تعني أن القيمة غير متاحة.</p></section>
+      <details class="bank-notes"><summary id="retail-notes-title">ملاحظات البيانات</summary><ul><li>المصدر: ملف «argaam_retail.xlsx» للنتائج السنوية 2021–2025، وملف «argaam_retail_quarterly.xlsx» للنتائج الربعية من Q1 2022.</li><li>الأرباع مستقلة (Q4 هو الربع الرابع وحده وليس السنة). فترتا 6 و9 أشهر مجموع الأرباع، والهوامش محسوبة من المجاميع.</li><li>ربح السهم في فترتي 6 و9 أشهر مجموع ربح السهم للأرباع، فهو تقريبي إذا تغير عدد الأسهم خلال السنة.</li><li>العرض السنوي من الملف السنوي الرسمي؛ قد يختلف قليلًا عن مجموع الأرباع عند تعديل أرقام سابقة.</li><li>في عرض «متتالية» يقارن التغير كل ربع بنفس الربع من العام السابق لتجنب أثر المواسم.</li><li>تغطي البيانات 18 شركة مدرجة في قطاع تجارة و تجزئة؛ وتظهر السنوات غير المتاحة بعلامة «—».</li></ul><p id="retail-import-info"></p></details>
     </section>
-    <footer class="footer"><p>نتائج سنوية محفوظة داخل المشروع · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
+    <footer class="footer"><p>نتائج ربعية وسنوية محفوظة داخل المشروع · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات قطاع تجارة و تجزئة.</p></noscript>
   </main>
-  <script type="module" src="retail.js?v=retail-value-labels-20261106-v12"></script>
-  <script src="layout.js?v=20261113" defer></script>
+  <script type="module" src="retail.js?v=retail-periods-20261113"></script>
+  <script src="layout.js?v=20261113-periods" defer></script>
 </body>
 </html>

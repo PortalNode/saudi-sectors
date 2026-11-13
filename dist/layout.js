@@ -48,8 +48,9 @@
     let title = panel.querySelector('.key-figures-title');
     if (!table) { strip?.remove(); title?.remove(); return; }
     const headings = [...table.querySelectorAll('thead th')];
-    const year = headings.at(-1)?.textContent.trim() || '';
-    const previousYear = headings.at(-3)?.textContent.trim() || '';
+    // A table may name its own periods (e.g. quarterly views comparing with the same quarter last year).
+    const year = table.dataset.latestLabel || headings.at(-1)?.textContent.trim() || '';
+    const previousYear = table.dataset.compareLabel || headings.at(-3)?.textContent.trim() || '';
     const rows = new Map([...table.querySelectorAll('tbody tr[data-metric]')].map(row => [row.dataset.metric, row]));
     const keys = PREFERRED.filter(key => rows.has(key)).concat([...rows.keys()].filter(key => !PREFERRED.includes(key))).slice(0, 5);
     const cells = keys.map(key => {
