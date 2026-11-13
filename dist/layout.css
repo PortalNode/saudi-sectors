@@ -149,3 +149,12 @@ details.bank-notes[open]>summary{margin-bottom:8px}
 .cmp-step .years-heading>span:first-child{display:none}
 .cmp-step .company-options,.cmp-step .year-options{margin:0}
 @media(max-width:900px){.cmp-steps{grid-template-columns:minmax(0,1fr)}.cmp-step{border-inline-start:0}.cmp-step+.cmp-step{border-top:1px solid var(--line)}}
+
+/* Market summary: group titles centred above their figures; the dated source
+   line is already in the top bar, so it is not repeated here. */
+.market-summary .market-date{display:none}
+.market-group{text-align:center}
+.market-group-label{text-align:center;font-size:11px;margin-bottom:8px}
+.market-group-cards{justify-content:center}
+.market-summary .market-group .market-card,.market-summary .market-group .market-card strong{text-align:center}
+.market-summary .market-group .market-card .market-daily-change{justify-content:center}
