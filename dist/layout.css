@@ -1,0 +1,151 @@
+/* Layout only: reorganises the existing pages. Colours and typeface come from
+   styles.css / theme.css and are not redefined here beyond surface tokens. */
+:root{--panel:#151b22;--head:#242d37;--hover:#1d2731;--on-accent:#15191f;--soft-line:#3a424c}
+:root[data-theme="light"]{--panel:#fff;--head:#e7edf3;--hover:#fff3da;--on-accent:#17222e;--soft-line:#d4dce5}
+
+/* ---------- Shared top bar (all pages) ---------- */
+.site-bar{display:flex;align-items:center;gap:6px 18px;flex-wrap:wrap;padding:8px 14px;margin:0 0 14px;background:var(--panel);border:1px solid var(--line)}
+.site-bar .site-name{font-size:19px;font-weight:700;line-height:1.3;letter-spacing:0;margin:0;color:var(--ink);white-space:nowrap}
+.site-bar .site-name a{color:inherit}
+.site-bar .hero-date{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:5px;margin:0;font-size:11px;color:var(--muted)}
+.site-nav{display:flex;gap:2px;margin-inline-start:auto}
+.site-nav a{padding:8px 10px;font-size:12.5px;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.site-nav a:hover{color:var(--ink)}
+.site-nav a[aria-current="page"]{color:var(--teal);border-bottom-color:#f59e0b}
+.site-bar .theme-switch-label{display:none}
+@media(max-width:760px){.site-bar{padding:8px 10px}.site-nav{margin-inline-start:0}.site-bar .theme-switch{margin-inline-start:auto}}
+
+/* ---------- Market summary in four groups ---------- */
+.market-summary .market-stats{display:grid;grid-template-columns:1.5fr 1.4fr 1.1fr 1.8fr;gap:0;overflow:visible;white-space:normal;padding-bottom:0}
+.market-group{min-width:0;padding:2px 14px;border-inline-start:1px solid var(--line)}
+.market-group:first-child{border-inline-start:0;padding-inline-start:0}
+.market-group:last-child{padding-inline-end:0}
+.market-group-label{display:block;margin-bottom:6px;font-size:10px;color:var(--muted)}
+.market-group-cards{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px 12px;align-items:end}
+.market-summary .market-group .market-card{min-width:0;min-height:0;padding:0;border:0}
+.market-summary .market-group .market-card>span{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.market-summary .market-group .market-card strong{display:block;white-space:nowrap}
+.market-group-breadth .market-group-cards{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr))}
+.breadth-bar{grid-column:1/-1;display:flex;gap:2px;height:7px;border-radius:2px;overflow:hidden}
+.breadth-bar i{display:block;height:100%;min-width:0}
+.breadth-up{background:var(--green)}.breadth-flat{background:var(--muted)}.breadth-down{background:var(--red)}
+.market-group-index .market-group-cards{grid-auto-columns:max-content;gap:4px 18px}
+.market-group-turnover .market-card>span{display:none!important}
+.market-summary .market-group-turnover .market-card strong{font-size:18px}
+.market-summary .market-group-index .market-card:first-child strong{font-size:18px}
+@media(max-width:980px){
+  .market-summary .market-stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr);row-gap:12px}
+  .market-group{padding:0 12px}
+  .market-group:nth-child(odd){border-inline-start:0;padding-inline-start:0}
+  .market-group:nth-child(n+3){border-top:1px solid var(--line);padding-top:10px}
+}
+@media(max-width:560px){
+  .market-summary .market-stats{grid-template-columns:minmax(0,1fr)}
+  .market-group{border-inline-start:0;padding-inline:0}
+  .market-group+.market-group{border-top:1px solid var(--line);padding-top:10px}
+}
+
+/* ---------- Two-level sector picker ---------- */
+.workspace .sector-nav{display:block;margin:10px 0 12px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);overflow:visible;max-height:none}
+.sector-groups,.sector-chips{display:flex;flex-wrap:wrap;gap:5px}
+.sector-chips{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.group-button{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:6px 12px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--muted);font-size:11.5px;font-weight:700;white-space:nowrap}
+.group-button:hover{color:var(--ink);border-color:#64707d}
+.group-button.active{background:#f59e0b;border-color:#f59e0b;color:var(--on-accent)}
+.group-button .count{font-size:10.5px;font-weight:400;opacity:.8;direction:ltr;unicode-bidi:isolate}
+.workspace .sector-nav .sector-button{display:inline-flex;align-items:center;gap:8px;flex:none;width:auto;min-height:30px;padding:5px 10px;font-size:11.5px;font-weight:500;overflow:visible;text-overflow:clip}
+.workspace .sector-nav .sector-button .count{display:inline;font-size:10.5px;color:inherit;opacity:.75;direction:ltr;unicode-bidi:isolate}
+.sector-chip-change{font-size:10.5px;font-weight:700;direction:ltr;unicode-bidi:isolate}
+.sector-button.active .sector-chip-change{color:inherit!important}
+
+/* The page title already names the selection; drop the repeated heading above the single table. */
+#sector-all .sector-heading{display:none}
+
+/* ---------- Table tools: column views, EPS mode, status ---------- */
+.table-tools{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin:0 0 8px}
+.table-tools-label{font-size:11px;color:var(--muted)}
+.col-switch{display:inline-flex;border:1px solid var(--soft-line);border-radius:1px;white-space:nowrap}
+.col-switch button{border:0;border-radius:0;background:transparent;color:var(--muted);padding:8px 11px;font-size:11.5px;font-weight:700}
+.col-switch button:hover{color:var(--ink)}
+.col-switch button[aria-pressed="true"]{background:#f59e0b;color:var(--on-accent)}
+.col-switch button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.status-brief{margin-inline-start:auto;max-width:52ch;min-width:0;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.read-guide{margin:0 0 12px;font-size:11.5px;color:var(--muted)}
+.read-guide summary{width:max-content;max-width:100%;padding:4px 0;cursor:pointer;color:var(--teal);font-weight:700}
+.read-guide .table-note{display:flex;margin:8px 0;background:var(--panel);border:1px solid var(--line);border-radius:2px;color:var(--muted);font-size:11.5px;line-height:1.8}
+.read-guide .note-icon{border-color:var(--muted)}
+.read-guide .financial-status{margin:0 0 8px}
+@media(max-width:760px){.status-brief{flex:1 1 100%;margin-inline-start:0;max-width:none}}
+
+/* Column views. Order: 1 symbol, 2 name, 3 price, 4 day, 5 eps, 6 pe, 7 book,
+   8 pb, 9 yield, 10 52w, 11 mcap, 12 traded, 13 ytd, 14 3m, 15 6m, 16 1y. */
+.sections[data-cols="val"] :is(col,th,td):is(:nth-child(10),:nth-child(12),:nth-child(13),:nth-child(14),:nth-child(15),:nth-child(16)),
+.sections[data-cols="perf"] :is(col,th,td):is(:nth-child(5),:nth-child(6),:nth-child(7),:nth-child(8),:nth-child(9),:nth-child(11),:nth-child(12)),
+.sections[data-cols="trade"] :is(col,th,td):is(:nth-child(5),:nth-child(6),:nth-child(7),:nth-child(8),:nth-child(9),:nth-child(13),:nth-child(14),:nth-child(15),:nth-child(16)){display:none}
+.sections:is([data-cols="val"],[data-cols="perf"],[data-cols="trade"]) table{min-width:860px}
+.sections:is([data-cols="val"],[data-cols="perf"],[data-cols="trade"]) col:not(.col-symbol):not(.col-name){width:auto}
+
+/* ---------- Results pages (all sectors) ---------- */
+.banks-page .bank-breadcrumb{margin:0 0 12px}
+.banks-page .bank-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.banks-page .bank-tab{flex:none;min-height:32px;padding:6px 12px}
+.banks-page .bank-heading{margin:16px 0 10px}
+
+/* Key figures: one row, equal columns, numbers on one line */
+.key-figures{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:10px 0 12px;background:var(--panel);border:1px solid var(--line)}
+.key-figure{display:grid;grid-template-rows:auto auto auto;gap:3px;min-width:0;padding:12px 14px;border-inline-start:1px solid var(--line)}
+.key-figure:first-child{border-inline-start:0}
+.key-figure dt{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.key-figure dd{margin:0;font-size:17px;font-weight:700;color:var(--ink);white-space:nowrap;direction:ltr;unicode-bidi:isolate;text-align:right;font-variant-numeric:tabular-nums}
+.key-figure small{display:flex;gap:6px;align-items:baseline;font-size:10.5px;color:var(--muted);white-space:nowrap}
+.key-figure small b{font-weight:700;direction:ltr;unicode-bidi:isolate}
+.key-figures-title{margin:14px 0 0;font-size:11px;color:var(--muted)}
+@media(max-width:560px){.key-figures{grid-template-columns:repeat(2,minmax(0,1fr))}.key-figure{border-inline-start:0;border-top:1px solid var(--line)}.key-figure:nth-child(-n+2){border-top:0}.key-figure:nth-child(even){border-inline-start:1px solid var(--line)}}
+
+/* Current PE card (banks): heading, then five equal cells on one row */
+.banks-page .bank-current-pe-card{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;padding:0}
+.banks-page .bank-current-pe-card>h3{grid-column:1/-1;margin:0;padding:10px 14px;border-bottom:1px solid var(--line);font-size:14px}
+.banks-page .bank-current-pe-card>.bank-current-pe-value{display:grid;gap:3px;align-content:start;margin:0;padding:12px 14px;font-size:17px;line-height:1.5;white-space:nowrap}
+.banks-page .bank-current-pe-card>.bank-current-pe-value::before{content:"مكرر الربح الحالي";font-size:10.5px;font-weight:400;line-height:1.5;color:var(--muted)}
+.banks-page .bank-current-pe-card dl{display:contents}
+.banks-page .bank-current-pe-card dl>div{display:grid;gap:3px;align-content:start;min-width:0;padding:12px 14px;border-inline-start:1px solid var(--line)}
+.banks-page .bank-current-pe-card dt{font-size:10.5px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.banks-page .bank-current-pe-card dd{margin:0;font-size:17px;font-weight:700;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.banks-page .bank-current-pe-card dd time{font-size:12px;font-weight:500}
+.banks-page .bank-current-pe-card>p{grid-column:1/-1;margin:0;padding:3px 14px;font-size:10.5px;line-height:1.7}
+.banks-page .bank-current-pe-card>p:first-of-type{border-top:1px solid var(--line);padding-top:8px}
+.banks-page .bank-current-pe-card>p:last-child{padding-bottom:10px}
+@media(max-width:760px){
+  .banks-page .bank-current-pe-card{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .banks-page .bank-current-pe-card>.bank-current-pe-value{grid-column:1/-1;border-bottom:1px solid var(--line)}
+  .banks-page .bank-current-pe-card dl>div{border-inline-start:0;border-bottom:1px solid var(--line)}
+  .banks-page .bank-current-pe-card dl>div:nth-child(even){border-inline-start:1px solid var(--line)}
+}
+
+/* Annual table: balanced columns, every number on its row's centre line */
+.banks-page .annual-table{min-width:900px;table-layout:fixed}
+.banks-page .annual-table .annual-col-label{width:23%}
+.banks-page .annual-table .annual-col-change{width:7%}
+.banks-page .annual-table .annual-col-value{width:auto}
+.banks-page .annual-table tbody td{vertical-align:middle;white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.4}
+.banks-page .annual-table tbody th.annual-label{vertical-align:middle}
+.banks-page .annual-table .num{font-variant-numeric:tabular-nums}
+.banks-page .annual-table .annual-change .num{font-size:11px}
+@media(max-width:760px){.banks-page .annual-table{min-width:860px}.banks-page .annual-table .annual-col-label{width:150px}}
+
+/* Notes collapse to one line at the end of the page */
+details.bank-notes>summary{cursor:pointer;color:var(--teal);font-size:13px;font-weight:700}
+details.bank-notes[open]>summary{margin-bottom:8px}
+
+/* ---------- Comparison page: three numbered steps ---------- */
+.cmp-steps{display:grid;grid-template-columns:1fr 1fr 1.3fr;margin:0 0 14px;background:var(--panel);border:1px solid var(--line)}
+.cmp-step{min-width:0;padding:12px 14px;border-inline-start:1px solid var(--line)}
+.cmp-step:first-child{border-inline-start:0}
+.cmp-step-title{display:flex;align-items:center;gap:7px;margin:0 0 10px;font-size:13px;font-weight:700;color:var(--teal)}
+.cmp-step-title i{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#f59e0b;color:var(--on-accent);font-size:11px;font-style:normal;font-weight:700;flex:none}
+.cmp-step-title small{font-weight:400;color:var(--muted);font-size:11px}
+.cmp-step .comparison-selectors{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:0;padding:0;border:0}
+.cmp-step .years-control,.cmp-step .companies-heading{margin:0 0 8px;padding:0;border:0}
+.cmp-step .years-heading>span:first-child{display:none}
+.cmp-step .company-options,.cmp-step .year-options{margin:0}
+@media(max-width:900px){.cmp-steps{grid-template-columns:minmax(0,1fr)}.cmp-step{border-inline-start:0}.cmp-step+.cmp-step{border-top:1px solid var(--line)}}

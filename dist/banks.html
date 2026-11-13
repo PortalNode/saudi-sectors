@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="banks.css?v=compact-columns-20261104">
   <link rel="stylesheet" href="bank-charts.css?v=current-pe-20261105">
   <link rel="stylesheet" href="theme.css?v=20261105">
+  <link rel="stylesheet" href="layout.css?v=20261113">
   <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261109-favicon1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20261109-favicon1">
@@ -19,17 +20,13 @@
 </head>
 <body class="banks-page">
   <main class="main-content" id="bank-main">
-    <div class="appearance-bar"><div class="theme-switch" role="group" aria-label="اختيار مظهر الموقع"><span class="theme-switch-label">المظهر</span><button type="button" data-theme-option="light" aria-pressed="false">فاتح</button><button type="button" data-theme-option="dark" aria-pressed="true">داكن</button></div></div>
-    <header class="hero">
-      <div class="hero-copy">
-        <h1>السوق السعودي</h1>
-        <div class="hero-date">النتائج السنوية لقطاع البنوك · <bdi>2021–2025</bdi></div>
-      </div>
+    <header class="site-bar">
+      <h1 class="site-name"><a href="index.html">السوق السعودي</a></h1>
+      <div class="hero-date">النتائج السنوية لقطاع البنوك · <bdi>2021–2025</bdi></div>
+      <nav class="site-nav" aria-label="صفحات الموقع"><a href="index.html" aria-current="page">الشركات</a><a href="comparison.html">مقارنة النتائج المالية</a></nav>
+      <div class="theme-switch" role="group" aria-label="اختيار مظهر الموقع"><span class="theme-switch-label">المظهر</span><button type="button" data-theme-option="light" aria-pressed="false">فاتح</button><button type="button" data-theme-option="dark" aria-pressed="true">داكن</button></div>
     </header>
-    <div class="bank-breadcrumb">
-      <p><a href="index.html">السوق السعودي</a><span aria-hidden="true"> / </span><span>نتائج البنوك</span></p>
-      <a href="index.html" class="bank-back">العودة إلى الشركات</a>
-    </div>
+    <div class="bank-breadcrumb"><p><a href="index.html">الشركات</a><span aria-hidden="true"> / </span><span>نتائج البنوك</span></p></div>
     <nav id="bank-nav" class="bank-nav" aria-label="اختيار البنك"></nav>
     <p id="bank-load-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات البنوك من ملف المشروع…</p>
     <section id="bank-panel" class="bank-panel" aria-labelledby="bank-title" hidden>
@@ -49,8 +46,7 @@
         <div id="bank-charts-grid" class="bank-charts-grid"></div>
         <p class="bank-charts-footnote">اختر أي بند من القائمة لعرض مقارنة السنوات، أو «مكرر الربح الحالي — جميع البنوك» لمقارنة البنوك العشرة بآخر لقطة متاحة. المبالغ بالمليار، وربحية السهم بالريال، والمكرر بالمرات، والنسب بالمئة. القيم التاريخية الأصلية في الجدول؛ «—» تعني أن القيمة غير متاحة. خيار الأفراد والشركات معًا يعرض عمودين لكل سنة دون تعديل النسب.</p>
       </section>
-      <section class="bank-notes" aria-labelledby="bank-notes-title">
-        <h3 id="bank-notes-title">ملاحظات البيانات</h3>
+      <details class="bank-notes"><summary id="bank-notes-title">ملاحظات البيانات</summary>
         <ul>
           <li>المصدر: ملف «البنوك.xlsx» المقدم من المستخدم. القيم من الجدول السنوي في الملف كما هي؛ لم تُراجع بمصدر خارجي، ولا يوجد جلب تلقائي من أرقام.</li>
           <li>ربحية السهم محفوظة كما وردت في الملف؛ قد تختلف قواعدها أو تعديلات عدد الأسهم بين السنوات، ولا يُفترض أن نموها يطابق نمو صافي الربح.</li>
@@ -59,11 +55,12 @@
           <li>لم تُدرج سنة 2020 أو الصفوف الفصلية، ولا ورقة «الودائع تحت الطلب» لأنها بلا سنة محددة. هذه نسخة ثابتة تُحدّث عند استيراد ملف جديد.</li>
         </ul>
         <p id="bank-import-info"></p>
-      </section>
+      </details>
     </section>
     <footer class="footer"><p>نتائج سنوية محفوظة داخل المشروع · المكرر الحالي من لقطة أسعار وربحية المشروع، وليس أسعارًا مباشرة · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات ملف البنوك.</p></noscript>
   </main>
   <script type="module" src="banks.js?v=value-labels-20261106"></script>
+  <script src="layout.js?v=20261113" defer></script>
 </body>
 </html>

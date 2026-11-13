@@ -1,7 +1,7 @@
 const columns = [
-  ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],
+  ['symbol','رمز السهم','symbol'],['name','اسم الشركة','name'],['price','سعر السهم','price'],['day','تغير اليوم','day'],
   ['eps','ربحية السهم','eps'],['pe','مكرر الأرباح','pe'],['bookValue','القيمة الدفترية','bv'],
-  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['week52Position','آخر 52 أسبوع','week52'],['marketCap','القيمة السوقية','mcap'],['day','تغير اليوم','day'],['tradedValue','القيمة المتداولة (مليون)','tval'],['ytd','الأداء منذ بداية السنة','ytd'],['month3','تغير 3 أشهر','3m'],
+  ['pb','مكرر القيمة الدفترية','pb'],['dividendYield','عائد التوزيع','yield'],['week52Position','آخر 52 أسبوع','week52'],['marketCap','القيمة السوقية','mcap'],['tradedValue','القيمة المتداولة (مليون)','tval'],['ytd','الأداء منذ بداية السنة','ytd'],['month3','تغير 3 أشهر','3m'],
   ['month6','تغير 6 أشهر','6m'],['year1','تغير سنة','1y']
 ];
 const numberFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -10,6 +10,25 @@ const epsFormat = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximum
 const timeFormat = new Intl.DateTimeFormat('ar-SA',{timeZone:'Asia/Riyadh',hour:'2-digit',minute:'2-digit'});
 let data, financialMap, activeSector = null, query = '', sortBySector = new Map([['all',{key:'marketCap',dir:-1}]]), epsMode = 'recurring', refreshRunning = false, pricesRefreshRunning = false, priceRefreshError = '';
 const financials = new Map();
+// Main groups for the two-level sector picker. Sectors not listed fall under «أخرى».
+const SECTOR_GROUPS = [
+  ['المالية',['البنوك','التمويل','التأمين','الخدمات المالية','أسواق الاوراق المالية']],
+  ['الطاقة والمواد',['النفط و الغاز','البتروكيماويات','المرافق والطاقة','المواد الاساسية','الاسمنت','التعدين والمعادن','المنتجات الزجاجية']],
+  ['الصناعة والخدمات',['الصناعات التحويلية','متعددة الأنشطة','النقل','خدمات الاعمال']],
+  ['الاستهلاك',['تجارة و تجزئة','السلع الاستهلاكية','الأغذية والمشروبات','الزراعة','الفنادق و السياحة','المراكز الرياضية','التعليم و التدريب','وسائل الاعلام']],
+  ['الصحة',['الرعاية الصحية','خدمات الرعاية الصحية','موردي الادوية']],
+  ['العقار',['العقارات','الصناديق العقارية المتداولة']],
+  ['التقنية والاتصالات',['الاتصالات','تقنية المعلومات']]
+];
+let sectorGroup = null;
+function sectorGroups(){
+  const known=new Set(SECTOR_GROUPS.flatMap(group=>group[1]));
+  const groups=SECTOR_GROUPS.map(([label,names])=>({label,indexes:names.map(name=>data.sectors.findIndex(sector=>sector.name===name)).filter(index=>index>=0)})).filter(group=>group.indexes.length);
+  const rest=data.sectors.map((sector,index)=>known.has(sector.name)?-1:index).filter(index=>index>=0);
+  if(rest.length)groups.push({label:'أخرى',indexes:rest});
+  return groups;
+}
+function groupOfSector(index){return sectorGroups().findIndex(group=>group.indexes.includes(index));}
 const $ = id => document.getElementById(id);
 const escapeHtml = value => String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const normalized = value => String(value ?? '').normalize('NFKD').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').toLowerCase().trim();
@@ -148,12 +167,12 @@ function paintMarketSummary(){
     {label:'الشركات المنخفضة',value:integerFormat.format(breadth.down),trend:-1},
     {label:'دون تغيير',value:integerFormat.format(breadth.flat),trend:0},
     {label:'القيمة المتداولة',value:m.turnover==null?'—':integerFormat.format(m.turnover),source:m.turnoverSource,estimated:m.turnoverEstimated===true},
-    {label:'أداء المؤشر منذ بداية السنة',value:m.ytd,percent:true},
+    {label:'منذ بداية السنة',value:m.ytd,percent:true},
     {label:'3 أشهر',value:m.month3,percent:true},
     {label:'6 أشهر',value:m.month6,percent:true},
     {label:'سنة',value:m.year1,percent:true}
   ];
-  $('market-stats').innerHTML=items.map(item=>{
+  const cards=items.map(item=>{
     const trend=item.trend ?? (item.percent?item.value:null);
     const display=item.percent?(item.value==null?'—':`${item.value>0?'+':''}${numberFormat.format(item.value)}%`):item.value;
     const cls=typeof trend==='number'?(trend>0?'up':trend<0?'down':'flat'):'';
@@ -161,7 +180,10 @@ function paintMarketSummary(){
     const itemSource=item.percent?providerLabel(m.performanceSource):item.source?providerLabel(item.source):source;
     const title=item.label.startsWith('الشركات')||item.label==='دون تغيير'?`محسوب من بيانات أسهم الجدول · ${providerLabel(data.priceSource?.provider)} · ${snapshotLabel()}`:`المصدر: ${itemSource} · ${item.percent?'تاريخ بيانات الأداء':'تاريخ المؤشر'}: ${item.percent?m.performanceDate||'غير متاح':date||'غير متاح'}${item.estimated?' · تقدير من أحجام الأسهم المتأخرة ويُستبدل بالقيمة الرسمية عند الإغلاق':''}`;
     return `<div class="market-card" title="${escapeHtml(title)}"><span>${item.label}</span><strong class="${cls}">${display}${estimatedMark}</strong></div>`;
-  }).join('');
+  });
+  const group=(label,body,kind)=>`<div class="market-group market-group-${kind}"><span class="market-group-label">${label}</span><div class="market-group-cards">${body}</div></div>`;
+  const breadthBar=`<div class="breadth-bar" aria-hidden="true"><i class="breadth-up" style="flex:${breadth.up}"></i><i class="breadth-flat" style="flex:${breadth.flat}"></i><i class="breadth-down" style="flex:${breadth.down}"></i></div>`;
+  $('market-stats').innerHTML=group('المؤشر العام',cards[0]+cards[1],'index')+group('اتساع السوق',breadthBar+cards[2]+cards[4]+cards[3],'breadth')+group('القيمة المتداولة (ريال)',cards[5],'turnover')+group('أداء المؤشر',cards.slice(6).join(''),'performance');
   const checked=checkedLabel(m.updatedAt);
   const label=mode==='close'?'إغلاق رسمي':mode==='delayed'?'بيانات متأخرة · غير مؤكدة رسميًا':'بيانات المؤشر';
   $('market-date').textContent=m.date||m.value!=null?`${label} · ${date||(mode==='close'?'آخر إغلاق متاح':'تاريخ غير متاح')} · ${source}${checked?` · آخر فحص ${checked}`:''}`:'بانتظار تحديث المؤشر';
@@ -172,8 +194,17 @@ function sectorChange(stocks){
   return total?weighted/total:null;
 }
 function nav(){
-  $('sector-nav').innerHTML=`<button class="sector-button ${activeSector===null?'active':''}" data-sector="all" type="button" aria-pressed="${activeSector===null}" title="جميع القطاعات · ${allStocks().length} شركة"><span>جميع القطاعات</span><span class="count">${data.sectors.length}</span></button>`+
-    data.sectors.map((sector,i)=>`<button class="sector-button ${activeSector===i?'active':''}" data-sector="${i}" type="button" aria-pressed="${activeSector===i}" title="${escapeHtml(sector.name)} · ${sector.stocks.length} شركة"><span>${escapeHtml(sector.name)}</span><span class="count">${sector.stocks.length}</span></button>`).join('');
+  const groups=sectorGroups();
+  if(activeSector!==null)sectorGroup=groupOfSector(activeSector);
+  if(sectorGroup!==null&&!groups[sectorGroup])sectorGroup=null;
+  const allActive=activeSector===null&&sectorGroup===null;
+  const groupButtons=`<button class="group-button ${allActive?'active':''}" data-sector="all" type="button" aria-pressed="${allActive}" title="جميع القطاعات · ${allStocks().length} شركة"><span>جميع القطاعات</span><span class="count">${allStocks().length}</span></button>`+
+    groups.map((group,gi)=>`<button class="group-button ${sectorGroup===gi?'active':''}" data-group="${gi}" type="button" aria-pressed="${sectorGroup===gi}"><span>${escapeHtml(group.label)}</span><span class="count">${group.indexes.reduce((total,index)=>total+data.sectors[index].stocks.length,0)}</span></button>`).join('');
+  const chips=sectorGroup===null?'':groups[sectorGroup].indexes.map(i=>{
+    const sector=data.sectors[i],change=sectorChange(sector.stocks),changeClass=change==null?'flat':change>0?'up':change<0?'down':'flat',changeText=change==null?'—':`${change>0?'+':''}${numberFormat.format(change)}%`;
+    return `<button class="sector-button ${activeSector===i?'active':''}" data-sector="${i}" type="button" aria-pressed="${activeSector===i}" title="${escapeHtml(sector.name)} · ${sector.stocks.length} شركة · تغير مرجح محسوب"><span>${escapeHtml(sector.name)}</span><span class="count">${sector.stocks.length}</span><span class="sector-chip-change ${changeClass}">${changeText}</span></button>`;
+  }).join('');
+  $('sector-nav').innerHTML=`<div class="sector-groups" role="group" aria-label="مجموعات القطاعات">${groupButtons}</div>${chips?`<div class="sector-chips" role="group" aria-label="قطاعات ${escapeHtml(groups[sectorGroup].label)}">${chips}</div>`:''}`;
 }
 function row(stock){
   const dividendTitle=stock.dividendYield==null?'عائد التوزيع (آخر سنة) غير متاح في ملف البيانات':stock.dividendYieldSource==='Argaam Dividend Yield (%) (Last Year)'?'أرقام: عائد التوزيع (%) (آخر سنة)':`عائد التوزيع · المصدر: ${stock.dividendYieldSource||'ملف البيانات؛ المصدر غير محدد'}`;
@@ -207,18 +238,18 @@ function row(stock){
   const isConsumer=data?.sectors.some(sector=>sector.name==='السلع الاستهلاكية'&&sector.stocks.some(company=>company.symbol===stock.symbol));
   const isExchange=data?.sectors.some(sector=>sector.name==='أسواق الاوراق المالية'&&sector.stocks.some(company=>company.symbol===stock.symbol));
   const companyLabel=isBank?`<a class="company-results-link" href="banks.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isMining?`<a class="company-results-link" href="mining.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2020–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isTelecom?`<a class="company-results-link" href="telecom.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isUtilities?`<a class="company-results-link" href="utilities.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isHealthServices?`<a class="company-results-link" href="healthservices.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isMaterials?`<a class="company-results-link" href="materials.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isPetrochem?`<a class="company-results-link" href="petrochem.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isOilgas?`<a class="company-results-link" href="oilgas.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isCement?`<a class="company-results-link" href="cement.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isRetail?`<a class="company-results-link" href="retail.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isFood?`<a class="company-results-link" href="food.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isAgriculture?`<a class="company-results-link" href="agriculture.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isMulti?`<a class="company-results-link" href="multi.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isIndustrial?`<a class="company-results-link" href="industrial.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isRealEstate?`<a class="company-results-link" href="realestate.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isTransport?`<a class="company-results-link" href="transport.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isMedia?`<a class="company-results-link" href="media.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isHotelsTourism?`<a class="company-results-link" href="hotels-tourism.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isInformationTechnology?`<a class="company-results-link" href="information-technology.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isBusinessServices?`<a class="company-results-link" href="business-services.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isEducation?`<a class="company-results-link" href="education.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isSports?`<a class="company-results-link" href="sports.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isPharma?`<a class="company-results-link" href="pharma.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isHealth?`<a class="company-results-link" href="health.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isGlass?`<a class="company-results-link" href="glass.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isConsumer?`<a class="company-results-link" href="consumer.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:isExchange?`<a class="company-results-link" href="exchange.html?symbol=${encodeURIComponent(stock.symbol)}" title="النتائج السنوية 2021–2025 لـ ${escapeHtml(stock.name)}">${escapeHtml(stock.name)}</a>`:escapeHtml(stock.name);
-  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${companyLabel}</td><td title="${escapeHtml(priceTitle)}">${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,2)}</td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="${escapeHtml(dividendTitle)}">${percent(stock.dividendYield,false)}</td><td>${range52(stock)}</td><td title="${escapeHtml(`القيمة السوقية · ${priceTitle}`)}">${numeric(stock.marketCap)}</td><td>${percent(stock.day)}</td><td title="${escapeHtml(`القيمة المتداولة بالمليون ريال · ${priceTitle}`)}">${stock.tradedValue==null?'<span class="missing">—</span>':`<span class="num">${numberFormat.format(stock.tradedValue/1e6)}</span>`}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.ytd)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.month3)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.month6)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.year1)}</td></tr>`;
+  return `<tr><td class="sticky-1"><span class="symbol-badge">${escapeHtml(stock.symbol)}</span></td><td class="sticky-2 company-name">${companyLabel}</td><td title="${escapeHtml(priceTitle)}">${stock.price==null?'<span class="missing">—</span>':`<span class="num price">${numberFormat.format(stock.price)}</span>`}</td><td>${percent(stock.day)}</td><td title="${escapeHtml(stock._epsSource)}">${numeric(stock.eps,2)}</td><td>${pe(stock)}</td><td title="${escapeHtml(stock._bookSource)}">${numeric(stock.bookValue)}</td><td>${numeric(stock.pb)}</td><td title="${escapeHtml(dividendTitle)}">${percent(stock.dividendYield,false)}</td><td>${range52(stock)}</td><td title="${escapeHtml(`القيمة السوقية · ${priceTitle}`)}">${numeric(stock.marketCap)}</td><td title="${escapeHtml(`القيمة المتداولة بالمليون ريال · ${priceTitle}`)}">${stock.tradedValue==null?'<span class="missing">—</span>':`<span class="num">${numberFormat.format(stock.tradedValue/1e6)}</span>`}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.ytd)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.month3)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.month6)}</td><td title="${escapeHtml(performanceTitle)}">${percent(stock.year1)}</td></tr>`;
 }
 function render(){
   nav();
   const selected=activeSector===null
-    ? [{index:'all',name:'جميع الشركات',stocks:allStocks()}]
+    ? [{index:'all',name:sectorGroup===null?'جميع الشركات':sectorGroups()[sectorGroup]?.label||'جميع الشركات',stocks:sectorGroup===null?allStocks():(sectorGroups()[sectorGroup]?.indexes||[]).flatMap(i=>data.sectors[i].stocks)}]
     : [{index:activeSector,name:data.sectors[activeSector].name,stocks:data.sectors[activeSector].stocks}];
   const filtered=selected.map(group=>({...group,stocks:group.stocks.filter(s=>normalized(s.name).includes(query)||s.symbol.includes(query))})).filter(group=>group.stocks.length);
   const count=filtered.reduce((n,group)=>n+group.stocks.length,0);
-  $('view-title').textContent=activeSector===null?'جميع القطاعات':data.sectors[activeSector].name;
+  $('view-title').textContent=activeSector===null?(sectorGroup===null?'جميع القطاعات':sectorGroups()[sectorGroup]?.label||'جميع القطاعات'):data.sectors[activeSector].name;
   const allSort=sortBySector.get('all');
-  $('result-count').textContent=activeSector===null?`${count} شركة في جدول واحد${allSort?.key==='marketCap'&&allSort.dir===-1?' · الأكبر قيمة سوقية أولًا':''}`:`${count} شركة في قطاع ${data.sectors[activeSector].name}`;
+  $('result-count').textContent=activeSector===null&&sectorGroup!==null?`${count} شركة في مجموعة ${sectorGroups()[sectorGroup]?.label||''}`:activeSector===null?`${count} شركة في جدول واحد${allSort?.key==='marketCap'&&allSort.dir===-1?' · الأكبر قيمة سوقية أولًا':''}`:`${count} شركة في قطاع ${data.sectors[activeSector].name}`;
   $('clear').hidden=!query;
   $('empty').hidden=filtered.length!==0;
   $('sectors').innerHTML=filtered.map(({name,index,stocks})=>{
@@ -531,8 +562,10 @@ async function loadFinancialMap(){
 }
 
 document.addEventListener('click',event=>{
+  const groupButton=event.target.closest('[data-group]');
+  if(groupButton){sectorGroup=Number(groupButton.dataset.group);activeSector=null;sortBySector.set('all',{key:'marketCap',dir:-1});render();return;}
   const sectorButton=event.target.closest('[data-sector]');
-  if(sectorButton){activeSector=sectorButton.dataset.sector==='all'?null:Number(sectorButton.dataset.sector);if(activeSector===null)sortBySector.set('all',{key:'marketCap',dir:-1});render();$('main-content').scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(sectorButton){activeSector=sectorButton.dataset.sector==='all'?null:Number(sectorButton.dataset.sector);if(activeSector===null){sectorGroup=null;sortBySector.set('all',{key:'marketCap',dir:-1});}render();return;}
   const sortButton=event.target.closest('[data-sort]');
   if(sortButton){const index=sortButton.dataset.index==='all'?'all':Number(sortButton.dataset.index),key=sortButton.dataset.sort,current=sortBySector.get(index);sortBySector.set(index,{key,dir:current?.key===key?-current.dir:1});const section=document.getElementById(`sector-${index}`);const scroll=section.querySelector('.table-wrap').scrollLeft;render();document.getElementById(`sector-${index}`).querySelector('.table-wrap').scrollLeft=scroll;}
 });

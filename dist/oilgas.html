@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="banks.css?v=oilgas-annual-20261105">
   <link rel="stylesheet" href="bank-charts.css?v=oilgas-value-labels-20261106-v12">
   <link rel="stylesheet" href="theme.css?v=20261105">
-<style>.annual-margin-section{margin-top:32px;padding-top:18px;border-top:1px solid var(--line)}.annual-margin-section h3{margin:0 0 10px;color:#f5b543;font-size:14px}.annual-margin-table{min-width:1170px}.annual-margin-table .annual-col-value{width:110px}</style>  <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
+<style>.annual-margin-section{margin-top:32px;padding-top:18px;border-top:1px solid var(--line)}.annual-margin-section h3{margin:0 0 10px;color:#f5b543;font-size:14px}.annual-margin-table{min-width:1170px}.annual-margin-table .annual-col-value{width:110px}</style>  <link rel="stylesheet" href="layout.css?v=20261113">  <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261109-favicon1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20261109-favicon1">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20261109-favicon1">
@@ -18,9 +18,13 @@
 </head>
 <body class="banks-page">
   <main class="main-content" id="oilgas-main">
-    <div class="appearance-bar"><div class="theme-switch" role="group" aria-label="اختيار مظهر الموقع"><span class="theme-switch-label">المظهر</span><button type="button" data-theme-option="light" aria-pressed="false">فاتح</button><button type="button" data-theme-option="dark" aria-pressed="true">داكن</button></div></div>
-    <header class="hero"><div class="hero-copy"><h1>السوق السعودي</h1><div class="hero-date">النتائج السنوية لقطاع النفط و الغاز · <bdi>2021–2025</bdi></div></div></header>
-    <div class="bank-breadcrumb"><p><a href="index.html">السوق السعودي</a><span aria-hidden="true"> / </span><span>نتائج النفط و الغاز</span></p><a href="index.html" class="bank-back">العودة إلى الشركات</a></div>
+    <header class="site-bar">
+      <h1 class="site-name"><a href="index.html">السوق السعودي</a></h1>
+      <div class="hero-date">النتائج السنوية لقطاع النفط و الغاز · <bdi>2021–2025</bdi></div>
+      <nav class="site-nav" aria-label="صفحات الموقع"><a href="index.html" aria-current="page">الشركات</a><a href="comparison.html">مقارنة النتائج المالية</a></nav>
+      <div class="theme-switch" role="group" aria-label="اختيار مظهر الموقع"><span class="theme-switch-label">المظهر</span><button type="button" data-theme-option="light" aria-pressed="false">فاتح</button><button type="button" data-theme-option="dark" aria-pressed="true">داكن</button></div>
+    </header>
+    <div class="bank-breadcrumb"><p><a href="index.html">الشركات</a><span aria-hidden="true"> / </span><span>نتائج النفط و الغاز</span></p></div>
     <nav id="oilgas-nav" class="bank-nav" aria-label="اختيار شركة النفط و الغاز"></nav>
     <p id="oilgas-load-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات قطاع النفط و الغاز…</p>
     <section id="oilgas-panel" class="bank-panel" aria-labelledby="oilgas-title" hidden>
@@ -29,11 +33,12 @@
       <div class="bank-table-hint">اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.</div>
       <div id="oilgas-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول النتائج السنوية للنفط و الغاز"></div>
       <section id="oilgas-charts" class="bank-charts" aria-labelledby="oilgas-charts-title"><div class="bank-charts-heading"><h3 id="oilgas-charts-title">المقارنة بالأعمدة</h3><p id="oilgas-charts-context"></p></div><div class="bank-chart-control"><label for="oilgas-chart-metric">البند المراد مقارنته</label><select id="oilgas-chart-metric" aria-describedby="oilgas-chart-selection-status"></select></div><p id="oilgas-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p><div id="oilgas-charts-grid" class="bank-charts-grid"></div><p class="bank-charts-footnote">اختر أي بند لعرض مقارنة السنوات السنوية بين 2021 و2025. المبالغ بالمليار ريال بعد تحويلها من القيم الأصلية بالمليون ريال، وربحية السهم بالريال. «—» تعني أن القيمة غير متاحة.</p></section>
-      <section class="bank-notes" aria-labelledby="oilgas-notes-title"><h3 id="oilgas-notes-title">ملاحظات البيانات</h3><ul><li>المصدر: ملف «argaam_oilgas.xlsx» المقدم من المستخدم، والروابط المرجعية لأرقام محفوظة لكل شركة.</li><li>البيانات المعروضة سنوية فقط (FY) للأعوام 2021–2025؛ لم تُدرج أرباح الربع الرابع ولا أي بيانات ربع سنوية.</li><li>تغطي البيانات 7 شركات مدرجة في قطاع النفط و الغاز؛ وتظهر السنوات غير المتاحة بعلامة «—».</li></ul><p id="oilgas-import-info"></p></section>
+      <details class="bank-notes"><summary id="oilgas-notes-title">ملاحظات البيانات</summary><ul><li>المصدر: ملف «argaam_oilgas.xlsx» المقدم من المستخدم، والروابط المرجعية لأرقام محفوظة لكل شركة.</li><li>البيانات المعروضة سنوية فقط (FY) للأعوام 2021–2025؛ لم تُدرج أرباح الربع الرابع ولا أي بيانات ربع سنوية.</li><li>تغطي البيانات 7 شركات مدرجة في قطاع النفط و الغاز؛ وتظهر السنوات غير المتاحة بعلامة «—».</li></ul><p id="oilgas-import-info"></p></details>
     </section>
     <footer class="footer"><p>نتائج سنوية محفوظة داخل المشروع · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات قطاع النفط و الغاز.</p></noscript>
   </main>
   <script type="module" src="oilgas.js?v=oilgas-value-labels-20261106-v12"></script>
+  <script src="layout.js?v=20261113" defer></script>
 </body>
 </html>
