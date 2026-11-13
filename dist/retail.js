@@ -1,6 +1,6 @@
-import { escapeHtml, validateDataset, renderAnnualTable } from './retail-metrics.mjs?v=retail-periods-20261113';
+import { escapeHtml, validateDataset, renderAnnualTable } from './retail-metrics.mjs?v=retail-periods-20261113-w2';
 import { renderRetailCharts, fitRetailCharts, getChartOptions } from './retail-charts.mjs?v=retail-value-labels-20261106-v12';
-import { PERIODS, QUARTER_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel } from './retail-periods.mjs?v=retail-periods-20261113';
+import { PERIODS, QUARTER_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel } from './retail-periods.mjs?v=retail-periods-20261113-w2';
 const $ = id => document.getElementById(id);
 const VERSION = 'retail-periods-20261113';
 let dataset, quarterly, activeCompany, chartCompany, activeYears = [], selectedChartKey = 'netProfit';

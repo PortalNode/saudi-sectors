@@ -106,7 +106,7 @@ export function renderPeriodTable(company, columns, { sequential = false, captio
       }).join('');
       return `<tr data-metric="${metric.key}"><th scope="row" class="annual-label">${escapeHtml(metric.label + suffix)}</th>${cells}</tr>`;
     }).join('');
-    return `<table class="annual-table period-table ${tableClass}" data-latest-label="${escapeHtml(latestLabel)}" data-compare-label="${escapeHtml(compareLabel)}"><caption>${escapeHtml(tableCaption)}</caption><colgroup>${colgroup}</colgroup><thead>${header}</thead><tbody>${rows}</tbody></table>`;
+    return `<table class="annual-table period-table${sequential ? ' period-table-seq' : ''} ${tableClass}" data-latest-label="${escapeHtml(latestLabel)}" data-compare-label="${escapeHtml(compareLabel)}"><caption>${escapeHtml(tableCaption)}</caption><colgroup>${colgroup}</colgroup><thead>${header}</thead><tbody>${rows}</tbody></table>`;
   };
   const financial = METRICS.filter(metric => metric.unit !== 'percent'), margins = METRICS.filter(metric => metric.unit === 'percent');
   return `<div class="annual-financial-section">${render(financial, true, `${company.name} · ${caption}`, 'annual-financial-table')}</div><div class="annual-margin-section"><h3>الهوامش</h3>${render(margins, false, `${company.name} · الهوامش · ${caption}`, 'annual-margin-table')}</div>`;
