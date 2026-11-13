@@ -1,4 +1,25 @@
-import { escapeHtml, numericValue, annualChange, METRICS } from './retail-metrics.mjs?v=retail-periods-20261113';
+// Shared by every sector results page (all non-bank sectors use the same nine items).
+export const METRICS = [
+  { key: 'revenue', label: 'الإيرادات' },
+  { key: 'grossIncome', label: 'إجمالي الدخل' },
+  { key: 'operatingIncome', label: 'دخل العمليات' },
+  { key: 'netProfit', label: 'صافي الدخل' },
+  { key: 'epsBeforeExceptional', label: 'ربح السهم قبل البنود الاستثنائية', unit: 'sar' },
+  { key: 'eps', label: 'ربح السهم', unit: 'sar' },
+  { key: 'grossMargin', label: 'هامش إجمالي الربح', unit: 'percent' },
+  { key: 'operatingMargin', label: 'هامش دخل العمليات', unit: 'percent' },
+  { key: 'netMargin', label: 'هامش صافي الربح', unit: 'percent' }
+];
+export function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+}
+export const numericValue = value => typeof value === 'number' && Number.isFinite(value) ? value : null;
+export function annualChange(current, previous) {
+  current = numericValue(current); previous = numericValue(previous);
+  if (current === null || previous === null || previous === 0) return null;
+  const result = (current - previous) / Math.abs(previous) * 100;
+  return Number.isFinite(result) ? result : null;
+}
 
 // Period views built from standalone quarters: one quarter across years, the last
 // eight quarters in sequence, or year-to-date sums (6 months = Q1+Q2, 9 months = Q1..Q3).
@@ -110,4 +131,16 @@ export function renderPeriodTable(company, columns, { sequential = false, captio
   };
   const financial = METRICS.filter(metric => metric.unit !== 'percent'), margins = METRICS.filter(metric => metric.unit === 'percent');
   return `<div class="annual-financial-section">${render(financial, true, `${company.name} · ${caption}`, 'annual-financial-table')}</div><div class="annual-margin-section"><h3>الهوامش</h3>${render(margins, false, `${company.name} · الهوامش · ${caption}`, 'annual-margin-table')}</div>`;
+}
+
+export function validateQuarterly(data, sector) {
+  if (data?.schemaVersion !== 1 || (sector && data.sector !== sector) || !Array.isArray(data.companies) || !Array.isArray(data.quarters) || !data.quarters.length) throw new Error('invalid quarterly dataset');
+  for (const company of data.companies) {
+    if (!/^\d{4}$/.test(company.symbol) || !company.quarters || typeof company.quarters !== 'object') throw new Error('invalid quarterly company');
+    for (const [key, values] of Object.entries(company.quarters)) {
+      if (!/^\d{4}Q[1-4]$/.test(key)) throw new Error('invalid quarter key');
+      for (const value of Object.values(values)) if (value !== null && numericValue(value) === null) throw new Error('nonnumeric quarterly value');
+    }
+  }
+  return data;
 }
