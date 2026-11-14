@@ -1,4 +1,4 @@
-import { escapeHtml, numericValue, METRICS } from './financial-services-metrics.mjs?v=financial-services-20261115';
+import { escapeHtml, numericValue, METRICS } from './financial-services-metrics.mjs?v=financial-services-20261115b';
 
 const HEIGHT = 280;
 const GOLD = '#f59e0b';

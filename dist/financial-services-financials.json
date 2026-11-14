@@ -11,8 +11,8 @@
  "source": {
   "name": "القوائم المالية لدراية (صور مقدمة من المستخدم)",
   "importedAt": "2026-11-15T00:00:00Z",
-  "provider":"القوائم المالية لدراية",
-  "note": "القيم من صور القوائم المالية المقدمة من المستخدم (بالريال)، محوّلة إلى مليون ريال. ربح السهم = صافي الدخل ÷ 249.74 مليون سهم لكل الفترات.",
+  "provider": "القوائم المالية لدراية",
+  "note": "«إجمالي الإيرادات» = إجمالي دخل العمليات في قوائم الشركة. ربح السهم = صافي الربح ÷ 249.74 مليون سهم لكل الفترات، وربح السهم قبل البنود الاستثنائية مساوٍ له لعدم وجود بنود استثنائية.",
   "sharesMillions": 249.74
  },
  "companies": [
@@ -25,80 +25,65 @@
      "year": 2021,
      "period": "FY",
      "values": {
-      "revenue": 575.068755,
-      "totalOperatingIncome": 588.878133,
-      "operatingExpenses": -217.5943,
+      "revenue": 588.878133,
       "operatingIncome": 371.283833,
-      "profitBeforeZakat": 378.267089,
       "netProfit": 365.479072,
       "eps": 1.463438,
+      "epsBeforeExceptional": 1.463438,
       "operatingMargin": 0.630493496351307,
-      "netMargin": 0.6206361749893674,
-      "costToIncome": 0.3695065036486929
+      "netMargin": 0.6206361749893674
      }
     },
     {
      "year": 2022,
      "period": "FY",
      "values": {
-      "revenue": 613.736916,
-      "totalOperatingIncome": 645.460118,
-      "operatingExpenses": -284.08429,
+      "revenue": 645.460118,
       "operatingIncome": 361.375828,
-      "profitBeforeZakat": 322.843535,
       "netProfit": 307.509453,
       "eps": 1.231318,
+      "epsBeforeExceptional": 1.231318,
       "operatingMargin": 0.5598732097030975,
-      "netMargin": 0.476418983023828,
-      "costToIncome": 0.4401267902969026
+      "netMargin": 0.476418983023828
      }
     },
     {
      "year": 2023,
      "period": "FY",
      "values": {
-      "revenue": 470.033491,
-      "totalOperatingIncome": 623.528484,
-      "operatingExpenses": -257.064812,
+      "revenue": 623.528484,
       "operatingIncome": 366.463672,
-      "profitBeforeZakat": 347.946243,
       "netProfit": 329.704033,
       "eps": 1.320189,
+      "epsBeforeExceptional": 1.320189,
       "operatingMargin": 0.587725631472515,
-      "netMargin": 0.5287714057342086,
-      "costToIncome": 0.41227436852748495
+      "netMargin": 0.5287714057342086
      }
     },
     {
      "year": 2024,
      "period": "FY",
      "values": {
-      "revenue": 598.31379,
-      "totalOperatingIncome": 878.094105,
-      "operatingExpenses": -360.391793,
+      "revenue": 878.094105,
       "operatingIncome": 517.702312,
-      "profitBeforeZakat": 455.680603,
       "netProfit": 443.902418,
       "eps": 1.777458,
+      "epsBeforeExceptional": 1.777458,
       "operatingMargin": 0.5895749772742183,
-      "netMargin": 0.5055294363922418,
-      "costToIncome": 0.41042502272578174
+      "netMargin": 0.5055294363922418
      }
     },
     {
      "year": 2025,
      "period": "FY",
      "values": {
-      "revenue": 641.254489,
-      "totalOperatingIncome": 934.509119,
-      "operatingExpenses": -405.666863,
+      "revenue": 934.509119,
       "operatingIncome": 528.842256,
-      "profitBeforeZakat": 410.603944,
       "netProfit": 400.155751,
       "eps": 1.602289,
+      "epsBeforeExceptional": 1.602289,
       "operatingMargin": 0.5659037940324261,
-      "netMargin": 0.4281988723964501,
-      "costToIncome": 0.4340962059675738
+      "netMargin": 0.4281988723964501
      }
     }
    ]

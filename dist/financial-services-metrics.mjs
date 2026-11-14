@@ -1,23 +1,18 @@
 const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-// دراية المالية: بنود قائمة الدخل كما في قوائم الشركة (شركة وساطة واستثمار، لا يناسبها «إجمالي الربح»).
+// دراية المالية: البنود بصيغة أرقام. «إجمالي الإيرادات» هو إجمالي دخل العمليات في قوائم الشركة (يشمل دخل الاستثمار).
 export const METRICS = [
-  { key: 'revenue', label: 'الإيرادات من العقود مع العملاء' },
-  { key: 'totalOperatingIncome', label: 'إجمالي دخل العمليات' },
-  { key: 'operatingExpenses', label: 'إجمالي المصروفات التشغيلية' },
-  { key: 'operatingIncome', label: 'دخل العمليات' },
-  { key: 'profitBeforeZakat', label: 'الربح قبل الزكاة' },
-  { key: 'netProfit', label: 'صافي الدخل عن الفترة' },
+  { key: 'revenue', label: 'إجمالي الإيرادات' },
+  { key: 'operatingIncome', label: 'الربح التشغيلي' },
+  { key: 'netProfit', label: 'صافي الربح (الخسارة)' },
+  { key: 'epsBeforeExceptional', label: 'ربح السهم قبل البنود الاستثنائية', unit: 'sar' },
   { key: 'eps', label: 'ربح السهم', unit: 'sar' },
-  { key: 'operatingMargin', label: 'هامش دخل العمليات', unit: 'percent' },
-  { key: 'netMargin', label: 'هامش صافي الدخل', unit: 'percent' },
-  { key: 'costToIncome', label: 'المصروفات التشغيلية إلى إجمالي دخل العمليات', unit: 'percent' }
+  { key: 'operatingMargin', label: 'هامش الربح التشغيلي', unit: 'percent' },
+  { key: 'netMargin', label: 'هامش صافي الربح', unit: 'percent' }
 ];
-// Ratios use total operating income as the base (it includes investment income besides customer revenue).
 function ratios(values) {
-  const base = numericValue(values.totalOperatingIncome);
+  const base = numericValue(values.revenue);
   const share = key => { const top = numericValue(values[key]); return top !== null && base ? top / base : null; };
-  const expenses = numericValue(values.operatingExpenses);
-  return { operatingMargin: share('operatingIncome'), netMargin: share('netProfit'), costToIncome: expenses !== null && base ? -expenses / base : null };
+  return { operatingMargin: share('operatingIncome'), netMargin: share('netProfit') };
 }
 export const PERIOD_SPEC = { metrics: METRICS, ratios };
 export function escapeHtml(value) {
