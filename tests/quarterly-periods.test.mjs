@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { buildPeriodColumns, renderPeriodTable, sumQuarters, validateQuarterly, quarterLabel } from '../dist/quarterly-periods.mjs';
+import { buildPeriodColumns, renderPeriodTable, sumQuarters, validateQuarterly, quarterLabel, periodRange, monthRange, isCalendarYear } from '../dist/quarterly-periods.mjs';
 
 const values = (revenue, netProfit) => ({ revenue, grossIncome: revenue / 2, operatingIncome: netProfit, netProfit, epsBeforeExceptional: 1, eps: 1 });
 const company = {
@@ -62,4 +62,23 @@ test('every quarterly data file in dist is valid and matches its annual sector',
     const page = readFileSync(new URL(`../dist/${slug}.html`, import.meta.url), 'utf8');
     assert.match(page, /quarterly-periods\.css/, `${slug}.html must link quarterly-periods.css`);
   }
+});
+
+test('month ranges follow the company fiscal year', () => {
+  assert.equal(periodRange('h1'), 'يناير – يونيو');
+  assert.equal(periodRange('m9', 12), 'يناير – سبتمبر');
+  // Ataa: fiscal year ends in July, so Q1 = August – October and 6 months = August – January.
+  assert.equal(monthRange(7, 1), 'أغسطس – أكتوبر');
+  assert.equal(monthRange(7, 4), 'مايو – يوليو');
+  assert.equal(periodRange('h1', 7), 'أغسطس – يناير');
+  assert.equal(periodRange('m9', 7), 'أغسطس – أبريل');
+  assert.equal(periodRange('fy', 7), 'السنة المالية كاملة');
+  assert.ok(isCalendarYear(undefined) && isCalendarYear(12) && !isCalendarYear(7));
+});
+
+test('fiscal year end must be a month', () => {
+  const dataset = fiscalYearEnd => ({ schemaVersion: 1, sector: 'س', quarters: ['2025Q1'], companies: [{ symbol: '1000', fiscalYearEnd, quarters: {} }] });
+  assert.doesNotThrow(() => validateQuarterly(dataset(7)));
+  assert.throws(() => validateQuarterly(dataset(13)));
+  assert.throws(() => validateQuarterly(dataset('7')));
 });

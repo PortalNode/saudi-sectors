@@ -32,6 +32,8 @@ METRIC_KEYS = {
     "ربح السهم": "eps",
 }
 QUARTER_NAMES = {"الأول": 1, "الثاني": 2, "الثالث": 3, "الرابع": 4}
+# Companies whose fiscal year does not end in December (see the file's _comment).
+FISCAL_YEARS = {k: v for k, v in json.loads((ROOT / "scripts" / "fiscal-years.json").read_text(encoding="utf-8")).items() if not k.startswith("_")}
 
 class ImportValidationError(ValueError): pass
 
@@ -82,7 +84,14 @@ def import_workbook(slug, input_path):
         title, quarters = read_sheet(ws)
         company = match_company(ws.title, title, annual["companies"])
         if company["symbol"] in by_symbol: raise ImportValidationError(f"الشركة {company['name']} مكررة في أكثر من ورقة")
-        by_symbol[company["symbol"]] = {"symbol": company["symbol"], "name": company["name"], "sourceSheet": ws.title, "quarters": quarters}
+        record = {"symbol": company["symbol"], "name": company["name"], "sourceSheet": ws.title}
+        fiscal = FISCAL_YEARS.get(company["symbol"])
+        if fiscal:
+            if fiscal["endMonth"] not in range(1, 13): raise ImportValidationError(f"شهر نهاية السنة المالية غير صحيح لـ {company['name']} في fiscal-years.json")
+            record["fiscalYearEnd"] = fiscal["endMonth"]
+            if fiscal.get("note"): record["fiscalNote"] = fiscal["note"]
+        record["quarters"] = quarters
+        by_symbol[company["symbol"]] = record
     companies = [by_symbol[c["symbol"]] for c in annual["companies"] if c["symbol"] in by_symbol]
     missing = [c["name"] for c in annual["companies"] if c["symbol"] not in by_symbol]
     all_quarters = sorted({q for c in companies for q in c["quarters"]})
@@ -124,6 +133,11 @@ def main():
     output = DIST / f"{args.slug}-quarterly-financials.json"
     output.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"كُتب {output.relative_to(ROOT)}: {len(data['companies'])} شركة، من {data['quarters'][0]} إلى {data['quarters'][-1]}")
+    fiscal = [f"{c['name']} (تنتهي في الشهر {c['fiscalYearEnd']})" for c in data["companies"] if "fiscalYearEnd" in c]
+    if fiscal: print("شركات سنتها المالية لا تنتهي في ديسمبر: " + "، ".join(fiscal))
+    latest = f"{datetime.now().year}Q{(datetime.now().month - 1) // 3 + 1}"
+    early = [c["name"] for c in data["companies"] if "fiscalYearEnd" not in c and c["quarters"] and max(c["quarters"]) >= latest]
+    if early: print("تنبيه: شركات فيها ربع لم ينتهِ بعد في التقويم، فقد تكون سنتها المالية غير ميلادية (أضفها إلى scripts/fiscal-years.json): " + "، ".join(early))
     if missing: print("شركات في الملف السنوي بلا بيانات ربعية: " + "، ".join(missing))
     report = restatement_report(data, annual)
     print("فروق بين مجموع الأرباع والسنوي (غالبًا تعديل أرقام سابقة):\n" + "\n".join(report) if report else "مجموع الأرباع يطابق السنوي في كل السنوات.")

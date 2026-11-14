@@ -30,6 +30,23 @@ export const PERIODS = {
   fy: { label: 'سنوي', range: 'السنة المالية كاملة' }
 };
 export const QUARTER_NAMES = ['', 'الأول', 'الثاني', 'الثالث', 'الرابع'];
+export const MONTH_NAMES = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+
+// Quarters are numbered within the company's fiscal year (as Argaam does), so a company whose
+// year ends in July has Q1 = August – October and "6 months" = August – January.
+// fiscalYearEnd is the month (1–12) the fiscal year ends in; 12 is a calendar year.
+const monthAfter = (month, offset) => (month - 1 + offset) % 12 + 1;
+export const isCalendarYear = fiscalYearEnd => !fiscalYearEnd || fiscalYearEnd === 12;
+export function monthRange(fiscalYearEnd = 12, firstQuarter = 1, lastQuarter = firstQuarter) {
+  const start = monthAfter(fiscalYearEnd || 12, (firstQuarter - 1) * 3 + 1);
+  const end = monthAfter(fiscalYearEnd || 12, lastQuarter * 3);
+  return `${MONTH_NAMES[start]} – ${MONTH_NAMES[end]}`;
+}
+/** Month range of a period view for a company, e.g. 'يناير – يونيو' or 'أغسطس – يناير'. */
+export function periodRange(period, fiscalYearEnd = 12) {
+  const { quarters, range } = PERIODS[period];
+  return quarters ? monthRange(fiscalYearEnd, 1, quarters) : range;
+}
 export const SEQUENCE_LENGTH = 8;
 const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const SUMMABLE = METRICS.filter(metric => metric.unit !== 'percent').map(metric => metric.key);
@@ -144,6 +161,8 @@ export function validateQuarterly(data, sector) {
   if (data?.schemaVersion !== 1 || (sector && data.sector !== sector) || !Array.isArray(data.companies) || !Array.isArray(data.quarters) || !data.quarters.length) throw new Error('invalid quarterly dataset');
   for (const company of data.companies) {
     if (!/^\d{4}$/.test(company.symbol) || !company.quarters || typeof company.quarters !== 'object') throw new Error('invalid quarterly company');
+    if (company.fiscalYearEnd !== undefined && !(Number.isInteger(company.fiscalYearEnd) && company.fiscalYearEnd >= 1 && company.fiscalYearEnd <= 12)) throw new Error('invalid fiscal year end');
+    if (company.fiscalNote !== undefined && typeof company.fiscalNote !== 'string') throw new Error('invalid fiscal note');
     for (const [key, values] of Object.entries(company.quarters)) {
       if (!/^\d{4}Q[1-4]$/.test(key)) throw new Error('invalid quarter key');
       for (const value of Object.values(values)) if (value !== null && numericValue(value) === null) throw new Error('nonnumeric quarterly value');

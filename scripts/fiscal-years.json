@@ -1,0 +1,9 @@
+{
+  "_comment": "Companies whose fiscal year does not end in December, by symbol. endMonth is the month (1-12) the fiscal year ends in; Argaam numbers their quarters and years within that fiscal year. import-quarterly-workbook.py copies these into dist/<slug>-quarterly-financials.json. Companies not listed use a calendar year.",
+  "4292": { "name": "عطاء", "endMonth": 7 },
+  "4291": {
+    "name": "الوطنية للتعليم",
+    "endMonth": 7,
+    "note": "كانت سنتها المالية تنتهي في أغسطس حتى 2023، وكانت السنة المالية 2024 قصيرة (11 شهرًا، من سبتمبر 2023 إلى يوليو 2024)."
+  }
+}

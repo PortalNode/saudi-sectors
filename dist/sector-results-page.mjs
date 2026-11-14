@@ -1,4 +1,4 @@
-import { escapeHtml, PERIODS, QUARTER_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly } from './quarterly-periods.mjs?v=quarterly-20261114';
+import { escapeHtml, PERIODS, QUARTER_NAMES, MONTH_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly, isCalendarYear, monthRange, periodRange } from './quarterly-periods.mjs?v=quarterly-20261114b';
 
 /**
  * Drives a sector results page (annual table + bar chart) and, when
@@ -14,11 +14,12 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
   const { validateDataset, renderAnnualTable } = metrics;
   let dataset, quarterly, activeCompany, chartCompany, activeYears = [], selectedChartKey = 'netProfit';
   let period = 'fy', quarter = '3';
+  let fiscal = { end: 12, note: '' }; // the selected company's fiscal year (quarters are numbered within it)
 
   const annualRange = () => dataset ? `${dataset.years[0]}–${dataset.years.at(-1)}` : '';
   function periodSummary() {
     if (period === 'q') return quarter === 'seq' ? 'آخر الأرباع المتتالية' : `الربع ${QUARTER_NAMES[quarter]} عبر السنوات`;
-    return period === 'fy' ? 'النتائج السنوية' : `${PERIODS[period].label} (${PERIODS[period].range})`;
+    return period === 'fy' ? 'النتائج السنوية' : `${PERIODS[period].label} (${periodRange(period, fiscal.end)})`;
   }
   function mountPeriodBar() {
     const heading = $('panel').querySelector('.bank-heading');
@@ -36,6 +37,7 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     notes?.insertAdjacentHTML('beforeend', [
       `البيانات الربعية من ملف «${escapeHtml(quarterly.source.name)}» من ${quarterLabel(quarterly.quarters[0])} إلى ${quarterLabel(quarterly.quarters.at(-1))}.`,
       'الأرباع مستقلة (Q4 هو الربع الرابع وحده وليس السنة). فترتا 6 و9 أشهر مجموع الأرباع، والهوامش محسوبة من المجاميع.',
+      ...(quarterly.companies.some(company => !isCalendarYear(company.fiscalYearEnd)) ? ['بعض الشركات سنتها المالية لا تنتهي في ديسمبر؛ أرباعها مرقّمة حسب سنتها المالية كما في أرقام، فقد لا يغطي الربع نفسه الأشهر نفسها في كل الشركات.'] : []),
       'ربح السهم في فترتي 6 و9 أشهر مجموع ربح السهم للأرباع، فهو تقريبي إذا تغير عدد الأسهم خلال السنة.',
       'العرض السنوي من الملف السنوي؛ قد يختلف قليلًا عن مجموع الأرباع عند تعديل أرقام سابقة.',
       'في عرض «متتالية» يقارن التغير كل ربع بنفس الربع من العام السابق لتجنب أثر المواسم.'
@@ -52,8 +54,11 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     $('period-desc').innerHTML = period === 'fy'
       ? 'من الملف السنوي · «نسبة التغير» مقارنةً بالسنة السابقة'
       : period === 'q'
-        ? (quarter === 'seq' ? 'الأرباع بالترتيب · التغير مقارنةً بنفس الربع من العام السابق' : `الربع <b>${QUARTER_NAMES[quarter]}</b> مقارنةً بنفسه في السنوات السابقة`)
-        : `تراكمي ${PERIODS[period].range} · مقارنةً بنفس الفترة من العام السابق`;
+        ? (quarter === 'seq' ? 'الأرباع بالترتيب · التغير مقارنةً بنفس الربع من العام السابق' : `الربع <b>${QUARTER_NAMES[quarter]}</b>${isCalendarYear(fiscal.end) ? '' : ` (${monthRange(fiscal.end, Number(quarter))})`} مقارنةً بنفسه في السنوات السابقة`)
+        : `تراكمي ${periodRange(period, fiscal.end)} · مقارنةً بنفس الفترة من العام السابق`;
+    if (period !== 'fy' && !isCalendarYear(fiscal.end)) {
+      $('period-desc').innerHTML += `<br><span class="period-fiscal">السنة المالية للشركة تنتهي في ${MONTH_NAMES[fiscal.end]}، والأرباع والسنوات مرقّمة حسبها كما في أرقام (الربع الأول ${monthRange(fiscal.end, 1)}).${fiscal.note ? ` ${escapeHtml(fiscal.note)}` : ''}</span>`;
+    }
     if (badge) badge.innerHTML = latestKey ? `آخر ربع متاح <bdi dir="ltr">${quarterLabel(latestKey)}</bdi>` : `السنوات المتاحة <bdi>${annualRange()}</bdi>`;
   }
   function drawSelectedChart() {
@@ -80,6 +85,7 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     const company = dataset.companies.find(item => item.symbol === symbol) || dataset.companies[0];
     const quarterCompany = quarterly?.companies.find(item => item.symbol === company.symbol);
     if (period !== 'fy' && !quarterCompany) period = 'fy';
+    fiscal = { end: quarterCompany?.fiscalYearEnd ?? 12, note: quarterCompany?.fiscalNote ?? '' };
     $('nav').innerHTML = dataset.companies.map(item => `<button type="button" class="bank-tab" data-company="${escapeHtml(item.symbol)}" aria-pressed="${item.symbol === company.symbol}" title="نتائج ${escapeHtml(item.name)} ${escapeHtml(item.symbol)}">${escapeHtml(item.name)}</button>`).join('');
     $('title').innerHTML = `${escapeHtml(company.name)} <span class="symbol-badge">${escapeHtml(company.symbol)}</span>`;
     $('subtitle').textContent = `${company.fullName || company.name} · قطاع ${sectorName} · ${quarterly ? periodSummary() : 'نتائج سنوية فقط'}`;
