@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
-SHARED_VERSION = "quarterly-20261113"
+SHARED_VERSION = "quarterly-20261114"
 LAYOUT_VERSION = "20261113-periods"
 
 def fail(message): sys.exit(f"خطأ: {message}")

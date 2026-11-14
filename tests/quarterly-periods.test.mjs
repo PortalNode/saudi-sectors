@@ -29,6 +29,17 @@ test('a single quarter is compared across years', () => {
   assert.deepEqual(columns.map(column => column.label), ['Q4 2024']);
 });
 
+test('a missing year is not bridged by a two-year change', () => {
+  // Like SADAFCO: 2023 has no Q3 (fiscal-year change), so Q3 2024 has no year-earlier column.
+  const gapped = { symbol: '1001', name: 'فجوة', quarters: { '2022Q3': values(100, 10), '2024Q3': values(150, 15), '2025Q3': values(300, 30) } };
+  const columns = buildPeriodColumns(gapped, 'q', '3');
+  assert.deepEqual(columns.map(column => column.label), ['Q3 2022', 'Q3 2024', 'Q3 2025']);
+  const row = renderPeriodTable(gapped, columns, { caption: 'x' }).match(/<tr data-metric="revenue">.*?<\/tr>/)[0];
+  assert.doesNotMatch(row, /\+50\.00%/);
+  assert.match(row, /\+100\.00%/);
+  assert.equal((row.match(/لا يمكن حساب التغير/g) || []).length, 1);
+});
+
 test('sequential view compares with the same quarter last year', () => {
   const columns = buildPeriodColumns(company, 'q', 'seq');
   assert.equal(columns.length, 7);

@@ -1,4 +1,4 @@
-import { escapeHtml, PERIODS, QUARTER_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly } from './quarterly-periods.mjs?v=quarterly-20261113';
+import { escapeHtml, PERIODS, QUARTER_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly } from './quarterly-periods.mjs?v=quarterly-20261114';
 
 /**
  * Drives a sector results page (annual table + bar chart) and, when

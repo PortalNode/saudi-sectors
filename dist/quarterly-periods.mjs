@@ -112,7 +112,14 @@ export function renderPeriodTable(company, columns, { sequential = false, captio
   const compareLabel = sequential
     ? (columns.at(-1) ? quarterLabel(`${Number(columns.at(-1).id.slice(0, 4)) - 1}Q${columns.at(-1).id.slice(5)}`) : '')
     : fullLabel(columns.at(-2));
-  const reference = (index, key) => sequential ? columns[index].sameQuarterLastYear?.[key] ?? null : columns[index - 1]?.values?.[key] ?? null;
+  // Only the year immediately before counts: when a year is missing (fiscal-year change, late listing)
+  // the column before is two or more years back and must not be shown as a year-over-year change.
+  const yearOf = column => Number(String(column?.id ?? '').slice(0, 4));
+  const reference = (index, key) => {
+    if (sequential) return columns[index].sameQuarterLastYear?.[key] ?? null;
+    const previous = columns[index - 1];
+    return previous && yearOf(previous) === yearOf(columns[index]) - 1 ? previous.values?.[key] ?? null : null;
+  };
   const hasChangeCell = index => sequential || index > 0;
   const headerCell = column => `<th scope="col"${column.id === latest ? ' class="period-latest"' : ''}><bdi dir="ltr">${escapeHtml(column.label)}</bdi>${column.sub ? `<span class="period-sub">${escapeHtml(column.sub)}</span>` : ''}</th>`;
   const render = (metrics, withChanges, tableCaption, tableClass) => {
