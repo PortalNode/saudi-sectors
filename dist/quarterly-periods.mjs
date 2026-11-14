@@ -1,4 +1,4 @@
-// Shared by every sector results page (all non-bank sectors use the same nine items).
+// Shared by every sector results page. Most sectors use these nine items; a page can supply its own (see PERIOD_SPEC).
 export const METRICS = [
   { key: 'revenue', label: 'الإيرادات' },
   { key: 'grossIncome', label: 'إجمالي الدخل' },
@@ -49,23 +49,31 @@ export function periodRange(period, fiscalYearEnd = 12) {
 }
 export const SEQUENCE_LENGTH = 8;
 const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const SUMMABLE = METRICS.filter(metric => metric.unit !== 'percent').map(metric => metric.key);
 const MARGINS = { grossMargin: 'grossIncome', operatingMargin: 'operatingIncome', netMargin: 'netProfit' };
+// A sector page may export its own PERIOD_SPEC from its metrics module: { metrics, ratios(values) }.
+// ratios returns the derived percentages for a set of summed values. Pages without one use the nine standard items.
+export const DEFAULT_PERIOD_SPEC = {
+  metrics: METRICS,
+  ratios(values) {
+    const result = {};
+    for (const [key, numerator] of Object.entries(MARGINS)) {
+      const top = numericValue(values[numerator]), revenue = numericValue(values.revenue);
+      result[key] = top !== null && revenue ? top / revenue : null;
+    }
+    return result;
+  }
+};
+const summable = spec => spec.metrics.filter(metric => metric.unit !== 'percent').map(metric => metric.key);
 
 const hasData = values => !!values && Object.values(values).some(value => numericValue(value) !== null);
 export const quarterLabel = key => `Q${key.slice(5)} ${key.slice(0, 4)}`;
 
-export function withMargins(values) {
+export function withMargins(values, spec = DEFAULT_PERIOD_SPEC) {
   if (!values) return null;
-  const result = { ...values };
-  for (const [key, numerator] of Object.entries(MARGINS)) {
-    const top = numericValue(values[numerator]), revenue = numericValue(values.revenue);
-    result[key] = top !== null && revenue ? top / revenue : null;
-  }
-  return result;
+  return { ...values, ...spec.ratios(values) };
 }
 
-export function sumQuarters(company, year, count) {
+export function sumQuarters(company, year, count, spec = DEFAULT_PERIOD_SPEC) {
   const quarters = [];
   for (let quarter = 1; quarter <= count; quarter += 1) {
     const values = company.quarters?.[`${year}Q${quarter}`];
@@ -73,28 +81,28 @@ export function sumQuarters(company, year, count) {
     quarters.push(values);
   }
   const totals = {};
-  for (const key of SUMMABLE) {
+  for (const key of summable(spec)) {
     const parts = quarters.map(values => numericValue(values[key]));
     totals[key] = parts.includes(null) ? null : Number(parts.reduce((sum, value) => sum + value, 0).toFixed(6));
   }
-  return hasData(totals) ? withMargins(totals) : null;
+  return hasData(totals) ? withMargins(totals, spec) : null;
 }
 
 /** Columns for a non-annual period: [{ id, label, sub, values, previous }] oldest first. */
-export function buildPeriodColumns(company, period, quarter = '3') {
+export function buildPeriodColumns(company, period, quarter = '3', spec = DEFAULT_PERIOD_SPEC) {
   const keys = Object.keys(company?.quarters ?? {}).filter(key => hasData(company.quarters[key])).sort();
   const years = [...new Set(keys.map(key => Number(key.slice(0, 4))))].sort((a, b) => a - b);
   let columns;
   if (period === 'h1' || period === 'm9') {
     const { quarters, short, label } = PERIODS[period];
-    columns = years.map(year => ({ id: String(year), label: String(year), chartLabel: `${short} ${year}`, sub: label, values: sumQuarters(company, year, quarters) }));
+    columns = years.map(year => ({ id: String(year), label: String(year), chartLabel: `${short} ${year}`, sub: label, values: sumQuarters(company, year, quarters, spec) }));
   } else if (period === 'q' && quarter === 'seq') {
     columns = keys.slice(-SEQUENCE_LENGTH).map(key => {
       const year = Number(key.slice(0, 4)), number = key.slice(5);
-      return { id: key, label: quarterLabel(key), values: withMargins(company.quarters[key]), sameQuarterLastYear: withMargins(company.quarters[`${year - 1}Q${number}`]) };
+      return { id: key, label: quarterLabel(key), values: withMargins(company.quarters[key], spec), sameQuarterLastYear: withMargins(company.quarters[`${year - 1}Q${number}`], spec) };
     });
   } else if (period === 'q') {
-    columns = years.map(year => ({ id: `${year}Q${quarter}`, label: quarterLabel(`${year}Q${quarter}`), values: withMargins(company.quarters[`${year}Q${quarter}`]) }));
+    columns = years.map(year => ({ id: `${year}Q${quarter}`, label: quarterLabel(`${year}Q${quarter}`), values: withMargins(company.quarters[`${year}Q${quarter}`], spec) }));
   } else throw new Error(`unknown period ${period}`);
   return columns.filter(column => hasData(column.values));
 }
@@ -122,7 +130,7 @@ function formatChange(current, previous) {
  * the previous column for year-over-year views, or the stored same-quarter-last-year
  * values in the sequential view (so seasonality does not distort the change).
  */
-export function renderPeriodTable(company, columns, { sequential = false, caption = '' } = {}) {
+export function renderPeriodTable(company, columns, { sequential = false, caption = '', metrics = METRICS } = {}) {
   const latest = columns.at(-1)?.id;
   const fullLabel = column => column ? (column.sub ? `${column.sub} ${column.label}` : column.label) : '';
   const latestLabel = fullLabel(columns.at(-1));
@@ -153,7 +161,7 @@ export function renderPeriodTable(company, columns, { sequential = false, captio
     }).join('');
     return `<table class="annual-table period-table${sequential ? ' period-table-seq' : ''} ${tableClass}" data-latest-label="${escapeHtml(latestLabel)}" data-compare-label="${escapeHtml(compareLabel)}"><caption>${escapeHtml(tableCaption)}</caption><colgroup>${colgroup}</colgroup><thead>${header}</thead><tbody>${rows}</tbody></table>`;
   };
-  const financial = METRICS.filter(metric => metric.unit !== 'percent'), margins = METRICS.filter(metric => metric.unit === 'percent');
+  const financial = metrics.filter(metric => metric.unit !== 'percent'), margins = metrics.filter(metric => metric.unit === 'percent');
   return `<div class="annual-financial-section">${render(financial, true, `${company.name} · ${caption}`, 'annual-financial-table')}</div><div class="annual-margin-section"><h3>الهوامش</h3>${render(margins, false, `${company.name} · الهوامش · ${caption}`, 'annual-margin-table')}</div>`;
 }
 

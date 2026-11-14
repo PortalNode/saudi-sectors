@@ -1,4 +1,4 @@
-import { escapeHtml, PERIODS, QUARTER_NAMES, MONTH_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly, isCalendarYear, monthRange, periodRange } from './quarterly-periods.mjs?v=quarterly-20261114b';
+import { escapeHtml, PERIODS, QUARTER_NAMES, MONTH_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly, isCalendarYear, monthRange, periodRange } from './quarterly-periods.mjs?v=quarterly-20261115';
 
 /**
  * Drives a sector results page (annual table + bar chart) and, when
@@ -12,6 +12,7 @@ import { escapeHtml, PERIODS, QUARTER_NAMES, MONTH_NAMES, buildPeriodColumns, ch
 export function initSectorResultsPage({ slug, sectorName, metrics, charts, version, quarterly: wantQuarterly = true }) {
   const $ = id => document.getElementById(`${slug}-${id}`);
   const { validateDataset, renderAnnualTable } = metrics;
+  const periodSpec = metrics.PERIOD_SPEC; // optional: the page's own items for quarterly and cumulative views
   let dataset, quarterly, activeCompany, chartCompany, activeYears = [], selectedChartKey = 'netProfit';
   let period = 'fy', quarter = '3';
   let fiscal = { end: 12, note: '' }; // the selected company's fiscal year (quarters are numbered within it)
@@ -95,10 +96,10 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
       chartCompany = company;
       $('table-wrap').innerHTML = renderAnnualTable(company, activeYears);
     } else {
-      const columns = buildPeriodColumns(quarterCompany, period, quarter);
+      const columns = buildPeriodColumns(quarterCompany, period, quarter, periodSpec);
       activeYears = columns.map(column => column.chartLabel ?? column.label);
       chartCompany = chartCompanyFor(company, columns);
-      $('table-wrap').innerHTML = renderPeriodTable(company, columns, { sequential: period === 'q' && quarter === 'seq', caption: periodSummary() });
+      $('table-wrap').innerHTML = renderPeriodTable(company, columns, { sequential: period === 'q' && quarter === 'seq', caption: periodSummary(), metrics: periodSpec?.metrics });
     }
     $('table-wrap').scrollLeft = 0;
     $('panel').hidden = false;
@@ -142,7 +143,7 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
       $('import-info').textContent = `المصدر المحفوظ: ${dataset.source.name}${quarterly ? ` و${quarterly.source.name}` : ''} · ${dataset.source.provider}.`;
       selectCompany(readUrlState(), true);
       $('load-status').textContent = quarterly
-        ? `المصدر: أرقام · سنوي ${annualRange()} وربعي ${quarterLabel(quarterly.quarters[0])} – ${quarterLabel(quarterly.quarters.at(-1))}`
+        ? `المصدر: ${escapeHtml(dataset.source.provider || 'أرقام')} · سنوي ${annualRange()} وربعي ${quarterLabel(quarterly.quarters[0])} – ${quarterLabel(quarterly.quarters.at(-1))}`
         : `المصدر: ملف ${dataset.source.name} · بيانات ثابتة ${annualRange()} · نسب التغير محسوبة من القيم السنوية المخزنة`;
     } catch (error) {
       $('load-status').textContent = `تعذر تحميل ملف نتائج ${sectorName}. أعد تحميل الصفحة؛ لم تُستبدل البيانات بأرقام افتراضية.`;
