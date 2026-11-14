@@ -1,0 +1,252 @@
+{
+ "note": "تواريخ إدراج بحثتُ عنها للشركات التي لم يذكر موقع تداول السعودية تاريخ إدراجها. precision=month: المصدر يذكر الشهر والسنة فقط فلا يُعرض اليوم.",
+ "checked": "2026-11-15",
+ "symbols": {
+  "1010": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-67"
+  },
+  "1030": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "موقع البنك السعودي للاستثمار وDecypha",
+   "url": "https://www.saib.com.sa/en/investor-relations"
+  },
+  "1050": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-17"
+  },
+  "1060": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-40"
+  },
+  "2030": {
+   "listed": "1993-07-18",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-14"
+  },
+  "2040": {
+   "listed": "1993-01-10",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-361"
+  },
+  "2060": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-382"
+  },
+  "2080": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-399"
+  },
+  "2090": {
+   "listed": "1993-01-01",
+   "precision": "month",
+   "source": "مباشر (Mubasher)",
+   "url": "https://english.mubasher.info/markets/TDWL/stocks/2090/profile"
+  },
+  "2100": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-396"
+  },
+  "2120": {
+   "listed": "1993-05-24",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-1309"
+  },
+  "2140": {
+   "listed": "1993-12-07",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-389"
+  },
+  "2150": {
+   "listed": "1993-12-21",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-16"
+  },
+  "2170": {
+   "listed": "1997-08-11",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-52"
+  },
+  "2180": {
+   "listed": "1991-06-16",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-55"
+  },
+  "2190": {
+   "listed": "1998-08-26",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-10"
+  },
+  "2220": {
+   "listed": "2000-09-26",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-344"
+  },
+  "2230": {
+   "listed": "2002-05-26",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-351"
+  },
+  "3010": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-69"
+  },
+  "3020": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-80"
+  },
+  "3030": {
+   "listed": "1993-01-01",
+   "precision": "month",
+   "source": "مباشر (Mubasher)",
+   "url": "https://english.mubasher.info/markets/TDWL/stocks/3030/profile"
+  },
+  "3040": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-85"
+  },
+  "3050": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-93"
+  },
+  "3060": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-97"
+  },
+  "3080": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-327"
+  },
+  "3090": {
+   "listed": "1994-08-27",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-328"
+  },
+  "4020": {
+   "listed": "1993-01-10",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-406"
+  },
+  "4030": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-411"
+  },
+  "4040": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-409"
+  },
+  "4050": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-1305"
+  },
+  "4061": {
+   "listed": "1994-01-01",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-419"
+  },
+  "4070": {
+   "listed": "1993-01-03",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-416"
+  },
+  "4090": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-423"
+  },
+  "4130": {
+   "listed": "1992-11-30",
+   "precision": "day",
+   "source": "نشرة إصدار أسهم حقوق الأولوية — هيئة السوق المالية",
+   "url": "https://cma.gov.sa/en/Market/Prospectuses/Documents/Al%20Baha%20RI%20EN.pdf"
+  },
+  "4150": {
+   "listed": "1994-04-02",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-415"
+  },
+  "5110": {
+   "listed": "2002-06-08",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-337"
+  },
+  "6020": {
+   "listed": "1993-01-01",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-341"
+  },
+  "6040": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-360"
+  },
+  "6060": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-388"
+  },
+  "6070": {
+   "listed": "1993-01-02",
+   "precision": "month",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-390"
+  },
+  "6090": {
+   "listed": "1993-11-07",
+   "precision": "day",
+   "source": "Decypha (مباشر)",
+   "url": "https://www.decypha.com/en/company-list/x-397"
+  }
+ }
+}
