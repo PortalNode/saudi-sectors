@@ -78,6 +78,11 @@ jobs:
         run: node scripts/update-prices.mjs
         env:
           CURL_IMPERSONATE_BIN: /opt/curl-impersonate/curl_chrome116
+      # Daily closes for the mini chart. Runs once per official session (it
+      # skips until data.json has a newer official close); a source outage
+      # never blocks the price update.
+      - name: Update daily close history
+        run: node scripts/update-history.mjs || echo "::warning::Daily close history was not updated."
       # A push made meanwhile (site edits) used to reject the bot's push and
       # lose the update. Rebase onto it; if that conflicts, start again from
       # the newest main and refetch, so prices land on the latest content.
@@ -89,7 +94,7 @@ jobs:
           git config user.name "price-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
-            git add dist/data.json
+            git add dist/data.json dist/history
             if git diff --cached --quiet; then
               echo "No price changes to commit."
               echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -109,6 +114,7 @@ jobs:
             git rebase --abort 2>/dev/null || true
             git reset --hard origin/main
             node scripts/update-prices.mjs
+            node scripts/update-history.mjs || true
           done
           echo "Could not publish the refreshed data after 3 attempts."
           exit 1
