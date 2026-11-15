@@ -33,9 +33,9 @@ function fixture(mode = 'delayed', checkedAt = '2026-11-04T09:20:00Z') {
 }
 const response = value => ({ ok: true, status: 200, json: async () => clone(value) });
 async function settle() { for (let i = 0; i < 3; i++) await new Promise(resolve => setImmediate(resolve)); }
-function harness(initial = fixture(), { map = { snapshot: {}, companyIds: {}, sectorIds: [] } } = {}) {
+function harness(initial = fixture(), { map = { snapshot: {}, companyIds: {}, sectorIds: [] }, tradingView = null, now = '2026-11-04T10:00:00Z' } = {}) {
   const nodes = new Map(), documentListeners = new Map(), intervals = [], calls = [], queue = [initial];
-  let clock = Date.parse('2026-11-04T10:00:00Z');
+  let clock = Date.parse(now);
   class ClockDate extends Date {
     constructor(...args) { super(...(args.length ? args : [clock])); }
     static now() { return clock; }
@@ -64,6 +64,10 @@ function harness(initial = fixture(), { map = { snapshot: {}, companyIds: {}, se
     fetch: async (url, options) => {
       calls.push({ url, options });
       if (url.startsWith('financial-map.json')) { if (map instanceof Error) throw map; return response(map); }
+      if (url.startsWith('https://scanner.tradingview.com/')) {
+        if (!tradingView) throw new Error('TradingView offline');
+        return response(tradingView(JSON.parse(options.body)));
+      }
       assert.match(url, /^data\.json\?v=\d+$/);
       if (!queue.length) throw new Error('No queued price response');
       const item = queue.shift();
@@ -304,6 +308,45 @@ await test('initial-load recovery and financial-map failure do not take down ava
   assert.match(noMap.node('sectors').innerHTML, /Alpha/);
   assert.equal(noMap.node('empty').hidden, true);
   assert.equal(noMap.evaluate('allStocks()[0].pe'), 10);
+});
+
+await test('after the close, a stale snapshot shows that session\'s dated TradingView close, never as official', async () => {
+  const thursday = Date.parse('2026-11-05T12:10:00Z') / 1000, wednesday = Date.parse('2026-11-04T12:10:00Z') / 1000;
+  const snapshot = fixture('close', '2026-11-04T17:00:00Z');
+  snapshot.priceSource.officialDate = '2026-11-04';
+  const rows = { 'TADAWUL:1111': [21.5, 7.5, 'SAR', thursday, 'delayed_streaming_900', 107.5e6, 5e6, 1.5],
+    'TADAWUL:1112': [19, -5, 'SAR', wednesday, 'delayed_streaming_900', 290e6, 1e6, -1],
+    'TADAWUL:TASI': [10100, 1, 'SAR', thursday, 'delayed_streaming_900', null, null, 100] };
+  const tradingView = body => ({ data: body.symbols.tickers.filter(t => rows[t]).map(s => ({ s, d: rows[s] })) });
+  // Thursday 16:30 Riyadh: session over, published snapshot still Wednesday's close.
+  const h = harness(snapshot, { tradingView, now: '2026-11-05T13:30:00Z' }); await settle();
+  const [alpha, beta] = h.evaluate('allStocks()');
+  assert.equal(alpha.price, 21.5);
+  assert.equal(alpha.priceDate, '2026-11-05');
+  assert.equal(alpha.priceStatus, 'delayed');
+  // A quote from the snapshot's own (official) session never replaces it.
+  assert.equal(beta.price, 20);
+  assert.equal(beta.priceStatus, 'delayed');
+  assert.equal(h.evaluate('data.marketSummary.value'), 10100);
+  assert.equal(h.evaluate('data.marketSummary.pointChange'), 100);
+  assert.equal(h.evaluate('data.marketSummary.isIntraday'), false);
+  assert.match(h.node('price-mode').textContent, /أسعار متأخرة · غير مؤكدة رسميًا/);
+  assert.equal(h.node('price-date').textContent, '05.11.2026');
+  assert.match(h.node('price-status').textContent, /نهاية جلسة 05\.11\.2026.*غير مؤكدة رسميًا/);
+  // Friday: the snapshot holds Thursday's official close, so nothing overrides it
+  // and an absent newer quote is not reported as an error.
+  const current = fixture('close', '2026-11-05T17:00:00Z');
+  Object.assign(current, { asOf: '2026-11-05' });
+  Object.assign(current.priceSource, { officialDate: '2026-11-05', observedDate: '2026-11-05' });
+  const friday = harness(current, { tradingView, now: '2026-11-06T09:00:00Z' }); await settle();
+  assert.equal(friday.evaluate('allStocks()[0].price'), 20);
+  assert.equal(friday.node('price-mode').textContent, 'إغلاق رسمي');
+  assert.doesNotMatch(friday.node('price-status').textContent, /تعذر/);
+  assert.equal(friday.calls.filter(call => call.url.includes('tradingview')).length, 0);
+  // TradingView unreachable after hours: the published snapshot stays, no alarm.
+  const offline = harness(clone(snapshot), { now: '2026-11-05T13:30:00Z' }); await settle();
+  assert.equal(offline.evaluate('allStocks()[0].price'), 20);
+  assert.doesNotMatch(offline.node('price-status').textContent, /تعذر/);
 });
 
 await test('HTML retains existing structure and adds accessible status with cache-busted script', async () => {

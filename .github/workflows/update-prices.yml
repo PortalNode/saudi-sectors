@@ -2,14 +2,19 @@ name: Update market prices
 
 on:
   schedule:
-    # Dated delayed prices during the session, including closing auction.
-    # UTC + 3 = Riyadh. Actions schedules are best-effort, not real-time feeds.
+    # Times are UTC; Riyadh = UTC + 3. GitHub schedules are best-effort: in
+    # November 2026 only 2–3 of ~50 daily slots actually fired, mostly hours
+    # late, and none at all on some trading days. Many independent slots, plus
+    # the self-chain below, make a missed day far less likely.
+    # In session (10:03–15:53 Riyadh), two staggered offsets.
     - cron: '3,18,33,48 7-12 * * 0-4'
-    # A second staggered slot: GitHub drops or delays scheduled runs under
-    # load, and two independent offsets make a total miss far less likely.
     - cron: '8,23,38,53 7-12 * * 0-4'
-    # Retry the official closing report at 16:08, 17:08, 18:08 and 20:08 Riyadh.
+    # Official closing report, then hourly catch-up until 02:38 Riyadh.
     - cron: '8 13,14,15,17 * * 0-4'
+    - cron: '38 12-23 * * 0-4'
+    # Next-morning catch-up (03:23–09:23 Riyadh) for a session whose evening
+    # runs were all dropped; Mon–Fri UTC covers the Sun–Thu sessions.
+    - cron: '23 0-6 * * 1-5'
   workflow_dispatch:
     inputs:
       sleepMinutes:
@@ -22,18 +27,13 @@ permissions:
   pages: write
   id-token: write
 
-# Both workflows share the publication lock. An update is never cancelled midway.
-concurrency:
-  group: github-pages
-  cancel-in-progress: false
-
 jobs:
-  update:
+  # A chained run waits here, outside any concurrency group, so its wait never
+  # blocks a website deploy and a deploy never cancels the pending update.
+  wait:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 135
     steps:
-      - name: Check out source
-        uses: actions/checkout@v6
       - name: Wait for the next slot (self-chained run)
         run: |
           MINUTES="${{ github.event.inputs.sleepMinutes || '0' }}"
@@ -41,6 +41,20 @@ jobs:
             echo "Chained run: sleeping $MINUTES minutes until the next slot."
             sleep $(( MINUTES * 60 ))
           fi
+
+  update:
+    needs: wait
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Updates run one at a time; an update is never cancelled midway.
+    concurrency:
+      group: price-update
+      cancel-in-progress: false
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -64,25 +78,54 @@ jobs:
         run: node scripts/update-prices.mjs
         env:
           CURL_IMPERSONATE_BIN: /opt/curl-impersonate/curl_chrome116
+      # A push made meanwhile (site edits) used to reject the bot's push and
+      # lose the update. Rebase onto it; if that conflicts, start again from
+      # the newest main and refetch, so prices land on the latest content.
       - name: Commit refreshed data
+        id: commit
+        env:
+          CURL_IMPERSONATE_BIN: /opt/curl-impersonate/curl_chrome116
         run: |
           git config user.name "price-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dist/data.json
-          if git diff --cached --quiet; then
-            echo "No price changes to commit."
-          else
+          for attempt in 1 2 3; do
+            git add dist/data.json
+            if git diff --cached --quiet; then
+              echo "No price changes to commit."
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             git commit -m "Update dated market snapshot $(date -u +%F)"
-            git push
-          fi
+            if git push; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt); main moved meanwhile."
+            git fetch origin main
+            if git rebase origin/main && git push; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            git reset --hard origin/main
+            node scripts/update-prices.mjs
+          done
+          echo "Could not publish the refreshed data after 3 attempts."
+          exit 1
       - name: Upload website files
+        if: steps.commit.outputs.changed == 'true'
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 
   deploy:
     needs: update
+    if: needs.update.outputs.changed == 'true'
     runs-on: ubuntu-latest
+    # Shares the Pages lock with the site deploy workflow.
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -90,12 +133,28 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-      # GitHub silently drops scheduled runs under load; a chain that re-triggers
-      # the next slot makes one morning start enough for the whole session.
+
+  # GitHub silently drops scheduled runs under load; a chain that re-triggers
+  # the next slot makes one start enough for the rest of the day.
+  chain:
+    needs: [update, deploy]
+    if: ${{ always() && needs.update.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Chain the next update slot
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Another chained run already queued or waiting: do not fork a second
+          # chain (every cron start would otherwise add one). Updates are
+          # serialized, so that run reaches this step later and chains on.
+          WAITING=$(gh run list --repo "${{ github.repository }}" --workflow update-prices.yml \
+            --event workflow_dispatch --limit 20 --json databaseId,status \
+            -q '[.[] | select(.databaseId != ${{ github.run_id }} and (.status == "queued" or .status == "in_progress" or .status == "waiting" or .status == "pending" or .status == "requested"))] | length')
+          if [ "${WAITING:-0}" != "0" ]; then
+            echo "Another chained run is already pending; the chain continues there."
+            exit 0
+          fi
           MINUTES=$(node -e '
             const parts = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Riyadh",weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date());
             const get = k => parts.find(p=>p.type===k)?.value;
@@ -109,7 +168,8 @@ jobs:
             const next = slots.find(m => m > now + 2);
             console.log(next == null ? 0 : next - now);
           ')
-          if [ "$MINUTES" = "0" ] || [ "$MINUTES" -gt 22 ]; then
+          # Up to 125 minutes bridges 16:08 → 17:08 → 18:08 → 20:08.
+          if [ "$MINUTES" = "0" ] || [ "$MINUTES" -gt 125 ]; then
             echo "No next slot within reach today; chain ends."
           else
             gh workflow run update-prices.yml --repo "${{ github.repository }}" -f sleepMinutes=$MINUTES

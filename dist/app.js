@@ -406,9 +406,34 @@ async function getYahooLiveQuotes(symbols){
 function liveDate(){
   return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 }
-async function getTradingViewLiveQuotes(symbols){
+// The published snapshot depends on GitHub's scheduler, which can skip or
+// delay runs for hours. Whenever the snapshot is not an official close for the
+// latest session, the page reads that session's dated TradingView quotes itself
+// (during the session and after it), labelled delayed and never official.
+// Most recent Sunday–Thursday session that has opened (10:00 Riyadh). Public
+// holidays are not modelled; on one, no newer quote exists and nothing changes.
+function latestSessionDate(now=new Date()){
+  for(let back=0;back<8;back++){
+    const day=new Date(now.getTime()-back*864e5);
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Riyadh',weekday:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'}).formatToParts(day);
+    const part=type=>parts.find(p=>p.type===type)?.value;
+    if(['Fri','Sat'].includes(part('weekday')) || (back===0 && Number(part('hour'))<10)) continue;
+    return `${part('year')}-${part('month')}-${part('day')}`;
+  }
+  return liveDate();
+}
+function snapshotNeedsLiveQuotes(snapshot){
+  return isMarketHours() || snapshot?.priceSource?.mode!=='close' || !(String(snapshot?.asOf||'')>=latestSessionDate());
+}
+function acceptsLiveDate(snapshot, observedDate){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(observedDate||'') || observedDate>liveDate()) return false;
+  const asOf=String(snapshot?.asOf||'');
+  if(isMarketHours() && observedDate===liveDate()) return true;
+  return observedDate>asOf || (observedDate===asOf && snapshot?.priceSource?.mode!=='close');
+}
+async function getTradingViewLiveQuotes(symbols, accept=date=>date===liveDate()){
   const unique=[...new Set(symbols.filter(Boolean))], result=new Map();
-  const columns=['close','change','currency','time','update_mode','market_cap_basic','Value.Traded'];
+  const columns=['close','change','currency','time','update_mode','market_cap_basic','Value.Traded','change_abs'];
   for(let i=0;i<unique.length;i+=300){
     const tickers=unique.slice(i,i+300).map(symbol=>`TADAWUL:${symbol}`);
     try{
@@ -421,26 +446,30 @@ async function getTradingViewLiveQuotes(symbols){
       const payload=await response.json();
       for(const row of payload.data||[]){
         const symbol=String(row.s||'').replace(/^TADAWUL:/,'');
-        const [price,day,currency,barTime,updateMode,marketCap,tradedValue]=row.d||[];
-        const observedDate=Number.isFinite(Number(barTime))
+        const [price,day,currency,barTime,updateMode,marketCap,tradedValue,pointChange]=row.d||[];
+        const observedDate=barTime!=null && barTime!=='' && Number.isFinite(Number(barTime))
           ? new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(Number(barTime)*1000)) : null;
         if(!unique.includes(symbol) || !(Number(price)>0) || !Number.isFinite(Number(day)) ||
-           (currency && currency!=='SAR') || observedDate!==liveDate()) continue;
+           (currency && currency!=='SAR') || !accept(observedDate)) continue;
         result.set(symbol,{price:Number(price),day:Number(day),marketCap:Number(marketCap),
-          updateMode: String(updateMode||'delayed'), tradedValue:Number(tradedValue), date:observedDate});
+          updateMode: String(updateMode||'delayed'), tradedValue:Number(tradedValue), date:observedDate,
+          pointChange:pointChange==null||pointChange===''||!Number.isFinite(Number(pointChange))?null:Number(pointChange)});
       }
     }catch(error){ /* انتقل إلى Yahoo إذا لم يتوفر TradingView */ }
   }
   return result;
 }
 async function applyTradingViewLivePrices(snapshot){
-  if(!isMarketHours() || !snapshot?.sectors?.length) return false;
+  if(!snapshotNeedsLiveQuotes(snapshot) || !snapshot?.sectors?.length) return false;
   const stocks=snapshot.sectors.flatMap(sector=>sector.stocks);
   const symbols=['TASI',...stocks.map(stock=>stock.symbol)];
-  const quotes=await getTradingViewLiveQuotes(symbols);
+  const all=await getTradingViewLiveQuotes(symbols, observed=>acceptsLiveDate(snapshot, observed));
+  // One session only: never mix quotes from two different trading days.
+  const date=[...all.values()].map(quote=>quote.date).sort().at(-1);
+  const quotes=new Map([...all].filter(([,quote])=>quote.date===date));
   const index=quotes.get('TASI');
   let changed=0, turnover=0, turnoverStocks=0;
-  const checkedAt=new Date().toISOString(), date=liveDate();
+  const checkedAt=new Date().toISOString(), inSession=isMarketHours() && date===liveDate();
   for(const stock of stocks){
     const quote=quotes.get(stock.symbol);
     if(!quote) continue;
@@ -457,12 +486,13 @@ async function applyTradingViewLivePrices(snapshot){
     changed++;
   }
   if(index){
-    const previous=Number(snapshot.marketSummary?.value);
+    // The snapshot's index value may be from an older session or an earlier
+    // intraday check, so the point change comes from the provider itself.
     snapshot.marketSummary={...snapshot.marketSummary,
       value:index.price,
-      pointChange:Number.isFinite(previous)?index.price-previous:null,
+      pointChange:index.pointChange,
       day:index.day, date, source:'TradingView', mode:'delayed',
-      isIntraday:true, updatedAt:checkedAt};
+      isIntraday:inSession, updatedAt:checkedAt};
   }
   if(turnoverStocks){
     snapshot.marketSummary={...snapshot.marketSummary, turnover, turnoverSource:'TradingView',
@@ -471,7 +501,9 @@ async function applyTradingViewLivePrices(snapshot){
   if(changed || index){
     snapshot.priceSource={...snapshot.priceSource, provider:'TradingView', mode:'delayed',
       observedDate:date, checkedAt, live:true, liveSymbols:changed, liveTurnover:turnover, liveTurnoverStocks:turnoverStocks,
-      warning:'الأسعار المتأخرة من TradingView مؤرخة بجلسة اليوم وغير مؤكدة رسميًا كإغلاق؛ سيُستبدل بها الإغلاق الرسمي بعد تحديث المصدر.'};
+      warning:inSession
+        ? 'الأسعار المتأخرة من TradingView مؤرخة بجلسة اليوم وغير مؤكدة رسميًا كإغلاق؛ سيُستبدل بها الإغلاق الرسمي بعد تحديث المصدر.'
+        : `أسعار نهاية جلسة ${displayDate(date)} من TradingView، متأخرة وغير مؤكدة رسميًا كإغلاق؛ سيحل محلها الإغلاق الرسمي من تداول عند تحديث المصدر.`};
     snapshot.priceDate=date;
     return true;
   }
@@ -533,12 +565,13 @@ async function refreshPrices(){
     priceRefreshError='';
     // لا نستخدم Yahoo إلا داخل جلسة السوق. فشل المسار المباشر لا يمنع
     // عرض آخر لقطة موثوقة من data.json ولا يغيّرها.
-    if(isMarketHours()){
+    if(snapshotNeedsLiveQuotes(data)){
       try{
         const liveUpdated=await applyTradingViewLivePrices(data);
-        if(!liveUpdated) priceRefreshError='تعذر الحصول على أسعار مباشرة من TradingView؛ احتُفظ بلقطة المصدر المنشورة.';
+        // Outside the session an absent newer quote is normal (holiday, weekend).
+        if(!liveUpdated && isMarketHours()) priceRefreshError='تعذر الحصول على أسعار مباشرة من TradingView؛ احتُفظ بلقطة المصدر المنشورة.';
       }
-      catch(error){ priceRefreshError='تعذر تحديث السعر المباشر؛ احتُفظ بلقطة المصدر المنشورة.'; }
+      catch(error){ if(isMarketHours()) priceRefreshError='تعذر تحديث السعر المباشر؛ احتُفظ بلقطة المصدر المنشورة.'; }
     }
     if(initial)$('empty').querySelector('h3').textContent='لا توجد نتائج مطابقة';
     paintSnapshot();paintMarketSummary();applyFinancials();

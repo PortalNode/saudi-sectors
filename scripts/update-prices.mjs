@@ -246,7 +246,16 @@ if (!pricesOnly) {
   });
   console.log(`Argaam dividend yields: ${yieldCount}/${stocks.length}`);
 }
-if (!dryRun) {
+// Catch-up runs after the close re-read the same official report many times.
+// Outside the session, a snapshot that differs only in check times is not
+// rewritten, so those runs neither commit nor redeploy. In session the check
+// time itself is information (the page flags copies older than 35 minutes).
+const CHECK_TIME_FIELDS = new Set(['checkedAt', 'updatedAt', 'priceCheckedAt', 'week52CheckedAt',
+  'dividendYieldCheckedAt', 'turnoverUpdatedAt']);
+const withoutCheckTimes = value => JSON.stringify(value, (key, item) => CHECK_TIME_FIELDS.has(key) ? undefined : item);
+const unchanged = !marketSession(now).active && withoutCheckTimes(data) === withoutCheckTimes(JSON.parse(originalText));
+if (unchanged) console.log('Snapshot unchanged apart from check times; data.json left as is.');
+if (!dryRun && !unchanged) {
   const temp = new URL(`../dist/.data-${process.pid}.tmp`, import.meta.url);
   if (await readFile(DATA_FILE, 'utf8') !== originalText) {
     throw new Error('Data changed during fetch; data.json left untouched');
