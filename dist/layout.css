@@ -162,3 +162,11 @@ details.bank-notes[open]>summary{margin-bottom:8px}
 .market-group-cards{justify-content:center}
 .market-summary .market-group .market-card,.market-summary .market-group .market-card strong{text-align:center}
 .market-summary .market-group .market-card .market-daily-change{justify-content:center}
+
+/* ---------- Favourites (watchlist) ---------- */
+.favorites-button .fav-icon{color:#f59e0b;font-size:13px;line-height:1}
+.favorites-button.active .fav-icon{color:inherit}
+.symbol-cell{display:inline-flex;align-items:center;gap:5px}
+.fav-toggle{flex:none;display:inline-grid;place-items:center;width:18px;height:18px;padding:0;border:0;background:transparent;color:var(--muted);font-size:14px;line-height:1;opacity:.55;transition:color .15s,opacity .15s,transform .15s}
+.fav-toggle:hover{opacity:1;color:#f59e0b;transform:scale(1.15)}
+.fav-toggle.on{color:#f59e0b;opacity:1}
