@@ -8,7 +8,8 @@ Finance companies report their own items, kept exactly as in the workbook:
 net financing and investment commission income, net income, EPS before exceptional
 items and EPS. The script copies the workbook to argaam_finance.xlsx and writes
 dist/finance-financials.json. A company listed later than the others (Tasheel) has
-no columns for the early years; those years are stored with empty values.
+no columns for the early years; only the years it has are stored, so its table
+starts at its first year (as in the other sectors).
 
 Workbook layout: one sheet per company "<name> - سنوي"; row 1 title with "(symbol)";
 row 2 headers "السنة المالية 2021", "التغير السنوي", …; the items below. The
@@ -78,8 +79,6 @@ def import_workbook(path):
         have = {record["year"] for record in company["years"]}
         if have != set(range(min(have), years[-1] + 1)):
             raise ImportValidationError(f"سنوات {company['name']} ليست متصلة حتى {years[-1]}")
-        # Years before the company's first column (later listing) are kept empty.
-        company["years"] = [{"year": year, "period": "FY", "values": dict.fromkeys(METRIC_KEYS.values())} for year in years if year not in have] + company["years"]
     return {
         "schemaVersion": 1,
         "sector": SECTOR,
@@ -104,8 +103,8 @@ def main():
     nulls = sum(v is None for c in data["companies"] for r in c["years"] for v in r["values"].values())
     print(f"كُتب {OUTPUT.relative_to(ROOT)}: {len(data['companies'])} شركة، السنوات {data['years'][0]}–{data['years'][-1]}، قيم ناقصة: {nulls}")
     for company in data["companies"]:
-        empty = [r["year"] for r in company["years"] if all(v is None for v in r["values"].values())]
-        if empty: print(f"  {company['name']}: لا توجد بيانات لسنوات {'، '.join(map(str, empty))} في الملف")
+        first = company["years"][0]["year"]
+        if first > data["years"][0]: print(f"  {company['name']}: يبدأ من {first}")
 
 if __name__ == "__main__":
     main()

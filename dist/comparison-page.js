@@ -249,7 +249,7 @@ function render(){
 
 async function loadSector(slug, wanted={}){
   state.sector = slug; $('sector-select').value = slug;
-  const data = await (await fetch(`${DATA_BASE}${slug}-financials.json?v=comparison-v4`)).json();
+  const data = await (await fetch(`${DATA_BASE}${slug}-financials.json?v=comparison-v5`)).json();
   companies = data.companies || data.banks || []; allYears = data.years || [];
   valueIndex = new Map(companies.map(c => [c.symbol, new Map((c.years||[]).map(r => [r.year, r.values||{}]))]));
   const keys = availableMetrics();

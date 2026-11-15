@@ -12,7 +12,7 @@
   "name": "argaam_finance.xlsx",
   "provider": "أرقام",
   "sha256": "8d5ea0d265879139b0b1b2a46c6c791ec04b89c1afd3a1437067e6ee0ac5664b",
-  "importedAt": "2026-11-15T15:29:51Z",
+  "importedAt": "2026-11-15T16:28:57Z",
   "note": "البنود كما في ملف أرقام؛ المبالغ بالمليون ريال وربح السهم بالريال. «التغير السنوي» يُحسب في الصفحة."
  },
  "companies": [
@@ -22,26 +22,6 @@
    "fullName": "تسهيل (4083)",
    "sourceSheet": "تسهيل - سنوي",
    "years": [
-    {
-     "year": 2021,
-     "period": "FY",
-     "values": {
-      "netFinancingIncome": null,
-      "netProfit": null,
-      "epsBeforeExceptional": null,
-      "eps": null
-     }
-    },
-    {
-     "year": 2022,
-     "period": "FY",
-     "values": {
-      "netFinancingIncome": null,
-      "netProfit": null,
-      "epsBeforeExceptional": null,
-      "eps": null
-     }
-    },
     {
      "year": 2023,
      "period": "FY",

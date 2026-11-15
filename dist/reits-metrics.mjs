@@ -1,11 +1,11 @@
 const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-// الصناديق العقارية المتداولة: البنود كما في ملف أرقام «الصناديق العقارية - الأرباح السنوية.xlsx».
+// الصناديق العقارية المتداولة: البنود كما في ملف أرقام «الصناديق العقارية - الأرباح السنوية.xlsx»،
+// عدا «ربح الوحدة قبل البنود الاستثنائية» لأنه «غير متوفر» لكل الصناديق.
 export const METRICS = [
   { key: 'rentalIncome', label: 'إيرادات الإيجار' },
   { key: 'ffo', label: 'الدخل من العمليات التشغيلية (FFO)' },
   { key: 'netProfit', label: 'صافي الدخل' },
   { key: 'units', label: 'عدد الوحدات', unit: 'million_units' },
-  { key: 'epsBeforeExceptional', label: 'ربح الوحدة قبل البنود الاستثنائية', unit: 'sar' },
   { key: 'ffoPerUnit', label: 'ربح الوحدة من العمليات التشغيلية', unit: 'sar' },
   { key: 'eps', label: 'ربح الوحدة', unit: 'sar' }
 ];

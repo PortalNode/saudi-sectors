@@ -5,11 +5,12 @@ Usage:
     python3 scripts/import-reits-workbook.py "<الصناديق العقارية - الأرباح السنوية.xlsx>"
 
 REITs report their own items, kept exactly as in the workbook: rental income,
-funds from operations (FFO), net income, number of units (millions), earnings per
-unit before exceptional items, FFO per unit and earnings per unit. Cells marked
-"غير متوفر" are stored empty. The script copies the workbook to argaam_reits.xlsx
-and writes dist/reits-financials.json. A fund listed later than the others has no
-columns for the early years; those years are stored with empty values.
+funds from operations (FFO), net income, number of units (millions), FFO per unit
+and earnings per unit. "ربح الوحدة قبل البنود الاستثنائية" is "غير متوفر" for every
+fund, so that row is skipped. Other "غير متوفر" cells are stored empty. The script
+copies the workbook to argaam_reits.xlsx and writes dist/reits-financials.json. A
+fund listed later than the others has no columns for the early years; only the
+years it has are stored, so its table starts at its first year.
 
 Workbook layout: one sheet per company "<name> - سنوي"; row 1 title with "(symbol)";
 row 2 headers "السنة المالية 2021", "التغير السنوي", …; the items below. The
@@ -29,10 +30,11 @@ METRIC_KEYS = {
     "الدخل من العمليات التشغيلية (FFO)": "ffo",
     "صافي الدخل": "netProfit",
     "عدد الوحدات": "units",
-    "ربح الوحدة قبل البنود الاستثنائية": "epsBeforeExceptional",
     "ربح الوحدة من العمليات التشغيلية": "ffoPerUnit",
     "ربح الوحدة": "eps",
 }
+# Rows in the workbook that are left out on purpose (empty for every fund).
+SKIPPED = {"ربح الوحدة قبل البنود الاستثنائية"}
 
 class ImportValidationError(ValueError): pass
 
@@ -54,7 +56,7 @@ def read_sheet(ws):
     seen = set()
     for row in rows[2:]:
         label = norm(row[0])
-        if not label: continue
+        if not label or label in SKIPPED: continue
         key = METRIC_KEYS.get(label)
         if not key: raise ImportValidationError(f"بند غير معروف «{label}» في «{ws.title}»")
         seen.add(key)
@@ -82,8 +84,6 @@ def import_workbook(path):
         have = {record["year"] for record in company["years"]}
         if have != set(range(min(have), years[-1] + 1)):
             raise ImportValidationError(f"سنوات {company['name']} ليست متصلة حتى {years[-1]}")
-        # Years before the company's first column (later listing) are kept empty.
-        company["years"] = [{"year": year, "period": "FY", "values": dict.fromkeys(METRIC_KEYS.values())} for year in years if year not in have] + company["years"]
     return {
         "schemaVersion": 1,
         "sector": SECTOR,
@@ -108,8 +108,8 @@ def main():
     nulls = sum(v is None for c in data["companies"] for r in c["years"] for v in r["values"].values())
     print(f"كُتب {OUTPUT.relative_to(ROOT)}: {len(data['companies'])} شركة، السنوات {data['years'][0]}–{data['years'][-1]}، قيم ناقصة: {nulls}")
     for company in data["companies"]:
-        empty = [r["year"] for r in company["years"] if all(v is None for v in r["values"].values())]
-        if empty: print(f"  {company['name']}: لا توجد بيانات لسنوات {'، '.join(map(str, empty))} في الملف")
+        first = company["years"][0]["year"]
+        if first > data["years"][0]: print(f"  {company['name']}: يبدأ من {first}")
 
 if __name__ == "__main__":
     main()

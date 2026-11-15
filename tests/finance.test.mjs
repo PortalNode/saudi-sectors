@@ -17,19 +17,19 @@ test('finance file covers the sector on the main table, 2021–2025, with the fo
   assert.deepEqual(annual.years, [2021, 2022, 2023, 2024, 2025]);
   assert.deepEqual(metrics.METRICS.map(metric => metric.key), ITEMS);
   for (const item of annual.companies) {
-    assert.deepEqual(item.years.map(record => record.year), annual.years);
+    assert.deepEqual(item.years.map(record => record.year), item.symbol === '4083' ? [2023, 2024, 2025] : annual.years);
     for (const record of item.years) assert.deepEqual(Object.keys(record.values), ITEMS);
   }
 });
 
-test('figures match the workbook, and Tasheel has no 2021–2022 values', () => {
+test('figures match the workbook, and Tasheel starts at 2023 with no empty years', () => {
   assert.equal(year('4083', 2025).netFinancingIncome, 672.65);
   assert.equal(year('4083', 2025).netProfit, 273.64);
   assert.equal(year('4081', 2025).netProfit, -126.34);
   assert.equal(year('4081', 2025).epsBeforeExceptional, -0.18);
   assert.equal(year('4081', 2025).eps, -1.05);
   assert.equal(year('1183', 2022).eps, 0.96);
-  for (const value of [2021, 2022]) assert.ok(Object.values(year('4083', value)).every(item => item === null));
+  assert.equal(company('4083').years.find(record => record.year < 2023), undefined);
 });
 
 test('annual table shows the four items with year-over-year changes and no margins section', () => {
@@ -51,7 +51,7 @@ test('main table links the finance sector and its companies to the page', () => 
   assert.match(app, /href="finance\.html">النتائج السنوية 2021–2025/);
   assert.match(app, /href="finance\.html\?symbol=/);
   assert.match(read('index.html'), /app\.js\?v=[^"]*finance-20261115/);
-  assert.match(read('finance.html'), /src="finance\.js\?v=finance-quarterly-20261115"/);
+  assert.match(read('finance.html'), /src="finance\.js\?v=finance-quarterly-20261115b"/);
 });
 
 test('quarterly file covers the five companies with the same four items; Q4 is a standalone quarter', () => {

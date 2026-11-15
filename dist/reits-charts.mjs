@@ -1,4 +1,4 @@
-import { escapeHtml, numericValue, METRICS } from './reits-metrics.mjs?v=reits-20261115';
+import { escapeHtml, numericValue, METRICS } from './reits-metrics.mjs?v=reits-20261115b';
 
 const HEIGHT = 280;
 const GOLD = '#f59e0b';
