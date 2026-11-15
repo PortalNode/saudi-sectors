@@ -92,3 +92,6 @@
 .cc-fs-options label{display:inline-flex;align-items:center;gap:6px}
 .cc-fs-options select{min-height:28px;padding:3px 8px;border:1px solid var(--pf-line);background:var(--pf-bg2);color:var(--pf-ink);font:inherit;font-size:11.5px}
 .cc-chips [data-fibset][aria-expanded="true"]{border-color:var(--pf-gold);color:var(--pf-ink)}
+.cc-chips [data-delete]{border-style:dashed}
+.cc-chips [data-delete]:disabled{opacity:.4;cursor:default}
+.cc-chips [data-delete]:not(:disabled){color:var(--cq-down);border-color:var(--cq-down)}

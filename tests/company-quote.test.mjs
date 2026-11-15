@@ -77,6 +77,18 @@ test('the magnet snaps to the nearest open/high/low/close: always when strong, o
   assert.equal(calc.nearestPrice(bar, toY, toY(51.7), 'off'), null);
 });
 
+test('placed drawings can be selected, moved, reshaped and deleted, and the magnet also guides the first point', () => {
+  const chart = read('company-chart.js');
+  assert.match(chart, /function hitTest\(x, y\)/);
+  assert.match(chart, /box\.addEventListener\('pointerdown', event => \{\s*if \(state\.tool \|\| event\.button !== 0/, 'a capture-phase handler grabs drawings before the chart pans');
+  assert.match(chart, /\}, true\);/);
+  assert.match(chart, /data-delete disabled>حذف المحدد/);
+  assert.match(chart, /event\.key === 'Delete' \|\| event\.key === 'Backspace'/);
+  assert.match(chart, /CrosshairMode\.MagnetOHLC/, 'the crosshair snaps with the strong magnet');
+  assert.match(chart, /hover\.snapped \? colors\.gold/, 'the snapped point is drawn');
+  assert.match(chart, /const point = pointFrom\(event\);\s*hover = point;/, 'it follows the cursor before the first click');
+});
+
 test('the price range shows the change and its percentage from the first point', () => {
   assert.equal(calc.rangeLabel(46.12, 61.25), '+15.13 (+32.81%)');
   assert.equal(calc.rangeLabel(61.25, 46.12), '−15.13 (−24.70%)');
@@ -96,8 +108,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261115e/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115e" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115e" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261115f/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115f" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115f" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
