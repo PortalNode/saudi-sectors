@@ -1,0 +1,310 @@
+{
+ "schemaVersion": 1,
+ "sector": "التمويل",
+ "years": [
+  2021,
+  2022,
+  2023,
+  2024,
+  2025
+ ],
+ "source": {
+  "name": "argaam_finance.xlsx",
+  "provider": "أرقام",
+  "sha256": "8d5ea0d265879139b0b1b2a46c6c791ec04b89c1afd3a1437067e6ee0ac5664b",
+  "importedAt": "2026-11-15T15:29:51Z",
+  "note": "البنود كما في ملف أرقام؛ المبالغ بالمليون ريال وربح السهم بالريال. «التغير السنوي» يُحسب في الصفحة."
+ },
+ "companies": [
+  {
+   "symbol": "4083",
+   "name": "تسهيل",
+   "fullName": "تسهيل (4083)",
+   "sourceSheet": "تسهيل - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": null,
+      "netProfit": null,
+      "epsBeforeExceptional": null,
+      "eps": null
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": null,
+      "netProfit": null,
+      "epsBeforeExceptional": null,
+      "eps": null
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 460.61,
+      "netProfit": 212.16,
+      "epsBeforeExceptional": 2.95,
+      "eps": 2.95
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 543.78,
+      "netProfit": 222.38,
+      "epsBeforeExceptional": 3.09,
+      "eps": 3.09
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 672.65,
+      "netProfit": 273.64,
+      "epsBeforeExceptional": 3.65,
+      "eps": 3.65
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4082",
+   "name": "مرنة",
+   "fullName": "مرنة (4082)",
+   "sourceSheet": "مرنة - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 113.58,
+      "netProfit": 40.88,
+      "epsBeforeExceptional": 0.82,
+      "eps": 0.82
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 128.7,
+      "netProfit": 47.01,
+      "epsBeforeExceptional": 0.94,
+      "eps": 0.94
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 123.07,
+      "netProfit": 36.63,
+      "epsBeforeExceptional": 0.51,
+      "eps": 0.51
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 139.84,
+      "netProfit": 32.72,
+      "epsBeforeExceptional": 0.46,
+      "eps": 0.46
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 166.5,
+      "netProfit": 1.01,
+      "epsBeforeExceptional": 0.01,
+      "eps": 0.01
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4081",
+   "name": "النايفات",
+   "fullName": "النايفات (4081)",
+   "sourceSheet": "النايفات - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 284.09,
+      "netProfit": 225.09,
+      "epsBeforeExceptional": 1.88,
+      "eps": 1.88
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 275.57,
+      "netProfit": 171.46,
+      "epsBeforeExceptional": 1.43,
+      "eps": 1.43
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 257.89,
+      "netProfit": 88.71,
+      "epsBeforeExceptional": 0.74,
+      "eps": 0.74
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 316.32,
+      "netProfit": 131.24,
+      "epsBeforeExceptional": 1.09,
+      "eps": 1.09
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 296.5,
+      "netProfit": -126.34,
+      "epsBeforeExceptional": -0.18,
+      "eps": -1.05
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "1182",
+   "name": "أملاك",
+   "fullName": "أملاك (1182)",
+   "sourceSheet": "أملاك - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 228.4,
+      "netProfit": 107.75,
+      "epsBeforeExceptional": 1.06,
+      "eps": 1.06
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 219.53,
+      "netProfit": 96.72,
+      "epsBeforeExceptional": 0.95,
+      "eps": 0.95
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 175.65,
+      "netProfit": 31.81,
+      "epsBeforeExceptional": 0.31,
+      "eps": 0.31
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 243.35,
+      "netProfit": 46.31,
+      "epsBeforeExceptional": 0.45,
+      "eps": 0.45
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 342.5,
+      "netProfit": 65.23,
+      "epsBeforeExceptional": 0.64,
+      "eps": 0.64
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "1183",
+   "name": "سهل",
+   "fullName": "سهل (1183)",
+   "sourceSheet": "سهل - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 217.31,
+      "netProfit": 103.2,
+      "epsBeforeExceptional": 1.03,
+      "eps": 1.03
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 161.3,
+      "netProfit": 95.89,
+      "epsBeforeExceptional": 0.54,
+      "eps": 0.96
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 119.57,
+      "netProfit": 2.33,
+      "epsBeforeExceptional": 0.04,
+      "eps": 0.02
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 148.98,
+      "netProfit": 26.53,
+      "epsBeforeExceptional": 0.27,
+      "eps": 0.27
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "netFinancingIncome": 204.71,
+      "netProfit": 50.68,
+      "epsBeforeExceptional": 0.49,
+      "eps": 0.51
+     }
+    }
+   ]
+  }
+ ]
+}
