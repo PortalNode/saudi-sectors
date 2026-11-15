@@ -123,6 +123,8 @@ function harness(initial = priceFixture(), { map = { snapshot: {} } } = {}) {
     fetch: async (url, options) => {
       fetchCalls.push({ url, options });
       if (url.startsWith('banks-financials.json')) return response(annualFixture());
+      // The quarterly file is optional; these tests cover the annual page and current PE only.
+      if (url.startsWith('banks-quarterly-financials.json')) return { ok: false, status: 404 };
       if (url.startsWith('financial-map.json')) {
         if (financialMap instanceof Error) throw financialMap;
         return response(financialMap);

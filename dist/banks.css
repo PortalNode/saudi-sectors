@@ -48,3 +48,6 @@
  .bank-notes{padding:11px;font-size:10px}.bank-unit-note,.bank-table-hint{font-size:10px}
  .sector-meta .bank-results-link{font-size:10px;padding:5px 7px}
 }
+
+/* Period bar (quarterly-periods.css) is static markup on this page; keep it hidden until quarterly data loads. */
+.banks-page .period-bar[hidden]{display:none}
