@@ -31,8 +31,8 @@
   const fibLevels = (a, b) => FIB.map(([ratio, color]) => ({ ratio, color, price: b + (a - b) * ratio }));
   const HINTS = {
     hline: 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي',
-    trend: 'اضغط على نقطة البداية ثم نقطة النهاية لرسم خط اتجاه',
-    fib: 'اضغط على بداية الموجة (قاع أو قمة) ثم نهايتها لرسم مستويات فيبوناتشي'
+    trend: 'اضغط على نقطة البداية ثم على النهاية، أو اسحب من البداية إلى النهاية · Esc للإلغاء',
+    fib: 'اضغط على بداية الموجة (قمة أو قاع) ثم على نهايتها، أو اسحب بينهما · Esc للإلغاء'
   };
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
@@ -119,7 +119,7 @@
       <p class="cc-hint" hidden></p>
       <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية حتى آخر إغلاق رسمي، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint');
-    let chart = null, LWC = null, colors = null, data = [], main = null, calc = {}, drawn = [];
+    let chart = null, LWC = null, colors = null, data = [], main = null, calc = {}, drawn = [], preview = null;
 
     function visibleChange() {
       const range = chart?.timeScale().getVisibleLogicalRange();
@@ -146,34 +146,52 @@
     }
 
     // الرسوم محفوظة بالسعر والتاريخ، فتظهر في اليومي والأسبوعي والشهري (على أقرب شمعة)
-    const barAt = iso => { let k = 0; for (let i = 0; i < data.length && data[i].time <= iso; i++) k = i; return data[k]?.time; };
+    const barIndex = iso => { let k = 0; for (let i = 0; i < data.length && data[i].time <= iso; i++) k = i; return k; };
+    // الخط الأفقي يمتد بعرض الشارت كما في TradingView؛ خط الاتجاه وفيبوناتشي يُرسمان على اللوحة بين النقطتين
     function paintDrawings() {
       for (const d of drawn) d.remove();
       drawn = [];
-      for (const d of drawings) {
-        if (d.type === 'hline') { const line = main.createPriceLine({ price: d.price, color: colors.gold, lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: true, title: '' }); drawn.push({ remove: () => main.removePriceLine(line) }); }
-        if (d.type === 'trend') {
-          const t1 = barAt(d.a.time), t2 = barAt(d.b.time);
-          if (!t1 || !t2 || t1 === t2) continue;
-          const s = chart.addSeries(LWC.LineSeries, { color: colors.gold, lineWidth: 2, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false, pointMarkersVisible: true });
-          s.setData([{ time: t1, value: d.a.price }, { time: t2, value: d.b.price }].sort((x, y) => x.time < y.time ? -1 : 1));
-          drawn.push({ remove: () => chart.removeSeries(s) });
+      for (const d of drawings) if (d.type === 'hline') {
+        const line = main.createPriceLine({ price: d.price, color: colors.gold, lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: true, title: '' });
+        drawn.push({ remove: () => main.removePriceLine(line) });
+      }
+      overlay.redraw();
+    }
+    function drawShapes(ctx) {
+      const ts = chart.timeScale();
+      const xy = p => { const x = ts.logicalToCoordinate(p.logical ?? barIndex(p.time)), y = main.priceToCoordinate(p.price); return x == null || y == null ? null : { x, y }; };
+      const dotAt = (pt, color) => { ctx.beginPath(); ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill(); };
+      const segment = (a, b, color, width, dash = []) => { ctx.beginPath(); ctx.setLineDash(dash); ctx.lineWidth = width; ctx.strokeStyle = color; ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]); };
+      ctx.font = `600 11px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.textBaseline = 'bottom';
+      for (const d of [...drawings, ...(preview ? [preview] : [])]) {
+        if (d.type !== 'trend' && d.type !== 'fib') continue;
+        const A = xy(d.a), B = xy(d.b);
+        if (!A || !B) continue;
+        if (d.type === 'trend') { segment(A, B, colors.gold, 2); dotAt(A, colors.gold); dotAt(B, colors.gold); continue; }
+        // فيبوناتشي: المستويات بين نقطتي الموجة فقط، مع تظليل خفيف بينها واسم المستوى وسعره
+        const x1 = Math.min(A.x, B.x), x2 = Math.max(A.x, B.x), width = Math.max(x2 - x1, 1);
+        const levels = fibLevels(d.a.price, d.b.price).map(level => ({ ...level, y: main.priceToCoordinate(level.price) })).filter(level => level.y != null);
+        for (let i = 1; i < levels.length; i++) { ctx.fillStyle = levels[i].color + '1a'; ctx.fillRect(x1, Math.min(levels[i - 1].y, levels[i].y), width, Math.abs(levels[i].y - levels[i - 1].y)); }
+        for (const level of levels) {
+          segment({ x: x1, y: level.y }, { x: x2, y: level.y }, level.color, 1);
+          ctx.fillStyle = level.color;
+          ctx.textAlign = 'left';
+          ctx.fillText(`${(level.ratio * 100).toFixed(1)}% (${f2.format(level.price)})`, Math.max(x1, 0) + 4, level.y - 2);
         }
-        if (d.type === 'fib') {
-          for (const level of fibLevels(d.a.price, d.b.price)) {
-            const line = main.createPriceLine({ price: level.price, color: level.color, lineWidth: 1, lineStyle: level.ratio === 0 || level.ratio === 1 ? LWC.LineStyle.Solid : LWC.LineStyle.Dashed, axisLabelVisible: true, title: `${(level.ratio * 100).toFixed(1)}%` });
-            drawn.push({ remove: () => main.removePriceLine(line) });
-          }
-          // خط منقط يصل نقطتي الموجة
-          const t1 = barAt(d.a.time), t2 = barAt(d.b.time);
-          if (t1 && t2 && t1 !== t2) {
-            const s = chart.addSeries(LWC.LineSeries, { color: colors.muted, lineWidth: 1, lineStyle: LWC.LineStyle.Dotted, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false, pointMarkersVisible: true });
-            s.setData([{ time: t1, value: d.a.price }, { time: t2, value: d.b.price }].sort((x, y) => x.time < y.time ? -1 : 1));
-            drawn.push({ remove: () => chart.removeSeries(s) });
-          }
-        }
+        segment(A, B, colors.muted, 1, [3, 3]);
+        dotAt(A, colors.muted); dotAt(B, colors.muted);
       }
     }
+    // طبقة رسم على الشارت (primitive): تُعاد رسمها مع كل تحريك أو تكبير
+    const overlay = {
+      request: null,
+      redraw() { this.request?.(); },
+      attached({ requestUpdate }) { this.request = requestUpdate; },
+      detached() { this.request = null; },
+      updateAllViews() {},
+      paneViews() { return [{ zOrder: () => 'top', renderer: () => ({ draw: target => target.useMediaCoordinateSpace(({ context }) => drawShapes(context)) }) }]; }
+    };
 
     function build(keepRange) {
       const saved = keepRange && chart ? chart.timeScale().getVisibleLogicalRange() : null;
@@ -232,9 +250,10 @@
       if (state.interval === 'd' && bigJumps(file).length) {
         LWC.createSeriesMarkers(main, bigJumps(file).filter(f => data.some(b => b.time === f.date)).map(f => ({ time: f.date, position: 'aboveBar', color: colors.gold, shape: 'arrowDown', text: `${f.change > 0 ? '+' : ''}${f2.format(f.change)}%` })));
       }
+      main.attachPrimitive(overlay);
       drawn = []; paintDrawings();
+      if (state.tool) chart.applyOptions({ handleScroll: false, handleScale: false });
       chart.subscribeCrosshairMove(p => showLegend(p?.time ?? null));
-      chart.subscribeClick(onChartClick);
       chart.timeScale().subscribeVisibleLogicalRangeChange(visibleChange);
       // بعد أن تطبّق المكتبة البيانات (في الإطار التالي)، وإلا أعادت ضبط المدى
       const apply = saved ? () => chart.timeScale().setVisibleLogicalRange(saved) : () => {
@@ -245,19 +264,57 @@
       showLegend(null);
     }
 
-    function onChartClick(p) {
-      if (!state.tool || !p?.point || (p.paneIndex ?? 0) > 0) return;
-      const price = main.coordinateToPrice(p.point.y), time = p.time ?? data.at(-1)?.time;
-      if (price == null || !time) return;
-      if (state.tool === 'hline') { drawings.push({ type: 'hline', price: Math.round(price * 100) / 100 }); setTool(null); }
-      else if (!pending) { pending = { time, price }; hint.textContent = state.tool === 'fib' ? 'اختر نهاية الموجة' : 'اختر النقطة الثانية لخط الاتجاه'; return; }
-      else if (barAt(time) === barAt(pending.time)) return; // النقطتان على الشمعة نفسها: انتظر نقطة أخرى
-      else { drawings.push({ type: state.tool, a: pending, b: { time, price } }); setTool(null); }
+    // نقطة الرسم من موضع المؤشر: شمعة أقرب + السعر عند ذلك الارتفاع، داخل لوحة السعر فقط
+    function pointFrom(event) {
+      if (!chart || !main) return null;
+      const rect = box.getBoundingClientRect(), x = event.clientX - rect.left, y = event.clientY - rect.top;
+      if (y < 0 || y > chart.panes()[0].getHeight()) return null;
+      const logical = chart.timeScale().coordinateToLogical(x), price = main.coordinateToPrice(y);
+      if (logical == null || price == null) return null;
+      const index = Math.max(0, Math.min(data.length - 1, Math.round(logical)));
+      return { time: data[index].time, price, logical: index };
+    }
+    let press = null;
+    function finish(point) {
+      if (point.logical === pending.logical) return; // النقطتان على الشمعة نفسها: انتظر نقطة أخرى
+      const strip = p => ({ time: p.time, price: p.price });
+      drawings.push({ type: state.tool, a: strip(pending), b: strip(point) });
       saveDrawings(symbol, drawings);
+      setTool(null);
       paintDrawings();
     }
+    box.addEventListener('pointerdown', event => {
+      if (!state.tool || event.button !== 0) return;
+      const point = pointFrom(event); if (!point) return;
+      event.preventDefault();
+      press = { x: event.clientX, y: event.clientY, point };
+      if (state.tool === 'hline') return;
+      if (pending) { finish(point); press = null; return; }
+      pending = point; preview = { type: state.tool, a: point, b: point };
+      hint.textContent = state.tool === 'fib' ? 'حرّك المؤشر إلى نهاية الموجة واضغط، أو اسحب وأفلت' : 'حرّك المؤشر إلى النقطة الثانية واضغط، أو اسحب وأفلت';
+      try { box.setPointerCapture(event.pointerId); } catch { /* not capturable */ }
+      overlay.redraw();
+    });
+    box.addEventListener('pointermove', event => {
+      if (!pending || !preview) return;
+      const point = pointFrom(event); if (!point) return;
+      preview.b = point; overlay.redraw();
+    });
+    box.addEventListener('pointerup', event => {
+      if (!state.tool || !press) return;
+      const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6;
+      if (state.tool === 'hline' && !moved) {
+        drawings.push({ type: 'hline', price: Math.round(press.point.price * 100) / 100 });
+        saveDrawings(symbol, drawings); setTool(null); paintDrawings();
+      } else if (pending && moved) { const point = pointFrom(event) ?? preview?.b; if (point) finish(point); }
+      press = null;
+    });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && state.tool && box.isConnected) setTool(null); });
     function setTool(tool) {
-      state.tool = tool; pending = null;
+      state.tool = tool; pending = null; preview = null;
+      // أثناء الرسم لا يتحرك الشارت بالسحب ولا يتكبّر، حتى لا يتعارض مع تحديد النقاط
+      chart?.applyOptions({ handleScroll: !tool, handleScale: !tool });
+      overlay.redraw();
       panel.querySelectorAll('[data-tool]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.tool === tool)));
       box.classList.toggle('cc-drawing', !!tool);
       hint.hidden = !tool;

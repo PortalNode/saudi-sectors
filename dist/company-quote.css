@@ -49,7 +49,7 @@
 .cc-legend .cc-ind bdi{color:var(--c)}
 /* الارتفاع: الشارت الرئيسي ثم 110px لكل لوحة مؤشر (RSI، MACD) */
 .cc-chart{--cc-base:340px;position:relative;height:calc(var(--cc-base) + var(--cc-panes,0) * 110px)}
-.cc-chart.cc-drawing{cursor:crosshair}
+.cc-chart.cc-drawing{cursor:crosshair;touch-action:none}
 .cc-hint{margin:6px 0 0;font-size:11px;color:var(--pf-gold);font-weight:700}
 .cc-hint[hidden]{display:none}
 .cc-flag-note{color:var(--pf-gold)}
