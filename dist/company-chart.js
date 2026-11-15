@@ -27,8 +27,34 @@
   ];
   const TOOLS = [['hline', 'خط أفقي'], ['trend', 'خط اتجاه'], ['fib', 'فيبوناتشي']];
   // مستويات تصحيح فيبوناتشي كما في TradingView: 1 عند النقطة الأولى و0 عند الثانية
-  const FIB = [[0, '#9da7b2'], [0.236, '#f05252'], [0.382, '#d95926'], [0.5, '#22c55e'], [0.618, '#199e70'], [0.786, '#3987e5'], [1, '#9da7b2']];
-  const fibLevels = (a, b) => FIB.map(([ratio, color]) => ({ ratio, color, price: b + (a - b) * ratio }));
+  // إعدادات فيبوناتشي الافتراضية على نمط TradingView (المستويات المفعّلة وألوانها وموضع العناوين)،
+  // ويغيّرها الزائر من زر الإعدادات فتُحفظ في متصفحه
+  const FIB_DEFAULT = {
+    levels: [
+      [-2.618, '#2962ff', true], [-0.618, '#00bcd4', true], [-0.27, '#f23645', true], [0, '#787b86', true], [0.236, '#f23645', false],
+      [0.382, '#ff9800', true], [0.5, '#4caf50', true], [0.618, '#089981', true], [0.764, '#e91e63', true], [0.786, '#00bcd4', false],
+      [1, '#787b86', true], [1.272, '#ff9800', true], [1.618, '#2962ff', true], [2, '#089981', true], [2.272, '#ff9800', true],
+      [2.414, '#e91e63', true], [2.618, '#f23645', true], [3.272, '#434651', false], [3.618, '#089981', true], [4, '#b22833', false],
+      [4.272, '#9c27b0', false], [4.618, '#a0522d', false]
+    ].map(([value, color, on]) => ({ value, color, on })),
+    trend: true,       // خط الاتجاه المنقط بين النقطتين
+    background: false, // تظليل بين المستويات
+    reverse: false,    // عكس اتجاه المستويات
+    prices: true,      // السعر بين قوسين
+    showLevels: true,  // اسم المستوى
+    levelsAs: 'percent', // percent: 61.80%، values: 0.618
+    labels: 'right',   // موضع العناوين: يمين أو يسار المستويات
+    extend: 'none'     // none | right | left | both
+  };
+  const loadFib = () => { try { const saved = JSON.parse(localStorage.getItem('cc-fib') || 'null'); return saved?.levels?.length ? { ...FIB_DEFAULT, ...saved } : structuredClone(FIB_DEFAULT); } catch { return structuredClone(FIB_DEFAULT); } };
+  const saveFib = () => { try { localStorage.setItem('cc-fib', JSON.stringify(fib)); } catch { /* ignore */ } };
+  let fib = loadFib();
+  // كما في TradingView: المستوى 1 عند النقطة الأولى و0 عند الثانية (والانعكاس يبدّلهما)
+  const fibLevels = (a, b, settings = FIB_DEFAULT) => {
+    const [p1, p0] = settings.reverse ? [b, a] : [a, b];
+    return settings.levels.filter(level => level.on && Number.isFinite(level.value)).sort((x, y) => x.value - y.value)
+      .map(level => ({ ratio: level.value, color: level.color, price: p0 + (p1 - p0) * level.value }));
+  };
   const HINTS = {
     hline: 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي',
     trend: 'اضغط على نقطة البداية ثم على النهاية، أو اسحب من البداية إلى النهاية · Esc للإلغاء',
@@ -112,13 +138,14 @@
         <span class="cc-tools-label">المؤشرات</span>
         <div class="cc-chips" role="group" aria-label="المؤشرات الفنية">${INDICATORS.map(x => chip('ind', x.id, `${x.color ? `<i style="background:${x.color}"></i>` : ''}${x.label}`, state.ind.has(x.id), x.title)).join('')}</div>
         <span class="cc-tools-label">الرسم</span>
-        <div class="cc-chips" role="group" aria-label="أدوات الرسم">${TOOLS.map(([id, t]) => chip('tool', id, t, state.tool === id)).join('')}<button type="button" data-undo>تراجع</button><button type="button" data-clear>مسح الرسوم</button></div>
+        <div class="cc-chips" role="group" aria-label="أدوات الرسم">${TOOLS.map(([id, t]) => chip('tool', id, t, state.tool === id)).join('')}<button type="button" data-fibset title="إعدادات فيبوناتشي" aria-expanded="false">⚙ إعدادات فيبوناتشي</button><button type="button" data-undo>تراجع</button><button type="button" data-clear>مسح الرسوم</button></div>
       </div>
+      <div class="cc-fib-settings" hidden></div>
       <div class="cc-legend" aria-live="polite"></div>
       <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div>
       <p class="cc-hint" hidden></p>
       <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية حتى آخر إغلاق رسمي، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
-    const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint');
+    const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     let chart = null, LWC = null, colors = null, data = [], main = null, calc = {}, drawn = [], preview = null;
 
     function visibleChange() {
@@ -162,24 +189,33 @@
       const xy = p => { const x = ts.logicalToCoordinate(p.logical ?? barIndex(p.time)), y = main.priceToCoordinate(p.price); return x == null || y == null ? null : { x, y }; };
       const dotAt = (pt, color) => { ctx.beginPath(); ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill(); };
       const segment = (a, b, color, width, dash = []) => { ctx.beginPath(); ctx.setLineDash(dash); ctx.lineWidth = width; ctx.strokeStyle = color; ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]); };
-      ctx.font = `600 11px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.font = `600 12px ${getComputedStyle(document.body).fontFamily}`;
       ctx.textBaseline = 'bottom';
       for (const d of [...drawings, ...(preview ? [preview] : [])]) {
         if (d.type !== 'trend' && d.type !== 'fib') continue;
         const A = xy(d.a), B = xy(d.b);
         if (!A || !B) continue;
         if (d.type === 'trend') { segment(A, B, colors.gold, 2); dotAt(A, colors.gold); dotAt(B, colors.gold); continue; }
-        // فيبوناتشي: المستويات بين نقطتي الموجة فقط، مع تظليل خفيف بينها واسم المستوى وسعره
-        const x1 = Math.min(A.x, B.x), x2 = Math.max(A.x, B.x), width = Math.max(x2 - x1, 1);
-        const levels = fibLevels(d.a.price, d.b.price).map(level => ({ ...level, y: main.priceToCoordinate(level.price) })).filter(level => level.y != null);
-        for (let i = 1; i < levels.length; i++) { ctx.fillStyle = levels[i].color + '1a'; ctx.fillRect(x1, Math.min(levels[i - 1].y, levels[i].y), width, Math.abs(levels[i].y - levels[i - 1].y)); }
+        // فيبوناتشي: المستويات بين نقطتي الموجة (أو ممتدة حسب الإعداد)، والعناوين على يمينها فوق الخط كما في TradingView
+        const paneWidth = ts.width();
+        const x1 = ['left', 'both'].includes(fib.extend) ? 0 : Math.min(A.x, B.x);
+        const x2 = ['right', 'both'].includes(fib.extend) ? paneWidth : Math.max(A.x, B.x);
+        const levels = fibLevels(d.a.price, d.b.price, fib).map(level => ({ ...level, y: main.priceToCoordinate(level.price) })).filter(level => level.y != null);
+        if (fib.background) for (let i = 1; i < levels.length; i++) { ctx.fillStyle = levels[i].color + '22'; ctx.fillRect(x1, Math.min(levels[i - 1].y, levels[i].y), Math.max(x2 - x1, 1), Math.abs(levels[i].y - levels[i - 1].y)); }
         for (const level of levels) {
           segment({ x: x1, y: level.y }, { x: x2, y: level.y }, level.color, 1);
+          const name = fib.showLevels ? (fib.levelsAs === 'values' ? String(level.ratio) : `${(level.ratio * 100).toFixed(2)}%`) : '';
+          const text = [name, fib.prices ? `(${f2.format(level.price)})` : ''].filter(Boolean).join(' ');
+          if (!text) continue;
           ctx.fillStyle = level.color;
-          ctx.textAlign = 'left';
-          ctx.fillText(`${(level.ratio * 100).toFixed(1)}% (${f2.format(level.price)})`, Math.max(x1, 0) + 4, level.y - 2);
+          // يمين نهاية المستوى (أو يساره) وفوق الخط؛ وإن امتد المستوى إلى طرف اللوحة يبقى العنوان داخلها
+          let x, align;
+          if (fib.labels === 'right') [x, align] = x2 >= paneWidth - 1 ? [paneWidth - 6, 'right'] : [x2 + 6, 'left'];
+          else [x, align] = x1 <= 1 ? [6, 'left'] : [x1 - 6, 'right'];
+          ctx.textAlign = align;
+          ctx.fillText(text, x, level.y - 2);
         }
-        segment(A, B, colors.muted, 1, [3, 3]);
+        if (fib.trend) { segment(A, B, colors.muted, 1, [4, 4]); }
         dotAt(A, colors.muted); dotAt(B, colors.muted);
       }
     }
@@ -310,6 +346,39 @@
       press = null;
     });
     document.addEventListener('keydown', event => { if (event.key === 'Escape' && state.tool && box.isConnected) setTool(null); });
+    /* ---------- إعدادات فيبوناتشي ---------- */
+    function renderFibSettings() {
+      const opt = (value, label, current) => `<option value="${value}"${value === current ? ' selected' : ''}>${label}</option>`;
+      const check = (key, label) => `<label class="cc-fs-check"><input type="checkbox" data-fib-opt="${key}"${fib[key] ? ' checked' : ''}>${label}</label>`;
+      fibPanel.innerHTML = `
+        <div class="cc-fs-head"><b>إعدادات فيبوناتشي</b><span>تُطبّق على كل رسوم فيبوناتشي وتُحفظ في هذا المتصفح</span><button type="button" data-fib-reset>الإعدادات الافتراضية</button><button type="button" data-fib-close aria-label="إغلاق">✕</button></div>
+        <div class="cc-fs-levels">${fib.levels.map((level, i) => `<div class="cc-fs-level"><input type="checkbox" data-fib-on="${i}"${level.on ? ' checked' : ''} aria-label="تفعيل المستوى"><input type="number" step="0.001" value="${level.value}" data-fib-value="${i}" aria-label="قيمة المستوى" dir="ltr"><input type="color" value="${level.color}" data-fib-color="${i}" aria-label="لون المستوى"></div>`).join('')}</div>
+        <div class="cc-fs-options">
+          ${check('trend', 'خط الاتجاه')}${check('background', 'الخلفية')}${check('reverse', 'انعكاس')}${check('prices', 'أسعار')}${check('showLevels', 'مستويات')}
+          <label>عرض المستويات <select data-fib-opt="levelsAs">${opt('percent', 'نسب مئوية', fib.levelsAs)}${opt('values', 'قيم', fib.levelsAs)}</select></label>
+          <label>العناوين <select data-fib-opt="labels">${opt('right', 'يمين', fib.labels)}${opt('left', 'يسار', fib.labels)}</select></label>
+          <label>تمديد <select data-fib-opt="extend">${opt('none', 'لا تقم بالتمديد', fib.extend)}${opt('right', 'لليمين', fib.extend)}${opt('left', 'لليسار', fib.extend)}${opt('both', 'للجهتين', fib.extend)}</select></label>
+        </div>`;
+    }
+    fibPanel.addEventListener('input', event => {
+      const t = event.target, i = Number(t.dataset.fibOn ?? t.dataset.fibValue ?? t.dataset.fibColor);
+      if (t.dataset.fibOn != null) fib.levels[i].on = t.checked;
+      else if (t.dataset.fibValue != null) { const v = parseFloat(t.value); if (Number.isFinite(v)) fib.levels[i].value = v; }
+      else if (t.dataset.fibColor != null) fib.levels[i].color = t.value;
+      else if (t.dataset.fibOpt) fib[t.dataset.fibOpt] = t.type === 'checkbox' ? t.checked : t.value;
+      else return;
+      saveFib(); overlay.redraw();
+    });
+    fibPanel.addEventListener('click', event => {
+      if (event.target.closest('[data-fib-close]')) toggleFibSettings(false);
+      if (event.target.closest('[data-fib-reset]')) { fib = structuredClone(FIB_DEFAULT); saveFib(); renderFibSettings(); overlay.redraw(); }
+    });
+    function toggleFibSettings(open = fibPanel.hidden) {
+      if (open) renderFibSettings();
+      fibPanel.hidden = !open;
+      panel.querySelector('[data-fibset]')?.setAttribute('aria-expanded', String(open));
+    }
+
     function setTool(tool) {
       state.tool = tool; pending = null; preview = null;
       // أثناء الرسم لا يتحرك الشارت بالسحب ولا يتكبّر، حتى لا يتعارض مع تحديد النقاط
@@ -322,7 +391,8 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo]'); if (!b || !chart) return;
+      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset]'); if (!b || !chart) return;
+      if (b.hasAttribute('data-fibset')) { toggleFibSettings(); return; }
       let keep = true;
       if (b.dataset.tool) { setTool(state.tool === b.dataset.tool ? null : b.dataset.tool); return; }
       if (b.hasAttribute('data-undo')) { drawings.pop(); saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
@@ -348,5 +418,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels } };
+  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT } };
 })();

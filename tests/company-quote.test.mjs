@@ -9,7 +9,7 @@ const read = name => readFileSync(new URL(name, dist), 'utf8');
 const bar = (d, c, extra = {}) => ({ d, o: c, h: c, l: c, c, v: 100, ...extra });
 
 // The chart's calculations, loaded as the page loads them.
-const context = { window: {}, localStorage: { getItem: () => null, setItem() {} }, Intl, Math, JSON, Date, Number, Set, Map, Promise, console };
+const context = { window: {}, localStorage: { getItem: () => null, setItem() {} }, Intl, Math, JSON, Date, Number, Set, Map, Promise, console, structuredClone };
 vm.runInNewContext(read('company-chart.js'), context);
 const calc = context.window.CompanyChart.calc;
 
@@ -50,13 +50,21 @@ test('indicators follow TradingView\'s definitions', () => {
   assert.deepEqual({ macd: flat.macd, signal: flat.signal, hist: flat.hist }, { macd: 0, signal: 0, hist: 0 });
 });
 
-test('Fibonacci levels run from 100% at the first point to 0% at the second, as in TradingView', () => {
-  const levels = JSON.parse(JSON.stringify(calc.fibLevels(8, 13)));
-  assert.deepEqual(levels.map(l => l.ratio), [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
-  assert.equal(levels[0].price, 13);
-  assert.equal(levels.at(-1).price, 8);
+test('Fibonacci levels run from 100% at the first point to 0% at the second, with TradingView-style defaults', () => {
+  const plain = value => JSON.parse(JSON.stringify(value));
+  const defaults = plain(calc.FIB_DEFAULT);
+  assert.deepEqual(defaults.levels.filter(l => l.on).map(l => l.value), [-2.618, -0.618, -0.27, 0, 0.382, 0.5, 0.618, 0.764, 1, 1.272, 1.618, 2, 2.272, 2.414, 2.618, 3.618]);
+  assert.deepEqual({ trend: defaults.trend, background: defaults.background, labels: defaults.labels, extend: defaults.extend, levelsAs: defaults.levelsAs }, { trend: true, background: false, labels: 'right', extend: 'none', levelsAs: 'percent' });
+  const levels = plain(calc.fibLevels(8, 13));
+  assert.equal(levels.find(l => l.ratio === 0).price, 13);
+  assert.equal(levels.find(l => l.ratio === 1).price, 8);
   assert.equal(levels.find(l => l.ratio === 0.5).price, 10.5);
-  assert.ok(Math.abs(levels.find(l => l.ratio === 0.618).price - 9.91) < 1e-9);
+  assert.ok(Math.abs(levels.find(l => l.ratio === 1.618).price - 4.91) < 1e-9, 'extensions go beyond the first point');
+  assert.ok(Math.abs(levels.find(l => l.ratio === -0.618).price - 16.09) < 1e-9, 'negative levels go beyond the second point');
+  const reversed = plain(calc.fibLevels(8, 13, { ...defaults, reverse: true }));
+  assert.equal(reversed.find(l => l.ratio === 0).price, 8);
+  const custom = plain(calc.fibLevels(8, 13, { ...defaults, levels: [{ value: 0.5, color: '#000000', on: true }, { value: 0.25, color: '#000000', on: false }] }));
+  assert.deepEqual(custom.map(l => l.ratio), [0.5]);
 });
 
 test('weekly candles run Sunday to Thursday and monthly by calendar month', () => {
@@ -72,8 +80,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261115c/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115c" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115c" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261115d/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115d" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115d" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
