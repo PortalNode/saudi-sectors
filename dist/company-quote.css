@@ -41,7 +41,7 @@
 .cc-chips button:hover{color:var(--pf-ink);border-color:var(--pf-muted)}
 .cc-chips button[aria-pressed="true"]{background:var(--pf-gold-soft);border-color:var(--pf-gold);color:var(--pf-ink)}
 .cc-chips button i{width:9px;height:3px;border-radius:2px;flex:none}
-.cc-chips [data-clear]{border-style:dashed}
+.cc-chips :is([data-clear],[data-undo]){border-style:dashed}
 .cc-legend{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;min-height:22px;margin:10px 0 2px;font-size:11px;color:var(--pf-muted)}
 .cc-legend b{color:var(--pf-ink);font-size:11.5px}
 .cc-legend bdi{direction:ltr;font-variant-numeric:tabular-nums;color:var(--pf-ink);font-weight:700}

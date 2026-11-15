@@ -16,16 +16,24 @@
   const DEFAULT_RANGE = { d: '1y', w: '3y', m: '5y' };
   // المؤشرات: على الشارت نفسه (overlay) أو في لوحة تحته (pane)
   const INDICATORS = [
-    { id: 'sma20', label: 'م.م 20', title: 'متوسط متحرك بسيط 20', kind: 'overlay', color: '#3987e5' },
-    { id: 'sma50', label: 'م.م 50', title: 'متوسط متحرك بسيط 50', kind: 'overlay', color: '#d95926' },
-    { id: 'sma200', label: 'م.م 200', title: 'متوسط متحرك بسيط 200', kind: 'overlay', color: '#9085e9' },
-    { id: 'ema20', label: 'أسي 20', title: 'متوسط متحرك أسي 20', kind: 'overlay', color: '#199e70' },
+    { id: 'sma20', label: 'متوسط 20', title: 'متوسط متحرك بسيط 20', kind: 'overlay', color: '#3987e5' },
+    { id: 'sma50', label: 'متوسط 50', title: 'متوسط متحرك بسيط 50', kind: 'overlay', color: '#d95926' },
+    { id: 'sma200', label: 'متوسط 200', title: 'متوسط متحرك بسيط 200', kind: 'overlay', color: '#9085e9' },
+    { id: 'ema20', label: 'متوسط أسي 20', title: 'متوسط متحرك أسي 20', kind: 'overlay', color: '#199e70' },
     { id: 'bb', label: 'بولنجر', title: 'نطاقات بولنجر (20، 2)', kind: 'overlay', color: '#c98500' },
     { id: 'vol', label: 'الحجم', title: 'حجم التداول', kind: 'volume' },
     { id: 'rsi', label: 'RSI', title: 'مؤشر القوة النسبية (14)', kind: 'pane', color: '#9085e9' },
     { id: 'macd', label: 'MACD', title: 'الماكد (12، 26، 9)', kind: 'pane', color: '#3987e5' }
   ];
-  const TOOLS = [['hline', 'خط أفقي'], ['trend', 'خط اتجاه']];
+  const TOOLS = [['hline', 'خط أفقي'], ['trend', 'خط اتجاه'], ['fib', 'فيبوناتشي']];
+  // مستويات تصحيح فيبوناتشي كما في TradingView: 1 عند النقطة الأولى و0 عند الثانية
+  const FIB = [[0, '#9da7b2'], [0.236, '#f05252'], [0.382, '#d95926'], [0.5, '#22c55e'], [0.618, '#199e70'], [0.786, '#3987e5'], [1, '#9da7b2']];
+  const fibLevels = (a, b) => FIB.map(([ratio, color]) => ({ ratio, color, price: b + (a - b) * ratio }));
+  const HINTS = {
+    hline: 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي',
+    trend: 'اضغط على نقطة البداية ثم نقطة النهاية لرسم خط اتجاه',
+    fib: 'اضغط على بداية الموجة (قاع أو قمة) ثم نهايتها لرسم مستويات فيبوناتشي'
+  };
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
   const state = { type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null };
@@ -104,7 +112,7 @@
         <span class="cc-tools-label">المؤشرات</span>
         <div class="cc-chips" role="group" aria-label="المؤشرات الفنية">${INDICATORS.map(x => chip('ind', x.id, `${x.color ? `<i style="background:${x.color}"></i>` : ''}${x.label}`, state.ind.has(x.id), x.title)).join('')}</div>
         <span class="cc-tools-label">الرسم</span>
-        <div class="cc-chips" role="group" aria-label="أدوات الرسم">${TOOLS.map(([id, t]) => chip('tool', id, t, state.tool === id)).join('')}<button type="button" data-clear>مسح الرسوم</button></div>
+        <div class="cc-chips" role="group" aria-label="أدوات الرسم">${TOOLS.map(([id, t]) => chip('tool', id, t, state.tool === id)).join('')}<button type="button" data-undo>تراجع</button><button type="button" data-clear>مسح الرسوم</button></div>
       </div>
       <div class="cc-legend" aria-live="polite"></div>
       <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div>
@@ -150,6 +158,19 @@
           const s = chart.addSeries(LWC.LineSeries, { color: colors.gold, lineWidth: 2, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false, pointMarkersVisible: true });
           s.setData([{ time: t1, value: d.a.price }, { time: t2, value: d.b.price }].sort((x, y) => x.time < y.time ? -1 : 1));
           drawn.push({ remove: () => chart.removeSeries(s) });
+        }
+        if (d.type === 'fib') {
+          for (const level of fibLevels(d.a.price, d.b.price)) {
+            const line = main.createPriceLine({ price: level.price, color: level.color, lineWidth: 1, lineStyle: level.ratio === 0 || level.ratio === 1 ? LWC.LineStyle.Solid : LWC.LineStyle.Dashed, axisLabelVisible: true, title: `${(level.ratio * 100).toFixed(1)}%` });
+            drawn.push({ remove: () => main.removePriceLine(line) });
+          }
+          // خط منقط يصل نقطتي الموجة
+          const t1 = barAt(d.a.time), t2 = barAt(d.b.time);
+          if (t1 && t2 && t1 !== t2) {
+            const s = chart.addSeries(LWC.LineSeries, { color: colors.muted, lineWidth: 1, lineStyle: LWC.LineStyle.Dotted, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false, pointMarkersVisible: true });
+            s.setData([{ time: t1, value: d.a.price }, { time: t2, value: d.b.price }].sort((x, y) => x.time < y.time ? -1 : 1));
+            drawn.push({ remove: () => chart.removeSeries(s) });
+          }
         }
       }
     }
@@ -229,9 +250,9 @@
       const price = main.coordinateToPrice(p.point.y), time = p.time ?? data.at(-1)?.time;
       if (price == null || !time) return;
       if (state.tool === 'hline') { drawings.push({ type: 'hline', price: Math.round(price * 100) / 100 }); setTool(null); }
-      else if (!pending) { pending = { time, price }; hint.textContent = 'اختر النقطة الثانية لخط الاتجاه'; return; }
+      else if (!pending) { pending = { time, price }; hint.textContent = state.tool === 'fib' ? 'اختر نهاية الموجة' : 'اختر النقطة الثانية لخط الاتجاه'; return; }
       else if (barAt(time) === barAt(pending.time)) return; // النقطتان على الشمعة نفسها: انتظر نقطة أخرى
-      else { drawings.push({ type: 'trend', a: pending, b: { time, price } }); setTool(null); }
+      else { drawings.push({ type: state.tool, a: pending, b: { time, price } }); setTool(null); }
       saveDrawings(symbol, drawings);
       paintDrawings();
     }
@@ -240,13 +261,14 @@
       panel.querySelectorAll('[data-tool]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.tool === tool)));
       box.classList.toggle('cc-drawing', !!tool);
       hint.hidden = !tool;
-      hint.textContent = tool === 'hline' ? 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي' : tool === 'trend' ? 'اضغط على نقطة البداية ثم نقطة النهاية لرسم خط اتجاه' : '';
+      hint.textContent = HINTS[tool] ?? '';
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear]'); if (!b || !chart) return;
+      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo]'); if (!b || !chart) return;
       let keep = true;
       if (b.dataset.tool) { setTool(state.tool === b.dataset.tool ? null : b.dataset.tool); return; }
+      if (b.hasAttribute('data-undo')) { drawings.pop(); saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
       if (b.hasAttribute('data-clear')) { drawings = []; saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
       if (b.dataset.type) state.type = b.dataset.type;
       if (b.dataset.interval) { state.interval = b.dataset.interval; state.range = DEFAULT_RANGE[state.interval]; keep = false; }
@@ -269,5 +291,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd } };
+  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels } };
 })();

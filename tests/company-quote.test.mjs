@@ -50,6 +50,15 @@ test('indicators follow TradingView\'s definitions', () => {
   assert.deepEqual({ macd: flat.macd, signal: flat.signal, hist: flat.hist }, { macd: 0, signal: 0, hist: 0 });
 });
 
+test('Fibonacci levels run from 100% at the first point to 0% at the second, as in TradingView', () => {
+  const levels = JSON.parse(JSON.stringify(calc.fibLevels(8, 13)));
+  assert.deepEqual(levels.map(l => l.ratio), [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+  assert.equal(levels[0].price, 13);
+  assert.equal(levels.at(-1).price, 8);
+  assert.equal(levels.find(l => l.ratio === 0.5).price, 10.5);
+  assert.ok(Math.abs(levels.find(l => l.ratio === 0.618).price - 9.91) < 1e-9);
+});
+
 test('weekly candles run Sunday to Thursday and monthly by calendar month', () => {
   const daily = [['2026-11-12', 10, 11, 9, 10.5], ['2026-11-15', 10.5, 12, 10, 11], ['2026-11-16', 11, 11.5, 8, 9]].map(([time, open, high, low, close]) => ({ time, open, high, low, close, volume: 1 }));
   const weeks = calc.group(daily, 'w');
@@ -63,8 +72,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261115/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261115b/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115b" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115b" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
