@@ -33,6 +33,8 @@ METRIC_KEYS = {
     # Insurance items (insurance-metrics.mjs)
     "إجمالي الأقساط المكتتبة (GWP)": "gwp",
     "إيرادات التأمين": "insuranceRevenue",
+    # Finance items (finance-metrics.mjs)
+    "صافي دخل عمولات التمويل والاستثمار": "netFinancingIncome",
 }
 QUARTER_NAMES = {"الأول": 1, "الثاني": 2, "الثالث": 3, "الرابع": 4}
 # Companies whose fiscal year does not end in December (see the file's _comment).
@@ -115,7 +117,7 @@ def restatement_report(data, annual):
     fy = {c["symbol"]: {r["year"]: r["values"] for r in c.get("years", [])} for c in annual["companies"]}
     for company in data["companies"]:
         for year, values in fy.get(company["symbol"], {}).items():
-            for key in ("revenue", "insuranceRevenue", "netProfit"):
+            for key in ("revenue", "insuranceRevenue", "netFinancingIncome", "netProfit"):
                 parts = [company["quarters"].get(f"{year}Q{n}", {}).get(key) for n in range(1, 5)]
                 total, official = (sum(parts) if None not in parts else None), values.get(key)
                 if total is not None and finite(official) and abs(total - official) > max(1, abs(official) * 0.005):

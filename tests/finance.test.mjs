@@ -51,5 +51,17 @@ test('main table links the finance sector and its companies to the page', () => 
   assert.match(app, /href="finance\.html">النتائج السنوية 2021–2025/);
   assert.match(app, /href="finance\.html\?symbol=/);
   assert.match(read('index.html'), /app\.js\?v=[^"]*finance-20261115/);
-  assert.match(read('finance.html'), /src="finance\.js\?v=finance-20261115"/);
+  assert.match(read('finance.html'), /src="finance\.js\?v=finance-quarterly-20261115"/);
+});
+
+test('quarterly file covers the five companies with the same four items; Q4 is a standalone quarter', () => {
+  const quarterly = JSON.parse(read('finance-quarterly-financials.json'));
+  assert.equal(quarterly.sector, 'التمويل');
+  assert.deepEqual(quarterly.companies.map(item => item.symbol).sort(), annual.companies.map(item => item.symbol).sort());
+  for (const item of quarterly.companies) for (const values of Object.values(item.quarters)) assert.deepEqual(Object.keys(values).sort(), [...ITEMS].sort());
+  const nayifat = quarterly.companies.find(item => item.symbol === '4081').quarters;
+  const total = [1, 2, 3, 4].reduce((sum, n) => sum + nayifat[`2025Q${n}`].netProfit, 0);
+  assert.equal(Math.round(total * 100) / 100, year('4081', 2025).netProfit);
+  assert.equal(nayifat['2025Q4'].netProfit, -185.81);
+  assert.ok(Object.keys(quarterly.companies.find(item => item.symbol === '4083').quarters).every(key => key >= '2024Q1'));
 });
