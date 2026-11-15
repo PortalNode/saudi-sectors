@@ -1,0 +1,1319 @@
+{
+ "schemaVersion": 1,
+ "sector": "التأمين",
+ "years": [
+  2022,
+  2023,
+  2024,
+  2025
+ ],
+ "source": {
+  "name": "argaam_insurance.xlsx",
+  "provider": "أرقام",
+  "sha256": "33cffeec31d8c7bba0ba4ce3f70f60fd11e761f7dca218d51f683d5dd7672246",
+  "importedAt": "2026-11-15T14:06:13Z",
+  "note": "البنود كما في ملف أرقام؛ المبالغ بالمليون ريال وربح السهم بالريال. «التغير السنوي» يُحسب في الصفحة."
+ },
+ "companies": [
+  {
+   "symbol": "8010",
+   "name": "التعاونية",
+   "fullName": "التعاونية (8010)",
+   "sourceSheet": "التعاونية - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 14355.51,
+      "insuranceRevenue": 11408.35,
+      "netProfit": 302.19,
+      "epsBeforeExceptional": 1.34,
+      "eps": 1.34
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 18359.52,
+      "insuranceRevenue": 15265.42,
+      "netProfit": 616.43,
+      "epsBeforeExceptional": 2.74,
+      "eps": 2.74
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 19821.55,
+      "insuranceRevenue": 18272.96,
+      "netProfit": 1022.03,
+      "epsBeforeExceptional": 4.38,
+      "eps": 4.54
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 23841.61,
+      "insuranceRevenue": 21403.18,
+      "netProfit": 1103.11,
+      "epsBeforeExceptional": 4.9,
+      "eps": 4.9
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8012",
+   "name": "جزيرة تكافل",
+   "fullName": "جزيرة تكافل (8012)",
+   "sourceSheet": "جزيرة تكافل - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 415.62,
+      "insuranceRevenue": 220.58,
+      "netProfit": 38.52,
+      "epsBeforeExceptional": 0.58,
+      "eps": 0.58
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 437.42,
+      "insuranceRevenue": 301.95,
+      "netProfit": 44.25,
+      "epsBeforeExceptional": 0.67,
+      "eps": 0.67
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 425.37,
+      "insuranceRevenue": 339.67,
+      "netProfit": 37.2,
+      "epsBeforeExceptional": 0.56,
+      "eps": 0.56
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 526.0,
+      "insuranceRevenue": 361.56,
+      "netProfit": 39.84,
+      "epsBeforeExceptional": 0.6,
+      "eps": 0.6
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8020",
+   "name": "ملاذ للتأمين",
+   "fullName": "ملاذ للتأمين (8020)",
+   "sourceSheet": "ملاذ للتأمين - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 944.38,
+      "insuranceRevenue": 973.09,
+      "netProfit": -41.38,
+      "epsBeforeExceptional": -0.83,
+      "eps": -0.83
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 870.59,
+      "insuranceRevenue": 934.71,
+      "netProfit": 38.19,
+      "epsBeforeExceptional": 0.76,
+      "eps": 0.76
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 1406.24,
+      "insuranceRevenue": 1010.72,
+      "netProfit": 26.89,
+      "epsBeforeExceptional": 0.54,
+      "eps": 0.54
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 1241.24,
+      "insuranceRevenue": 1445.36,
+      "netProfit": 21.7,
+      "epsBeforeExceptional": 0.0,
+      "eps": 0.43
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8030",
+   "name": "ميدغلف للتأمين",
+   "fullName": "ميدغلف للتأمين (8030)",
+   "sourceSheet": "ميدغلف للتأمين - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 2854.6,
+      "insuranceRevenue": 2643.13,
+      "netProfit": -396.87,
+      "epsBeforeExceptional": -3.78,
+      "eps": -3.78
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 3135.53,
+      "insuranceRevenue": 3332.15,
+      "netProfit": 201.47,
+      "epsBeforeExceptional": 1.92,
+      "eps": 1.92
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 3731.15,
+      "insuranceRevenue": 3551.79,
+      "netProfit": 101.99,
+      "epsBeforeExceptional": 0.76,
+      "eps": 0.97
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 4350.44,
+      "insuranceRevenue": 4320.24,
+      "netProfit": 41.06,
+      "epsBeforeExceptional": 0.3,
+      "eps": 0.36
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8040",
+   "name": "متكاملة",
+   "fullName": "متكاملة (8040)",
+   "sourceSheet": "متكاملة - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 848.26,
+      "insuranceRevenue": 735.65,
+      "netProfit": 8.58,
+      "epsBeforeExceptional": 0.14,
+      "eps": 0.14
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 960.95,
+      "insuranceRevenue": 862.63,
+      "netProfit": 36.99,
+      "epsBeforeExceptional": 0.62,
+      "eps": 0.62
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 816.26,
+      "insuranceRevenue": 873.89,
+      "netProfit": 15.17,
+      "epsBeforeExceptional": 0.25,
+      "eps": 0.25
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 972.72,
+      "insuranceRevenue": 879.81,
+      "netProfit": 7.41,
+      "epsBeforeExceptional": 0.12,
+      "eps": 0.12
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8050",
+   "name": "سلامة",
+   "fullName": "سلامة (8050)",
+   "sourceSheet": "سلامة - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 792.11,
+      "insuranceRevenue": 598.35,
+      "netProfit": -38.87,
+      "epsBeforeExceptional": -2.1,
+      "eps": -2.1
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 788.97,
+      "insuranceRevenue": 802.29,
+      "netProfit": 51.3,
+      "epsBeforeExceptional": 2.12,
+      "eps": 2.12
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 526.57,
+      "insuranceRevenue": 678.48,
+      "netProfit": 30.12,
+      "epsBeforeExceptional": 1.02,
+      "eps": 1.24
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 655.09,
+      "insuranceRevenue": 558.38,
+      "netProfit": -91.56,
+      "epsBeforeExceptional": -3.01,
+      "eps": -3.05
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8060",
+   "name": "ولاء",
+   "fullName": "ولاء (8060)",
+   "sourceSheet": "ولاء - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 2641.93,
+      "insuranceRevenue": 2572.34,
+      "netProfit": -68.08,
+      "epsBeforeExceptional": -0.66,
+      "eps": -0.66
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 3346.16,
+      "insuranceRevenue": 2887.64,
+      "netProfit": 147.98,
+      "epsBeforeExceptional": 1.43,
+      "eps": 1.43
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 3504.51,
+      "insuranceRevenue": 3344.58,
+      "netProfit": 64.3,
+      "epsBeforeExceptional": 0.34,
+      "eps": 0.5
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 2967.67,
+      "insuranceRevenue": 3104.3,
+      "netProfit": -175.82,
+      "epsBeforeExceptional": -1.38,
+      "eps": -1.38
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8070",
+   "name": "الدرع العربي",
+   "fullName": "الدرع العربي (8070)",
+   "sourceSheet": "الدرع العربي - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 1106.29,
+      "insuranceRevenue": 918.72,
+      "netProfit": -18.23,
+      "epsBeforeExceptional": -0.29,
+      "eps": -0.29
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 1297.13,
+      "insuranceRevenue": 1127.89,
+      "netProfit": 66.94,
+      "epsBeforeExceptional": 0.99,
+      "eps": 0.99
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 1845.23,
+      "insuranceRevenue": 1566.8,
+      "netProfit": 71.0,
+      "epsBeforeExceptional": 0.89,
+      "eps": 0.89
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 2929.0,
+      "insuranceRevenue": 1881.89,
+      "netProfit": -43.75,
+      "epsBeforeExceptional": -0.55,
+      "eps": -0.55
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8100",
+   "name": "سايكو",
+   "fullName": "سايكو (8100)",
+   "sourceSheet": "سايكو - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 1039.42,
+      "insuranceRevenue": 911.68,
+      "netProfit": -61.65,
+      "epsBeforeExceptional": -2.05,
+      "eps": -2.05
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 1061.78,
+      "insuranceRevenue": 1044.52,
+      "netProfit": 71.1,
+      "epsBeforeExceptional": 2.37,
+      "eps": 2.37
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 1125.12,
+      "insuranceRevenue": 1080.64,
+      "netProfit": 49.32,
+      "epsBeforeExceptional": 1.64,
+      "eps": 1.64
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 1253.43,
+      "insuranceRevenue": 1156.88,
+      "netProfit": 22.18,
+      "epsBeforeExceptional": 0.74,
+      "eps": 0.74
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8120",
+   "name": "إتحاد الخليج الأهلية",
+   "fullName": "إتحاد الخليج الأهلية (8120)",
+   "sourceSheet": "إتحاد الخليج الأهلية - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 548.43,
+      "insuranceRevenue": 506.77,
+      "netProfit": -18.3,
+      "epsBeforeExceptional": -0.4,
+      "eps": -0.4
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 690.92,
+      "insuranceRevenue": 624.48,
+      "netProfit": 125.04,
+      "epsBeforeExceptional": 2.72,
+      "eps": 2.72
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 975.55,
+      "insuranceRevenue": 804.75,
+      "netProfit": 43.65,
+      "epsBeforeExceptional": 0.95,
+      "eps": 0.95
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 1003.03,
+      "insuranceRevenue": 1038.2,
+      "netProfit": -83.63,
+      "epsBeforeExceptional": -1.82,
+      "eps": -1.82
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8150",
+   "name": "أسيج",
+   "fullName": "أسيج (8150)",
+   "sourceSheet": "أسيج - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 830.7,
+      "insuranceRevenue": 672.81,
+      "netProfit": -17.34,
+      "epsBeforeExceptional": -0.6,
+      "eps": -0.6
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 1047.4,
+      "insuranceRevenue": 974.68,
+      "netProfit": 63.41,
+      "epsBeforeExceptional": 2.18,
+      "eps": 2.18
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 844.71,
+      "insuranceRevenue": 883.35,
+      "netProfit": -16.48,
+      "epsBeforeExceptional": -0.57,
+      "eps": -0.57
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 1219.86,
+      "insuranceRevenue": 993.24,
+      "netProfit": -41.19,
+      "epsBeforeExceptional": -1.42,
+      "eps": -1.42
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8160",
+   "name": "التأمين العربية",
+   "fullName": "التأمين العربية (8160)",
+   "sourceSheet": "التأمين العربية - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 733.19,
+      "insuranceRevenue": 560.65,
+      "netProfit": 6.2,
+      "epsBeforeExceptional": 0.21,
+      "eps": 0.21
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 923.58,
+      "insuranceRevenue": 838.95,
+      "netProfit": 60.46,
+      "epsBeforeExceptional": 1.14,
+      "eps": 1.14
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 617.28,
+      "insuranceRevenue": 694.69,
+      "netProfit": 30.15,
+      "epsBeforeExceptional": 0.57,
+      "eps": 0.57
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 990.66,
+      "insuranceRevenue": 851.12,
+      "netProfit": -45.18,
+      "epsBeforeExceptional": -0.85,
+      "eps": -0.85
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8170",
+   "name": "الاتحاد",
+   "fullName": "الاتحاد (8170)",
+   "sourceSheet": "الاتحاد - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 1176.7,
+      "insuranceRevenue": 1072.87,
+      "netProfit": 12.7,
+      "epsBeforeExceptional": 0.25,
+      "eps": 0.25
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 1481.33,
+      "insuranceRevenue": 1202.17,
+      "netProfit": 93.9,
+      "epsBeforeExceptional": 1.88,
+      "eps": 1.88
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 1316.81,
+      "insuranceRevenue": 1489.65,
+      "netProfit": 49.13,
+      "epsBeforeExceptional": 1.68,
+      "eps": 0.98
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 1205.5,
+      "insuranceRevenue": 1254.55,
+      "netProfit": -244.44,
+      "epsBeforeExceptional": -4.89,
+      "eps": -4.89
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8180",
+   "name": "الصقر للتأمين",
+   "fullName": "الصقر للتأمين (8180)",
+   "sourceSheet": "الصقر للتأمين - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 475.26,
+      "insuranceRevenue": 473.35,
+      "netProfit": -53.46,
+      "epsBeforeExceptional": -2.52,
+      "eps": -2.52
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 471.5,
+      "insuranceRevenue": 486.23,
+      "netProfit": 42.3,
+      "epsBeforeExceptional": 1.99,
+      "eps": 1.99
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 601.79,
+      "insuranceRevenue": 503.66,
+      "netProfit": 31.86,
+      "epsBeforeExceptional": 1.06,
+      "eps": 1.06
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 591.85,
+      "insuranceRevenue": 604.41,
+      "netProfit": -70.32,
+      "epsBeforeExceptional": -2.49,
+      "eps": -2.34
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8190",
+   "name": "المتحدة للتأمين",
+   "fullName": "المتحدة للتأمين (8190)",
+   "sourceSheet": "المتحدة للتأمين - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 821.84,
+      "insuranceRevenue": 634.33,
+      "netProfit": -55.48,
+      "epsBeforeExceptional": -1.39,
+      "eps": -1.39
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 1029.42,
+      "insuranceRevenue": 1061.77,
+      "netProfit": 5.29,
+      "epsBeforeExceptional": 0.13,
+      "eps": 0.13
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 1156.69,
+      "insuranceRevenue": 1049.58,
+      "netProfit": -15.06,
+      "epsBeforeExceptional": -0.38,
+      "eps": -0.38
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 622.95,
+      "insuranceRevenue": 858.31,
+      "netProfit": -256.22,
+      "epsBeforeExceptional": -6.5,
+      "eps": -6.41
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8200",
+   "name": "الإعادة السعودية",
+   "fullName": "الإعادة السعودية (8200)",
+   "sourceSheet": "الإعادة السعودية - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 1403.0,
+      "insuranceRevenue": 697.0,
+      "netProfit": 76.05,
+      "epsBeforeExceptional": 0.59,
+      "eps": 0.59
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 1597.0,
+      "insuranceRevenue": 627.19,
+      "netProfit": 124.43,
+      "epsBeforeExceptional": 0.97,
+      "eps": 0.97
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 2359.84,
+      "insuranceRevenue": 1129.97,
+      "netProfit": 474.81,
+      "epsBeforeExceptional": 0.85,
+      "eps": 3.69
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 2927.74,
+      "insuranceRevenue": 1672.5,
+      "netProfit": 140.04,
+      "epsBeforeExceptional": 0.84,
+      "eps": 0.84
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8210",
+   "name": "بوبا العربية",
+   "fullName": "بوبا العربية (8210)",
+   "sourceSheet": "بوبا العربية - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 13896.88,
+      "insuranceRevenue": 12873.11,
+      "netProfit": 805.12,
+      "epsBeforeExceptional": 5.37,
+      "eps": 5.37
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 16668.74,
+      "insuranceRevenue": 15887.72,
+      "netProfit": 940.16,
+      "epsBeforeExceptional": 6.27,
+      "eps": 6.27
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 18394.13,
+      "insuranceRevenue": 18101.52,
+      "netProfit": 1166.0,
+      "epsBeforeExceptional": 7.74,
+      "eps": 7.77
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 20491.41,
+      "insuranceRevenue": 19303.06,
+      "netProfit": 1079.09,
+      "epsBeforeExceptional": 6.97,
+      "eps": 7.19
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8230",
+   "name": "تكافل الراجحي",
+   "fullName": "تكافل الراجحي (8230)",
+   "sourceSheet": "تكافل الراجحي - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 3470.07,
+      "insuranceRevenue": 2934.5,
+      "netProfit": 72.39,
+      "epsBeforeExceptional": 0.36,
+      "eps": 0.36
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 6022.86,
+      "insuranceRevenue": 4236.47,
+      "netProfit": 328.06,
+      "epsBeforeExceptional": 1.64,
+      "eps": 1.64
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 10909.09,
+      "insuranceRevenue": 5391.46,
+      "netProfit": 332.34,
+      "epsBeforeExceptional": 1.55,
+      "eps": 1.66
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 10573.19,
+      "insuranceRevenue": 5322.13,
+      "netProfit": 454.98,
+      "epsBeforeExceptional": 2.27,
+      "eps": 2.27
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8240",
+   "name": "تشب",
+   "fullName": "تشب (8240)",
+   "sourceSheet": "تشب - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 303.68,
+      "insuranceRevenue": 299.36,
+      "netProfit": 12.54,
+      "epsBeforeExceptional": 0.31,
+      "eps": 0.31
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 350.87,
+      "insuranceRevenue": 329.44,
+      "netProfit": 24.82,
+      "epsBeforeExceptional": 0.62,
+      "eps": 0.62
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 398.01,
+      "insuranceRevenue": 383.41,
+      "netProfit": 16.29,
+      "epsBeforeExceptional": 0.41,
+      "eps": 0.41
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 426.13,
+      "insuranceRevenue": 392.97,
+      "netProfit": 10.62,
+      "epsBeforeExceptional": 0.27,
+      "eps": 0.27
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8250",
+   "name": "جي آي جي",
+   "fullName": "جي آي جي (8250)",
+   "sourceSheet": "جي آي جي - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 1567.25,
+      "insuranceRevenue": 1480.64,
+      "netProfit": 15.91,
+      "epsBeforeExceptional": 0.3,
+      "eps": 0.3
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 1541.59,
+      "insuranceRevenue": 1564.75,
+      "netProfit": 128.53,
+      "epsBeforeExceptional": 2.45,
+      "eps": 2.45
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 1463.64,
+      "insuranceRevenue": 1463.52,
+      "netProfit": 98.2,
+      "epsBeforeExceptional": 1.87,
+      "eps": 1.87
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 1590.12,
+      "insuranceRevenue": 1503.76,
+      "netProfit": 126.19,
+      "epsBeforeExceptional": 2.4,
+      "eps": 2.4
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8260",
+   "name": "الخليجية العامة",
+   "fullName": "الخليجية العامة (8260)",
+   "sourceSheet": "الخليجية العامة - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 373.29,
+      "insuranceRevenue": 315.69,
+      "netProfit": -106.02,
+      "epsBeforeExceptional": -3.53,
+      "eps": -3.53
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 330.64,
+      "insuranceRevenue": 315.65,
+      "netProfit": 3.53,
+      "epsBeforeExceptional": 0.12,
+      "eps": 0.12
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 441.69,
+      "insuranceRevenue": 414.35,
+      "netProfit": -94.21,
+      "epsBeforeExceptional": -1.93,
+      "eps": -3.14
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 299.11,
+      "insuranceRevenue": 321.75,
+      "netProfit": -120.49,
+      "epsBeforeExceptional": -4.02,
+      "eps": -4.02
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8280",
+   "name": "ليفا",
+   "fullName": "ليفا (8280)",
+   "sourceSheet": "ليفا - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 455.53,
+      "insuranceRevenue": 337.95,
+      "netProfit": -42.95,
+      "epsBeforeExceptional": -1.07,
+      "eps": -1.07
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 522.11,
+      "insuranceRevenue": 513.63,
+      "netProfit": 11.26,
+      "epsBeforeExceptional": 0.28,
+      "eps": 0.28
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 477.2,
+      "insuranceRevenue": 446.13,
+      "netProfit": 32.76,
+      "epsBeforeExceptional": 0.82,
+      "eps": 0.82
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 692.33,
+      "insuranceRevenue": 575.03,
+      "netProfit": 26.64,
+      "epsBeforeExceptional": 0.67,
+      "eps": 0.67
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8300",
+   "name": "الوطنية",
+   "fullName": "الوطنية (8300)",
+   "sourceSheet": "الوطنية - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 1042.42,
+      "insuranceRevenue": 835.08,
+      "netProfit": -27.66,
+      "epsBeforeExceptional": -0.69,
+      "eps": -0.69
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 1627.88,
+      "insuranceRevenue": 1378.64,
+      "netProfit": 84.58,
+      "epsBeforeExceptional": 2.11,
+      "eps": 2.11
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 1853.99,
+      "insuranceRevenue": 1796.14,
+      "netProfit": 103.05,
+      "epsBeforeExceptional": 2.34,
+      "eps": 2.58
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 1984.2,
+      "insuranceRevenue": 1837.59,
+      "netProfit": 37.09,
+      "epsBeforeExceptional": 0.93,
+      "eps": 0.93
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8310",
+   "name": "أمانة للتأمين",
+   "fullName": "أمانة للتأمين (8310)",
+   "sourceSheet": "أمانة للتأمين - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 230.52,
+      "insuranceRevenue": 237.7,
+      "netProfit": -48.18,
+      "epsBeforeExceptional": -1.12,
+      "eps": -1.12
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 173.58,
+      "insuranceRevenue": 184.64,
+      "netProfit": 25.44,
+      "epsBeforeExceptional": 0.59,
+      "eps": 0.59
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 226.22,
+      "insuranceRevenue": 212.6,
+      "netProfit": 12.03,
+      "epsBeforeExceptional": 0.23,
+      "eps": 0.28
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 340.28,
+      "insuranceRevenue": 282.11,
+      "netProfit": -13.28,
+      "epsBeforeExceptional": -0.31,
+      "eps": -0.31
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "8311",
+   "name": "عناية",
+   "fullName": "عناية (8311)",
+   "sourceSheet": "عناية - سنوي",
+   "years": [
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "gwp": 227.47,
+      "insuranceRevenue": 226.93,
+      "netProfit": -6.36,
+      "epsBeforeExceptional": -0.28,
+      "eps": -0.28
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "gwp": 250.03,
+      "insuranceRevenue": 250.88,
+      "netProfit": 20.22,
+      "epsBeforeExceptional": 0.88,
+      "eps": 0.88
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "gwp": 233.81,
+      "insuranceRevenue": 233.51,
+      "netProfit": -26.76,
+      "epsBeforeExceptional": -1.16,
+      "eps": -1.16
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "gwp": 108.71,
+      "insuranceRevenue": 170.54,
+      "netProfit": -6.7,
+      "epsBeforeExceptional": -0.07,
+      "eps": -0.29
+     }
+    }
+   ]
+  }
+ ]
+}
