@@ -1,0 +1,1407 @@
+{
+ "schemaVersion": 1,
+ "sector": "الصناديق العقارية المتداولة",
+ "years": [
+  2021,
+  2022,
+  2023,
+  2024,
+  2025
+ ],
+ "source": {
+  "name": "argaam_reits.xlsx",
+  "provider": "أرقام",
+  "sha256": "29ea7697661df5c8c78b0bfa50c77125cc6f24e4fde0801f65403e2480be85fc",
+  "importedAt": "2026-11-15T16:03:13Z",
+  "note": "البنود كما في ملف أرقام؛ المبالغ بالمليون ريال، وعدد الوحدات بالمليون، وربح الوحدة بالريال. «غير متوفر» يُحفظ فارغًا، و«التغير السنوي» يُحسب في الصفحة."
+ },
+ "companies": [
+  {
+   "symbol": "4330",
+   "name": "الرياض ريت",
+   "fullName": "الرياض ريت (4330)",
+   "sourceSheet": "الرياض ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 267.48,
+      "ffo": 127.51,
+      "netProfit": 96.55,
+      "units": 171.7,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.74,
+      "eps": 0.56
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 296.09,
+      "ffo": 113.82,
+      "netProfit": 88.93,
+      "units": 171.7,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.66,
+      "eps": 0.52
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 257.98,
+      "ffo": 54.99,
+      "netProfit": 21.65,
+      "units": 171.7,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.32,
+      "eps": 0.13
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 264.47,
+      "ffo": 21.84,
+      "netProfit": -187.28,
+      "units": 171.7,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.13,
+      "eps": -1.09
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 275.52,
+      "ffo": 12.01,
+      "netProfit": -13.46,
+      "units": 171.7,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.07,
+      "eps": -0.08
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4331",
+   "name": "الجزيرة ريت",
+   "fullName": "الجزيرة ريت (4331)",
+   "sourceSheet": "الجزيرة ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 5.24,
+      "ffo": 3.33,
+      "netProfit": 4.29,
+      "units": 11.8,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.28,
+      "eps": 0.36
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 6.03,
+      "ffo": 3.97,
+      "netProfit": 5.7,
+      "units": 11.8,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.34,
+      "eps": 0.48
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 5.98,
+      "ffo": 4.21,
+      "netProfit": 7.25,
+      "units": 11.8,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.36,
+      "eps": 0.61
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 6.41,
+      "ffo": 4.88,
+      "netProfit": 3.02,
+      "units": 11.8,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.41,
+      "eps": 0.26
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 7.06,
+      "ffo": 5.49,
+      "netProfit": 7.36,
+      "units": 11.8,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.47,
+      "eps": 0.62
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4332",
+   "name": "جدوى ريت الحرمين",
+   "fullName": "جدوى ريت الحرمين (4332)",
+   "sourceSheet": "جدوى ريت الحرمين - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 16.0,
+      "ffo": 6.69,
+      "netProfit": -9.16,
+      "units": 66.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.1,
+      "eps": -0.14
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 19.34,
+      "ffo": 1.35,
+      "netProfit": -48.51,
+      "units": 66.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.02,
+      "eps": -0.73
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 28.88,
+      "ffo": 2.5,
+      "netProfit": 13.76,
+      "units": 66.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.04,
+      "eps": 0.21
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 40.79,
+      "ffo": 12.33,
+      "netProfit": 17.56,
+      "units": 66.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.19,
+      "eps": 0.27
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 41.92,
+      "ffo": 17.43,
+      "netProfit": 30.78,
+      "units": 66.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.26,
+      "eps": 0.47
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4333",
+   "name": "تعليم ريت",
+   "fullName": "تعليم ريت (4333)",
+   "sourceSheet": "تعليم ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 50.63,
+      "ffo": 43.24,
+      "netProfit": 39.46,
+      "units": 51.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.85,
+      "eps": 0.77
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 62.45,
+      "ffo": 45.53,
+      "netProfit": 33.16,
+      "units": 51.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.89,
+      "eps": 0.65
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 66.4,
+      "ffo": 38.91,
+      "netProfit": 36.3,
+      "units": 51.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.76,
+      "eps": 0.71
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 67.71,
+      "ffo": 38.64,
+      "netProfit": 32.52,
+      "units": 51.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.76,
+      "eps": 0.64
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 66.91,
+      "ffo": 40.73,
+      "netProfit": 33.74,
+      "units": 51.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.8,
+      "eps": 0.66
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4334",
+   "name": "المعذر ريت",
+   "fullName": "المعذر ريت (4334)",
+   "sourceSheet": "المعذر ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 51.63,
+      "ffo": 38.67,
+      "netProfit": 8.38,
+      "units": 61.37,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.63,
+      "eps": 0.14
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 61.73,
+      "ffo": 42.78,
+      "netProfit": 28.21,
+      "units": 61.37,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.7,
+      "eps": 0.46
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 61.28,
+      "ffo": 41.25,
+      "netProfit": 44.52,
+      "units": 61.37,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.67,
+      "eps": 0.73
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 62.82,
+      "ffo": 44.1,
+      "netProfit": 41.14,
+      "units": 61.37,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.72,
+      "eps": 0.67
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 66.96,
+      "ffo": 44.2,
+      "netProfit": 34.02,
+      "units": 61.37,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.72,
+      "eps": 0.55
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4335",
+   "name": "مشاركة ريت",
+   "fullName": "مشاركة ريت (4335)",
+   "sourceSheet": "مشاركة ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 100.7,
+      "ffo": 59.18,
+      "netProfit": 29.87,
+      "units": 88.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.67,
+      "eps": 0.34
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 112.21,
+      "ffo": 45.43,
+      "netProfit": 10.9,
+      "units": 88.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.52,
+      "eps": 0.12
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 106.68,
+      "ffo": 5.37,
+      "netProfit": -8.35,
+      "units": 88.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.06,
+      "eps": -0.09
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 106.1,
+      "ffo": 11.68,
+      "netProfit": -22.29,
+      "units": 88.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.13,
+      "eps": -0.25
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 97.16,
+      "ffo": 10.12,
+      "netProfit": -109.89,
+      "units": 88.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.12,
+      "eps": -1.25
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4336",
+   "name": "ملكية ريت",
+   "fullName": "ملكية ريت (4336)",
+   "sourceSheet": "ملكية ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 76.52,
+      "ffo": 45.11,
+      "netProfit": 30.53,
+      "units": 68.11,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.66,
+      "eps": 0.45
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 95.85,
+      "ffo": 25.98,
+      "netProfit": -0.11,
+      "units": 68.11,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.38,
+      "eps": 0.0
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 113.47,
+      "ffo": 15.14,
+      "netProfit": -11.81,
+      "units": 103.77,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.15,
+      "eps": -0.11
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 119.34,
+      "ffo": 21.23,
+      "netProfit": 15.14,
+      "units": 103.77,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.2,
+      "eps": 0.15
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 124.44,
+      "ffo": 29.28,
+      "netProfit": -28.36,
+      "units": 103.77,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.28,
+      "eps": -0.27
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4337",
+   "name": "العزيزية ريت",
+   "fullName": "العزيزية ريت (4337)",
+   "sourceSheet": "العزيزية ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 15.05,
+      "ffo": 9.34,
+      "netProfit": 0.98,
+      "units": 57.24,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.16,
+      "eps": 0.02
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 36.79,
+      "ffo": 10.69,
+      "netProfit": -83.39,
+      "units": 57.24,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.19,
+      "eps": -1.46
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 19.95,
+      "ffo": 3.74,
+      "netProfit": -52.23,
+      "units": 57.24,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.07,
+      "eps": -0.91
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 17.69,
+      "ffo": 2.47,
+      "netProfit": -114.92,
+      "units": 57.24,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.04,
+      "eps": -2.01
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 20.76,
+      "ffo": 3.42,
+      "netProfit": -0.93,
+      "units": 57.24,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.06,
+      "eps": -0.02
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4338",
+   "name": "الأهلي ريت 1",
+   "fullName": "الأهلي ريت 1 (4338)",
+   "sourceSheet": "الأهلي ريت 1 - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 183.41,
+      "ffo": 101.37,
+      "netProfit": 75.42,
+      "units": 137.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.74,
+      "eps": 0.55
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 185.12,
+      "ffo": 91.94,
+      "netProfit": 66.12,
+      "units": 137.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.67,
+      "eps": 0.48
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 183.06,
+      "ffo": 64.12,
+      "netProfit": 40.56,
+      "units": 137.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.47,
+      "eps": 0.29
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 187.65,
+      "ffo": 52.66,
+      "netProfit": 26.68,
+      "units": 137.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.38,
+      "eps": 0.19
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 196.72,
+      "ffo": 46.62,
+      "netProfit": 18.39,
+      "units": 137.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.34,
+      "eps": 0.13
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4339",
+   "name": "دراية ريت",
+   "fullName": "دراية ريت (4339)",
+   "sourceSheet": "دراية ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 130.2,
+      "ffo": 69.14,
+      "netProfit": 45.56,
+      "units": 107.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.64,
+      "eps": 0.42
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 123.13,
+      "ffo": 67.36,
+      "netProfit": 47.18,
+      "units": 107.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.63,
+      "eps": 0.44
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 103.49,
+      "ffo": 20.39,
+      "netProfit": 40.27,
+      "units": 107.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.19,
+      "eps": 0.37
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 97.3,
+      "ffo": 28.97,
+      "netProfit": 14.84,
+      "units": 107.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.27,
+      "eps": 0.14
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 100.31,
+      "ffo": 30.49,
+      "netProfit": 8.73,
+      "units": 107.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.28,
+      "eps": 0.08
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4340",
+   "name": "الراجحي ريت",
+   "fullName": "الراجحي ريت (4340)",
+   "sourceSheet": "الراجحي ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 130.28,
+      "ffo": 75.49,
+      "netProfit": -175.08,
+      "units": 161.86,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.47,
+      "eps": -1.08
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 158.16,
+      "ffo": 111.83,
+      "netProfit": 113.41,
+      "units": 161.86,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.69,
+      "eps": 0.7
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 192.07,
+      "ffo": 109.64,
+      "netProfit": 75.55,
+      "units": 275.61,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.4,
+      "eps": 0.27
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 237.7,
+      "ffo": 147.66,
+      "netProfit": 187.25,
+      "units": 275.61,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.54,
+      "eps": 0.68
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 231.07,
+      "ffo": 141.16,
+      "netProfit": 147.39,
+      "units": 275.61,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.51,
+      "eps": 0.53
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4342",
+   "name": "جدوى ريت السعودية",
+   "fullName": "جدوى ريت السعودية (4342)",
+   "sourceSheet": "جدوى ريت السعودية - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 145.2,
+      "ffo": 106.91,
+      "netProfit": 27.85,
+      "units": 186.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.57,
+      "eps": 0.15
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 158.45,
+      "ffo": 74.84,
+      "netProfit": 52.77,
+      "units": 186.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.4,
+      "eps": 0.28
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 141.25,
+      "ffo": 82.89,
+      "netProfit": 200.27,
+      "units": 186.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.44,
+      "eps": 1.07
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 177.97,
+      "ffo": 106.45,
+      "netProfit": 55.78,
+      "units": 186.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.57,
+      "eps": 0.3
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 189.56,
+      "ffo": 113.8,
+      "netProfit": 64.6,
+      "units": 186.51,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.61,
+      "eps": 0.35
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4344",
+   "name": "سدكو كابيتال ريت",
+   "fullName": "سدكو كابيتال ريت (4344)",
+   "sourceSheet": "سدكو كابيتال ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 72.9,
+      "ffo": 42.13,
+      "netProfit": -35.44,
+      "units": 117.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.36,
+      "eps": -0.3
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 137.51,
+      "ffo": 75.46,
+      "netProfit": 41.11,
+      "units": 117.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.64,
+      "eps": 0.35
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 161.79,
+      "ffo": 69.1,
+      "netProfit": 33.56,
+      "units": 186.94,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.37,
+      "eps": 0.18
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 173.53,
+      "ffo": 69.42,
+      "netProfit": 14.41,
+      "units": 186.94,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.37,
+      "eps": 0.08
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 216.43,
+      "ffo": 77.91,
+      "netProfit": 79.25,
+      "units": 186.94,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.42,
+      "eps": 0.42
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4345",
+   "name": "الإنماء ريت للتجزئة",
+   "fullName": "الإنماء ريت للتجزئة (4345)",
+   "sourceSheet": "الإنماء ريت للتجزئة - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 59.05,
+      "ffo": 6.18,
+      "netProfit": -14.86,
+      "units": 118.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.05,
+      "eps": -0.13
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 48.74,
+      "ffo": 8.46,
+      "netProfit": -3.6,
+      "units": 118.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.07,
+      "eps": -0.03
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 51.63,
+      "ffo": 18.28,
+      "netProfit": -10.22,
+      "units": 118.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.15,
+      "eps": -0.09
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 79.84,
+      "ffo": 20.59,
+      "netProfit": 8.13,
+      "units": 118.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.17,
+      "eps": 0.07
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 101.71,
+      "ffo": 39.01,
+      "netProfit": -21.01,
+      "units": 118.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.33,
+      "eps": -0.18
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4346",
+   "name": "ميفك ريت",
+   "fullName": "ميفك ريت (4346)",
+   "sourceSheet": "ميفك ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 56.07,
+      "ffo": 11.76,
+      "netProfit": -133.12,
+      "units": 73.28,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.16,
+      "eps": -1.82
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 63.21,
+      "ffo": 7.06,
+      "netProfit": 13.69,
+      "units": 73.28,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.1,
+      "eps": 0.19
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 60.52,
+      "ffo": 0.44,
+      "netProfit": -11.47,
+      "units": 73.28,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.01,
+      "eps": -0.16
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 64.51,
+      "ffo": 9.24,
+      "netProfit": 8.12,
+      "units": 73.28,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.13,
+      "eps": 0.11
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 61.03,
+      "ffo": 16.62,
+      "netProfit": 0.36,
+      "units": 73.28,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.23,
+      "eps": 0.0
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4347",
+   "name": "بنيان ريت",
+   "fullName": "بنيان ريت (4347)",
+   "sourceSheet": "بنيان ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 219.48,
+      "ffo": 112.34,
+      "netProfit": 65.4,
+      "units": 162.88,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.69,
+      "eps": 0.4
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 246.68,
+      "ffo": 126.67,
+      "netProfit": 97.58,
+      "units": 162.88,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.78,
+      "eps": 0.6
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 269.18,
+      "ffo": 134.19,
+      "netProfit": 110.9,
+      "units": 162.88,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.82,
+      "eps": 0.68
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 248.49,
+      "ffo": 117.21,
+      "netProfit": 88.44,
+      "units": 162.88,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.72,
+      "eps": 0.54
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 278.1,
+      "ffo": 137.59,
+      "netProfit": 103.69,
+      "units": 162.88,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.84,
+      "eps": 0.64
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4348",
+   "name": "الخبير ريت",
+   "fullName": "الخبير ريت (4348)",
+   "sourceSheet": "الخبير ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 117.78,
+      "ffo": 47.25,
+      "netProfit": -33.83,
+      "units": 141.01,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.34,
+      "eps": -0.24
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 118.76,
+      "ffo": 46.53,
+      "netProfit": 43.38,
+      "units": 141.01,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.33,
+      "eps": 0.31
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 123.72,
+      "ffo": 62.02,
+      "netProfit": 35.14,
+      "units": 141.01,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.44,
+      "eps": 0.25
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 129.36,
+      "ffo": 62.38,
+      "netProfit": 59.34,
+      "units": 141.01,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.44,
+      "eps": 0.42
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 135.06,
+      "ffo": 58.97,
+      "netProfit": 37.47,
+      "units": 141.01,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.42,
+      "eps": 0.27
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4349",
+   "name": "الإنماء ريت الفندقي",
+   "fullName": "الإنماء ريت الفندقي (4349)",
+   "sourceSheet": "الإنماء ريت الفندقي - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": null,
+      "ffo": null,
+      "netProfit": null,
+      "units": null,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": null,
+      "eps": null
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": null,
+      "ffo": null,
+      "netProfit": null,
+      "units": null,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": null,
+      "eps": null
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 89.45,
+      "ffo": 81.02,
+      "netProfit": 60.45,
+      "units": 102.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.79,
+      "eps": 0.59
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 74.41,
+      "ffo": 66.56,
+      "netProfit": 48.85,
+      "units": 102.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.65,
+      "eps": 0.48
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 74.41,
+      "ffo": 66.45,
+      "netProfit": 48.96,
+      "units": 102.0,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.65,
+      "eps": 0.48
+     }
+    }
+   ]
+  },
+  {
+   "symbol": "4350",
+   "name": "الاستثمار ريت",
+   "fullName": "الاستثمار ريت (4350)",
+   "sourceSheet": "الاستثمار ريت - سنوي",
+   "years": [
+    {
+     "year": 2021,
+     "period": "FY",
+     "values": {
+      "rentalIncome": null,
+      "ffo": null,
+      "netProfit": null,
+      "units": null,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": null,
+      "eps": null
+     }
+    },
+    {
+     "year": 2022,
+     "period": "FY",
+     "values": {
+      "rentalIncome": null,
+      "ffo": null,
+      "netProfit": null,
+      "units": null,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": null,
+      "eps": null
+     }
+    },
+    {
+     "year": 2023,
+     "period": "FY",
+     "values": {
+      "rentalIncome": null,
+      "ffo": null,
+      "netProfit": null,
+      "units": null,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": null,
+      "eps": null
+     }
+    },
+    {
+     "year": 2024,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 50.46,
+      "ffo": -7.38,
+      "netProfit": -22.01,
+      "units": 60.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": -0.12,
+      "eps": -0.36
+     }
+    },
+    {
+     "year": 2025,
+     "period": "FY",
+     "values": {
+      "rentalIncome": 113.34,
+      "ffo": 10.86,
+      "netProfit": -19.98,
+      "units": 60.5,
+      "epsBeforeExceptional": null,
+      "ffoPerUnit": 0.18,
+      "eps": -0.33
+     }
+    }
+   ]
+  }
+ ]
+}
