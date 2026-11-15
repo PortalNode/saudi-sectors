@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { marketCapMap, sortByMarketCap } from '../dist/market-cap-order.mjs';
 
 // Test banks.js orchestration only; do not import the concurrently maintained ratio module.
 const source = readFileSync(new URL('../dist/banks.js', import.meta.url), 'utf8')
@@ -80,7 +81,7 @@ function harness(initial = priceFixture(), { map = { snapshot: {} } } = {}) {
     document, window, URL, URLSearchParams, Intl, Date: ClockDate, Map, Number, String, Math, Promise,
     console: { warn(...args) { warnings.push(args); }, error(...args) { errors.push(args); } },
     setInterval(callback, milliseconds) { intervals.push({ callback, milliseconds }); return intervals.length; },
-    escapeHtml,
+    escapeHtml, marketCapMap, sortByMarketCap,
     validateDataset(value) { assert.equal(value.banks.length, 10); return value; },
     renderAnnualTable(bank, years) {
       calls.annual.push({ bank, years });
@@ -360,6 +361,17 @@ await test('60-second no-store polling, visibility recovery, and semaphore only 
     assert.match(call.url, /\?v=\d+$/);
     assert.equal(call.options.cache, 'no-store');
   }
+});
+
+await test('bank tabs run from the largest market cap down, from the same price request', async () => {
+  const prices = priceFixture();
+  prices.sectors[0].stocks.forEach((stock, index) => { stock.marketCap = (index + 1) * 1000; });
+  const h = harness(prices); await settle();
+  const order = [...h.node('bank-nav').innerHTML.matchAll(/data-bank="(\d+)"/g)].map(match => match[1]);
+  assert.deepEqual(order, annualFixture().banks.map(bank => bank.symbol).reverse());
+  assert.match(h.node('bank-nav').innerHTML, /data-bank="1120" aria-pressed="true"/);
+  assert.equal(h.fetchCalls.filter(call => call.url.startsWith('data.json')).length, 1);
+  assert.doesNotMatch(h.node('bank-nav').innerHTML, /1000|القيمة السوقية/);
 });
 
 console.log(`Current bank PE UI tests passed: ${groups.length} groups (Node vm, mocked imports, no browser).`);

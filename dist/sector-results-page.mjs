@@ -1,3 +1,4 @@
+import { loadMarketCaps, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
 import { escapeHtml, PERIODS, QUARTER_NAMES, MONTH_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly, isCalendarYear, monthRange, periodRange } from './quarterly-periods.mjs?v=quarterly-20261115';
 
 /**
@@ -132,9 +133,11 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
   }
   async function load() {
     try {
-      const [annualResponse, quarterlyData] = await Promise.all([fetch(`${slug}-financials.json?v=${version}`), loadQuarterly()]);
+      const [annualResponse, quarterlyData, caps] = await Promise.all([fetch(`${slug}-financials.json?v=${version}`), loadQuarterly(), loadMarketCaps()]);
       if (!annualResponse.ok) throw new Error(`HTTP ${annualResponse.status}`);
       dataset = validateDataset(await annualResponse.json());
+      // Company tabs from the largest market cap down (the cap itself is not shown).
+      dataset = { ...dataset, companies: sortByMarketCap(dataset.companies, caps) };
       quarterly = quarterlyData?.sector === dataset.sector ? quarterlyData : null;
       if (quarterlyData && !quarterly) console.error(`${slug}: quarterly file sector «${quarterlyData.sector}» ≠ «${dataset.sector}»`);
       if (quarterly) mountPeriodBar();

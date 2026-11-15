@@ -1,5 +1,6 @@
 // صفحة المقارنة: تقرأ ملفات ‎*-financials.json‎ (سنوي) و‎*-quarterly-financials.json‎ (ربعي) لكل قطاع.
 import { DEFAULT_PERIOD_SPEC, sumQuarters, withMargins, quarterLabel, monthRange, isCalendarYear, MONTH_NAMES, QUARTER_NAMES } from './quarterly-periods.mjs?v=quarterly-20261115';
+import { loadMarketCaps, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
 const DATA_BASE = '';
 const VERSION = 'comparison-v6';
 const MAX_COMPANIES = 8; // ثمانية ألوان متمايزة ومتحقق منها؛ أكثر من ذلك يفقد الرسم وضوحه
@@ -48,7 +49,8 @@ function fmt(v, signed=false){
   return (signed && x>0 ? '+' : '') + s;
 }
 const num = (v,signed) => `<span class="n">${fmt(v,signed)}</span>`;
-const chosen = () => state.symbols.map(s => companies.find(c => c.symbol===s)).filter(Boolean);
+// المختارة بترتيب القائمة (الأكبر قيمة سوقية أولًا)، لا بترتيب الاختيار
+const chosen = () => companies.filter(c => state.symbols.includes(c.symbol));
 
 /* التغير بين قيمتين: نقاط مئوية للبنود النسبية، نسبة عند أساس موجب، وإلا فرق مطلق */
 function change(a,b){
@@ -313,6 +315,9 @@ const list = chosen(), ok = list.length>=Math.min(2,companies.length) && list.le
 
 /* ---------- البيانات ---------- */
 const cache = new Map();
+// الشركات مرتبة من الأكبر قيمة سوقية (لا تُعرض القيمة)؛ عند تعذر data.json يبقى ترتيب الملف
+const capsPromise = loadMarketCaps();
+let caps = new Map();
 async function fetchSector(slug){
   if(!cache.has(slug)) cache.set(slug, (async () => {
     const get = async name => { const r = await fetch(`${DATA_BASE}${name}?v=${VERSION}`); if(!r.ok) throw new Error(`${name}: ${r.status}`); return r.json(); };
@@ -324,7 +329,7 @@ async function fetchSector(slug){
 }
 // الأعمدة والقيم للفترة المختارة، وهامش الربح يُحسب من المجاميع كما في صفحات القطاعات
 function buildIndex(){
-  const annualCompanies = annual.companies || annual.banks || [];
+  const annualCompanies = sortByMarketCap(annual.companies || annual.banks || [], caps);
   colLabels = new Map();
   state.period = quarterly ? chosenPeriod : 'fy';
   if(state.period==='fy'){
@@ -334,7 +339,7 @@ function buildIndex(){
     return;
   }
   const byName = new Map(annualCompanies.map(c => [c.symbol, c]));
-  companies = quarterly.companies.map(c => ({ ...c, name: byName.get(c.symbol)?.name || c.name }));
+  companies = sortByMarketCap(quarterly.companies, caps).map(c => ({ ...c, name: byName.get(c.symbol)?.name || c.name }));
   const keys = [...new Set(quarterly.companies.flatMap(c => Object.values(c.quarters||{}).flatMap(v => Object.keys(v||{}))))];
   const spec = { metrics: keys.map(key => ({ key })), ratios: DEFAULT_PERIOD_SPEC.ratios };
   const ids = new Set();
@@ -365,7 +370,7 @@ function applyData(wanted={}){
 }
 async function loadSector(slug, wanted={}){
   state.sector = slug; $('sector-select').value = slug;
-  ({ annual, quarterly } = await fetchSector(slug));
+  [{ annual, quarterly }, caps] = await Promise.all([fetchSector(slug), capsPromise]);
   if(state.sector!==slug) return; // اختار المستخدم قطاعًا آخر أثناء التحميل
   slots = new Map(); state.query = ''; $('company-search').value = '';
   state.symbols = []; state.years = [];

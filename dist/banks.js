@@ -2,6 +2,7 @@ import { escapeHtml, validateDataset, renderAnnualTable } from './bank-metrics.m
 import { renderBankCharts, fitBankCharts, getChartOptions } from './bank-charts.mjs?v=value-labels-20261106';
 import { buildCurrentBankPE, renderCurrentBankPECard } from './bank-current-pe.mjs?v=20261105';
 import { renderCurrentPEComparison, fitCurrentPEComparison } from './bank-current-pe-chart.mjs?v=20261105';
+import { marketCapMap, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
 import { PERIODS, QUARTER_NAMES, quarterLabel, validateQuarterly, buildBankPeriodColumns, renderBankPeriodTable, getBankPeriodChartOptions, renderBankPeriodChart, fitBankPeriodChart } from './bank-quarterly.mjs?v=banks-quarterly-20261115';
 
 const element = id => document.getElementById(id);
@@ -133,12 +134,13 @@ async function readCurrentJSON(path) {
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
 }
-async function refreshCurrentPE() {
+// initialPrices: the price snapshot load() already requested (to order the banks), so it is not fetched twice.
+async function refreshCurrentPE(initialPrices) {
   if (!dataset || currentRefreshRunning) return;
   currentRefreshRunning = true;
   try {
     const [pricesResult, mapResult] = await Promise.allSettled([
-      readCurrentJSON('data.json'), readCurrentJSON('financial-map.json')
+      initialPrices ?? readCurrentJSON('data.json'), readCurrentJSON('financial-map.json')
     ]);
     if (pricesResult.status !== 'fulfilled') throw new Error('price snapshot unavailable');
     const prices = pricesResult.value;
@@ -182,15 +184,19 @@ async function loadQuarterly() {
 }
 async function load() {
   try {
+    const prices = readCurrentJSON('data.json');
+    prices.catch(() => {}); // a failure is reported by refreshCurrentPE
     const [response, quarterlyData] = await Promise.all([fetch('banks-financials.json?v=workbook-20261104'), loadQuarterly()]);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     dataset = validateDataset(await response.json());
+    // Bank tabs from the largest market cap down (the cap itself is not shown); file order if prices fail.
+    dataset.banks = sortByMarketCap(dataset.banks, marketCapMap(await prices.catch(() => null)));
     quarterly = quarterlyData;
     const imported = new Date(dataset.source?.importedAt);
     const date = Number.isNaN(imported.getTime()) ? 'غير محدد' : new Intl.DateTimeFormat('ar-SA', { timeZone: 'Asia/Riyadh', calendar: 'gregory', year: 'numeric', month: '2-digit', day: '2-digit' }).format(imported);
     element('bank-import-info').textContent = `تاريخ استيراد الملف: ${date} · تاريخ الاستيراد ليس تاريخ إعلان النتائج · ورقة المصدر تظهر لكل بنك في الملف المحفوظ.`;
     selectBank(readUrlState(), true);
-    refreshCurrentPE();
+    refreshCurrentPE(prices);
   } catch (error) {
     element('bank-load-status').textContent = 'تعذر تحميل ملف نتائج البنوك. أعد تحميل الصفحة؛ لم تُستبدل البيانات بأرقام افتراضية.';
     element('bank-panel').hidden = true;
