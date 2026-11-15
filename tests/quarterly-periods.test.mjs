@@ -56,8 +56,9 @@ test('every quarterly data file in dist is valid and matches its annual sector',
     const slug = file.replace('-quarterly-financials.json', '');
     const quarterly = JSON.parse(readFileSync(new URL(`../dist/${file}`, import.meta.url), 'utf8'));
     const annual = JSON.parse(readFileSync(new URL(`../dist/${slug}-financials.json`, import.meta.url), 'utf8'));
-    validateQuarterly(quarterly, annual.sector);
-    const symbols = new Set(annual.companies.map(item => item.symbol));
+    // The banks annual file has its own shape (banks[], no sector field).
+    validateQuarterly(quarterly, slug === 'banks' ? 'البنوك' : annual.sector);
+    const symbols = new Set((annual.companies ?? annual.banks).map(item => item.symbol));
     for (const item of quarterly.companies) assert.ok(symbols.has(item.symbol), `${slug}: ${item.symbol} not in annual file`);
     const page = readFileSync(new URL(`../dist/${slug}.html`, import.meta.url), 'utf8');
     assert.match(page, /quarterly-periods\.css/, `${slug}.html must link quarterly-periods.css`);

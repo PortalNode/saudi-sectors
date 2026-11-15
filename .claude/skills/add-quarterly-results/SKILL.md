@@ -17,7 +17,7 @@ description: إضافة النتائج الربعية (ربع، 6 أشهر، 9 �
 ## المدخلات
 - **مسار ملف Excel**: إن لم يعطه المستخدم، ابحث في `/Users/ahmadaghnj/argaam/` عن ملف باسم القطاع، ثم اسأل المستخدم إن لم تجد.
 - **القطاع**: حوّل اسمه إلى `slug` صفحته. الـ slug هو اسم الملف `dist/<slug>.html`، مثل retail وcement وfood وhotels-tourism وinformation-technology وbusiness-services. لمعرفة القطاع المقصود افتح `dist/<slug>-financials.json` واقرأ حقل `sector`.
-- **البنوك** (`banks`) لها بنود مختلفة ولا تعمل بهذه الطريقة. أخبر المستخدم بذلك بدل المحاولة.
+- **البنوك** (`banks`) لها بنود مختلفة (ستة بنود ربعية) وصفحة خاصة، فلا تستخدم الخطوتين 2 و3 معها. لتحديث بياناتها شغّل `python3 scripts/import-bank-quarterly-workbook.py "<مسار ملف Excel>"` فقط (يكتب `dist/banks-quarterly-financials.json` ولا يمس الملف السنوي)، ثم حدّث `QUARTERLY_VERSION` في `dist/banks.js` ورقم إصدار `banks.js` في `dist/banks.html`، ثم الاختبارات والمعاينة كالمعتاد. منطق الفترات للبنوك في `dist/bank-quarterly.mjs`.
 
 ## الخطوات
 1. **فرع:** إن كنت على `main` فاسأل المستخدم عن الفرع (أداة propose_branch) قبل أي تعديل.
