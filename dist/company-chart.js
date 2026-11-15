@@ -25,7 +25,28 @@
     { id: 'rsi', label: 'RSI', title: 'مؤشر القوة النسبية (14)', kind: 'pane', color: '#9085e9' },
     { id: 'macd', label: 'MACD', title: 'الماكد (12، 26، 9)', kind: 'pane', color: '#3987e5' }
   ];
-  const TOOLS = [['hline', 'خط أفقي'], ['trend', 'خط اتجاه'], ['fib', 'فيبوناتشي']];
+  const TOOLS = [['hline', 'خط أفقي'], ['trend', 'خط اتجاه'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر']];
+  // المغناطيس كما في TradingView: يلصق نقطة الرسم بأقرب سعر من الشمعة (افتتاح، أعلى، أدنى، إغلاق)؛
+  // «ضعيف» حين يقترب المؤشر منه فقط، و«قوي» دائمًا
+  const MAGNETS = [['off', 'إيقاف'], ['weak', 'ضعيف'], ['strong', 'قوي']];
+  const WEAK_MAGNET_PX = 14;
+  function nearestPrice(prices, toY, y, mode) {
+    if (mode === 'off') return null;
+    let best = null;
+    for (const price of prices) {
+      const py = toY(price);
+      if (py == null) continue;
+      const distance = Math.abs(py - y);
+      if (!best || distance < best.distance) best = { price, distance };
+    }
+    return best && (mode === 'strong' || best.distance <= WEAK_MAGNET_PX) ? best.price : null;
+  }
+  // نص نطاق السعر: الفرق ونسبته من النقطة الأولى
+  function rangeLabel(from, to) {
+    const diff = to - from, pct = from ? diff / from * 100 : 0, sign = diff > 0 ? '+' : diff < 0 ? '−' : '';
+    const fmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `${sign}${fmt.format(Math.abs(diff))} (${sign}${fmt.format(Math.abs(pct))}%)`;
+  }
   // مستويات تصحيح فيبوناتشي كما في TradingView: 1 عند النقطة الأولى و0 عند الثانية
   // إعدادات فيبوناتشي الافتراضية على نمط TradingView (المستويات المفعّلة وألوانها وموضع العناوين)،
   // ويغيّرها الزائر من زر الإعدادات فتُحفظ في متصفحه
@@ -58,13 +79,14 @@
   const HINTS = {
     hline: 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي',
     trend: 'اضغط على نقطة البداية ثم على النهاية، أو اسحب من البداية إلى النهاية · Esc للإلغاء',
-    fib: 'اضغط على بداية الموجة (قمة أو قاع) ثم على نهايتها، أو اسحب بينهما · Esc للإلغاء'
+    fib: 'اضغط على بداية الموجة (قمة أو قاع) ثم على نهايتها، أو اسحب بينهما · Esc للإلغاء',
+    range: 'اضغط على السعر الأول ثم على الثاني، أو اسحب بينهما، لقياس الفرق ونسبته · Esc للإلغاء'
   };
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
-  const state = { type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null };
-  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); } } catch { /* storage unavailable */ }
-  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ type: state.type, ind: [...state.ind] })); } catch { /* ignore */ } };
+  const state = { type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off' };
+  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; } } catch { /* storage unavailable */ }
+  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ type: state.type, ind: [...state.ind], magnet: state.magnet })); } catch { /* ignore */ } };
   const loadDrawings = symbol => { try { return JSON.parse(localStorage.getItem(`cc-draw-${symbol}`) || '[]'); } catch { return []; } };
   const saveDrawings = (symbol, list) => { try { localStorage.setItem(`cc-draw-${symbol}`, JSON.stringify(list)); } catch { /* ignore */ } };
 
@@ -139,6 +161,8 @@
         <div class="cc-chips" role="group" aria-label="المؤشرات الفنية">${INDICATORS.map(x => chip('ind', x.id, `${x.color ? `<i style="background:${x.color}"></i>` : ''}${x.label}`, state.ind.has(x.id), x.title)).join('')}</div>
         <span class="cc-tools-label">الرسم</span>
         <div class="cc-chips" role="group" aria-label="أدوات الرسم">${TOOLS.map(([id, t]) => chip('tool', id, t, state.tool === id)).join('')}<button type="button" data-fibset title="إعدادات فيبوناتشي" aria-expanded="false">⚙ إعدادات فيبوناتشي</button><button type="button" data-undo>تراجع</button><button type="button" data-clear>مسح الرسوم</button></div>
+        <span class="cc-tools-label">المغناطيس</span>
+        <div class="cq-range" role="group" aria-label="المغناطيس">${MAGNETS.map(([id, t]) => chip('magnet', id, t, state.magnet === id, id === 'weak' ? 'يلصق النقطة بأقرب سعر في الشمعة حين يقترب المؤشر منه' : id === 'strong' ? 'يلصق النقطة دائمًا بأقرب سعر في الشمعة (افتتاح، أعلى، أدنى، إغلاق)' : '')).join('')}</div>
       </div>
       <div class="cc-fib-settings" hidden></div>
       <div class="cc-legend" aria-live="polite"></div>
@@ -192,9 +216,25 @@
       ctx.font = `600 12px ${getComputedStyle(document.body).fontFamily}`;
       ctx.textBaseline = 'bottom';
       for (const d of [...drawings, ...(preview ? [preview] : [])]) {
-        if (d.type !== 'trend' && d.type !== 'fib') continue;
+        if (!['trend', 'fib', 'range'].includes(d.type)) continue;
         const A = xy(d.a), B = xy(d.b);
         if (!A || !B) continue;
+        if (d.type === 'range') {
+          // نطاق السعر: مستطيل بين السعرين، وسهم من الأول إلى الثاني، والفرق ونسبته
+          const color = d.b.price >= d.a.price ? '#2962ff' : '#f23645';
+          const x1 = Math.min(A.x, B.x), x2 = Math.max(A.x, B.x, x1 + 1), cx = (x1 + x2) / 2;
+          ctx.fillStyle = color + '26'; ctx.fillRect(x1, Math.min(A.y, B.y), x2 - x1, Math.abs(B.y - A.y));
+          segment({ x: x1, y: A.y }, { x: x2, y: A.y }, color, 1);
+          segment({ x: x1, y: B.y }, { x: x2, y: B.y }, color, 1);
+          segment({ x: cx, y: A.y }, { x: cx, y: B.y }, color, 1.5);
+          const dir = B.y < A.y ? -1 : 1;
+          if (Math.abs(B.y - A.y) > 8) { ctx.beginPath(); ctx.moveTo(cx, B.y); ctx.lineTo(cx - 5, B.y - dir * 7); ctx.lineTo(cx + 5, B.y - dir * 7); ctx.closePath(); ctx.fillStyle = color; ctx.fill(); }
+          const text = rangeLabel(d.a.price, d.b.price), w = ctx.measureText(text).width + 14, h = 20;
+          const ly = dir < 0 ? B.y - h - 6 : B.y + 6;
+          ctx.fillStyle = color; ctx.fillRect(cx - w / 2, ly, w, h);
+          ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.fillText(text, cx, ly + h - 4);
+          continue;
+        }
         if (d.type === 'trend') { segment(A, B, colors.gold, 2); dotAt(A, colors.gold); dotAt(B, colors.gold); continue; }
         // فيبوناتشي: المستويات بين نقطتي الموجة (أو ممتدة حسب الإعداد)، والعناوين على يمينها فوق الخط كما في TradingView
         const paneWidth = ts.width();
@@ -307,8 +347,9 @@
       if (y < 0 || y > chart.panes()[0].getHeight()) return null;
       const logical = chart.timeScale().coordinateToLogical(x), price = main.coordinateToPrice(y);
       if (logical == null || price == null) return null;
-      const index = Math.max(0, Math.min(data.length - 1, Math.round(logical)));
-      return { time: data[index].time, price, logical: index };
+      const index = Math.max(0, Math.min(data.length - 1, Math.round(logical))), b = data[index];
+      const snapped = nearestPrice(state.type === 'candles' ? [b.open, b.high, b.low, b.close] : [b.close], value => main.priceToCoordinate(value), y, state.magnet);
+      return { time: b.time, price: snapped ?? price, logical: index, snapped: snapped != null };
     }
     let press = null;
     function finish(point) {
@@ -391,8 +432,9 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset]'); if (!b || !chart) return;
+      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet]'); if (!b || !chart) return;
       if (b.hasAttribute('data-fibset')) { toggleFibSettings(); return; }
+      if (b.dataset.magnet) { state.magnet = b.dataset.magnet; panel.querySelectorAll('[data-magnet]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.magnet === state.magnet))); saveSettings(); return; }
       let keep = true;
       if (b.dataset.tool) { setTool(state.tool === b.dataset.tool ? null : b.dataset.tool); return; }
       if (b.hasAttribute('data-undo')) { drawings.pop(); saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
@@ -418,5 +460,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT } };
+  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, rangeLabel } };
 })();

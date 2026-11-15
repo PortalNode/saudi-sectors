@@ -67,6 +67,22 @@ test('Fibonacci levels run from 100% at the first point to 0% at the second, wit
   assert.deepEqual(custom.map(l => l.ratio), [0.5]);
 });
 
+test('the magnet snaps to the nearest open/high/low/close: always when strong, only when close when weak', () => {
+  const toY = price => 1000 - price * 10; // 10 pixels per riyal
+  const bar = [50, 52, 48, 51]; // open, high, low, close
+  assert.equal(calc.nearestPrice(bar, toY, toY(51.7), 'strong'), 52);
+  assert.equal(calc.nearestPrice(bar, toY, toY(48.6), 'strong'), 48);
+  assert.equal(calc.nearestPrice(bar, toY, toY(51.2), 'weak'), 51, 'within 14px');
+  assert.equal(calc.nearestPrice(bar, toY, toY(53.6), 'weak'), null, '16px away: no snap');
+  assert.equal(calc.nearestPrice(bar, toY, toY(51.7), 'off'), null);
+});
+
+test('the price range shows the change and its percentage from the first point', () => {
+  assert.equal(calc.rangeLabel(46.12, 61.25), '+15.13 (+32.81%)');
+  assert.equal(calc.rangeLabel(61.25, 46.12), '−15.13 (−24.70%)');
+  assert.equal(calc.rangeLabel(10, 10), '0.00 (0.00%)');
+});
+
 test('weekly candles run Sunday to Thursday and monthly by calendar month', () => {
   const daily = [['2026-11-12', 10, 11, 9, 10.5], ['2026-11-15', 10.5, 12, 10, 11], ['2026-11-16', 11, 11.5, 8, 9]].map(([time, open, high, low, close]) => ({ time, open, high, low, close, volume: 1 }));
   const weeks = calc.group(daily, 'w');
@@ -80,8 +96,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261115d/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115d" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115d" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261115e/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115e" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115e" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
