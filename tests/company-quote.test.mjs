@@ -82,7 +82,7 @@ test('placed drawings can be selected, moved, reshaped and deleted, and the magn
   assert.match(chart, /function hitTest\(x, y\)/);
   assert.match(chart, /box\.addEventListener\('pointerdown', event => \{\s*if \(state\.tool \|\| event\.button !== 0/, 'a capture-phase handler grabs drawings before the chart pans');
   assert.match(chart, /\}, true\);/);
-  assert.match(chart, /data-delete disabled>حذف المحدد/);
+  assert.match(chart, /data-delete disabled/);
   assert.match(chart, /event\.key === 'Delete' \|\| event\.key === 'Backspace'/);
   assert.match(chart, /CrosshairMode\.MagnetOHLC/, 'the crosshair snaps with the strong magnet');
   assert.match(chart, /hover\.snapped \? colors\.gold/, 'the snapped point is drawn');
@@ -121,8 +121,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261116a/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116a" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261116a" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261116b/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116b" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261116b" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);

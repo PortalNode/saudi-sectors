@@ -87,12 +87,33 @@
   const ICON_RESET = svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>');
   const ICON_FULL = svg('<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>');
   const ICON_EXIT = svg('<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>');
+  // أيقونات الشريط الجانبي على نمط TradingView: خطوط رفيعة بمقاس 20
+  const icon = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const ICONS = {
+    cursor: icon('<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>'),
+    trend: icon('<path d="M7.4 16.6l9.2-9.2"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="5.5" r="2"/>'),
+    hline: icon('<path d="M3 12h7M14 12h7"/><circle cx="12" cy="12" r="2"/>'),
+    fib: icon('<path d="M3 5h13M3 10h18M3 15h13M3 20h18"/><circle cx="18.5" cy="5" r="1.8"/><circle cx="18.5" cy="15" r="1.8"/>'),
+    range: icon('<path d="M6 3.5h12M6 20.5h12M12 7v13"/><path d="M8.5 10L12 6.5 15.5 10"/>'),
+    magnet: icon('<path d="M5 3.5h4.5V12a2.5 2.5 0 0 0 5 0V3.5H19V12a7 7 0 0 1-14 0z"/><path d="M5 7.5h4.5M14.5 7.5H19"/>'),
+    ind: icon('<path d="M3 20.5h18"/><path d="M4 16c2.5-6 4.5-6 6.5-1.5S15 18 16.5 11 19 4 20.5 4"/>'),
+    gear: icon('<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>'),
+    undo: icon('<path d="M9 14.5L4 9.5l5-5"/><path d="M4 9.5h10.5a5 5 0 0 1 0 10H11"/>'),
+    erase: icon('<path d="M14.5 4l5.5 5.5-9 9H6.5l-3-3z"/><path d="M9.5 9l5.5 5.5M11 20.5h9"/>'),
+    lock: icon('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>'),
+    unlock: icon('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 7.7-1.5"/>'),
+    eye: icon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>'),
+    eyeOff: icon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 20L20 4"/>'),
+    trash: icon('<path d="M4 6.5h16M9.5 6.5V4h5v2.5M6.5 6.5l1 14h9l1-14M10 10.5v6.5M14 10.5v6.5"/>')
+  };
+  const LOCK_TIP = locked => locked ? 'فتح قفل الرسوم' : 'قفل الرسوم (يمنع تحريكها وتعديلها)';
+  const HIDE_TIP = hidden => hidden ? 'إظهار الرسوم' : 'إخفاء الرسوم';
   const RESET_KEY = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '') ? '⌥ + R' : 'Alt + R';
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
-  const state = { type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off' };
-  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; } } catch { /* storage unavailable */ }
-  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ type: state.type, ind: [...state.ind], magnet: state.magnet })); } catch { /* ignore */ } };
+  const state = { type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off', locked: false, hidden: false };
+  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; state.locked = saved.locked === true; state.hidden = saved.hidden === true; } } catch { /* storage unavailable */ }
+  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ type: state.type, ind: [...state.ind], magnet: state.magnet, locked: state.locked, hidden: state.hidden })); } catch { /* ignore */ } };
   const loadDrawings = symbol => { try { return JSON.parse(localStorage.getItem(`cc-draw-${symbol}`) || '[]'); } catch { return []; } };
   const saveDrawings = (symbol, list) => { try { localStorage.setItem(`cc-draw-${symbol}`, JSON.stringify(list)); } catch { /* ignore */ } };
 
@@ -167,6 +188,8 @@
     const css = getComputedStyle(el), v = name => css.getPropertyValue(name).trim();
     return { ink: v('--pf-ink') || '#eef2f5', muted: v('--pf-muted') || '#9da7b2', line: v('--pf-line') || '#27313b', up: v('--cq-up') || '#22c55e', down: v('--cq-down') || '#f05252', gold: v('--pf-gold') || '#f59e0b' };
   }
+  // زر في الشريط الجانبي: أيقونة فقط، واسمه في تلميح يظهر بجانبه
+  const side = (attrs, svgIcon, tip, pressed) => `<button type="button" ${attrs} aria-label="${tip}" data-tip="${tip}"${pressed == null ? '' : ` aria-pressed="${pressed}"`}>${svgIcon}</button>`;
   const chip = (attr, id, label, on, title = '') => `<button type="button" data-${attr}="${id}" aria-pressed="${on}"${title ? ` title="${title}"` : ''}>${label}</button>`;
 
   function mount(panel, file) {
@@ -181,23 +204,37 @@
         <span class="cq-range-change cc-change"></span>
         <button type="button" class="cc-full-btn" data-full aria-pressed="false" title="تكبير الرسم البياني ليملأ الشاشة">${ICON_FULL}<span>ملء الشاشة</span></button>
       </div>
-      <div class="cc-toolbar cc-tools">
-        <span class="cc-tools-label">المؤشرات</span>
-        <div class="cc-chips" role="group" aria-label="المؤشرات الفنية">${INDICATORS.map(x => chip('ind', x.id, `${x.color ? `<i style="background:${x.color}"></i>` : ''}${x.label}`, state.ind.has(x.id), x.title)).join('')}</div>
-        <span class="cc-tools-label">الرسم</span>
-        <div class="cc-chips" role="group" aria-label="أدوات الرسم">${TOOLS.map(([id, t]) => chip('tool', id, t, state.tool === id)).join('')}<button type="button" data-fibset title="إعدادات فيبوناتشي" aria-expanded="false">⚙ إعدادات فيبوناتشي</button><button type="button" data-delete disabled>حذف المحدد</button><button type="button" data-undo>تراجع</button><button type="button" data-clear>مسح الرسوم</button></div>
-        <span class="cc-tools-label">المغناطيس</span>
-        <div class="cq-range" role="group" aria-label="المغناطيس">${MAGNETS.map(([id, t]) => chip('magnet', id, t, state.magnet === id, id === 'weak' ? 'يلصق النقطة بأقرب سعر في الشمعة حين يقترب المؤشر منه' : id === 'strong' ? 'يلصق النقطة دائمًا بأقرب سعر في الشمعة (افتتاح، أعلى، أدنى، إغلاق)' : '')).join('')}</div>
-      </div>
       <div class="cc-fib-settings" hidden></div>
-      <div class="cc-legend" aria-live="polite"></div>
-      <div class="cc-stage">
-        <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div>
-        <div class="cc-float"><button type="button" data-reset title="إعادة تعيين عرض الرسم البياني (${RESET_KEY})" aria-label="إعادة تعيين عرض الرسم البياني">${ICON_RESET}</button></div>
+      <div class="cc-body" dir="ltr">
+        <div class="cc-side" role="toolbar" aria-orientation="vertical" aria-label="أدوات الرسم والمؤشرات">
+          ${side('data-cursor', ICONS.cursor, 'المؤشر (بدون أداة رسم)', !state.tool)}
+          ${TOOLS.map(([id, t]) => side(`data-tool="${id}"`, ICONS[id], t, state.tool === id)).join('')}
+          <hr>
+          ${side('data-menu="magnet" aria-haspopup="true" aria-expanded="false"', ICONS.magnet, 'المغناطيس', state.magnet !== 'off')}
+          ${side('data-menu="ind" aria-haspopup="true" aria-expanded="false"', ICONS.ind, 'المؤشرات الفنية')}
+          ${side('data-fibset aria-expanded="false"', ICONS.gear, 'إعدادات فيبوناتشي')}
+          <hr>
+          ${side('data-undo', ICONS.undo, 'تراجع عن آخر رسمة')}
+          ${side('data-delete disabled', ICONS.erase, 'حذف الرسمة المحددة (Delete)')}
+          ${side('data-lock', state.locked ? ICONS.lock : ICONS.unlock, LOCK_TIP(state.locked), state.locked)}
+          ${side('data-hide', state.hidden ? ICONS.eyeOff : ICONS.eye, HIDE_TIP(state.hidden), state.hidden)}
+          <hr>
+          ${side('data-clear', ICONS.trash, 'مسح كل الرسوم')}
+        </div>
+        <div class="cc-main" dir="rtl">
+          <div class="cc-legend" aria-live="polite"></div>
+          <div class="cc-stage">
+            <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div>
+            <div class="cc-float"><button type="button" data-reset title="إعادة تعيين عرض الرسم البياني (${RESET_KEY})" aria-label="إعادة تعيين عرض الرسم البياني">${ICON_RESET}</button></div>
+          </div>
+        </div>
+        <div class="cc-flyout" dir="rtl" role="menu" hidden></div>
+        <div class="cc-tip" dir="rtl" role="tooltip" hidden></div>
       </div>
       <p class="cc-hint" hidden></p>
       <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية حتى آخر إغلاق رسمي، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
+    const body = panel.querySelector('.cc-body'), sideBar = panel.querySelector('.cc-side'), flyout = panel.querySelector('.cc-flyout'), tip = panel.querySelector('.cc-tip');
     let chart = null, LWC = null, colors = null, data = [], main = null, calc = {}, drawn = [], preview = null;
     // تحرير الرسوم: الرسمة المحددة، والسحب الجاري، ونقطة المغناطيس تحت المؤشر قبل الضغطة الأولى
     let selected = -1, drag = null, hover = null;
@@ -236,7 +273,7 @@
     function paintDrawings() {
       for (const d of drawn) d.remove();
       drawn = [];
-      for (const d of drawings) if (d.type === 'hline') {
+      for (const d of state.hidden ? [] : drawings) if (d.type === 'hline') {
         const line = main.createPriceLine({ price: d.price, color: colors.gold, lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: true, title: '' });
         drawn.push({ remove: () => main.removePriceLine(line) });
       }
@@ -256,7 +293,7 @@
         const A = xy(d.a), B = xy(d.b);
         if (A && B) { handle(A, colors.gold); handle(B, colors.gold); }
       });
-      for (const d of [...drawings, ...(preview ? [preview] : [])]) {
+      for (const d of [...(state.hidden ? [] : drawings), ...(preview ? [preview] : [])]) {
         if (!['trend', 'fib', 'range'].includes(d.type)) continue;
         const A = xy(d.a), B = xy(d.b);
         if (!A || !B) continue;
@@ -467,6 +504,7 @@
       return Math.hypot(x - (A.x + t * dx), y - (A.y + t * dy));
     }
     function hitTest(x, y) {
+      if (state.hidden || state.locked) return null; // الرسوم المخفية أو المقفلة لا تُحدَّد ولا تُسحب
       for (let i = drawings.length - 1; i >= 0; i--) {
         const d = drawings[i];
         if (d.type === 'hline') { const py = main.priceToCoordinate(d.price); if (py != null && Math.abs(py - y) <= 5) return { index: i, part: 'body' }; continue; }
@@ -561,6 +599,7 @@
     });
     document.addEventListener('keydown', event => {
       if (!box.isConnected || /^(INPUT|SELECT|TEXTAREA)$/.test(event.target?.tagName)) return;
+      if (event.key === 'Escape' && !flyout.hidden) { closeFlyout(); return; }
       if (event.key === 'Escape') { if (state.tool) setTool(null); else if (selected >= 0) select(-1); else if (isFull()) setFull(false); }
       // Alt/⌥ + R كما في TradingView (الحرف بالموضع حتى يعمل مع لوحة المفاتيح العربية و⌥ في ماك)
       if (event.altKey && !event.ctrlKey && !event.metaKey && event.code === 'KeyR') { event.preventDefault(); resetView(); }
@@ -599,6 +638,49 @@
       panel.querySelector('[data-fibset]')?.setAttribute('aria-expanded', String(open));
     }
 
+    /* ---------- الشريط الجانبي: قوائم المغناطيس والمؤشرات، والتلميحات، والقفل والإخفاء ---------- */
+    function closeFlyout() {
+      flyout.hidden = true; flyout.dataset.kind = '';
+      sideBar.querySelectorAll('[data-menu]').forEach(x => x.setAttribute('aria-expanded', 'false'));
+    }
+    function openFlyout(kind, button) {
+      if (!flyout.hidden && flyout.dataset.kind === kind) { closeFlyout(); return; }
+      const row = (attr, id, on, inner) => `<button type="button" role="menuitemcheckbox" data-${attr}="${id}" aria-pressed="${on}">${inner}</button>`;
+      flyout.innerHTML = kind === 'magnet'
+        ? `<b>المغناطيس</b>${MAGNETS.map(([id, t]) => row('magnet', id, state.magnet === id, `<span>${t}<small>${id === 'weak' ? 'يلصق النقطة بأقرب سعر في الشمعة حين يقترب المؤشر منه' : id === 'strong' ? 'يلصق النقطة دائمًا بأقرب سعر (افتتاح، أعلى، أدنى، إغلاق)' : 'النقطة حيث المؤشر تمامًا'}</small></span>`)).join('')}`
+        : `<b>المؤشرات الفنية</b>${INDICATORS.map(x => row('ind', x.id, state.ind.has(x.id), `<i style="background:${x.color || colors?.muted || '#9da7b2'}"></i><span>${x.title}</span>`)).join('')}`;
+      flyout.dataset.kind = kind; flyout.hidden = false; tip.hidden = true;
+      sideBar.querySelectorAll('[data-menu]').forEach(x => x.setAttribute('aria-expanded', String(x === button)));
+      // بجانب الزر، ولا تتجاوز أسفل منطقة الشارت
+      const top = button.getBoundingClientRect().top - body.getBoundingClientRect().top;
+      flyout.style.top = `${Math.max(0, Math.min(top, body.clientHeight - flyout.offsetHeight))}px`;
+    }
+    document.addEventListener('pointerdown', event => {
+      if (!flyout.hidden && body.isConnected && !flyout.contains(event.target) && !event.target.closest?.('[data-menu]')) closeFlyout();
+    });
+    sideBar.addEventListener('pointerover', event => {
+      const b = event.target.closest('button[data-tip]');
+      if (!b || event.pointerType !== 'mouse' || (!flyout.hidden && b.dataset.menu === flyout.dataset.kind)) { tip.hidden = true; return; }
+      tip.textContent = b.dataset.tip; tip.hidden = false;
+      tip.style.top = `${b.getBoundingClientRect().top - body.getBoundingClientRect().top + b.offsetHeight / 2}px`;
+    });
+    sideBar.addEventListener('pointerleave', () => { tip.hidden = true; });
+    sideBar.addEventListener('scroll', () => { tip.hidden = true; });
+    const setSide = (attr, svgIcon, label, on) => {
+      const b = sideBar.querySelector(`[${attr}]`); if (!b) return;
+      b.innerHTML = svgIcon; b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', label); b.dataset.tip = label;
+      if (!tip.hidden) tip.textContent = label;
+    };
+    function setLocked(on) {
+      state.locked = on; if (on && selected >= 0) select(-1);
+      setSide('data-lock', on ? ICONS.lock : ICONS.unlock, LOCK_TIP(on), on); saveSettings();
+    }
+    function setHidden(on) {
+      state.hidden = on; if (on && selected >= 0) select(-1);
+      setSide('data-hide', on ? ICONS.eyeOff : ICONS.eye, HIDE_TIP(on), on); saveSettings();
+      if (chart) paintDrawings();
+    }
+
     function setTool(tool) {
       state.tool = tool; pending = null; preview = null; hover = null;
       if (tool && selected >= 0) select(-1);
@@ -606,6 +688,8 @@
       chart?.applyOptions({ handleScroll: !tool, handleScale: !tool });
       overlay.redraw();
       panel.querySelectorAll('[data-tool]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.tool === tool)));
+      panel.querySelector('[data-cursor]')?.setAttribute('aria-pressed', String(!tool));
+      if (tool && state.hidden) setHidden(false); // الرسم الجديد يحتاج أن تكون الرسوم ظاهرة
       box.classList.toggle('cc-drawing', !!tool);
       hint.hidden = !tool;
       hint.textContent = HINTS[tool] ?? '';
@@ -613,11 +697,15 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full]'); if (!b || !chart) return;
+      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide]'); if (!b || !chart) return;
+      if (b.dataset.menu) { openFlyout(b.dataset.menu, b); return; }
+      if (b.hasAttribute('data-cursor')) { setTool(null); return; }
+      if (b.hasAttribute('data-lock')) { setLocked(!state.locked); return; }
+      if (b.hasAttribute('data-hide')) { setHidden(!state.hidden); return; }
       if (b.hasAttribute('data-reset')) { resetView(); return; }
       if (b.hasAttribute('data-full')) { setFull(!isFull()); return; }
       if (b.hasAttribute('data-fibset')) { toggleFibSettings(); return; }
-      if (b.dataset.magnet) { state.magnet = b.dataset.magnet; panel.querySelectorAll('[data-magnet]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.magnet === state.magnet))); saveSettings(); applyCrosshair(); return; }
+      if (b.dataset.magnet) { state.magnet = b.dataset.magnet; panel.querySelectorAll('[data-magnet]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.magnet === state.magnet))); sideBar.querySelector('[data-menu="magnet"]')?.setAttribute('aria-pressed', String(state.magnet !== 'off')); saveSettings(); applyCrosshair(); closeFlyout(); return; }
       let keep = true;
       if (b.dataset.tool) { setTool(state.tool === b.dataset.tool ? null : b.dataset.tool); return; }
       if (b.hasAttribute('data-delete')) { deleteSelected(); return; }

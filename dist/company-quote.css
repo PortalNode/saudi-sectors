@@ -34,25 +34,38 @@
 
 .cc-toolbar{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap}
 .cc-change{margin-inline-start:auto}
-.cc-tools{margin-top:8px;padding-top:8px;border-top:1px dashed var(--pf-line)}
-.cc-tools-label{font-size:10.5px;font-weight:700;color:var(--pf-muted)}
-.cc-chips{display:flex;flex-wrap:wrap;gap:4px}
-.cc-chips button{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--pf-line);background:transparent;color:var(--pf-muted);font:inherit;font-size:11px;font-weight:700;padding:4px 9px;cursor:pointer}
-.cc-chips button:hover{color:var(--pf-ink);border-color:var(--pf-muted)}
-.cc-chips button[aria-pressed="true"]{background:var(--pf-gold-soft);border-color:var(--pf-gold);color:var(--pf-ink)}
-.cc-chips button i{width:9px;height:3px;border-radius:2px;flex:none}
-.cc-chips :is([data-clear],[data-undo]){border-style:dashed}
 .cc-legend{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;min-height:22px;margin:10px 0 2px;font-size:11px;color:var(--pf-muted)}
 .cc-legend b{color:var(--pf-ink);font-size:11.5px}
 .cc-legend bdi{direction:ltr;font-variant-numeric:tabular-nums;color:var(--pf-ink);font-weight:700}
 .cc-legend .cq-up bdi{color:var(--cq-up)}.cc-legend .cq-down bdi{color:var(--cq-down)}
 .cc-legend .cc-ind bdi{color:var(--c)}
 /* الارتفاع: الشارت الرئيسي ثم 110px لكل لوحة مؤشر (RSI، MACD) */
-.cc-chart{--cc-base:340px;position:relative;height:calc(var(--cc-base) + var(--cc-panes,0) * 110px)}
+.cc-chart{--cc-base:410px;position:relative;height:calc(var(--cc-base) + var(--cc-panes,0) * 110px)}
 .cc-chart.cc-drawing{cursor:crosshair;touch-action:none}
 .cc-hint{margin:6px 0 0;font-size:11px;color:var(--pf-gold);font-weight:700}
 .cc-hint[hidden]{display:none}
 .cc-flag-note{color:var(--pf-gold)}
+/* الشريط الجانبي على يسار الشارت كما في TradingView: أدوات الرسم والمغناطيس والمؤشرات أيقوناتٍ، وأسماؤها في تلميح */
+.cc-body{position:relative;padding-left:48px;margin-top:8px}
+.cc-side{position:absolute;left:0;top:0;bottom:0;width:40px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;border-right:1px solid var(--pf-line)}
+.cc-side::-webkit-scrollbar{display:none}
+.cc-side button{position:relative;flex:none;display:grid;place-items:center;width:32px;height:30px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--pf-ink);cursor:pointer}
+.cc-side button:hover{background:var(--pf-line)}
+.cc-side button[aria-pressed="true"],.cc-side button[aria-expanded="true"]{background:var(--pf-gold-soft);color:var(--pf-gold)}
+.cc-side button:disabled{opacity:.35;cursor:default;background:transparent}
+.cc-side [data-menu]::after{content:"";position:absolute;right:3px;bottom:3px;border:2.5px solid transparent;border-right-color:currentColor;border-bottom-color:currentColor;opacity:.55}
+.cc-side hr{flex:none;width:24px;margin:3px 0;border:0;border-top:1px solid var(--pf-line)}
+.cc-main .cc-legend{margin-top:0}
+.cc-tip{position:absolute;left:46px;z-index:31;transform:translateY(-50%);padding:5px 9px;border-radius:5px;background:var(--pf-ink);color:var(--pf-bg);font-size:11.5px;font-weight:700;white-space:nowrap;pointer-events:none}
+.cc-flyout{position:absolute;left:46px;z-index:30;width:250px;max-width:calc(100vw - 90px);padding:6px;background:var(--pf-bg);border:1px solid var(--pf-line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.cc-flyout[hidden],.cc-tip[hidden]{display:none}
+.cc-flyout b{display:block;padding:4px 8px 6px;font-size:11px;color:var(--pf-muted)}
+.cc-flyout button{display:flex;align-items:center;gap:9px;width:100%;padding:7px 8px;border:0;border-radius:5px;background:transparent;color:var(--pf-ink);font:inherit;font-size:12px;font-weight:700;text-align:start;cursor:pointer}
+.cc-flyout button:hover{background:var(--pf-line)}
+.cc-flyout button i{width:12px;height:3px;border-radius:2px;flex:none}
+.cc-flyout button small{display:block;margin-top:2px;color:var(--pf-muted);font-size:10.5px;font-weight:400}
+.cc-flyout button::after{content:"";flex:none;width:14px;margin-inline-start:auto;text-align:center}
+.cc-flyout button[aria-pressed="true"]::after{content:"✓";color:var(--pf-gold);font-weight:800}
 /* إعادة تعيين العرض: زر عائم أسفل الشارت يظهر عند المرور عليه (ودائمًا على اللمس) كما في TradingView */
 .cc-stage{position:relative}
 .cc-float{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);display:flex;gap:6px;z-index:5;opacity:0;transition:opacity .15s}
@@ -64,7 +77,9 @@
 .cc-full-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--pf-line);background:transparent;color:var(--pf-muted);font:inherit;font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer}
 .cc-full-btn:hover,.cc-full-btn[aria-pressed="true"]{color:var(--pf-gold);border-color:var(--pf-gold)}
 .cq-chart-panel.cc-full{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;overflow:auto;padding:12px 16px;background:var(--pf-bg2)}
-.cq-chart-panel.cc-full .cc-stage{flex:1 1 auto;min-height:260px}
+.cq-chart-panel.cc-full .cc-body{flex:1 1 auto;display:flex;flex-direction:column;min-height:300px}
+.cq-chart-panel.cc-full .cc-main{flex:1 1 auto;display:flex;flex-direction:column}
+.cq-chart-panel.cc-full .cc-stage{flex:1 1 auto;min-height:240px}
 .cq-chart-panel.cc-full .cc-chart{position:absolute;inset:0;height:auto}
 html.cc-lock,html.cc-lock body{overflow:hidden}
 /* مكتبة الشارت ترسم داخل جدول: نعزله عن تنسيقات جداول الموقع (عرض أدنى، تخطيط ثابت، حدود) */
