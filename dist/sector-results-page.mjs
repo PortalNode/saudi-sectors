@@ -31,8 +31,6 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     const notes = $('panel').querySelector('.bank-notes ul');
     // Drop the annual-only disclaimers ("سنوية فقط … لم تُدرج … بيانات ربع سنوية").
     for (const item of notes?.querySelectorAll('li') ?? []) if (/ربع سنوية|سنوية فقط/.test(item.textContent)) item.remove();
-    const heroDate = document.querySelector('.hero-date');
-    if (heroDate) heroDate.textContent = `نتائج قطاع ${sectorName} · ربعية وتراكمية وسنوية`;
     const footnote = $('panel').querySelector('.bank-charts-footnote');
     if (footnote) footnote.textContent = footnote.textContent.replace(/اختر أي بند لعرض مقارنة السنوات السنوية بين \d{4} و\d{4}\./, 'اختر أي بند لعرض المقارنة للفترة المختارة.');
     notes?.insertAdjacentHTML('beforeend', [
@@ -142,9 +140,8 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
       if (quarterly) mountPeriodBar();
       $('import-info').textContent = `المصدر المحفوظ: ${dataset.source.name}${quarterly ? ` و${quarterly.source.name}` : ''} · ${dataset.source.provider}.`;
       selectCompany(readUrlState(), true);
-      $('load-status').textContent = quarterly
-        ? `المصدر: ${escapeHtml(dataset.source.provider || 'أرقام')} · سنوي ${annualRange()} وربعي ${quarterLabel(quarterly.quarters[0])} – ${quarterLabel(quarterly.quarters.at(-1))}`
-        : `المصدر: ملف ${dataset.source.name} · بيانات ثابتة ${annualRange()} · نسب التغير محسوبة من القيم السنوية المخزنة`;
+      // The loading line is only needed while loading or on failure; the sources are listed in the notes.
+      $('load-status').hidden = true;
     } catch (error) {
       $('load-status').textContent = `تعذر تحميل ملف نتائج ${sectorName}. أعد تحميل الصفحة؛ لم تُستبدل البيانات بأرقام افتراضية.`;
       console.error(`${slug} data could not be loaded:`, error);

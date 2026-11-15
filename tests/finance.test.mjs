@@ -51,7 +51,7 @@ test('main table links the finance sector and its companies to the page', () => 
   assert.match(app, /href="finance\.html">النتائج السنوية 2021–2025/);
   assert.match(app, /href="finance\.html\?symbol=/);
   assert.match(read('index.html'), /app\.js\?v=[^"]*finance-20261115/);
-  assert.match(read('finance.html'), /src="finance\.js\?v=finance-quarterly-20261115b"/);
+  assert.match(read('finance.html'), /src="finance\.js\?v=sector-switch-20261115"/);
 });
 
 test('quarterly file covers the five companies with the same four items; Q4 is a standalone quarter', () => {

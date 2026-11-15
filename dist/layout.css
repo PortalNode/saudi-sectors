@@ -13,7 +13,11 @@
 .site-nav a:hover{color:var(--ink)}
 .site-nav a[aria-current="page"]{color:var(--teal);border-bottom-color:#f59e0b}
 .site-bar .theme-switch-label{display:none}
-@media(max-width:760px){.site-bar{padding:8px 10px}.site-nav{margin-inline-start:0}.site-bar .theme-switch{margin-inline-start:auto}}
+.sector-switch{display:inline-flex;align-items:center;gap:8px;margin:0;font-size:12px;color:var(--muted)}
+.sector-switch select{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:6px 10px;min-width:190px;max-width:100%;direction:rtl;color-scheme:dark;cursor:pointer}
+.sector-switch select:hover,.sector-switch select:focus-visible{border-color:#f59e0b;outline:none}
+:root[data-theme="light"] .sector-switch select{color-scheme:light}
+@media(max-width:760px){.site-bar{padding:8px 10px}.sector-switch{order:3;flex:1 1 100%}.sector-switch select{flex:1;min-width:0}.site-nav{margin-inline-start:0}.site-bar .theme-switch{margin-inline-start:auto}}
 
 /* ---------- Market summary in four groups ---------- */
 .market-summary .market-stats{display:grid;grid-template-columns:1.5fr 1.4fr 1.1fr 1.8fr;gap:0;overflow:visible;white-space:normal;padding-bottom:0}

@@ -118,9 +118,7 @@ function selectBank(symbol, replaceHistory = false) {
   paintCurrentCard();
   populateChartOptions(bank);
   drawSelectedChart();
-  element('bank-load-status').textContent = quarterly
-    ? `المصدر: ملف البنوك.xlsx (سنوي 2021–2025) وملف ${quarterly.source.name} (ربعي ${quarterLabel(quarterly.quarters[0])} – ${quarterLabel(quarterly.quarters.at(-1))}) · نسب التغير محسوبة من قيم الملفين`
-    : 'المصدر: ملف البنوك.xlsx · بيانات ثابتة 2021–2025 · نسب التغير محسوبة من قيم الملف';
+  element('bank-load-status').hidden = true; // sources are listed in the notes
   document.title = period === 'fy' ? `${bank.name} | النتائج السنوية 2021–2025 | السوق السعودي` : `${bank.name} | ${periodSummary()} | السوق السعودي`;
   const url = new URL(window.location.href);
   url.searchParams.set('symbol', bank.symbol);
