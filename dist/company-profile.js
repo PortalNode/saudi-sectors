@@ -70,7 +70,7 @@
 
   async function start() {
     try {
-      profiles = window.COMPANY_PROFILES || await (await fetch('company-profiles.json?v=20261115-finance')).json();
+      profiles = window.COMPANY_PROFILES || await (await fetch('company-profiles.json?v=20261115-reits')).json();
     } catch (error) { console.warn('Company profiles unavailable:', error); return; }
     paint();
     new MutationObserver(paint).observe(document.body, { childList: true, subtree: true });
