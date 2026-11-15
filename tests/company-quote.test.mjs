@@ -1,73 +1,102 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { parseYahooChart, mergeHistory, validHistory, KEEP_DAYS } from '../scripts/history-merge.mjs';
+import vm from 'node:vm';
+import { parseYahoo, cleanBars, ohlcFile, validOhlc, YEARS } from '../scripts/ohlc-merge.mjs';
 
 const dist = new URL('../dist/', import.meta.url);
 const read = name => readFileSync(new URL(name, dist), 'utf8');
+const bar = (d, c, extra = {}) => ({ d, o: c, h: c, l: c, c, v: 100, ...extra });
+
+// The chart's calculations, loaded as the page loads them.
+const context = { window: {}, localStorage: { getItem: () => null, setItem() {} }, Intl, Math, JSON, Date, Number, Set, Map, Promise, console };
+vm.runInNewContext(read('company-chart.js'), context);
+const calc = context.window.CompanyChart.calc;
 
 test('Yahoo bars become Riyadh dates; empty bars and other currencies are rejected', () => {
-  // 2026-11-15 07:00 UTC = 10:00 Riyadh; 2026-11-15 22:30 UTC is already the 16th in Riyadh.
-  const chart = { chart: { result: [{ meta: { currency: 'SAR', gmtoffset: 10800 }, timestamp: [Date.parse('2026-11-15T07:00:00Z') / 1000, Date.parse('2026-11-15T22:30:00Z') / 1000, 0], indicators: { quote: [{ close: [9.949999809, 10.01, null] }] } }] } };
-  assert.deepEqual(parseYahooChart(chart), [{ date: '2026-11-15', close: 9.95 }, { date: '2026-11-16', close: 10.01 }]);
+  const t = (iso) => Date.parse(iso) / 1000;
+  const chart = { chart: { result: [{ meta: { currency: 'SAR', gmtoffset: 10800 }, timestamp: [t('2026-11-15T07:00:00Z'), t('2026-11-15T22:30:00Z'), t('2026-11-17T07:00:00Z')],
+    indicators: { quote: [{ open: [10, 10.1, null], high: [10.2, 10.3, 1], low: [9.9, 10, 1], close: [10.05, 10.2, 1], volume: [5, null, 1] }] } }] } };
+  assert.deepEqual(parseYahoo(chart), [{ d: '2026-11-15', o: 10, h: 10.2, l: 9.9, c: 10.05, v: 5 }, { d: '2026-11-16', o: 10.1, h: 10.3, l: 10, c: 10.2, v: 0 }]);
   chart.chart.result[0].meta.currency = 'USD';
-  assert.throws(() => parseYahooChart(chart), /currency/);
+  assert.throws(() => parseYahoo(chart), /currency/);
 });
 
-test('the official close overrides its day, nothing after it is kept, and an outage keeps the old file', () => {
-  const fetched = [{ date: '2026-11-11', close: 10 }, { date: '2026-11-12', close: 10.1 }, { date: '2026-11-15', close: 9.9 }, { date: '2026-11-16', close: 9.7 }];
-  const merged = mergeHistory({ fetched, official: { date: '2026-11-15', price: 9.95 } });
-  assert.deepEqual(merged.dates, ['2026-11-11', '2026-11-12', '2026-11-15']);
-  assert.deepEqual(merged.close, [10, 10.1, 9.95]);
-  assert.deepEqual(merged.corrected, { date: '2026-11-15', from: 9.9, to: 9.95 });
-  // Source down: the existing file stays and today's official close is appended.
-  const kept = mergeHistory({ fetched: null, existing: { dates: merged.dates, close: merged.close }, official: { date: '2026-11-16', price: 9.8 } });
-  assert.deepEqual(kept.dates.at(-1), '2026-11-16');
-  assert.deepEqual(kept.close, [10, 10.1, 9.95, 9.8]);
-  assert.equal(kept.corrected, null);
+test('the official close is final for its day and nothing after it is kept', () => {
+  const { bars } = cleanBars([bar('2026-11-12', 10), bar('2026-11-15', 9.9, { h: 9.92 }), bar('2026-11-16', 9.7)], { official: { date: '2026-11-15', price: 9.95 } });
+  assert.deepEqual(bars.map(b => b.d), ['2026-11-12', '2026-11-15']);
+  assert.equal(bars.at(-1).c, 9.95);
+  assert.equal(bars.at(-1).h, 9.95, 'the high widens to include the official close');
 });
 
-test('history keeps about a year', () => {
-  const fetched = [{ date: '2024-01-01', close: 5 }, { date: '2025-11-10', close: 6 }, { date: '2026-11-15', close: 7 }];
-  const merged = mergeHistory({ fetched });
-  assert.deepEqual(merged.dates, ['2025-11-10', '2026-11-15']);
-  assert.ok(KEEP_DAYS >= 366);
+test('bad prints that revert are dropped; jumps that stay are flagged; history keeps five years', () => {
+  const input = [bar('2020-01-01', 1), bar('2026-08-20', 64), bar('2026-08-23', 64.2), bar('2026-08-24', 18.3), bar('2026-08-25', 19.4), bar('2026-08-26', 65.7), bar('2026-08-27', 66), bar('2026-08-30', 20), bar('2026-08-31', 21)];
+  const { bars, dropped, flags } = cleanBars(input);
+  assert.deepEqual(dropped, ['2026-08-24', '2026-08-25']);
+  assert.ok(!bars.some(b => b.d === '2020-01-01'), `only ${YEARS} years are kept`);
+  assert.deepEqual(flags.map(f => f.date), ['2026-08-30'], 'a jump that does not revert is flagged, not dropped');
+  const file = ohlcFile('6050', 'x', null, { bars, dropped, flags });
+  assert.ok(validOhlc(file));
+  assert.ok(!validOhlc({ ...file, h: file.h.map(() => 0.01) }), 'a high below the close is invalid');
 });
 
-test('every results page shows the stock card under the company profile', () => {
+test('indicators follow TradingView\'s definitions', () => {
+  assert.deepEqual([...calc.sma([1, 2, 3, 4, 5], 3)], [null, null, 2, 3, 4]);
+  assert.deepEqual([...calc.ema([1, 2, 3, 4, 5], 3)], [null, null, 2, 3, 4], 'EMA seeds with the simple average');
+  assert.deepEqual([...calc.rsi([1, 2, 1, 2], 2)], [null, null, 50, 75], 'Wilder smoothing');
+  const bb = calc.bollinger([2, 4, 4, 4, 5, 5, 7, 9], 8, 2).at(-1);
+  assert.deepEqual({ mid: bb.mid, up: bb.up, low: bb.low }, { mid: 5, up: 9, low: 1 }, 'population standard deviation');
+  const flat = calc.macd(Array(40).fill(10)).at(-1);
+  assert.deepEqual({ macd: flat.macd, signal: flat.signal, hist: flat.hist }, { macd: 0, signal: 0, hist: 0 });
+});
+
+test('weekly candles run Sunday to Thursday and monthly by calendar month', () => {
+  const daily = [['2026-11-12', 10, 11, 9, 10.5], ['2026-11-15', 10.5, 12, 10, 11], ['2026-11-16', 11, 11.5, 8, 9]].map(([time, open, high, low, close]) => ({ time, open, high, low, close, volume: 1 }));
+  const weeks = calc.group(daily, 'w');
+  // The page code runs in its own realm: compare plain copies.
+  assert.deepEqual(JSON.parse(JSON.stringify(weeks.map(w => [w.time, w.end, w.open, w.high, w.low, w.close, w.volume]))), [['2026-11-12', '2026-11-12', 10, 11, 9, 10.5, 1], ['2026-11-15', '2026-11-16', 10.5, 12, 8, 9, 2]]);
+  assert.equal(calc.group(daily, 'm').length, 1);
+});
+
+test('every results page loads the stock card and its chart, with the library kept on the site', () => {
   const pages = readdirSync(dist).filter(name => name.endsWith('.html') && !['index.html', 'comparison.html'].includes(name));
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=quote-20261115/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-quote\.js\?v=quote-20261115" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261115/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115" defer><\/script>/, page);
   }
-  const script = read('company-quote.js');
-  // Same EPS rule as the home page: recurring, then reported, then the price file.
-  assert.match(script, /recurring \?\? reported \?\? num\(stock\.eps\)/);
-  assert.match(script, /eps > 0 && price > 0 \? price \/ eps : null/);
+  const chart = read('company-chart.js');
+  assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
+  assert.match(read('vendor/lightweight-charts-5.2.1.js').slice(0, 300), /Lightweight Charts™ v5\.2\.1[\s\S]*Apache License 2\.0/);
+  assert.match(read('vendor/lightweight-charts-LICENSE.txt'), /Apache License/);
+  const quote = read('company-quote.js');
+  assert.match(quote, /recurring \?\? reported \?\? num\(stock\.eps\)/, 'same EPS rule as the home page');
+  assert.match(quote, /eps > 0 && price > 0 \? price \/ eps : null/);
+  assert.doesNotMatch(quote, /history\//);
 });
 
-test('every history file is valid and ends on its stock\'s official close', () => {
+test('every candle file is valid and ends on its stock\'s official close', () => {
   const data = JSON.parse(read('data.json'));
   const stocks = new Map(data.sectors.flatMap(sector => sector.stocks).map(stock => [stock.symbol, stock]));
-  const dir = new URL('history/', dist);
-  assert.ok(existsSync(dir), 'dist/history exists');
+  const dir = new URL('ohlc/', dist);
+  assert.ok(existsSync(dir));
   const files = readdirSync(dir).filter(name => /^\d{4}\.json$/.test(name));
-  assert.ok(files.length >= stocks.size * 0.9, `history for most stocks (${files.length}/${stocks.size})`);
+  assert.ok(files.length >= stocks.size * 0.9, `candles for most stocks (${files.length}/${stocks.size})`);
   for (const name of files) {
     const file = JSON.parse(readFileSync(new URL(name, dir), 'utf8'));
-    assert.ok(validHistory(file), name);
+    assert.ok(validOhlc(file), name);
     const stock = stocks.get(file.symbol);
     assert.ok(stock, `${name}: symbol in data.json`);
-    if (file.officialThrough) assert.ok(file.dates.at(-1) <= file.officialThrough, `${name}: nothing after the official close`);
+    if (file.officialThrough) assert.ok(file.d.at(-1) <= file.officialThrough, `${name}: nothing after the official close`);
     const official = stock.lastOfficialClose;
-    if (official?.date === file.dates.at(-1)) assert.equal(file.close.at(-1), Math.round(official.price * 100) / 100, `${name}: last close is the official close`);
+    if (official?.date === file.d.at(-1)) assert.equal(file.c.at(-1), Math.round(official.price * 100) / 100, `${name}: last close is the official close`);
   }
 });
 
-test('the price workflow refreshes the history and commits it with the prices', () => {
+test('the price workflow refreshes the candles and commits them with the prices', () => {
   const workflow = readFileSync(new URL('../.github/workflows/update-prices.yml', import.meta.url), 'utf8');
-  assert.match(workflow, /run: node scripts\/update-history\.mjs \|\| echo/);
-  assert.match(workflow, /git add dist\/data\.json dist\/history/);
+  assert.match(workflow, /run: node scripts\/update-ohlc\.mjs \|\| echo/);
+  assert.match(workflow, /git add -A dist\/data\.json dist\/ohlc/);
+  assert.doesNotMatch(workflow, /update-history/);
 });

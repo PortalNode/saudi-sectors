@@ -1,0 +1,9 @@
+{
+ "officialDate": "2026-11-15",
+ "updatedAt": "2026-11-15T19:46:08.630Z",
+ "source": "Yahoo Finance · آخر إغلاق من تداول السعودية",
+ "symbols": 271,
+ "failed": [
+  "1325 (too few valid bars)"
+ ]
+}

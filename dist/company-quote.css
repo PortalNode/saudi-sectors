@@ -1,18 +1,16 @@
-/* بطاقة «السهم» تحت نبذة الشركة: أرقام السهم وشارت مصغر للإغلاقات اليومية. تعتمد ألوان company-profile.css */
+/* بطاقة «السهم» تحت نبذة الشركة: أرقام السهم ثم شارت السهم (company-chart.js). تعتمد ألوان company-profile.css */
 :root{--cq-up:#22c55e;--cq-down:#f05252;--cq-flat:var(--pf-muted)}
 :root[data-theme="light"]{--cq-up:#15803d;--cq-down:#d92d20}
 
 .company-quote{border-top-color:var(--pf-line)}
 .cq-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 16px;border-bottom:1px solid var(--pf-line)}
 .cq-head h3{margin:0;font-size:13px;font-weight:800;color:var(--pf-gold)}
-.cq-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
 .cq-up{color:var(--cq-up)}.cq-down{color:var(--cq-down)}.cq-flat{color:var(--cq-flat)}
 
-/* الأرقام: شبكة 3 × 2 */
-.cq-figures{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-left:1px solid var(--pf-line)}
-.cq-tile{padding:14px 16px;border-left:1px solid var(--pf-line);border-bottom:1px solid var(--pf-line);min-width:0}
-.cq-tile:nth-child(3n){border-left:0}
-.cq-tile:nth-child(n+4){border-bottom:0}
+/* الأرقام: صف من ست خانات (3 × 2 على الأجهزة المتوسطة، 2 × 3 على الجوال) */
+.cq-figures{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-bottom:1px solid var(--pf-line)}
+.cq-tile{padding:14px 16px;border-left:1px solid var(--pf-line);min-width:0}
+.cq-tile:last-child{border-left:0}
 .cq-label{display:block;font-size:10px;color:var(--pf-muted);font-weight:700;margin-bottom:6px}
 .cq-value{display:flex;align-items:baseline;gap:5px;font-size:21px;font-weight:800;line-height:1.15;color:var(--pf-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .cq-value bdi{direction:ltr}
@@ -22,9 +20,8 @@
 .cq-note{display:block;margin-top:6px;font-size:10.5px;color:var(--pf-muted);line-height:1.5}
 .cq-note bdi{direction:ltr;font-variant-numeric:tabular-nums}
 
-/* الشارت المصغر */
+/* الشارت */
 .cq-chart-panel{padding:12px 16px 10px;background:var(--pf-bg2);min-width:0}
-.cq-chart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .cq-range{display:inline-flex;border:1px solid var(--pf-line)}
 .cq-range button{border:0;background:transparent;color:var(--pf-muted);font:inherit;font-size:11px;font-weight:700;padding:5px 11px;cursor:pointer}
 .cq-range button:hover{color:var(--pf-ink)}
@@ -32,34 +29,47 @@
 .cq-range-change{font-size:11.5px;color:var(--pf-muted)}
 .cq-range-change span{font-weight:800}
 .cq-range-change bdi{direction:ltr}
-.cq-chart{color:var(--cq-flat)}
-.cq-chart.cq-up{color:var(--cq-up)}.cq-chart.cq-down{color:var(--cq-down)}
-.cq-plot{position:relative;height:150px;margin:16px 0 20px;touch-action:pan-y;cursor:crosshair}
-.cq-plot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.cq-line{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
-.cq-base{stroke:var(--pf-muted);stroke-width:1;stroke-dasharray:3 4;opacity:.55}
-.cq-mark{position:absolute;transform:translate(-50%,-140%);font-size:10px;font-weight:700;color:var(--pf-muted);font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none}
-.cq-mark.lo{transform:translate(-50%,40%)}
-.cq-last{position:absolute;left:100%;width:8px;height:8px;border-radius:50%;background:currentColor;transform:translate(-50%,-50%);box-shadow:0 0 0 4px color-mix(in srgb,currentColor 22%,transparent)}
-.cq-cross{position:absolute;top:0;bottom:0;width:1px;background:var(--pf-muted);opacity:.6;pointer-events:none}
-.cq-dot{position:absolute;width:9px;height:9px;border-radius:50%;background:currentColor;border:2px solid var(--pf-bg);transform:translate(-50%,-50%);pointer-events:none}
-.cq-tip{position:absolute;top:-6px;transform:translate(-50%,-100%);background:var(--pf-bg);border:1px solid var(--pf-line);padding:5px 9px;font-size:10.5px;color:var(--pf-muted);white-space:nowrap;pointer-events:none;display:grid;gap:1px;text-align:center;z-index:2;box-shadow:0 4px 14px #0004}
-.cq-tip b{color:var(--pf-ink);font-size:12px}
-.cq-tip bdi{direction:ltr;font-variant-numeric:tabular-nums}
-.cq-cross[hidden],.cq-dot[hidden],.cq-tip[hidden]{display:none}
-.cq-axis{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--pf-muted);direction:ltr;font-variant-numeric:tabular-nums}
 .cq-source{margin:6px 0 0;font-size:10px;color:var(--pf-muted)}
 .cq-empty{margin:40px 0;text-align:center;font-size:11.5px;color:var(--pf-muted)}
 
+.cc-toolbar{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap}
+.cc-change{margin-inline-start:auto}
+.cc-tools{margin-top:8px;padding-top:8px;border-top:1px dashed var(--pf-line)}
+.cc-tools-label{font-size:10.5px;font-weight:700;color:var(--pf-muted)}
+.cc-chips{display:flex;flex-wrap:wrap;gap:4px}
+.cc-chips button{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--pf-line);background:transparent;color:var(--pf-muted);font:inherit;font-size:11px;font-weight:700;padding:4px 9px;cursor:pointer}
+.cc-chips button:hover{color:var(--pf-ink);border-color:var(--pf-muted)}
+.cc-chips button[aria-pressed="true"]{background:var(--pf-gold-soft);border-color:var(--pf-gold);color:var(--pf-ink)}
+.cc-chips button i{width:9px;height:3px;border-radius:2px;flex:none}
+.cc-chips [data-clear]{border-style:dashed}
+.cc-legend{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;min-height:22px;margin:10px 0 2px;font-size:11px;color:var(--pf-muted)}
+.cc-legend b{color:var(--pf-ink);font-size:11.5px}
+.cc-legend bdi{direction:ltr;font-variant-numeric:tabular-nums;color:var(--pf-ink);font-weight:700}
+.cc-legend .cq-up bdi{color:var(--cq-up)}.cc-legend .cq-down bdi{color:var(--cq-down)}
+.cc-legend .cc-ind bdi{color:var(--c)}
+/* الارتفاع: الشارت الرئيسي ثم 110px لكل لوحة مؤشر (RSI، MACD) */
+.cc-chart{--cc-base:340px;position:relative;height:calc(var(--cc-base) + var(--cc-panes,0) * 110px)}
+.cc-chart.cc-drawing{cursor:crosshair}
+.cc-hint{margin:6px 0 0;font-size:11px;color:var(--pf-gold);font-weight:700}
+.cc-hint[hidden]{display:none}
+.cc-flag-note{color:var(--pf-gold)}
+/* مكتبة الشارت ترسم داخل جدول: نعزله عن تنسيقات جداول الموقع (عرض أدنى، تخطيط ثابت، حدود) */
+.company-quote .cc-chart table{width:auto!important;min-width:0!important;max-width:none!important;table-layout:auto!important;border:0!important;border-collapse:separate!important;margin:0!important;background:none!important}
+.company-quote .cc-chart :is(tr,td,th){border:0!important;padding:0!important;background:none!important;position:static;box-shadow:none!important}
+
 @media (max-width:980px){
-  .cq-body{grid-template-columns:1fr}
-  .cq-figures{border-left:0;border-bottom:1px solid var(--pf-line)}
+  .cq-figures{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cq-tile:nth-child(-n+3){border-bottom:1px solid var(--pf-line)}
+  .cq-tile:nth-child(3n){border-left:0}
+  .cc-chart{--cc-base:300px}
 }
 @media (max-width:520px){
   .cq-figures{grid-template-columns:1fr 1fr}
+  .cq-tile{border-bottom:1px solid var(--pf-line)}
   .cq-tile:nth-child(3n){border-left:1px solid var(--pf-line)}
   .cq-tile:nth-child(2n){border-left:0}
-  .cq-tile:nth-child(n+4){border-bottom:1px solid var(--pf-line)}
-  .cq-tile:nth-child(n+5){border-bottom:0}
+  .cq-tile:nth-last-child(-n+2){border-bottom:0}
   .cq-value{font-size:18px}.cq-price .cq-value{font-size:21px}
+  .cc-change{margin-inline-start:0;width:100%}
+  .cc-chart{--cc-base:260px}
 }
