@@ -2,4 +2,4 @@
 import * as metrics from './insurance-metrics.mjs?v=insurance-20261115';
 import { renderInsuranceCharts, fitInsuranceCharts, getChartOptions } from './insurance-charts.mjs?v=insurance-20261115';
 import { initSectorResultsPage } from './sector-results-page.mjs?v=quarterly-20261115';
-initSectorResultsPage({ slug: 'insurance', sectorName: 'التأمين', metrics, charts: { render: renderInsuranceCharts, fit: fitInsuranceCharts, options: getChartOptions }, version: 'insurance-20261115' });
+initSectorResultsPage({ slug: 'insurance', sectorName: 'التأمين', metrics, charts: { render: renderInsuranceCharts, fit: fitInsuranceCharts, options: getChartOptions }, version: 'insurance-quarterly-20261115' });

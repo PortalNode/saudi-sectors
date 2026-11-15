@@ -30,6 +30,9 @@ METRIC_KEYS = {
     "صافي الدخل": "netProfit",
     "ربح السهم قبل البنود الاستثنائية": "epsBeforeExceptional",
     "ربح السهم": "eps",
+    # Insurance items (insurance-metrics.mjs)
+    "إجمالي الأقساط المكتتبة (GWP)": "gwp",
+    "إيرادات التأمين": "insuranceRevenue",
 }
 QUARTER_NAMES = {"الأول": 1, "الثاني": 2, "الثالث": 3, "الرابع": 4}
 # Companies whose fiscal year does not end in December (see the file's _comment).
@@ -61,7 +64,8 @@ def read_sheet(ws):
         if found.group(1) not in QUARTER_NAMES: raise ImportValidationError(f"عنوان ربع غير معروف: {header}")
         columns.append((index, f"{found.group(2)}Q{QUARTER_NAMES[found.group(1)]}"))
     if not columns: raise ImportValidationError(f"لا توجد أعمدة «الربع …» في الصف الثاني من «{ws.title}»")
-    quarters = {key: dict.fromkeys(METRIC_KEYS.values()) for _, key in columns}
+    sheet_keys = [key for key in dict.fromkeys(METRIC_KEYS.values()) if any(METRIC_KEYS.get(norm(row[0])) == key for row in rows[2:] if row)]
+    quarters = {key: dict.fromkeys(sheet_keys) for _, key in columns}
     seen = set()
     for row in rows[2:]:
         key = METRIC_KEYS.get(norm(row[0]))
@@ -111,7 +115,7 @@ def restatement_report(data, annual):
     fy = {c["symbol"]: {r["year"]: r["values"] for r in c.get("years", [])} for c in annual["companies"]}
     for company in data["companies"]:
         for year, values in fy.get(company["symbol"], {}).items():
-            for key in ("revenue", "netProfit"):
+            for key in ("revenue", "insuranceRevenue", "netProfit"):
                 parts = [company["quarters"].get(f"{year}Q{n}", {}).get(key) for n in range(1, 5)]
                 total, official = (sum(parts) if None not in parts else None), values.get(key)
                 if total is not None and finite(official) and abs(total - official) > max(1, abs(official) * 0.005):

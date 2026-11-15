@@ -11,7 +11,8 @@
   <link rel="stylesheet" href="bank-charts.css?v=insurance-20261115">
   <link rel="stylesheet" href="theme.css?v=20261105">
   <link rel="stylesheet" href="quarterly-periods.css?v=quarterly-20261115">  <link rel="stylesheet" href="company-profile.css?v=20261115">
-  <link rel="stylesheet" href="layout.css?v=20261113">  <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
+  <link rel="stylesheet" href="layout.css?v=20261113">
+  <style>/* Insurance items have no margins: hide the empty margins table in the period views. */ .annual-margin-section:has(tbody:empty) { display: none; }</style>  <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261109-favicon1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20261109-favicon1">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20261109-favicon1">
@@ -39,7 +40,7 @@
     <footer class="footer"><p>نتائج سنوية محفوظة داخل المشروع · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات قطاع التأمين.</p></noscript>
   </main>
-  <script type="module" src="insurance.js?v=insurance-20261115"></script>
+  <script type="module" src="insurance.js?v=insurance-quarterly-20261115"></script>
   <script src="company-profile.js?v=20261115" defer></script>
   <script src="layout.js?v=20261113-periods" defer></script>
 </body>
