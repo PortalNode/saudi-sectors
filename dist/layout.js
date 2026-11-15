@@ -19,7 +19,14 @@
   ];
   const currentPage = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
   const siteName = document.querySelector('.site-bar .site-name');
-  if (siteName && SECTOR_PAGES.some(([page]) => page === currentPage)) {
+  // «نتائج الشركات» in the top bar opens the last results page viewed (Banks the first time).
+  const onResultsPage = SECTOR_PAGES.some(([page]) => page === currentPage);
+  if (onResultsPage) write('saudi-sectors-results-page', currentPage);
+  const lastResults = read('saudi-sectors-results-page');
+  if (SECTOR_PAGES.some(([page]) => page === lastResults)) {
+    for (const link of document.querySelectorAll('a[data-results-link]')) link.href = `${lastResults}.html`;
+  }
+  if (siteName && onResultsPage) {
     const collator = new Intl.Collator('ar');
     const sorted = [...SECTOR_PAGES].sort((a, b) => collator.compare(a[1], b[1]));
     const label = document.createElement('label');
