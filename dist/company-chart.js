@@ -82,6 +82,12 @@
     fib: 'اضغط على بداية الموجة (قمة أو قاع) ثم على نهايتها، أو اسحب بينهما · Esc للإلغاء',
     range: 'اضغط على السعر الأول ثم على الثاني، أو اسحب بينهما، لقياس الفرق ونسبته · Esc للإلغاء'
   };
+  // أيقونات أزرار العرض: إعادة تعيين العرض، وملء الشاشة والخروج منه
+  const svg = d => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const ICON_RESET = svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>');
+  const ICON_FULL = svg('<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>');
+  const ICON_EXIT = svg('<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>');
+  const RESET_KEY = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '') ? '⌥ + R' : 'Alt + R';
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
   const state = { type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off' };
@@ -173,6 +179,7 @@
         <div class="cq-range" role="group" aria-label="الفترة الزمنية للشمعة">${INTERVALS.map(([id, t]) => chip('interval', id, t, id === state.interval)).join('')}</div>
         <div class="cq-range" role="group" aria-label="مدة العرض">${RANGES.map(([id, t]) => chip('crange', id, t, id === state.range)).join('')}</div>
         <span class="cq-range-change cc-change"></span>
+        <button type="button" class="cc-full-btn" data-full aria-pressed="false" title="تكبير الرسم البياني ليملأ الشاشة">${ICON_FULL}<span>ملء الشاشة</span></button>
       </div>
       <div class="cc-toolbar cc-tools">
         <span class="cc-tools-label">المؤشرات</span>
@@ -184,7 +191,10 @@
       </div>
       <div class="cc-fib-settings" hidden></div>
       <div class="cc-legend" aria-live="polite"></div>
-      <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div>
+      <div class="cc-stage">
+        <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div>
+        <div class="cc-float"><button type="button" data-reset title="إعادة تعيين عرض الرسم البياني (${RESET_KEY})" aria-label="إعادة تعيين عرض الرسم البياني">${ICON_RESET}</button></div>
+      </div>
       <p class="cc-hint" hidden></p>
       <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية حتى آخر إغلاق رسمي، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
@@ -367,15 +377,43 @@
       chart.subscribeCrosshairMove(p => showLegend(p?.time ?? null));
       chart.timeScale().subscribeVisibleLogicalRangeChange(visibleChange);
       // بعد أن تطبّق المكتبة البيانات (في الإطار التالي)، وإلا أعادت ضبط المدى
-      const apply = saved ? () => chart.timeScale().setVisibleLogicalRange(saved) : () => {
-        const from = fromDate(data.at(-1).time, RANGES.find(r => r[0] === state.range)[2]);
-        // مساحة فارغة بعد آخر شمعة (نحو 8% من العرض) للرسم في المستقبل كما في TradingView
-        const start = Math.max(0, data.findIndex(b => b.time >= from)), room = Math.max(3, Math.round((data.length - start) * 0.08));
-        chart.timeScale().setVisibleLogicalRange({ from: start - 0.5, to: data.length - 1 + room });
-      };
+      const apply = saved ? () => chart.timeScale().setVisibleLogicalRange(saved) : fitRange;
       apply(); requestAnimationFrame(() => requestAnimationFrame(apply));
       showLegend(null);
     }
+
+    // العرض الافتراضي لمدة العرض المختارة، مع مساحة فارغة بعد آخر شمعة (نحو 8% من العرض) للرسم في المستقبل كما في TradingView
+    function fitRange() {
+      if (!chart || !data.length) return;
+      const from = fromDate(data.at(-1).time, RANGES.find(r => r[0] === state.range)[2]);
+      const start = Math.max(0, data.findIndex(b => b.time >= from)), room = Math.max(3, Math.round((data.length - start) * 0.08));
+      chart.timeScale().setVisibleLogicalRange({ from: start - 0.5, to: data.length - 1 + room });
+    }
+    // إعادة تعيين عرض الرسم البياني كما في TradingView: يعيد المدى الزمني الافتراضي للمدة المختارة،
+    // ويعيد مقياس السعر في كل اللوحات إلى الضبط التلقائي بعد سحبه أو تكبيره يدويًا. الرسوم لا تتأثر.
+    function resetView() {
+      if (!chart) return;
+      for (const p of chart.panes()) for (const s of p.getSeries()) s.priceScale().applyOptions({ autoScale: true });
+      fitRange();
+    }
+
+    /* ---------- ملء الشاشة: Fullscreen API إن توفّر، وإلا تغطية الصفحة بالـ CSS (آيفون) ---------- */
+    const isFull = () => panel.classList.contains('cc-full');
+    function setFull(on) {
+      panel.classList.toggle('cc-full', on);
+      document.documentElement.classList.toggle('cc-lock', on);
+      const button = panel.querySelector('[data-full]');
+      if (button) {
+        button.setAttribute('aria-pressed', String(on));
+        button.title = on ? 'الخروج من ملء الشاشة (Esc)' : 'تكبير الرسم البياني ليملأ الشاشة';
+        button.innerHTML = `${on ? ICON_EXIT : ICON_FULL}<span>${on ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}</span>`;
+      }
+      if (on && panel.requestFullscreen && !document.fullscreenElement) panel.requestFullscreen().catch(() => { /* تبقى التغطية بالـ CSS */ });
+      if (!on && document.fullscreenElement === panel) document.exitFullscreen().catch(() => {});
+    }
+    // الخروج بزر المتصفح أو Esc في وضع ملء الشاشة الأصلي
+    const onFullscreenChange = () => { if (!document.fullscreenElement && isFull()) setFull(false); };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
 
     // نقطة الرسم من موضع المؤشر: شمعة أقرب + السعر عند ذلك الارتفاع، داخل لوحة السعر فقط
     function pointFrom(event) {
@@ -523,7 +561,9 @@
     });
     document.addEventListener('keydown', event => {
       if (!box.isConnected || /^(INPUT|SELECT|TEXTAREA)$/.test(event.target?.tagName)) return;
-      if (event.key === 'Escape') { if (state.tool) setTool(null); else if (selected >= 0) select(-1); }
+      if (event.key === 'Escape') { if (state.tool) setTool(null); else if (selected >= 0) select(-1); else if (isFull()) setFull(false); }
+      // Alt/⌥ + R كما في TradingView (الحرف بالموضع حتى يعمل مع لوحة المفاتيح العربية و⌥ في ماك)
+      if (event.altKey && !event.ctrlKey && !event.metaKey && event.code === 'KeyR') { event.preventDefault(); resetView(); }
       if ((event.key === 'Delete' || event.key === 'Backspace') && selected >= 0 && !state.tool) { event.preventDefault(); deleteSelected(); }
     });
     /* ---------- إعدادات فيبوناتشي ---------- */
@@ -573,7 +613,9 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete]'); if (!b || !chart) return;
+      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full]'); if (!b || !chart) return;
+      if (b.hasAttribute('data-reset')) { resetView(); return; }
+      if (b.hasAttribute('data-full')) { setFull(!isFull()); return; }
       if (b.hasAttribute('data-fibset')) { toggleFibSettings(); return; }
       if (b.dataset.magnet) { state.magnet = b.dataset.magnet; panel.querySelectorAll('[data-magnet]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.magnet === state.magnet))); saveSettings(); applyCrosshair(); return; }
       let keep = true;
@@ -592,7 +634,7 @@
     });
 
     const theme = new MutationObserver(() => { if (!chart) return; colors = palette(panel); build(true); });
-    current = { destroy() { theme.disconnect(); chart?.remove(); chart = null; } };
+    current = { destroy() { if (isFull()) setFull(false); document.removeEventListener('fullscreenchange', onFullscreenChange); theme.disconnect(); chart?.remove(); chart = null; } };
     loadLib().then(lib => {
       LWC = lib; colors = palette(panel);
       setTool(null);

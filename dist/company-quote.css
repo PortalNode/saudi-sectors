@@ -53,6 +53,20 @@
 .cc-hint{margin:6px 0 0;font-size:11px;color:var(--pf-gold);font-weight:700}
 .cc-hint[hidden]{display:none}
 .cc-flag-note{color:var(--pf-gold)}
+/* إعادة تعيين العرض: زر عائم أسفل الشارت يظهر عند المرور عليه (ودائمًا على اللمس) كما في TradingView */
+.cc-stage{position:relative}
+.cc-float{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);display:flex;gap:6px;z-index:5;opacity:0;transition:opacity .15s}
+.cc-stage:hover .cc-float,.cc-float:focus-within{opacity:1}
+@media (hover:none){.cc-float{opacity:.85}}
+.cc-float button{display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid var(--pf-line);border-radius:50%;background:var(--pf-bg);color:var(--pf-ink);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.cc-float button:hover{border-color:var(--pf-gold);color:var(--pf-gold)}
+/* ملء الشاشة */
+.cc-full-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--pf-line);background:transparent;color:var(--pf-muted);font:inherit;font-size:11px;font-weight:700;padding:4px 10px;cursor:pointer}
+.cc-full-btn:hover,.cc-full-btn[aria-pressed="true"]{color:var(--pf-gold);border-color:var(--pf-gold)}
+.cq-chart-panel.cc-full{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;overflow:auto;padding:12px 16px;background:var(--pf-bg2)}
+.cq-chart-panel.cc-full .cc-stage{flex:1 1 auto;min-height:260px}
+.cq-chart-panel.cc-full .cc-chart{position:absolute;inset:0;height:auto}
+html.cc-lock,html.cc-lock body{overflow:hidden}
 /* مكتبة الشارت ترسم داخل جدول: نعزله عن تنسيقات جداول الموقع (عرض أدنى، تخطيط ثابت، حدود) */
 .company-quote .cc-chart table{width:auto!important;min-width:0!important;max-width:none!important;table-layout:auto!important;border:0!important;border-collapse:separate!important;margin:0!important;background:none!important}
 .company-quote .cc-chart :is(tr,td,th){border:0!important;padding:0!important;background:none!important;position:static;box-shadow:none!important}
@@ -71,6 +85,7 @@
   .cq-tile:nth-last-child(-n+2){border-bottom:0}
   .cq-value{font-size:18px}.cq-price .cq-value{font-size:21px}
   .cc-change{margin-inline-start:0;width:100%}
+  .cc-full-btn span{display:none}
   .cc-chart{--cc-base:260px}
 }
 
