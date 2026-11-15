@@ -6,7 +6,7 @@
   <script src="theme.js?v=comparison-v4"></script>
   <link rel="stylesheet" href="styles.css?v=comparison-v4"><link rel="stylesheet" href="banks.css?v=comparison-v4"><link rel="stylesheet" href="theme.css?v=comparison-v4">
   <link rel="stylesheet" href="layout.css?v=results-tab-20261115">
-  <link rel="stylesheet" href="comparison-page.css?v=comparison-v4">
+  <link rel="stylesheet" href="comparison-page.css?v=comparison-v6">
   <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261109-favicon1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20261109-favicon1">
@@ -33,6 +33,16 @@
       <div class="cx-field"><div class="cx-select"><select id="sector-select"></select></div></div>
     </div>
     <div class="cx-row">
+      <span class="cx-label">الفترة</span>
+      <div class="cx-field">
+        <div class="cx-inline">
+          <div id="period-seg" class="cx-seg" role="group" aria-label="نوع الفترة"></div>
+          <div id="quarter-seg" class="cx-seg" role="group" aria-label="الربع" hidden></div>
+        </div>
+        <p id="period-note" class="cx-note"></p>
+      </div>
+    </div>
+    <div class="cx-row">
       <span class="cx-label">البند</span>
       <div class="cx-field">
         <div id="metric-groups" class="cx-seg" role="group" aria-label="مجموعة البنود"></div>
@@ -40,10 +50,10 @@
       </div>
     </div>
     <div class="cx-row">
-      <span class="cx-label">السنوات</span>
+      <span class="cx-label" id="years-label">السنوات</span>
       <div class="cx-field cx-inline">
         <div id="year-chips" class="cx-chips" role="group" aria-label="السنوات"></div>
-        <div class="cx-quick"><button type="button" data-years="all">الكل</button><button type="button" data-years="3">آخر 3 سنوات</button><button type="button" data-years="1">آخر سنة</button></div>
+        <div id="year-quick" class="cx-quick"></div>
       </div>
     </div>
     <div class="cx-row">
@@ -88,10 +98,10 @@
   </div>
 
   <details class="read-guide cx-guide"><summary>طريقة القراءة</summary>
-    <p>القيم من ملفات النتائج السنوية داخل المشروع. لكل شركة لون ثابت ما دامت مختارة. تظهر «—» للقيم غير المتاحة، والقيم السالبة بالأحمر. عمود «التغير» يقارن أول سنة مختارة بآخر سنة مختارة، ويُعرض بالنقاط المئوية للبنود النسبية.</p>
+    <p>القيم من ملفات النتائج السنوية والربعية داخل المشروع، وبنود كل قطاع كما في ملفاته. «ربع محدد» يقارن الربع نفسه عبر السنوات، و«أرباع متتالية» يعرض الأرباع بترتيبها الزمني، و«6 أشهر» و«9 أشهر» مجموع الأرباع المستقلة من بداية السنة، والهوامش تُحسب من هذه المجاميع. لكل شركة لون ثابت ما دامت مختارة. تظهر «—» للقيم غير المتاحة، والقيم السالبة بالأحمر. عمود «التغير» يقارن أول فترة مختارة بآخر فترة مختارة، ويُعرض بالنقاط المئوية للبنود النسبية.</p>
   </details>
   <div id="cx-tip" class="cx-tip" hidden></div>
 </main>
-<script type="module" src="comparison-page.js?v=comparison-v5"></script>
+<script type="module" src="comparison-page.js?v=comparison-v6"></script>
   <script src="layout.js?v=results-tab-20261115" defer></script>
 </body></html>
