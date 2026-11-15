@@ -121,8 +121,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261116b/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116b" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261116b" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261116c/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116c" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261116c" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
@@ -157,4 +157,22 @@ test('the price workflow refreshes the candles and commits them with the prices'
   assert.match(workflow, /run: node scripts\/update-ohlc\.mjs \|\| echo/);
   assert.match(workflow, /git add -A dist\/data\.json dist\/ohlc/);
   assert.doesNotMatch(workflow, /update-history/);
+});
+
+test('the chart symbol search finds any stock on the site by name or symbol and links to its sector page', () => {
+  const list = [
+    { symbol: '4009', name: 'السعودي الألماني الصحية', sector: 'الرعاية الصحية', page: 'health.html' },
+    { symbol: '1180', name: 'الأهلي', sector: 'البنوك', page: 'banks.html' },
+    { symbol: '2222', name: 'أرامكو السعودية', sector: 'النفط و الغاز', page: 'oilgas.html' }
+  ];
+  const symbols = query => [...calc.searchStocks(list, query)].map(x => x.symbol);
+  assert.deepEqual(symbols(''), ['4009', '1180', '2222'], 'an empty search lists every stock');
+  assert.deepEqual(symbols('2222'), ['2222']);
+  assert.deepEqual(symbols('ارامكو'), ['2222'], 'hamza forms match plain alef');
+  assert.deepEqual(symbols('السعوديه'), ['2222'], 'taa marbuta matches haa');
+  assert.equal(symbols('1')[0], '1180');
+  assert.equal(calc.norm('الصحيّة'), 'الصحيه');
+  const pages = new Set(Object.values(calc.SECTOR_PAGES));
+  assert.equal(pages.size, 31, 'every results page has a sector');
+  for (const page of pages) assert.ok(existsSync(new URL(`../dist/${page}`, import.meta.url)), page);
 });

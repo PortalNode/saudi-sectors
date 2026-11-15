@@ -108,6 +108,33 @@
   };
   const LOCK_TIP = locked => locked ? 'فتح قفل الرسوم' : 'قفل الرسوم (يمنع تحريكها وتعديلها)';
   const HIDE_TIP = hidden => hidden ? 'إظهار الرسوم' : 'إخفاء الرسوم';
+  // البحث عن سهم: كل أسهم الموقع من data.json، واختيار سهم يفتح صفحة نتائجه (صفحة قطاعه ?symbol=)
+  const SECTOR_PAGES = {
+    'البنوك': 'banks.html', 'التعدين والمعادن': 'mining.html', 'الاتصالات': 'telecom.html', 'المرافق والطاقة': 'utilities.html',
+    'خدمات الرعاية الصحية': 'healthservices.html', 'المواد الاساسية': 'materials.html', 'البتروكيماويات': 'petrochem.html',
+    'النفط و الغاز': 'oilgas.html', 'الاسمنت': 'cement.html', 'تجارة و تجزئة': 'retail.html', 'الأغذية والمشروبات': 'food.html',
+    'الزراعة': 'agriculture.html', 'متعددة الأنشطة': 'multi.html', 'الصناعات التحويلية': 'industrial.html', 'العقارات': 'realestate.html',
+    'النقل': 'transport.html', 'وسائل الاعلام': 'media.html', 'الفنادق و السياحة': 'hotels-tourism.html',
+    'تقنية المعلومات': 'information-technology.html', 'خدمات الاعمال': 'business-services.html', 'التعليم و التدريب': 'education.html',
+    'المراكز الرياضية': 'sports.html', 'موردي الادوية': 'pharma.html', 'الرعاية الصحية': 'health.html', 'المنتجات الزجاجية': 'glass.html',
+    'السلع الاستهلاكية': 'consumer.html', 'أسواق الاوراق المالية': 'exchange.html', 'الخدمات المالية': 'financial-services.html',
+    'التأمين': 'insurance.html', 'التمويل': 'finance.html', 'الصناديق العقارية المتداولة': 'reits.html'
+  };
+  // تطبيع البحث العربي كما في الصفحة الرئيسية: بلا تشكيل، والهمزات ألف، والتاء المربوطة هاء، والألف المقصورة ياء
+  const norm = value => String(value ?? '').normalize('NFKD').replace(/[\u064B-\u065F\u0670]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').toLowerCase().trim();
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let stockListPromise = null;
+  const loadStockList = () => stockListPromise ??= fetch('data.json').then(r => r.json())
+    .then(d => d.sectors.flatMap(sector => SECTOR_PAGES[sector.name] ? sector.stocks.map(x => ({ symbol: String(x.symbol), name: x.name, sector: sector.name, page: SECTOR_PAGES[sector.name] })) : []))
+    .catch(() => { stockListPromise = null; return []; });
+  // الرمز المطابق أولًا، ثم ما يبدأ به الرمز، ثم ما يبدأ به الاسم
+  const searchRank = (x, q) => x.symbol === q ? 0 : x.symbol.startsWith(q) ? 1 : norm(x.name).startsWith(q) ? 2 : 3;
+  function searchStocks(list, query) {
+    const q = norm(query);
+    if (!q) return list;
+    return list.filter(x => x.symbol.includes(q) || norm(x.name).includes(q)).sort((a, b) => searchRank(a, q) - searchRank(b, q));
+  }
+  const ICON_SEARCH = svg('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/>');
   const RESET_KEY = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '') ? '⌥ + R' : 'Alt + R';
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
@@ -198,11 +225,22 @@
     let drawings = loadDrawings(symbol), pending = null;
     panel.innerHTML = `
       <div class="cc-toolbar">
-        <div class="cq-range" role="group" aria-label="نوع الشارت">${TYPES.map(([id, t]) => chip('type', id, t, id === state.type)).join('')}</div>
-        <div class="cq-range" role="group" aria-label="الفترة الزمنية للشمعة">${INTERVALS.map(([id, t]) => chip('interval', id, t, id === state.interval)).join('')}</div>
-        <div class="cq-range" role="group" aria-label="مدة العرض">${RANGES.map(([id, t]) => chip('crange', id, t, id === state.range)).join('')}</div>
-        <span class="cq-range-change cc-change"></span>
-        <button type="button" class="cc-full-btn" data-full aria-pressed="false" title="تكبير الرسم البياني ليملأ الشاشة">${ICON_FULL}<span>ملء الشاشة</span></button>
+        <div class="cc-search">
+          <button type="button" class="cc-search-btn" data-search aria-haspopup="listbox" aria-expanded="false" title="البحث عن سهم">${ICON_SEARCH}<b>${esc(symbol)}</b><span class="cc-search-name"></span></button>
+          <div class="cc-search-pop" hidden>
+            <input type="search" placeholder="ابحث باسم الشركة أو الرمز" aria-label="ابحث عن سهم باسم الشركة أو الرمز" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="cc-search-list-${esc(symbol)}">
+            <ul class="cc-search-list" id="cc-search-list-${esc(symbol)}" role="listbox" aria-label="الأسهم"></ul>
+          </div>
+        </div>
+        <div class="cc-groups">
+          <div class="cq-range" role="group" aria-label="نوع الشارت">${TYPES.map(([id, t]) => chip('type', id, t, id === state.type)).join('')}</div>
+          <div class="cq-range" role="group" aria-label="الفترة الزمنية للشمعة">${INTERVALS.map(([id, t]) => chip('interval', id, t, id === state.interval)).join('')}</div>
+          <div class="cq-range" role="group" aria-label="مدة العرض">${RANGES.map(([id, t]) => chip('crange', id, t, id === state.range)).join('')}</div>
+        </div>
+        <div class="cc-end">
+          <span class="cq-range-change cc-change"></span>
+          <button type="button" class="cc-full-btn" data-full aria-pressed="false" title="تكبير الرسم البياني ليملأ الشاشة">${ICON_FULL}<span>ملء الشاشة</span></button>
+        </div>
       </div>
       <div class="cc-fib-settings" hidden></div>
       <div class="cc-body" dir="ltr">
@@ -234,6 +272,7 @@
       <p class="cc-hint" hidden></p>
       <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية حتى آخر إغلاق رسمي، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
+    const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
     const body = panel.querySelector('.cc-body'), sideBar = panel.querySelector('.cc-side'), flyout = panel.querySelector('.cc-flyout'), tip = panel.querySelector('.cc-tip');
     let chart = null, LWC = null, colors = null, data = [], main = null, calc = {}, drawn = [], preview = null;
     // تحرير الرسوم: الرسمة المحددة، والسحب الجاري، ونقطة المغناطيس تحت المؤشر قبل الضغطة الأولى
@@ -681,6 +720,47 @@
       if (chart) paintDrawings();
     }
 
+    /* ---------- البحث عن سهم ---------- */
+    let stockList = [], matches = [], active = 0;
+    loadStockList().then(list => { stockList = list; const me = list.find(x => x.symbol === String(symbol)); if (me) panel.querySelector('.cc-search-name').textContent = me.name; });
+    function markActive() {
+      searchList.querySelectorAll('[data-pick]').forEach((li, i) => li.setAttribute('aria-selected', String(i === active)));
+      const li = searchList.children[active];
+      if (li?.dataset.pick) { li.scrollIntoView({ block: 'nearest' }); searchInput.setAttribute('aria-activedescendant', li.id); }
+    }
+    function renderMatches() {
+      matches = searchStocks(stockList, searchInput.value); active = 0;
+      searchList.innerHTML = matches.length
+        ? matches.map(x => `<li role="option" id="cc-opt-${x.symbol}" data-pick="${esc(x.symbol)}" aria-selected="false"${x.symbol === String(symbol) ? ' class="cc-current"' : ''}><bdi class="cc-sym">${esc(x.symbol)}</bdi><span>${esc(x.name)}</span><small>${esc(x.sector)}</small></li>`).join('')
+        : `<li class="cc-none">${stockList.length ? 'لا توجد نتائج مطابقة' : 'جار تحميل قائمة الأسهم…'}</li>`;
+      markActive();
+    }
+    function openSearch(open) {
+      searchPop.hidden = !open; searchBtn.setAttribute('aria-expanded', String(open));
+      if (!open) return;
+      searchInput.value = ''; renderMatches(); searchInput.focus();
+      if (!stockList.length) loadStockList().then(list => { stockList = list; if (!searchPop.hidden) renderMatches(); });
+    }
+    function pick(sym) {
+      const target = stockList.find(x => x.symbol === sym);
+      if (!target) return;
+      if (target.symbol === String(symbol)) { openSearch(false); return; }
+      // صفحة الشركة الجديدة تفتح الشارت في ملء الشاشة أيضًا إن كان مفتوحًا به
+      try { if (isFull()) sessionStorage.setItem('cc-full', '1'); } catch { /* ignore */ }
+      location.href = `${target.page}?symbol=${encodeURIComponent(target.symbol)}`;
+    }
+    searchInput.addEventListener('input', renderMatches);
+    searchInput.addEventListener('keydown', event => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); if (matches.length) { active = (active + (event.key === 'ArrowDown' ? 1 : -1) + matches.length) % matches.length; markActive(); } }
+      else if (event.key === 'Enter') { event.preventDefault(); if (matches[active]) pick(matches[active].symbol); }
+      else if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); openSearch(false); searchBtn.focus(); }
+    });
+    searchList.addEventListener('click', event => { const li = event.target.closest('[data-pick]'); if (li) pick(li.dataset.pick); });
+    searchList.addEventListener('pointermove', event => { const li = event.target.closest('[data-pick]'); const i = li ? [...searchList.children].indexOf(li) : -1; if (i >= 0 && i !== active) { active = i; markActive(); } });
+    document.addEventListener('pointerdown', event => {
+      if (!searchPop.hidden && searchPop.isConnected && !searchPop.contains(event.target) && !searchBtn.contains(event.target)) openSearch(false);
+    });
+
     function setTool(tool) {
       state.tool = tool; pending = null; preview = null; hover = null;
       if (tool && selected >= 0) select(-1);
@@ -697,7 +777,9 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide]'); if (!b || !chart) return;
+      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
+      if (b.hasAttribute('data-search')) { openSearch(searchPop.hidden); return; }
+      if (!chart) return;
       if (b.dataset.menu) { openFlyout(b.dataset.menu, b); return; }
       if (b.hasAttribute('data-cursor')) { setTool(null); return; }
       if (b.hasAttribute('data-lock')) { setLocked(!state.locked); return; }
@@ -727,10 +809,11 @@
       LWC = lib; colors = palette(panel);
       setTool(null);
       build(false);
+      try { if (sessionStorage.getItem('cc-full')) { sessionStorage.removeItem('cc-full'); setFull(true); } } catch { /* ignore */ }
       theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     }).catch(() => { box.innerHTML = '<p class="cq-empty">تعذر تحميل مكتبة الشارت.</p>'; });
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, rangeLabel, addPeriods, periodsBetween } };
+  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
 })();
