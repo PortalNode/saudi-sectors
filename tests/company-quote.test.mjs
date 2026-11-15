@@ -89,6 +89,19 @@ test('placed drawings can be selected, moved, reshaped and deleted, and the magn
   assert.match(chart, /const point = pointFrom\(event\);\s*hover = point;/, 'it follows the cursor before the first click');
 });
 
+test('drawing points can go past the last candle: trading days in daily, weeks and months otherwise', () => {
+  // 2026-11-15 is a Sunday; Friday and Saturday are not trading days.
+  assert.equal(calc.addPeriods('2026-11-15', 1, 'd'), '2026-11-16');
+  assert.equal(calc.addPeriods('2026-11-19', 1, 'd'), '2026-11-22', 'Thursday → Sunday');
+  assert.equal(calc.addPeriods('2026-11-15', 10, 'd'), '2026-11-29');
+  assert.equal(calc.periodsBetween('2026-11-15', '2026-11-29', 'd'), 10);
+  assert.equal(calc.addPeriods('2026-11-15', 3, 'w'), '2026-12-06');
+  assert.equal(calc.periodsBetween('2026-11-15', '2026-12-06', 'w'), 3);
+  assert.equal(calc.addPeriods('2026-11-01', 2, 'm'), '2027-01-01');
+  assert.equal(calc.periodsBetween('2026-11-01', '2027-01-01', 'm'), 2);
+  assert.equal(calc.periodsBetween('2026-11-15', '2026-11-10', 'd'), 0);
+});
+
 test('the price range shows the change and its percentage from the first point', () => {
   assert.equal(calc.rangeLabel(46.12, 61.25), '+15.13 (+32.81%)');
   assert.equal(calc.rangeLabel(61.25, 46.12), '−15.13 (−24.70%)');
@@ -108,8 +121,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261115f/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115f" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115f" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261115g/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261115g" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261115g" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);

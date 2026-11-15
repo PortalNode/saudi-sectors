@@ -112,6 +112,24 @@
     }
     return out;
   }
+  // تواريخ بعد آخر شمعة (للرسم في المستقبل كما في TradingView): جلسات تداول الأحد – الخميس في اليومي،
+  // وأسابيع في الأسبوعي، وأشهر في الشهري. لا تُحسب العطل الرسمية المقبلة.
+  const isTradingDay = d => d.getUTCDay() !== 5 && d.getUTCDay() !== 6;
+  function addPeriods(iso, n, interval) {
+    const d = new Date(`${iso}T12:00:00Z`);
+    if (interval === 'w') d.setUTCDate(d.getUTCDate() + 7 * n);
+    else if (interval === 'm') d.setUTCMonth(d.getUTCMonth() + n);
+    else for (let left = n; left > 0;) { d.setUTCDate(d.getUTCDate() + 1); if (isTradingDay(d)) left -= 1; }
+    return d.toISOString().slice(0, 10);
+  }
+  function periodsBetween(fromIso, toIso, interval) {
+    const from = new Date(`${fromIso}T12:00:00Z`), to = new Date(`${toIso}T12:00:00Z`);
+    if (to <= from) return 0;
+    if (interval === 'w') return Math.round((to - from) / (7 * 864e5));
+    if (interval === 'm') return (to.getUTCFullYear() - from.getUTCFullYear()) * 12 + to.getUTCMonth() - from.getUTCMonth();
+    let count = 0; for (const d = new Date(from); d < to;) { d.setUTCDate(d.getUTCDate() + 1); if (isTradingDay(d)) count += 1; }
+    return count;
+  }
   const fromDate = (lastIso, months) => { const d = new Date(`${lastIso}T12:00:00Z`); d.setUTCMonth(d.getUTCMonth() - months); return d.toISOString().slice(0, 10); };
 
   /* ---------- المؤشرات (القيمة null حتى تكتمل الفترة) ---------- */
@@ -200,6 +218,10 @@
 
     // الرسوم محفوظة بالسعر والتاريخ، فتظهر في اليومي والأسبوعي والشهري (على أقرب شمعة)
     const barIndex = iso => { let k = 0; for (let i = 0; i < data.length && data[i].time <= iso; i++) k = i; return k; };
+    // موضع نقطة الرسم: داخل الشموع على أقرب شمعة، وبعد آخر شمعة بعدد الفترات المقبلة
+    const lastIndex = () => data.length - 1;
+    const logicalOf = iso => iso > data[lastIndex()].time ? lastIndex() + periodsBetween(data[lastIndex()].time, iso, state.interval) : barIndex(iso);
+    const timeAt = index => index <= lastIndex() ? data[Math.max(0, index)].time : addPeriods(data[lastIndex()].time, index - lastIndex(), state.interval);
     // الخط الأفقي يمتد بعرض الشارت كما في TradingView؛ خط الاتجاه وفيبوناتشي يُرسمان على اللوحة بين النقطتين
     function paintDrawings() {
       for (const d of drawn) d.remove();
@@ -210,7 +232,7 @@
       }
       overlay.redraw();
     }
-    const xy = p => { const x = chart.timeScale().logicalToCoordinate(p.logical ?? barIndex(p.time)), y = main.priceToCoordinate(p.price); return x == null || y == null ? null : { x, y }; };
+    const xy = p => { const x = chart.timeScale().logicalToCoordinate(p.logical ?? logicalOf(p.time)), y = main.priceToCoordinate(p.price); return x == null || y == null ? null : { x, y }; };
     function drawShapes(ctx) {
       const ts = chart.timeScale();
       const handle = (pt, color) => { ctx.beginPath(); ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.stroke(); };
@@ -347,7 +369,9 @@
       // بعد أن تطبّق المكتبة البيانات (في الإطار التالي)، وإلا أعادت ضبط المدى
       const apply = saved ? () => chart.timeScale().setVisibleLogicalRange(saved) : () => {
         const from = fromDate(data.at(-1).time, RANGES.find(r => r[0] === state.range)[2]);
-        chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, data.findIndex(b => b.time >= from)) - 0.5, to: data.length - 1 + 2 });
+        // مساحة فارغة بعد آخر شمعة (نحو 8% من العرض) للرسم في المستقبل كما في TradingView
+        const start = Math.max(0, data.findIndex(b => b.time >= from)), room = Math.max(3, Math.round((data.length - start) * 0.08));
+        chart.timeScale().setVisibleLogicalRange({ from: start - 0.5, to: data.length - 1 + room });
       };
       apply(); requestAnimationFrame(() => requestAnimationFrame(apply));
       showLegend(null);
@@ -360,7 +384,10 @@
       if (y < 0 || y > chart.panes()[0].getHeight()) return null;
       const logical = chart.timeScale().coordinateToLogical(x), price = main.coordinateToPrice(y);
       if (logical == null || price == null) return null;
-      const index = Math.max(0, Math.min(data.length - 1, Math.round(logical))), b = data[index];
+      const index = Math.max(0, Math.round(logical));
+      // بعد آخر شمعة: لا شمعة يلتصق بها المغناطيس، فالنقطة حيث المؤشر
+      if (index > lastIndex()) return { time: timeAt(index), price, logical: index, snapped: false };
+      const b = data[index];
       const snapped = nearestPrice(state.type === 'candles' ? [b.open, b.high, b.low, b.close] : [b.close], value => main.priceToCoordinate(value), y, state.magnet);
       return { time: b.time, price: snapped ?? price, logical: index, snapped: snapped != null };
     }
@@ -396,7 +423,6 @@
 
     /* ---------- تحرير الرسوم بعد تثبيتها: تحديد، سحب الرسمة كاملة أو أحد طرفيها، حذف ---------- */
     const local = event => { const rect = box.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
-    const clampIndex = i => Math.max(0, Math.min(data.length - 1, i));
     function distanceToSegment(x, y, A, B) {
       const dx = B.x - A.x, dy = B.y - A.y, len = dx * dx + dy * dy;
       const t = len ? Math.max(0, Math.min(1, ((x - A.x) * dx + (y - A.y) * dy) / len)) : 0;
@@ -463,7 +489,7 @@
         const dl = Math.round((chart.timeScale().coordinateToLogical(x) ?? drag.logical) - drag.logical);
         const dp = (main.coordinateToPrice(y) ?? drag.price) - drag.price;
         if (d.type === 'hline') d.price = Math.round((drag.orig.price + dp) * 100) / 100;
-        else { const shift = p => ({ time: data[clampIndex(barIndex(p.time) + dl)].time, price: p.price + dp }); d.a = shift(drag.orig.a); d.b = shift(drag.orig.b); }
+        else { const shift = p => ({ time: timeAt(Math.max(0, logicalOf(p.time) + dl)), price: p.price + dp }); d.a = shift(drag.orig.a); d.b = shift(drag.orig.b); }
       } else {
         // طرف الرسمة يتبع المؤشر، ويلتصق بالمغناطيس إن كان مفعّلًا
         const point = pointFrom(event);
@@ -576,5 +602,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, rangeLabel } };
+  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, rangeLabel, addPeriods, periodsBetween } };
 })();
