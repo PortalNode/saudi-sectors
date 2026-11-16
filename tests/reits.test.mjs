@@ -57,5 +57,5 @@ test('main table links the REITs sector and its funds to the page', () => {
   assert.match(app, /href="reits\.html">النتائج السنوية 2021–2025/);
   assert.match(app, /href="reits\.html\?symbol=/);
   assert.match(read('index.html'), /app\.js\?v=[^"]*reits-20261115/);
-  assert.match(read('reits.html'), /src="reits\.js\?v=mcap-order-20261115"/);
+  assert.match(read('reits.html'), /src="reits\.js\?v=latest-ytd-20261116"/);
 });

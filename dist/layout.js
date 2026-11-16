@@ -79,13 +79,17 @@
     mirror();
   }
 
-  // ----- Results pages: key figures strip built from the annual table -----
+  // ----- Results pages: key figures strip -----
+  // Built from the company's latest 3/6/9/12 months when the page left that table in
+  // <template class="latest-results"> (latest-results.mjs); otherwise from the visible table.
   const PREFERRED = ['revenue', 'netFinancingIncome', 'operatingIncome', 'netProfit', 'eps', 'netMargin', 'returnOnEquity', 'assets', 'equity'];
   const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function buildKeyFigures(wrap) {
-    const table = wrap.querySelector('table.annual-table');
     const panel = wrap.closest('.bank-panel');
     if (!panel) return;
+    const latest = panel.querySelector('template.latest-results')?.content;
+    const source = latest?.querySelector('table.annual-table') ? latest : wrap;
+    const table = source.querySelector('table.annual-table');
     let strip = panel.querySelector('.key-figures');
     let title = panel.querySelector('.key-figures-title');
     if (!table) { strip?.remove(); title?.remove(); return; }
@@ -93,7 +97,7 @@
     // A table may name its own periods (e.g. quarterly views comparing with the same quarter last year).
     const year = table.dataset.latestLabel || headings.at(-1)?.textContent.trim() || '';
     const previousYear = table.dataset.compareLabel || headings.at(-3)?.textContent.trim() || '';
-    const rows = new Map([...table.querySelectorAll('tbody tr[data-metric]')].map(row => [row.dataset.metric, row]));
+    const rows = new Map([...(source === latest ? source : table).querySelectorAll('tbody tr[data-metric]')].map(row => [row.dataset.metric, row]));
     const keys = PREFERRED.filter(key => rows.has(key)).concat([...rows.keys()].filter(key => !PREFERRED.includes(key))).slice(0, 5);
     const cells = keys.map(key => {
       const row = rows.get(key);
@@ -114,7 +118,7 @@
       const anchor = panel.querySelector('.bank-unit-note') || wrap;
       anchor.before(title, strip);
     }
-    title.textContent = year ? `أبرز أرقام ${year}` : 'أبرز الأرقام';
+    title.textContent = source === latest ? `آخر النتائج المالية: ${year}` : year ? `أبرز أرقام ${year}` : 'أبرز الأرقام';
     strip.innerHTML = cells;
   }
   for (const wrap of document.querySelectorAll('.annual-table-wrap')) {

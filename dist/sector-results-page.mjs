@@ -1,5 +1,6 @@
 import { loadMarketCaps, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
-import { escapeHtml, PERIODS, QUARTER_NAMES, MONTH_NAMES, buildPeriodColumns, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly, isCalendarYear, monthRange, periodRange } from './quarterly-periods.mjs?v=quarterly-20261115';
+import { escapeHtml, PERIODS, QUARTER_NAMES, MONTH_NAMES, buildPeriodColumns, sumQuarters, chartCompanyFor, renderPeriodTable, quarterLabel, validateQuarterly, isCalendarYear, monthRange, periodRange } from './quarterly-periods.mjs?v=quarterly-20261115';
+import { latestYearToDateColumns, setLatestResults } from './latest-results.mjs?v=latest-ytd-20261116';
 
 /**
  * Drives a sector results page (annual table + bar chart) and, when
@@ -90,6 +91,9 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     $('title').innerHTML = `${escapeHtml(company.name)} <span class="symbol-badge">${escapeHtml(company.symbol)}</span>`;
     $('subtitle').textContent = `${company.fullName || company.name} · قطاع ${sectorName} · ${quarterly ? periodSummary() : 'نتائج سنوية فقط'}`;
     syncPeriodControls(quarterCompany ? Object.keys(quarterCompany.quarters).sort().at(-1) : null);
+    // The key figures strip always shows the latest 3/6/9/12 months, whatever the table shows.
+    const latestColumns = quarterCompany ? latestYearToDateColumns(quarterCompany, (item, year, count) => sumQuarters(item, year, count, periodSpec)) : null;
+    setLatestResults($('panel'), latestColumns && renderPeriodTable(company, latestColumns, { caption: 'آخر النتائج', metrics: periodSpec?.metrics }));
     if (period === 'fy') {
       activeYears = company.years.map(record => record.year).sort((a, b) => a - b);
       chartCompany = company;

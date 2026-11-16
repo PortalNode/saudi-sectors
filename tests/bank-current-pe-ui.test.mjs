@@ -82,6 +82,8 @@ function harness(initial = priceFixture(), { map = { snapshot: {} } } = {}) {
     console: { warn(...args) { warnings.push(args); }, error(...args) { errors.push(args); } },
     setInterval(callback, milliseconds) { intervals.push({ callback, milliseconds }); return intervals.length; },
     escapeHtml, marketCapMap, sortByMarketCap,
+    // No quarterly file in these tests, so the latest-period strip source is only ever cleared.
+    sumBankQuarters() { return null; }, latestYearToDateColumns() { return null; }, setLatestResults() {},
     validateDataset(value) { assert.equal(value.banks.length, 10); return value; },
     renderAnnualTable(bank, years) {
       calls.annual.push({ bank, years });

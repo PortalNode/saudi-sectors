@@ -3,7 +3,8 @@ import { renderBankCharts, fitBankCharts, getChartOptions } from './bank-charts.
 import { buildCurrentBankPE } from './bank-current-pe.mjs?v=20261105';
 import { renderCurrentPEComparison, fitCurrentPEComparison } from './bank-current-pe-chart.mjs?v=20261105';
 import { marketCapMap, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
-import { PERIODS, QUARTER_NAMES, quarterLabel, validateQuarterly, buildBankPeriodColumns, renderBankPeriodTable, getBankPeriodChartOptions, renderBankPeriodChart, fitBankPeriodChart } from './bank-quarterly.mjs?v=banks-quarterly-20261115';
+import { PERIODS, QUARTER_NAMES, quarterLabel, validateQuarterly, sumBankQuarters, buildBankPeriodColumns, renderBankPeriodTable, getBankPeriodChartOptions, renderBankPeriodChart, fitBankPeriodChart } from './bank-quarterly.mjs?v=banks-quarterly-20261115';
+import { latestYearToDateColumns, setLatestResults } from './latest-results.mjs?v=latest-ytd-20261116';
 
 const element = id => document.getElementById(id);
 let dataset, activeChartBank;
@@ -97,6 +98,9 @@ function selectBank(symbol, replaceHistory = false) {
   element('bank-title').innerHTML = `${escapeHtml(bank.name)} <span class="symbol-badge">${escapeHtml(bank.symbol)}</span>`;
   element('bank-subtitle').textContent = `${bank.fullName || bank.name} · قطاع البنوك · ${period === 'fy' ? 'نتائج سنوية كاملة في الملف' : periodSummary()}`;
   syncPeriodControls(quarterBank);
+  // The key figures strip always shows the latest 3/6/9/12 months, whatever the table shows.
+  const latestColumns = quarterBank ? latestYearToDateColumns(quarterBank, sumBankQuarters) : null;
+  setLatestResults(element('bank-panel'), latestColumns && renderBankPeriodTable(bank, latestColumns, { caption: 'آخر النتائج' }));
   if (period === 'fy') {
     periodColumns = [];
     element('bank-table-wrap').innerHTML = renderAnnualTable(bank, dataset.years);
