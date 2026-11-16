@@ -50,6 +50,28 @@ test('indicators follow TradingView\'s definitions', () => {
   assert.deepEqual({ macd: flat.macd, signal: flat.signal, hist: flat.hist }, { macd: 0, signal: 0, hist: 0 });
 });
 
+test('ADJ adjusts earlier prices for cash dividends as TradingView does', () => {
+  const daily = [
+    { time: '2026-08-02', open: 44, high: 44.5, low: 43.8, close: 44 },
+    { time: '2026-08-04', open: 43.5, high: 43.9, low: 43.2, close: 43.6 },
+    { time: '2026-11-02', open: 40, high: 40.2, low: 39.7, close: 40 },
+    { time: '2026-11-03', open: 39.5, high: 39.8, low: 39.3, close: 39.6 }
+  ];
+  const adjusted = calc.adjustDividends(daily, [['2026-08-04', 0.55], ['2026-11-03', 0.55]]);
+  const f1 = 1 - 0.55 / 44, f2 = 1 - 0.55 / 40;
+  assert.equal(adjusted[0].close.toFixed(4), (44 * f1 * f2).toFixed(4), 'both dividends apply before the first ex-date');
+  assert.equal(adjusted[2].close.toFixed(4), (40 * f2).toFixed(4));
+  assert.equal(adjusted[3].close, 39.6, 'prices from the last ex-date on are unchanged');
+  assert.deepEqual(calc.adjustDividends(daily, []).map(b => b.close), daily.map(b => b.close), 'no dividends, nothing changes');
+  // stc (7010): the stored candles adjusted with Yahoo's dividends give TradingView's ADJ chart.
+  const file = JSON.parse(read('ohlc/7010.json'));
+  if (Array.isArray(file.div) && file.div.length) {
+    const bars = file.d.map((time, i) => ({ time, open: file.o[i], high: file.h[i], low: file.l[i], close: file.c[i] }));
+    const aug = calc.adjustDividends(bars, file.div).find(b => b.time === '2026-08-26');
+    if (aug) assert.ok(Math.abs(aug.high - 44.19) < 0.05, `August peak ${aug.high}`);
+  }
+});
+
 test('Fibonacci levels run from 100% at the first point to 0% at the second, with TradingView-style defaults', () => {
   const plain = value => JSON.parse(JSON.stringify(value));
   const defaults = plain(calc.FIB_DEFAULT);

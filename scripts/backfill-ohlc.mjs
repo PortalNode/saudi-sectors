@@ -17,7 +17,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { execFile as execFileCb } from 'node:child_process';
 import { promisify } from 'node:util';
-import { parseYahoo, parseYahooSplits, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, round2Price, SOURCE, TV_FIGURES, tvDistance } from './ohlc-merge.mjs';
+import { parseYahoo, parseYahooSplits, parseYahooDividends, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, mergeDividends, round2Price, SOURCE, TV_FIGURES, tvDistance } from './ohlc-merge.mjs';
 
 const execFile = promisify(execFileCb);
 const DIST = new URL('../dist/', import.meta.url);
@@ -124,15 +124,15 @@ async function worker() {
         if (official.at(-1)?.d === last.date) official.at(-1).c = round2Price(last.price);
       }
       // Explicit dates: Yahoo has answered `range=6y` with a shorter history from some networks.
-      const now = Math.floor(Date.now() / 1000), dailyJson = await yahooJson(stock.symbol, `period1=${now - 6 * 366 * 86400}&period2=${now}&interval=1d&events=split`);
-      let daily = new Map(parseYahoo(dailyJson).map(b => [b.d, b])), splits = parseYahooSplits(dailyJson);
+      const now = Math.floor(Date.now() / 1000), dailyJson = await yahooJson(stock.symbol, `period1=${now - 6 * 366 * 86400}&period2=${now}&interval=1d&events=split,div`);
+      let daily = new Map(parseYahoo(dailyJson).map(b => [b.d, b])), splits = parseYahooSplits(dailyJson), dividends = parseYahooDividends(dailyJson);
       // A history shorter than five years may be cut short by the Yahoo server that answered: ask another.
       const fiveYears = new Date(Date.now() - 5 * 365 * 864e5).toISOString().slice(0, 10);
       if (([...daily.keys()].sort()[0] ?? '9') > fiveYears) {
         try {
-          const other = JSON.parse(await getText(`https://query2.finance.yahoo.com/v8/finance/chart/${stock.symbol}.SR?range=max&interval=1d&events=split`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } }));
+          const other = JSON.parse(await getText(`https://query2.finance.yahoo.com/v8/finance/chart/${stock.symbol}.SR?range=max&interval=1d&events=split,div`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } }));
           const longer = new Map(parseYahoo(other).map(b => [b.d, b]));
-          if (longer.size > daily.size) { daily = longer; splits = parseYahooSplits(other); }
+          if (longer.size > daily.size) { daily = longer; splits = parseYahooSplits(other); dividends = parseYahooDividends(other); }
         } catch { /* keep the first answer */ }
       }
       let hourly = new Map();
@@ -155,7 +155,7 @@ async function worker() {
       const kept = new Map(before?.source === SOURCE && validOhlc(before) ? fileBars(before).filter(b => !(before.est || []).includes(b.d)).map(b => [b.d, b]) : []);
       const est = new Set(rebuilt.est);
       const bars = rebuilt.bars.map(b => { const k = kept.get(b.d); if (k && Math.abs(k.c - b.c) < 0.005) { est.delete(b.d); return k; } return b; });
-      const file = candleFile(stock.symbol, SOURCE, official.at(-1)?.d ?? null, bars, [...est]);
+      const file = candleFile(stock.symbol, SOURCE, official.at(-1)?.d ?? null, bars, [...est], mergeDividends(before?.div, dividends));
       if (!validOhlc(file)) throw new Error('too few valid bars');
       await writeFile(new URL(`${stock.symbol}.json`, DIR), JSON.stringify(file) + '\n');
       report.rebuilt += 1; report.estimated += file.est.length; failedInARow = 0;

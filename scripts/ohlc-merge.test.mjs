@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isFakeBar, parseYahooSplits, tvDistance, parseOfficialCloses, scaleFactors, rebuildBars, candleFile, validOhlc, addSession, scanBars, applyFactor } from './ohlc-merge.mjs';
+import { isFakeBar, parseYahooSplits, parseYahooDividends, mergeDividends, tvDistance, parseOfficialCloses, scaleFactors, rebuildBars, candleFile, validOhlc, addSession, scanBars, applyFactor } from './ohlc-merge.mjs';
 
 const bar = (d, c, extra = {}) => ({ d, o: c, h: c + 0.1, l: c - 0.1, c, v: 1000, ...extra });
 const days = n => Array.from({ length: n }, (_, i) => new Date(Date.UTC(2026, 0, 4 + i)).toISOString().slice(0, 10));
@@ -125,4 +125,13 @@ test('candidates are scored against TradingView\'s own figures', () => {
   const exact = [10.5, 9.9, 10.5, 9.9, 10.2, null, null];
   assert.equal(tvDistance(bars, exact, today).mismatches, 0);
   assert.equal(tvDistance(bars, [11, 9.9, 10.5, 9.9, 10.2, null, null], today).mismatches, 1, 'a 52-week high 5% apart is a mismatch');
+});
+
+test('cash dividends are read by ex-date and kept across updates', () => {
+  const t = iso => Date.parse(`${iso}T07:00:00Z`) / 1000;
+  const json = { chart: { result: [{ meta: { gmtoffset: 10800 }, events: { dividends: { a: { date: t('2026-11-03'), amount: 0.55 }, b: { date: t('2026-08-04'), amount: 0.55 } } } }] } };
+  assert.deepEqual(parseYahooDividends(json), [['2026-08-04', 0.55], ['2026-11-03', 0.55]]);
+  assert.deepEqual(mergeDividends([['2026-05-03', 0.55], ['2026-08-04', 0.5]], [['2026-08-04', 0.55]]), [['2026-05-03', 0.55], ['2026-08-04', 0.55]]);
+  const file = candleFile('7010', 'x', '2026-11-15', [bar('2026-01-04', 45), bar('2026-11-15', 41.36)], [], [['2025-11-09', 0.55], ['2026-02-24', 0.55]]);
+  assert.deepEqual(file.div, [['2026-02-24', 0.55]], 'only dividends within the candles are stored');
 });

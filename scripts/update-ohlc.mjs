@@ -15,7 +15,7 @@
  * Usage: node scripts/update-ohlc.mjs [--force] [--symbols 3003,2222] [--out <dir>]
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { parseYahoo, cleanBars, validOhlc, isFakeBar, fileBars, candleFile, scanBars, addSession, SCAN_COLUMNS, YEARS, SOURCE } from './ohlc-merge.mjs';
+import { parseYahoo, parseYahooDividends, mergeDividends, cleanBars, validOhlc, isFakeBar, fileBars, candleFile, scanBars, addSession, SCAN_COLUMNS, YEARS, SOURCE } from './ohlc-merge.mjs';
 
 const DIST = new URL('../dist/', import.meta.url);
 const arg = name => process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : null;
@@ -55,7 +55,8 @@ async function getJson(url, init = {}) {
   }
 }
 // Yahoo answers 429 to Node with a full Chrome user agent (it does not match Node's TLS fingerprint) but serves a plain one.
-const yahoo = (symbol, range) => getJson(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.SR?range=${range}&interval=1d`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } }).then(parseYahoo);
+const yahooJson = (symbol, range) => getJson(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.SR?range=${range}&interval=1d&events=div`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } });
+const yahoo = (symbol, range) => yahooJson(symbol, range).then(parseYahoo);
 
 async function scanner(symbols) {
   const rows = new Map();
@@ -81,13 +82,16 @@ async function worker() {
       const before = await readJson(file), session = sessions.get(stock.symbol);
       // Stored history (files from before the rebuild may still hold Yahoo's flat no-volume bars), or Yahoo for a new stock.
       let bars = before && validOhlc(before) ? fileBars(before).filter(b => Array.isArray(before.est) || !isFakeBar(b)) : null;
-      let source = before?.source === SOURCE ? SOURCE : FALLBACK_SOURCE, est = before?.est || [];
+      let source = before?.source === SOURCE ? SOURCE : FALLBACK_SOURCE, est = before?.est || [], div = before?.div || [];
       if (!bars) bars = cleanBars((await yahoo(stock.symbol, `${YEARS}y`)).filter(b => !isFakeBar(b)), { official }).bars;
       let through = before?.officialThrough ?? null;
       if (session?.today && official) {
         const last = bars.at(-1)?.d ?? '';
         // Sessions this update missed: the stored history stops before TradingView's previous session.
-        const fill = session.prev && last < session.prev.d && !bars.some(b => b.d === session.prev.d) ? await yahoo(stock.symbol, '3mo') : [];
+        // Recent Yahoo bars: dividends declared since the last run (the chart's ADJ option), and sessions this update missed.
+        let recent = null; try { recent = await yahooJson(stock.symbol, '3mo'); } catch { /* dividends wait for the next run */ }
+        if (recent) div = mergeDividends(div, parseYahooDividends(recent));
+        const fill = recent && session.prev && last < session.prev.d && !bars.some(b => b.d === session.prev.d) ? parseYahoo(recent) : [];
         const result = addSession(bars, session, official, { fill });
         if (result.added) {
           bars = result.bars; through = official.date;
@@ -96,7 +100,7 @@ async function worker() {
         }
       }
       if (!before && bars.at(-1)?.d === official?.date) through = official.date;
-      const next = candleFile(stock.symbol, source, through, bars, est);
+      const next = candleFile(stock.symbol, source, through, bars, est, div);
       if (!validOhlc(next)) throw new Error('too few valid bars');
       fetched += 1;
       const text = JSON.stringify(next) + '\n';

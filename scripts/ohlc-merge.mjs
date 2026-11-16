@@ -111,6 +111,19 @@ export function parseYahooSplits(json) {
     .map(e => ({ d: iso(e.date, offset), ratio: e.numerator / e.denominator })).sort((a, b) => a.d < b.d ? -1 : 1);
 }
 
+/** Yahoo chart JSON (requested with events=div) → [[date, amount]]: cash dividends by ex-date (SAR). */
+export function parseYahooDividends(json) {
+  const r = json?.chart?.result?.[0], offset = r?.meta?.gmtoffset ?? 10800;
+  const byDate = new Map();
+  for (const e of Object.values(r?.events?.dividends ?? {})) if (Number.isFinite(e?.date) && e.amount > 0) byDate.set(iso(e.date, offset), Math.round(e.amount * 1e6) / 1e6);
+  return [...byDate].sort(([a], [b]) => a < b ? -1 : 1);
+}
+/** Stored dividends with newly reported ones (a newer report wins for its date). */
+export function mergeDividends(stored = [], fresh = []) {
+  const byDate = new Map(stored); for (const [d, a] of fresh) byDate.set(d, a);
+  return [...byDate].sort(([a], [b]) => a < b ? -1 : 1);
+}
+
 /** Yahoo 60-minute chart → one bar per Riyadh session. Open/high/low match the session; the close
  * and volume miss the closing auction, so only the open/high/low/volume are used (marked estimated). */
 export function hourlyDays(json) {
@@ -237,9 +250,10 @@ export function jumpFlags(bars) {
 
 /** File → bars, and bars → file (keeps the page's column format). */
 export const fileBars = file => file.d.map((d, i) => ({ d, o: file.o[i], h: file.h[i], l: file.l[i], c: file.c[i], v: file.v[i] }));
-export function candleFile(symbol, source, officialThrough, bars, est = []) {
-  const kept = new Set(bars.map(b => b.d));
-  return { symbol, source, officialThrough, est: est.filter(d => kept.has(d)), flags: jumpFlags(bars),
+export function candleFile(symbol, source, officialThrough, bars, est = [], div = []) {
+  const kept = new Set(bars.map(b => b.d)), first = bars[0]?.d ?? '', last = bars.at(-1)?.d ?? '';
+  // Cash dividends (ex-date, SAR) for the chart's ADJ option; the candles themselves are not adjusted for them.
+  return { symbol, source, officialThrough, est: est.filter(d => kept.has(d)), div: div.filter(([d]) => d > first && d <= last), flags: jumpFlags(bars),
     d: bars.map(b => b.d), o: bars.map(b => b.o), h: bars.map(b => b.h), l: bars.map(b => b.l), c: bars.map(b => b.c), v: bars.map(b => b.v) };
 }
 

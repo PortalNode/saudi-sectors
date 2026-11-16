@@ -138,9 +138,9 @@
   const RESET_KEY = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '') ? '⌥ + R' : 'Alt + R';
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
-  const state = { type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off', locked: false, hidden: false };
-  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; state.locked = saved.locked === true; state.hidden = saved.hidden === true; } } catch { /* storage unavailable */ }
-  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ type: state.type, ind: [...state.ind], magnet: state.magnet, locked: state.locked, hidden: state.hidden })); } catch { /* ignore */ } };
+  const state = { adj: true, type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off', locked: false, hidden: false };
+  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (typeof saved.adj === 'boolean') state.adj = saved.adj; if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; state.locked = saved.locked === true; state.hidden = saved.hidden === true; } } catch { /* storage unavailable */ }
+  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ adj: state.adj, type: state.type, ind: [...state.ind], magnet: state.magnet, locked: state.locked, hidden: state.hidden })); } catch { /* ignore */ } };
   const loadDrawings = symbol => { try { return JSON.parse(localStorage.getItem(`cc-draw-${symbol}`) || '[]'); } catch { return []; } };
   const saveDrawings = (symbol, list) => { try { localStorage.setItem(`cc-draw-${symbol}`, JSON.stringify(list)); } catch { /* ignore */ } };
 
@@ -155,6 +155,18 @@
   /* ---------- البيانات ---------- */
   const bars = file => file.d.map((d, i) => ({ time: d, open: file.o[i], high: file.h[i], low: file.l[i], close: file.c[i], volume: file.v[i] }));
   const weekStart = iso => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() - d.getUTCDay()); return d.toISOString().slice(0, 10); };
+  // تعديل التوزيعات النقدية كما في TradingView (ADJ): كل سعر قبل تاريخ الاستحقاق يُضرب في
+  // (1 − التوزيع ÷ إغلاق الجلسة السابقة له). الحجم لا يتغير.
+  function adjustDividends(daily, dividends = []) {
+    const factor = new Array(daily.length).fill(1);
+    for (const [date, amount] of dividends) {
+      const i = daily.findIndex(b => b.time >= date);
+      if (i <= 0 || !(amount > 0) || !(daily[i - 1].close > amount)) continue;
+      const f = 1 - amount / daily[i - 1].close;
+      for (let j = 0; j < i; j++) factor[j] *= f;
+    }
+    return daily.map((b, i) => factor[i] === 1 ? b : { ...b, open: b.open * factor[i], high: b.high * factor[i], low: b.low * factor[i], close: b.close * factor[i] });
+  }
   function group(daily, interval) {
     if (interval === 'd') return daily;
     const key = interval === 'w' ? b => weekStart(b.time) : b => b.time.slice(0, 7);
@@ -221,7 +233,8 @@
 
   function mount(panel, file) {
     current?.destroy();
-    const daily = bars(file), symbol = file.symbol, estimated = new Set(file.est || []);
+    const raw = bars(file), symbol = file.symbol, estimated = new Set(file.est || []), dividends = (file.div || []).filter(([d]) => d > raw[0]?.time && d <= raw.at(-1)?.time);
+    let daily = state.adj ? adjustDividends(raw, dividends) : raw;
     let drawings = loadDrawings(symbol), pending = null;
     panel.innerHTML = `
       <div class="cc-toolbar">
@@ -236,6 +249,7 @@
           <div class="cq-range" role="group" aria-label="نوع الشارت">${TYPES.map(([id, t]) => chip('type', id, t, id === state.type)).join('')}</div>
           <div class="cq-range" role="group" aria-label="الفترة الزمنية للشمعة">${INTERVALS.map(([id, t]) => chip('interval', id, t, id === state.interval)).join('')}</div>
           <div class="cq-range" role="group" aria-label="مدة العرض">${RANGES.map(([id, t]) => chip('crange', id, t, id === state.range)).join('')}</div>
+          ${dividends.length ? `<div class="cq-range" role="group" aria-label="التوزيعات">${chip('adj', '1', 'ADJ', state.adj, 'تعديل الأسعار للتوزيعات النقدية، كما في زر ADJ في TradingView')}</div>` : ''}
         </div>
         <div class="cc-end">
           <span class="cq-range-change cc-change"></span>
@@ -270,7 +284,7 @@
         <div class="cc-tip" dir="rtl" role="tooltip" hidden></div>
       </div>
       <p class="cc-hint" hidden></p>
-      <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية على أساس TradingView حتى آخر إغلاق رسمي من تداول السعودية، معدّلة لإجراءات رأس المال (المنح والتجزئة والتخفيض وحقوق الأولوية) دون التوزيعات النقدية، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
+      <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية على أساس TradingView حتى آخر إغلاق رسمي من تداول السعودية، معدّلة لإجراءات رأس المال (المنح والتجزئة والتخفيض وحقوق الأولوية)، وللتوزيعات النقدية عند تفعيل ADJ كما في TradingView، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
     const body = panel.querySelector('.cc-body'), sideBar = panel.querySelector('.cc-side'), flyout = panel.querySelector('.cc-flyout'), tip = panel.querySelector('.cc-tip');
@@ -395,6 +409,7 @@
       const saved = keepRange && chart ? chart.timeScale().getVisibleLogicalRange() : null;
       chart?.remove();
       box.innerHTML = '';
+      daily = state.adj ? adjustDividends(raw, dividends) : raw;
       data = group(daily, state.interval);
       const closes = data.map(b => b.close);
       calc = {
@@ -445,8 +460,11 @@
         line(calc.macd.map(v => v?.signal ?? null), '#d95926', pane);
       }
       chart.panes().forEach((p, i) => p.setStretchFactor(i === 0 ? 3 : 1));
-      if (state.interval === 'd' && bigJumps(file).length) {
-        LWC.createSeriesMarkers(main, bigJumps(file).filter(f => data.some(b => b.time === f.date)).map(f => ({ time: f.date, position: 'aboveBar', color: colors.gold, shape: 'arrowDown', text: `${f.change > 0 ? '+' : ''}${f2.format(f.change)}%` })));
+      if (state.interval === 'd') {
+        // علامة D على شمعة استحقاق كل توزيع، كما في TradingView، وعلامة القفزات غير المفسَّرة
+        const marks = bigJumps(file).filter(f => data.some(b => b.time === f.date)).map(f => ({ time: f.date, position: 'aboveBar', color: colors.gold, shape: 'arrowDown', text: `${f.change > 0 ? '+' : ''}${f2.format(f.change)}%` }));
+        for (const [date, amount] of dividends) { const b = data.find(x => x.time >= date); if (b) marks.push({ time: b.time, position: 'belowBar', color: colors.gold, shape: 'circle', text: `D ${f2.format(amount)}` }); }
+        if (marks.length) LWC.createSeriesMarkers(main, marks.sort((a, b) => a.time < b.time ? -1 : 1));
       }
       main.attachPrimitive(overlay);
       drawn = []; paintDrawings();
@@ -779,7 +797,7 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
+      const b = event.target.closest('[data-adj],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
       if (b.hasAttribute('data-search')) { openSearch(searchPop.hidden); return; }
       if (!chart) return;
       if (b.dataset.menu) { openFlyout(b.dataset.menu, b); return; }
@@ -795,6 +813,7 @@
       if (b.hasAttribute('data-delete')) { deleteSelected(); return; }
       if (b.hasAttribute('data-undo')) { select(-1); drawings.pop(); saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
       if (b.hasAttribute('data-clear')) { select(-1); drawings = []; saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
+      if (b.dataset.adj) { state.adj = !state.adj; b.setAttribute('aria-pressed', String(state.adj)); }
       if (b.dataset.type) state.type = b.dataset.type;
       if (b.dataset.interval) { state.interval = b.dataset.interval; state.range = DEFAULT_RANGE[state.interval]; keep = false; }
       if (b.dataset.crange) { state.range = b.dataset.crange; keep = false; }
@@ -817,5 +836,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, calc: { group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
+  window.CompanyChart = { mount, calc: { adjustDividends, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
 })();
