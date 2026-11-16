@@ -90,7 +90,7 @@
         return { o: intraday.o?.[i] ?? c, h: intraday.h?.[i] ?? c, l: intraday.l?.[i] ?? c, c, day: iso.slice(0, 10), hm: iso.slice(11, 16) };
       });
       const days = [...new Set(points.map(p => p.day))].slice(-range.sessions);
-      series = points.filter(p => days.includes(p.day)).map(p => ({ ...p, label: range.sessions === 1 ? p.hm : `${dmy(p.day)} ${p.hm}`, first: false }));
+      series = points.filter(p => days.includes(p.day)).map(p => ({ ...p, label: range.sessions === 1 ? p.hm : `${dmy(p.day)} ${p.hm}`, full: `${dmy(p.day)}.${p.day.slice(0, 4)} ${p.hm}`, first: false }));
       series.forEach((p, i) => { p.first = i === 0 || series[i - 1].day !== p.day; });
       const previous = raw.filter(b => b.time < days[0]).at(-1);
       base = previous ? previous.close : series[0].c;
@@ -103,7 +103,7 @@
         const iso = from.toISOString().slice(0, 10);
         shown = bars.filter(b => b.time >= iso);
       }
-      series = shown.map(b => ({ o: b.open, h: b.high, l: b.low, c: b.close, day: b.time, label: dotDate(b.time), first: false }));
+      series = shown.map(b => ({ o: b.open, h: b.high, l: b.low, c: b.close, day: b.time, label: dotDate(b.time), full: dotDate(b.time), first: false }));
       base = series[0]?.c;
     }
     if (series.length < 2 || !(base > 0)) return null;
@@ -174,7 +174,9 @@
       cross.style.left = `${xPct}%`;
       hline.style.top = `${yPct}%`;
       ytag.style.top = `${yPct}%`; ytag.textContent = f2.format(p.c);
-      xtag.style.left = `${xPct}%`; xtag.textContent = p.label;
+      xtag.style.left = `${xPct}%`; xtag.textContent = p.full;
+      // عند الحافة يبقى الوسم داخل الشارت
+      xtag.style.transform = xPct > 75 ? 'translateX(-100%)' : xPct < 25 ? 'none' : 'translateX(-50%)';
     });
     link.addEventListener('pointerleave', () => { hide(); show(n - 1); });
   }
