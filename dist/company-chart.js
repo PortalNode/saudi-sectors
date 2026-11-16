@@ -233,8 +233,20 @@
   const side = (attrs, svgIcon, tip, pressed) => `<button type="button" ${attrs} aria-label="${tip}" data-tip="${tip}"${pressed == null ? '' : ` aria-pressed="${pressed}"`}>${svgIcon}</button>`;
   const chip = (attr, id, label, on, title = '') => `<button type="button" data-${attr}="${id}" aria-pressed="${on}"${title ? ` title="${title}"` : ''}>${label}</button>`;
 
-  function mount(panel, file) {
-    current?.destroy();
+  // شموع الأسهم التي فُتحت من بحث الشارت (الملفات تتغير يوميًا، فلا تُؤخذ من ذاكرة المتصفح)
+  const candleFiles = new Map();
+  const loadCandleFile = sym => {
+    if (!candleFiles.has(sym)) candleFiles.set(sym, fetch(`ohlc/${encodeURIComponent(sym)}.json`, { cache: 'no-cache' })
+      .then(r => r.ok ? r.json() : null).then(d => d?.d?.length > 1 ? d : null).catch(() => null)
+      .then(d => { if (!d) candleFiles.delete(sym); return d; }));
+    return candleFiles.get(sym);
+  };
+
+  // home: سهم الصفحة. اختيار سهم آخر من البحث يغيّر الشارت وحده دون إعادة تحميل الصفحة، كما في TradingView
+  // away: اسم السهم المعروض وصفحة قطاعه حين يختلف عن سهم الصفحة
+  function mount(panel, file, { home = null, away = {}, keepFull = false } = {}) {
+    current?.destroy({ keepFull });
+    home ??= { symbol: String(file.symbol), file };
     const raw = bars(file), symbol = file.symbol, estimated = new Set(file.est || []), dividends = (file.div || []).filter(([d]) => d > raw[0]?.time && d <= raw.at(-1)?.time);
     let daily = state.adj ? adjustDividends(raw, dividends) : raw;
     let drawings = loadDrawings(symbol), pending = null;
@@ -286,6 +298,7 @@
         <div class="cc-tip" dir="rtl" role="tooltip" hidden></div>
       </div>
       <p class="cc-hint" hidden></p>
+      ${String(symbol) !== home.symbol ? `<p class="cc-away" role="status">يعرض الشارت <b>${esc(away.name || symbol)}</b> <bdi>${esc(symbol)}</bdi>${away.page ? ` · <a href="${esc(away.page)}?symbol=${encodeURIComponent(symbol)}">نتائج الشركة</a>` : ''} · <button type="button" data-home>العودة إلى ${esc(home.name || home.symbol)}</button></p>` : ''}
       <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية على أساس TradingView حتى آخر إغلاق رسمي من تداول السعودية، معدّلة لإجراءات رأس المال (المنح والتجزئة والتخفيض وحقوق الأولوية)، وللتوزيعات النقدية عند تفعيل ADJ كما في TradingView، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
@@ -761,7 +774,7 @@
 
     /* ---------- البحث عن سهم ---------- */
     let stockList = [], matches = [], active = 0;
-    loadStockList().then(list => { stockList = list; const me = list.find(x => x.symbol === String(symbol)); if (me) panel.querySelector('.cc-search-name').textContent = me.name; });
+    loadStockList().then(list => { stockList = list; const me = list.find(x => x.symbol === String(symbol)); if (me) panel.querySelector('.cc-search-name').textContent = me.name; if (!home.name) home.name = list.find(x => x.symbol === home.symbol)?.name; });
     function markActive() {
       searchList.querySelectorAll('[data-pick]').forEach((li, i) => li.setAttribute('aria-selected', String(i === active)));
       const li = searchList.children[active];
@@ -784,9 +797,16 @@
       const target = stockList.find(x => x.symbol === sym);
       if (!target) return;
       if (target.symbol === String(symbol)) { openSearch(false); return; }
-      // صفحة الشركة الجديدة تفتح الشارت في ملء الشاشة أيضًا إن كان مفتوحًا به
-      try { if (isFull()) sessionStorage.setItem('cc-full', '1'); } catch { /* ignore */ }
-      location.href = `${target.page}?symbol=${encodeURIComponent(target.symbol)}`;
+      openSearch(false);
+      show(target.symbol, { name: target.name, page: target.page });
+    }
+    // يبدّل الشارت إلى سهم آخر في المكان نفسه (مع ملء الشاشة إن كان مفعّلًا)، وبقية الصفحة لسهمها
+    async function show(sym, away = {}) {
+      const button = panel.querySelector('.cc-search-btn b'); if (button) button.textContent = sym;
+      const next = sym === home.symbol ? home.file : await loadCandleFile(sym);
+      if (!box.isConnected) return;
+      if (!next) { if (button) button.textContent = String(symbol); hint.textContent = `لا تتوفر شموع للسهم ${sym} بعد`; return; }
+      mount(panel, next, { home, away, keepFull: isFull() });
     }
     searchInput.addEventListener('input', renderMatches);
     searchInput.addEventListener('keydown', event => {
@@ -816,8 +836,9 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-adj],[data-divmarks],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
+      const b = event.target.closest('[data-home],[data-adj],[data-divmarks],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
       if (b.hasAttribute('data-search')) { openSearch(searchPop.hidden); return; }
+      if (b.hasAttribute('data-home')) { show(home.symbol); return; }
       if (!chart) return;
       if (b.dataset.menu) { openFlyout(b.dataset.menu, b); return; }
       if (b.hasAttribute('data-cursor')) { setTool(null); return; }
@@ -845,11 +866,12 @@
     });
 
     const theme = new MutationObserver(() => { if (!chart) return; colors = palette(panel); build(true); });
-    current = { destroy() { if (isFull()) setFull(false); document.removeEventListener('fullscreenchange', onFullscreenChange); theme.disconnect(); chart?.remove(); chart = null; } };
+    current = { destroy({ keepFull = false } = {}) { if (isFull() && !keepFull) setFull(false); document.removeEventListener('fullscreenchange', onFullscreenChange); theme.disconnect(); chart?.remove(); chart = null; } };
     loadLib().then(lib => {
       LWC = lib; colors = palette(panel);
       setTool(null);
       build(false);
+      if (keepFull) setFull(true);
       try { if (sessionStorage.getItem('cc-full')) { sessionStorage.removeItem('cc-full'); setFull(true); } } catch { /* ignore */ }
       theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     }).catch(() => { box.innerHTML = '<p class="cq-empty">تعذر تحميل مكتبة الشارت.</p>'; });

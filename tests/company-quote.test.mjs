@@ -143,8 +143,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261116d/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116d" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261116d" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261116e/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116e" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261116e" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
@@ -179,6 +179,15 @@ test('the price workflow refreshes the candles and commits them with the prices'
   assert.match(workflow, /run: node scripts\/update-ohlc\.mjs \|\| echo/);
   assert.match(workflow, /git add -A dist\/data\.json dist\/ohlc/);
   assert.doesNotMatch(workflow, /update-history/);
+});
+
+test('picking a stock in the chart search switches the chart only, without reloading the page', () => {
+  const source = read('company-chart.js');
+  assert.doesNotMatch(source, /location\.href\s*=/, 'the search no longer navigates away');
+  assert.match(source, /show\(target\.symbol, \{ name: target\.name, page: target\.page \}\)/);
+  assert.match(source, /mount\(panel, next, \{ home, away, keepFull: isFull\(\) \}\)/, 'fullscreen stays on');
+  assert.match(source, /data-home/, 'a way back to the page\'s company');
+  assert.match(source, /\?symbol=\$\{encodeURIComponent\(symbol\)\}">نتائج الشركة<\/a>/, 'a link to the shown stock\'s results page');
 });
 
 test('the chart symbol search finds any stock on the site by name or symbol and links to its sector page', () => {
