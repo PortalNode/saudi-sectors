@@ -10,6 +10,16 @@
   const MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
   const longDate = iso => `${Number(iso.slice(8, 10))} ${MONTHS[Number(iso.slice(5, 7)) - 1]} ${iso.slice(0, 4)}`;
   const dot = iso => iso.split('-').reverse().join('.');
+  // تاريخ مؤشر الشارت بأسلوب TradingView: «الاثنين 16 نوفمبر '26»، والشهري «نوفمبر '26»
+  const WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  const crosshairDate = (time, interval) => {
+    const d = typeof time === 'string' ? new Date(time + 'T00:00:00Z')
+      : typeof time === 'number' ? new Date(time * 1000)
+      : new Date(Date.UTC(time.year, time.month - 1, time.day));
+    const yy = `'${String(d.getUTCFullYear()).slice(-2)}`;
+    const month = MONTHS[d.getUTCMonth()];
+    return interval === 'm' ? `${month} ${yy}` : `${WEEKDAYS[d.getUTCDay()]} ${d.getUTCDate()} ${month} ${yy}`;
+  };
   const TYPES = [['line', 'خطي'], ['candles', 'شموع']];
   const INTERVALS = [['d', 'يومي'], ['w', 'أسبوعي'], ['m', 'شهري']];
   const RANGES = [['3m', '3 أشهر', 3], ['6m', '6 أشهر', 6], ['1y', 'سنة', 12], ['3y', '3 سنوات', 36], ['5y', '5 سنوات', 60], ['all', 'الكل', null]];
@@ -461,7 +471,7 @@
         rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.08, bottom: state.ind.has('vol') ? 0.24 : 0.06 } },
         timeScale: { borderVisible: false, rightOffset: 2, minBarSpacing: 0.05 },
         crosshair: { mode: LWC.CrosshairMode.Normal },
-        localization: { priceFormatter: p => f2.format(p) }
+        localization: { priceFormatter: p => f2.format(p), timeFormatter: t => crosshairDate(t, state.interval) }
       });
       const { up, down } = colors;
       main = state.type === 'candles'
