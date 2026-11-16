@@ -221,7 +221,7 @@
 
   function mount(panel, file) {
     current?.destroy();
-    const daily = bars(file), symbol = file.symbol;
+    const daily = bars(file), symbol = file.symbol, estimated = new Set(file.est || []);
     let drawings = loadDrawings(symbol), pending = null;
     panel.innerHTML = `
       <div class="cc-toolbar">
@@ -270,7 +270,7 @@
         <div class="cc-tip" dir="rtl" role="tooltip" hidden></div>
       </div>
       <p class="cc-hint" hidden></p>
-      <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية حتى آخر إغلاق رسمي، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
+      <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية على أساس TradingView حتى آخر إغلاق رسمي من تداول السعودية، معدّلة لإجراءات رأس المال (المنح والتجزئة والتخفيض وحقوق الأولوية) دون التوزيعات النقدية، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
     const body = panel.querySelector('.cc-body'), sideBar = panel.querySelector('.cc-side'), flyout = panel.querySelector('.cc-flyout'), tip = panel.querySelector('.cc-tip');
@@ -299,7 +299,9 @@
         if (x.id === 'macd') return cell('MACD', `${f2.format(v.macd)}${v.signal != null ? ` / ${f2.format(v.signal)}` : ''}`, x.color);
         return cell(x.label, f2.format(v), x.color);
       }).join('');
-      legend.innerHTML = `<b>${when}</b>${cell('افتتاح', f2.format(b.open))}${cell('أعلى', f2.format(b.high))}${cell('أدنى', f2.format(b.low))}${cell('إغلاق', f2.format(b.close))}${ch == null ? '' : `<span class="cq-${dir}"><bdi>${ch > 0 ? '+' : ''}${f2.format(ch)}%</bdi></span>`}${state.ind.has('vol') ? cell('الحجم', big.format(b.volume)) : ''}${ind}`;
+      // جلسة لم تصل شمعتها من المصدر: الإغلاق رسمي، والافتتاح والأعلى والأدنى والحجم تقديرية
+      const estNote = state.interval === 'd' && estimated.has(b.time) ? '<span class="cc-est">تقديرية</span>' : '';
+      legend.innerHTML = `<b>${when}</b>${estNote}${cell('افتتاح', f2.format(b.open))}${cell('أعلى', f2.format(b.high))}${cell('أدنى', f2.format(b.low))}${cell('إغلاق', f2.format(b.close))}${ch == null ? '' : `<span class="cq-${dir}"><bdi>${ch > 0 ? '+' : ''}${f2.format(ch)}%</bdi></span>`}${state.ind.has('vol') ? cell('الحجم', big.format(b.volume)) : ''}${ind}`;
     }
 
     // الرسوم محفوظة بالسعر والتاريخ، فتظهر في اليومي والأسبوعي والشهري (على أقرب شمعة)

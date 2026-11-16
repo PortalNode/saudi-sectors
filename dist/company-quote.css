@@ -67,6 +67,7 @@
 .cc-hint{margin:6px 0 0;font-size:11px;color:var(--pf-gold);font-weight:700}
 .cc-hint[hidden]{display:none}
 .cc-flag-note{color:var(--pf-gold)}
+.cc-est{color:var(--pf-gold);font-size:.85em}
 /* الشريط الجانبي على يسار الشارت كما في TradingView: أدوات الرسم والمغناطيس والمؤشرات أيقوناتٍ، وأسماؤها في تلميح */
 .cc-body{position:relative;padding-left:48px;margin-top:8px}
 .cc-side{position:absolute;left:0;top:0;bottom:0;width:40px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;border-right:1px solid var(--pf-line)}

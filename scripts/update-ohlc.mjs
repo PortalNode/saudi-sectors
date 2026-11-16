@@ -1,20 +1,27 @@
 #!/usr/bin/env node
 /**
- * Daily candles for the stock chart on the results pages: dist/ohlc/<symbol>.json (five years).
- * Source: Yahoo Finance daily bars (free, no key; fetched here because browsers are blocked by CORS).
- * Each stock's last official Saudi Exchange close (data.json) is final for its day, nothing after it
- * is kept, bad prints are removed and unadjusted capital actions are flagged (scripts/ohlc-merge.mjs).
- * If the source fails for a stock its existing file is kept.
+ * Daily candles for the stock chart on the results pages: dist/ohlc/<symbol>.json (five years),
+ * kept on TradingView's basis (history adjusted for every capital action, not for cash dividends).
+ *
+ * After each official session the session's candle comes from the TradingView scanner (the same
+ * open/high/low/volume TradingView shows) with the Saudi Exchange's official close (data.json).
+ * The scanner also returns the previous session: when its close differs from the stored one by a
+ * whole-bar factor, a capital action took effect today and earlier history is rescaled by it.
+ * Sessions an update missed are filled from Yahoo; a stock without a file starts from Yahoo.
+ * The full history is rebuilt from the exchange's adjusted closes by scripts/backfill-ohlc.mjs.
+ *
  * Runs once per official session: it skips while dist/ohlc/index.json already covers data.json's
- * official date (use --force to refetch).
- * Usage: node scripts/update-ohlc.mjs [--force] [--symbols 3003,2222]
+ * official date (use --force to run again).
+ * Usage: node scripts/update-ohlc.mjs [--force] [--symbols 3003,2222] [--out <dir>]
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { parseYahoo, cleanBars, ohlcFile, validOhlc, YEARS } from './ohlc-merge.mjs';
+import { parseYahoo, cleanBars, validOhlc, isFakeBar, fileBars, candleFile, scanBars, addSession, SCAN_COLUMNS, YEARS, SOURCE } from './ohlc-merge.mjs';
 
-const DIST = new URL('../dist/', import.meta.url), DIR = new URL('ohlc/', DIST);
-const SOURCE = 'Yahoo Finance · آخر إغلاق من تداول السعودية';
+const DIST = new URL('../dist/', import.meta.url);
 const arg = name => process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : null;
+const dirUrl = path => new URL(`file://${path.startsWith('/') ? '' : process.cwd() + '/'}${path.replace(/\/?$/, '/')}`);
+const DIR = arg('--out') ? dirUrl(arg('--out')) : new URL('ohlc/', DIST);
+const FALLBACK_SOURCE = 'Yahoo Finance · آخر إغلاق من تداول السعودية';
 const force = process.argv.includes('--force'), only = arg('--symbols') ? new Set(arg('--symbols').split(',')) : null;
 const readJson = async url => { try { return JSON.parse(await readFile(url, 'utf8')); } catch { return null; } };
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -34,42 +41,75 @@ const officialOf = stock => {
   return null;
 };
 
-async function fetchYahoo(symbol) {
+async function getJson(url, init = {}) {
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000);
     try {
-      // Yahoo answers 429 to Node with a full Chrome user agent (it does not match Node's TLS fingerprint) but serves a plain one.
-      const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.SR?range=${YEARS}y&interval=1d`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' }, signal: controller.signal });
+      const response = await fetch(url, { ...init, signal: controller.signal });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return parseYahoo(await response.json());
+      return await response.json();
     } catch (error) {
       if (attempt === 3) throw error;
       await sleep(1500 * attempt);
     } finally { clearTimeout(timer); }
   }
 }
+// Yahoo answers 429 to Node with a full Chrome user agent (it does not match Node's TLS fingerprint) but serves a plain one.
+const yahoo = (symbol, range) => getJson(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.SR?range=${range}&interval=1d`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } }).then(parseYahoo);
+
+async function scanner(symbols) {
+  const rows = new Map();
+  for (let i = 0; i < symbols.length; i += 100) {
+    const json = await getJson('https://scanner.tradingview.com/ksa/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbols: { tickers: symbols.slice(i, i + 100).map(s => `TADAWUL:${s}`), query: { types: [] } }, columns: SCAN_COLUMNS }) });
+    for (const row of json?.data ?? []) rows.set(String(row.s).split(':')[1], scanBars(row));
+  }
+  return rows;
+}
 
 await mkdir(DIR, { recursive: true });
-const failed = [];
+let sessions = new Map();
+try { sessions = await scanner(stocks.map(s => s.symbol)); } catch (error) { console.warn(`TradingView scanner unavailable (${error.message}); using Yahoo for every stock.`); }
+
+const failed = [], adjusted = [];
 let written = 0, fetched = 0;
 const queue = [...stocks];
 async function worker() {
   while (queue.length) {
     const stock = queue.shift(), file = new URL(`${stock.symbol}.json`, DIR), official = officialOf(stock);
     try {
-      const next = ohlcFile(stock.symbol, SOURCE, official, cleanBars(await fetchYahoo(stock.symbol), { official }));
+      const before = await readJson(file), session = sessions.get(stock.symbol);
+      // Stored history (files from before the rebuild may still hold Yahoo's flat no-volume bars), or Yahoo for a new stock.
+      let bars = before && validOhlc(before) ? fileBars(before).filter(b => Array.isArray(before.est) || !isFakeBar(b)) : null;
+      let source = before?.source === SOURCE ? SOURCE : FALLBACK_SOURCE, est = before?.est || [];
+      if (!bars) bars = cleanBars((await yahoo(stock.symbol, `${YEARS}y`)).filter(b => !isFakeBar(b)), { official }).bars;
+      let through = before?.officialThrough ?? null;
+      if (session?.today && official) {
+        const last = bars.at(-1)?.d ?? '';
+        // Sessions this update missed: the stored history stops before TradingView's previous session.
+        const fill = session.prev && last < session.prev.d && !bars.some(b => b.d === session.prev.d) ? await yahoo(stock.symbol, '3mo') : [];
+        const result = addSession(bars, session, official, { fill });
+        if (result.added) {
+          bars = result.bars; through = official.date;
+          est = est.filter(d => d !== session.today.d && d !== session.prev?.d); // now real TradingView candles
+          if (result.factor) adjusted.push({ symbol: stock.symbol, date: session.prev.d, factor: Math.round(result.factor * 1e6) / 1e6 });
+        }
+      }
+      if (!before && bars.at(-1)?.d === official?.date) through = official.date;
+      const next = candleFile(stock.symbol, source, through, bars, est);
       if (!validOhlc(next)) throw new Error('too few valid bars');
       fetched += 1;
-      const text = JSON.stringify(next) + '\n', before = await readJson(file);
+      const text = JSON.stringify(next) + '\n';
       if (!before || JSON.stringify(before) + '\n' !== text) { await writeFile(file, text); written += 1; }
     } catch (error) { failed.push(`${stock.symbol} (${error.message})`); }
-    await sleep(120);
+    await sleep(50);
   }
 }
 await Promise.all(Array.from({ length: 4 }, worker));
 
-if (!only) await writeFile(new URL('index.json', DIR), JSON.stringify({ officialDate, updatedAt: new Date().toISOString(), source: SOURCE, symbols: fetched, failed }, null, 1) + '\n');
-console.log(`Candles: ${written} files written, ${fetched}/${stocks.length} fetched.`);
+if (!only) await writeFile(new URL('index.json', DIR), JSON.stringify({ ...(index || {}), officialDate, updatedAt: new Date().toISOString(), source: SOURCE, symbols: fetched, failed, adjustedToday: adjusted }, null, 1) + '\n');
+console.log(`Candles: ${written} files written, ${fetched}/${stocks.length} kept, ${sessions.size} sessions from TradingView.`);
+if (adjusted.length) console.log(`Capital actions applied today: ${adjusted.map(a => `${a.symbol} ×${a.factor}`).join(', ')}`);
 if (failed.length) console.warn(`Kept the existing file for: ${failed.join(', ')}`);
 // A source outage must not block the price update; only fail when nothing at all came back.
 if (stocks.length && failed.length === stocks.length) process.exit(1);
