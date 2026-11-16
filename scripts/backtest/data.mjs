@@ -1,6 +1,7 @@
 // Loads the stored candles into one in-memory universe for research. Read-only; nothing here writes
 // to dist/. Each stock keeps the file's columnar arrays plus two per-bar quality masks:
-//   est[i]  — the session is an estimate (flat candle / zero volume), so its volume and range are not real
+//   est[i]  — the session's open/high/low/volume are estimates (flat candle, zero volume). The CLOSE is still the
+//             official close, so close-only maths may use these bars; anything using range or volume may not
 //   flag[i] — the move into this bar is an unexplained jump the data pipeline flagged
 // Backtests refuse to trade on bars where these are set (see usable()).
 import { readFileSync, readdirSync } from 'node:fs';
@@ -12,7 +13,7 @@ export const OHLC_DIR = new URL('ohlc/', DIST);
 export function loadMarket() {
   const data = JSON.parse(readFileSync(new URL('data.json', DIST), 'utf8'));
   const meta = new Map();
-  for (const sector of data.sectors) for (const s of sector.stocks) meta.set(s.symbol, { symbol: s.symbol, name: s.name, sector: sector.name, suspended: !!s.suspended, marketCap: s.marketCap });
+  for (const sector of data.sectors) for (const s of sector.stocks) meta.set(s.symbol, { symbol: s.symbol, name: s.name, sector: sector.name, suspended: !!s.suspended, marketCap: s.marketCap, shares: s.shares });
   return { data, meta };
 }
 
