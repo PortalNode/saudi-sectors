@@ -112,7 +112,8 @@ async function worker() {
         official = official.filter(x => x.d <= last.date);
         if (official.at(-1)?.d === last.date) official.at(-1).c = round2Price(last.price);
       }
-      const dailyJson = await yahooJson(stock.symbol, 'range=6y&interval=1d&events=split');
+      // Explicit dates: Yahoo has answered `range=6y` with a shorter history from some networks.
+      const now = Math.floor(Date.now() / 1000), dailyJson = await yahooJson(stock.symbol, `period1=${now - 6 * 366 * 86400}&period2=${now}&interval=1d&events=split`);
       const daily = new Map(parseYahoo(dailyJson).map(b => [b.d, b])), splits = parseYahooSplits(dailyJson);
       let hourly = new Map();
       try { hourly = hourlyDays(await yahooJson(stock.symbol, 'range=730d&interval=60m')); } catch { /* estimated candles then use the closes only */ }

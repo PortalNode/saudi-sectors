@@ -196,10 +196,11 @@ export function rebuildBars({ official, daily, hourly = new Map(), splits = [], 
 function withEarlierHistory(official, daily) {
   const first = official[0];
   const earlier = [...daily.values()].filter(b => b.d < first.d && !isFakeBar(b) && b.c > 0).sort((a, b) => a.d < b.d ? -1 : 1);
-  const y = daily.get(first.d);
-  if (earlier.length < 5 || !y || isFakeBar(y)) return official;
-  const k = first.c / y.c, before = earlier.at(-1);
-  if (Math.abs(k - 1) > 0.05 || Math.abs((first.c / k) / before.c - 1) > DAILY_LIMIT) return official;
+  // The scale comes from the first exchange sessions Yahoo also has (it may miss the very first one).
+  const shared = official.slice(0, 10).map(x => ({ x, y: daily.get(x.d) })).filter(({ y }) => y && !isFakeBar(y) && y.c > 0);
+  if (earlier.length < 5 || !shared.length) return official;
+  const k = median(shared.map(({ x, y }) => x.c / y.c)), before = earlier.at(-1);
+  if (Math.abs(k - 1) > 0.05 || Math.abs((first.c / k) / before.c - 1) > DAILY_LIMIT * 1.5) return official;
   return earlier.map(b => ({ d: b.d, c: round2(b.c * k) })).concat(official);
 }
 
