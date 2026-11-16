@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Daily candles for the stock chart on the results pages: dist/ohlc/<symbol>.json (five years),
+ * Daily candles for the stock chart on the results pages: dist/ohlc/<symbol>.json (recent sessions)
+ * and dist/ohlc/history/<symbol>.json (earlier, from 2010; see ohlc-files.mjs),
  * kept on TradingView's basis (history adjusted for every capital action, not for cash dividends).
  *
  * After each official session the session's candle comes from the TradingView scanner (the same
@@ -15,7 +16,8 @@
  * Usage: node scripts/update-ohlc.mjs [--force] [--symbols 3003,2222] [--out <dir>]
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { parseYahoo, parseYahooDividends, mergeDividends, cleanBars, validOhlc, isFakeBar, fileBars, candleFile, scanBars, addSession, SCAN_COLUMNS, YEARS, SOURCE } from './ohlc-merge.mjs';
+import { parseYahoo, parseYahooDividends, mergeDividends, cleanBars, validOhlc, isFakeBar, fileBars, candleFile, scanBars, addSession, SCAN_COLUMNS, HISTORY_START, SOURCE } from './ohlc-merge.mjs';
+import { readCandles, writeCandles } from './ohlc-files.mjs';
 
 const DIST = new URL('../dist/', import.meta.url);
 const arg = name => process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : null;
@@ -55,7 +57,7 @@ async function getJson(url, init = {}) {
   }
 }
 // Yahoo answers 429 to Node with a full Chrome user agent (it does not match Node's TLS fingerprint) but serves a plain one.
-const yahooJson = (symbol, range) => getJson(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.SR?range=${range}&interval=1d&events=div`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } });
+const yahooJson = (symbol, range) => getJson(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.SR?${range === 'all' ? `period1=${Date.parse(`${HISTORY_START}T00:00:00Z`) / 1000}&period2=${Math.floor(Date.now() / 1000)}` : `range=${range}`}&interval=1d&events=div`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } });
 const yahoo = (symbol, range) => yahooJson(symbol, range).then(parseYahoo);
 
 async function scanner(symbols) {
@@ -79,11 +81,11 @@ async function worker() {
   while (queue.length) {
     const stock = queue.shift(), file = new URL(`${stock.symbol}.json`, DIR), official = officialOf(stock);
     try {
-      const before = await readJson(file), session = sessions.get(stock.symbol);
+      const before = await readCandles(DIR, stock.symbol), session = sessions.get(stock.symbol);
       // Stored history (files from before the rebuild may still hold Yahoo's flat no-volume bars), or Yahoo for a new stock.
       let bars = before && validOhlc(before) ? fileBars(before).filter(b => Array.isArray(before.est) || !isFakeBar(b)) : null;
       let source = before?.source === SOURCE ? SOURCE : FALLBACK_SOURCE, est = before?.est || [], div = before?.div || [];
-      if (!bars) bars = cleanBars((await yahoo(stock.symbol, `${YEARS}y`)).filter(b => !isFakeBar(b)), { official }).bars;
+      if (!bars) bars = cleanBars((await yahoo(stock.symbol, 'all')).filter(b => !isFakeBar(b)), { official }).bars;
       let through = before?.officialThrough ?? null;
       if (session?.today && official) {
         const last = bars.at(-1)?.d ?? '';
@@ -103,8 +105,7 @@ async function worker() {
       const next = candleFile(stock.symbol, source, through, bars, est, div);
       if (!validOhlc(next)) throw new Error('too few valid bars');
       fetched += 1;
-      const text = JSON.stringify(next) + '\n';
-      if (!before || JSON.stringify(before) + '\n' !== text) { await writeFile(file, text); written += 1; }
+      written += await writeCandles(DIR, next);
     } catch (error) { failed.push(`${stock.symbol} (${error.message})`); }
     await sleep(50);
   }

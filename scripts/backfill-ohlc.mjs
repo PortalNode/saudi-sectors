@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Rebuild five years of daily candles per stock on TradingView's basis (dist/ohlc/<symbol>.json).
+ * Rebuild every stock's daily candles since 2010 on TradingView's basis (dist/ohlc/<symbol>.json and
+ * dist/ohlc/history/<symbol>.json, see ohlc-files.mjs).
  *
  *  - Sessions and every close: the Saudi Exchange's own adjusted closes (company page chart,
  *    "adjusted for all corporate actions" — the same basis TradingView uses: bonus shares, splits,
@@ -15,9 +16,10 @@
  * Usage: node scripts/backfill-ohlc.mjs [--symbols 2222,1213] [--out <dir>] [--official-dir <dir>]
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readCandles, writeCandles } from './ohlc-files.mjs';
 import { execFile as execFileCb } from 'node:child_process';
 import { promisify } from 'node:util';
-import { parseYahoo, parseYahooSplits, parseYahooDividends, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, mergeDividends, round2Price, SOURCE, TV_FIGURES, tvDistance } from './ohlc-merge.mjs';
+import { parseYahoo, parseYahooSplits, parseYahooDividends, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, mergeDividends, HISTORY_START, round2Price, SOURCE, TV_FIGURES, tvDistance } from './ohlc-merge.mjs';
 
 const execFile = promisify(execFileCb);
 const DIST = new URL('../dist/', import.meta.url);
@@ -124,13 +126,13 @@ async function worker() {
         if (official.at(-1)?.d === last.date) official.at(-1).c = round2Price(last.price);
       }
       // Explicit dates: Yahoo has answered `range=6y` with a shorter history from some networks.
-      const now = Math.floor(Date.now() / 1000), dailyJson = await yahooJson(stock.symbol, `period1=${now - 6 * 366 * 86400}&period2=${now}&interval=1d&events=split,div`);
+      const now = Math.floor(Date.now() / 1000), period = `period1=${Date.parse(`${HISTORY_START}T00:00:00Z`) / 1000}&period2=${now}`;
+      const dailyJson = await yahooJson(stock.symbol, `${period}&interval=1d&events=split,div`);
       let daily = new Map(parseYahoo(dailyJson).map(b => [b.d, b])), splits = parseYahooSplits(dailyJson), dividends = parseYahooDividends(dailyJson);
-      // A history shorter than five years may be cut short by the Yahoo server that answered: ask another.
-      const fiveYears = new Date(Date.now() - 5 * 365 * 864e5).toISOString().slice(0, 10);
-      if (([...daily.keys()].sort()[0] ?? '9') > fiveYears) {
+      // A history that starts after the exchange's may be cut short by the Yahoo server that answered: ask another.
+      if (([...daily.keys()].sort()[0] ?? '9') > (official[0].d > HISTORY_START ? official[0].d : HISTORY_START)) {
         try {
-          const other = JSON.parse(await getText(`https://query2.finance.yahoo.com/v8/finance/chart/${stock.symbol}.SR?range=max&interval=1d&events=split,div`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } }));
+          const other = JSON.parse(await getText(`https://query2.finance.yahoo.com/v8/finance/chart/${stock.symbol}.SR?${period}&interval=1d&events=split,div`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } }));
           const longer = new Map(parseYahoo(other).map(b => [b.d, b]));
           if (longer.size > daily.size) { daily = longer; splits = parseYahooSplits(other); dividends = parseYahooDividends(other); }
         } catch { /* keep the first answer */ }
@@ -151,13 +153,13 @@ async function worker() {
       if (pick.exactSplits || pick.earlier) chosen.push(`${stock.symbol}${pick.exactSplits ? ' exact-splits' : ''}${pick.earlier ? ' nomu-history' : ''}`);
       // Sessions the daily update stored from TradingView stay as they are while their close still
       // matches (a later capital action changes every earlier close, and then the rebuild wins).
-      let before = null; try { before = JSON.parse(await readFile(new URL(`${stock.symbol}.json`, DIR), 'utf8')); } catch { /* new */ }
+      const before = await readCandles(DIR, stock.symbol);
       const kept = new Map(before?.source === SOURCE && validOhlc(before) ? fileBars(before).filter(b => !(before.est || []).includes(b.d)).map(b => [b.d, b]) : []);
       const est = new Set(rebuilt.est);
       const bars = rebuilt.bars.map(b => { const k = kept.get(b.d); if (k && Math.abs(k.c - b.c) < 0.005) { est.delete(b.d); return k; } return b; });
       const file = candleFile(stock.symbol, SOURCE, official.at(-1)?.d ?? null, bars, [...est], mergeDividends(before?.div, dividends));
       if (!validOhlc(file)) throw new Error('too few valid bars');
-      await writeFile(new URL(`${stock.symbol}.json`, DIR), JSON.stringify(file) + '\n');
+      await writeCandles(DIR, file);
       report.rebuilt += 1; report.estimated += file.est.length; failedInARow = 0;
       if (file.flags.length) report.flags.push(`${stock.symbol}: ${file.flags.map(f => `${f.date} ${f.change}%`).join(', ')}`);
       console.log(`[${++done}/${stocks.length} ${secs()}s] ${stock.symbol} ok: ${bars.length} candles from ${bars[0]?.d}, ${file.est.length} estimated (exchange from ${official[0]?.d}, Yahoo ${daily.size} days from ${[...daily.keys()].sort()[0]}), ${((Date.now() - t0) / 1000).toFixed(1)}s`);

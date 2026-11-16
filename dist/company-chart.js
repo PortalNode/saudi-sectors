@@ -12,7 +12,7 @@
   const dot = iso => iso.split('-').reverse().join('.');
   const TYPES = [['line', 'خطي'], ['candles', 'شموع']];
   const INTERVALS = [['d', 'يومي'], ['w', 'أسبوعي'], ['m', 'شهري']];
-  const RANGES = [['3m', '3 أشهر', 3], ['6m', '6 أشهر', 6], ['1y', 'سنة', 12], ['3y', '3 سنوات', 36], ['5y', '5 سنوات', 60]];
+  const RANGES = [['3m', '3 أشهر', 3], ['6m', '6 أشهر', 6], ['1y', 'سنة', 12], ['3y', '3 سنوات', 36], ['5y', '5 سنوات', 60], ['all', 'الكل', null]];
   const DEFAULT_RANGE = { d: '1y', w: '3y', m: '5y' };
   // المؤشرات: على الشارت نفسه (overlay) أو في لوحة تحته (pane)
   const INDICATORS = [
@@ -234,10 +234,20 @@
   const chip = (attr, id, label, on, title = '') => `<button type="button" data-${attr}="${id}" aria-pressed="${on}"${title ? ` title="${title}"` : ''}>${label}</button>`;
 
   // شموع الأسهم التي فُتحت من بحث الشارت (الملفات تتغير يوميًا، فلا تُؤخذ من ذاكرة المتصفح)
+  // لكل سهم ملفان: ohlc/<الرمز>.json للجلسات الأخيرة (يتحدث يوميًا)، وohlc/history/<الرمز>.json لما قبلها منذ 2010
+  function joinCandles(recent, history) {
+    if (!history?.d?.length || !recent.historyThrough) return recent;
+    const keep = history.d.map((d, i) => i).filter(i => history.d[i] < recent.d[0]);
+    const full = { ...recent, est: [...(history.est || []), ...(recent.est || [])], flags: [...(history.flags || []), ...(recent.flags || [])] };
+    for (const key of ['d', 'o', 'h', 'l', 'c', 'v']) full[key] = [...keep.map(i => history[key][i]), ...recent[key]];
+    return full;
+  }
+  const getJson = url => fetch(url, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
   const candleFiles = new Map();
   const loadCandleFile = sym => {
-    if (!candleFiles.has(sym)) candleFiles.set(sym, fetch(`ohlc/${encodeURIComponent(sym)}.json`, { cache: 'no-cache' })
-      .then(r => r.ok ? r.json() : null).then(d => d?.d?.length > 1 ? d : null).catch(() => null)
+    if (!candleFiles.has(sym)) candleFiles.set(sym, getJson(`ohlc/${encodeURIComponent(sym)}.json`)
+      .then(async recent => recent?.historyThrough ? joinCandles(recent, await getJson(`ohlc/history/${encodeURIComponent(sym)}.json`)) : recent)
+      .then(d => d?.d?.length > 1 ? d : null)
       .then(d => { if (!d) candleFiles.delete(sym); return d; }));
     return candleFiles.get(sym);
   };
@@ -503,7 +513,8 @@
     // العرض الافتراضي لمدة العرض المختارة، مع مساحة فارغة بعد آخر شمعة (نحو 8% من العرض) للرسم في المستقبل كما في TradingView
     function fitRange() {
       if (!chart || !data.length) return;
-      const from = fromDate(data.at(-1).time, RANGES.find(r => r[0] === state.range)[2]);
+      const months = RANGES.find(r => r[0] === state.range)?.[2];
+      const from = months == null ? data[0].time : fromDate(data.at(-1).time, months);
       const start = Math.max(0, data.findIndex(b => b.time >= from)), room = Math.max(3, Math.round((data.length - start) * 0.08));
       chart.timeScale().setVisibleLogicalRange({ from: start - 0.5, to: data.length - 1 + room });
     }
@@ -878,5 +889,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, calc: { adjustDividends, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
+  window.CompanyChart = { mount, load: loadCandleFile, calc: { joinCandles, adjustDividends, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
 })();

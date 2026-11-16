@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
-import { parseYahoo, cleanBars, ohlcFile, validOhlc, YEARS } from '../scripts/ohlc-merge.mjs';
+import { parseYahoo, cleanBars, ohlcFile, validOhlc, HISTORY_START, splitFile, joinFiles } from '../scripts/ohlc-merge.mjs';
 
 const dist = new URL('../dist/', import.meta.url);
 const read = name => readFileSync(new URL(name, dist), 'utf8');
@@ -29,11 +29,11 @@ test('the official close is final for its day and nothing after it is kept', () 
   assert.equal(bars.at(-1).h, 9.95, 'the high widens to include the official close');
 });
 
-test('bad prints that revert are dropped; jumps that stay are flagged; history keeps five years', () => {
-  const input = [bar('2020-01-01', 1), bar('2026-08-20', 64), bar('2026-08-23', 64.2), bar('2026-08-24', 18.3), bar('2026-08-25', 19.4), bar('2026-08-26', 65.7), bar('2026-08-27', 66), bar('2026-08-30', 20), bar('2026-08-31', 21)];
+test('bad prints that revert are dropped; jumps that stay are flagged; history starts in 2010', () => {
+  const input = [bar('2009-12-31', 1), bar('2026-08-20', 64), bar('2026-08-23', 64.2), bar('2026-08-24', 18.3), bar('2026-08-25', 19.4), bar('2026-08-26', 65.7), bar('2026-08-27', 66), bar('2026-08-30', 20), bar('2026-08-31', 21)];
   const { bars, dropped, flags } = cleanBars(input);
   assert.deepEqual(dropped, ['2026-08-24', '2026-08-25']);
-  assert.ok(!bars.some(b => b.d === '2020-01-01'), `only ${YEARS} years are kept`);
+  assert.ok(!bars.some(b => b.d < HISTORY_START), `nothing before ${HISTORY_START}`);
   assert.deepEqual(flags.map(f => f.date), ['2026-08-30'], 'a jump that does not revert is flagged, not dropped');
   const file = ohlcFile('6050', 'x', null, { bars, dropped, flags });
   assert.ok(validOhlc(file));
@@ -143,8 +143,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261116e/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116e" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261116e" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261116f/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116f" defer><\/script>\s*<script src="company-quote\.js\?v=chart-20261116f" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
@@ -174,10 +174,39 @@ test('every candle file is valid and ends on its stock\'s official close', () =>
   }
 });
 
+test('each stock\'s candles are split into recent and history files that join back exactly', () => {
+  const days = ['2023-05-01', '2024-12-31', '2025-01-01', '2026-11-15'];
+  const full = { symbol: '7010', source: 'x', officialThrough: '2026-11-15', est: ['2023-05-01', '2026-11-15'], div: [['2025-01-01', 0.55]], flags: [{ date: '2024-12-31', change: 12 }],
+    d: days, o: [1, 2, 3, 4], h: [1, 2, 3, 4], l: [1, 2, 3, 4], c: [1, 2, 3, 4], v: [5, 6, 7, 8] };
+  const { recent, history } = splitFile(full);
+  assert.deepEqual(recent.d, ['2025-01-01', '2026-11-15'], 'recent: from January 1 of last year');
+  assert.equal(recent.historyThrough, '2024-12-31');
+  assert.deepEqual(history.d, ['2023-05-01', '2024-12-31']);
+  assert.deepEqual(recent.div, full.div, 'dividends stay with the recent file');
+  const joined = joinFiles(recent, history);
+  assert.deepEqual({ ...joined, est: [...joined.est].sort() }, { ...full, est: [...full.est].sort() });
+  assert.deepEqual(JSON.parse(JSON.stringify(calc.joinCandles(recent, history))).d, full.d, 'the page joins them the same way');
+  assert.equal(splitFile({ ...full, d: ['2026-01-04', '2026-11-15'], o: [1, 2], h: [1, 2], l: [1, 2], c: [1, 2], v: [1, 2] }).history, null, 'a recent listing needs no history file');
+});
+
+test('the full history files are valid, start in 2010 or later, and join their recent files', () => {
+  const dir = new URL('ohlc/', dist), historyDir = new URL('ohlc/history/', dist);
+  if (!existsSync(historyDir)) return; // before the first rebuild with history files
+  for (const name of readdirSync(dir).filter(n => /^\d{4}\.json$/.test(n))) {
+    const recent = JSON.parse(readFileSync(new URL(name, dir), 'utf8'));
+    if (!recent.historyThrough) continue;
+    const history = JSON.parse(readFileSync(new URL(name, historyDir), 'utf8'));
+    assert.ok(validOhlc(history), `history/${name}`);
+    assert.ok(history.d[0] >= HISTORY_START, `history/${name} starts ${history.d[0]}`);
+    assert.equal(history.d.at(-1), recent.historyThrough, name);
+    assert.ok(history.d.at(-1) < recent.d[0], name);
+  }
+});
+
 test('the price workflow refreshes the candles and commits them with the prices', () => {
   const workflow = readFileSync(new URL('../.github/workflows/update-prices.yml', import.meta.url), 'utf8');
   assert.match(workflow, /run: node scripts\/update-ohlc\.mjs \|\| echo/);
-  assert.match(workflow, /git add -A dist\/data\.json dist\/ohlc/);
+  assert.match(workflow, /git add -A dist\/data\.json dist\/ohlc/, 'dist/ohlc includes the history files');
   assert.doesNotMatch(workflow, /update-history/);
 });
 

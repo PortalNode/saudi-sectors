@@ -2,7 +2,9 @@
 // Source: Yahoo Finance daily bars. The official Saudi Exchange close (data.json) is final for its day;
 // bad prints are removed and unadjusted capital actions are flagged for the chart.
 
-export const YEARS = 5;
+// Candles start here: Yahoo's daily open/high/low/volume for TADAWUL begin in March 2010, so every
+// candle from then on is a full one. (The exchange's closes go back further, but would give no candles.)
+export const HISTORY_START = '2010-01-01';
 export const DAILY_LIMIT = 0.105; // Tadawul caps a session's move at ±10%
 export const REVERT_WINDOW = 15;  // a jump that reverts within this many sessions is a bad print
 const round2 = value => Math.round(value * 100) / 100;
@@ -20,10 +22,10 @@ export function parseYahoo(json) {
 }
 
 /**
- * Sort, de-duplicate, keep the last YEARS years, end on the official close, drop bad prints and
+ * Sort, de-duplicate, keep everything since HISTORY_START, end on the official close, drop bad prints and
  * flag the remaining impossible jumps (capital actions the source did not adjust for).
  */
-export function cleanBars(input, { official = null, years = YEARS } = {}) {
+export function cleanBars(input, { official = null, start = HISTORY_START } = {}) {
   const byDate = new Map();
   for (const b of input) if (validBar(b)) byDate.set(b.d, { ...b });
   let bars = [...byDate.values()].sort((a, b) => a.d < b.d ? -1 : 1);
@@ -33,11 +35,7 @@ export function cleanBars(input, { official = null, years = YEARS } = {}) {
     const last = bars.at(-1);
     if (last?.d === official.date) { last.c = official.price; last.h = Math.max(last.h, last.c); last.l = Math.min(last.l, last.c); }
   }
-  if (bars.length) {
-    const from = new Date(`${bars.at(-1).d}T12:00:00Z`); from.setUTCFullYear(from.getUTCFullYear() - years);
-    const start = from.toISOString().slice(0, 10);
-    bars = bars.filter(b => b.d >= start);
-  }
+  bars = bars.filter(b => b.d >= start);
   const dropped = new Set();
   for (let i = 1; i < bars.length; i++) {
     const base = bars[i - 1].c;
@@ -169,11 +167,12 @@ export function scaleFactors(official, daily, { step = 0.02 } = {}) {
  * daily: Map date → Yahoo daily bar; hourly: Map date → Yahoo session bar from 60-minute data.
  * Returns { bars, est, flags }: est lists sessions whose open/high/low/volume are estimated.
  */
-export function rebuildBars({ official, daily, hourly = new Map(), splits = [], exactSplits = false, earlier = false, years = YEARS }) {
+export function rebuildBars({ official, daily, hourly = new Map(), splits = [], exactSplits = false, earlier = false, start: from = HISTORY_START }) {
   if (!official.length) return { bars: [], est: [], flags: [] };
   if (earlier) official = withEarlierHistory(official, daily);
-  const from = new Date(`${official.at(-1).d}T12:00:00Z`); from.setUTCFullYear(from.getUTCFullYear() - years);
-  const start = from.toISOString().slice(0, 10);
+  // From HISTORY_START, and not before Yahoo's first real session: earlier closes would give no candles.
+  const firstReal = [...daily.values()].filter(b => !isFakeBar(b)).reduce((m, b) => b.d < m ? b.d : m, '9999');
+  const start = firstReal > from ? firstReal : from;
   const k = scaleFactors(official, daily);
   const bars = [], est = [];
   for (let i = 0; i < official.length; i++) {
@@ -282,7 +281,7 @@ export function scanBars(row) {
  * action took effect today: earlier history is rescaled by that factor, as TradingView does.
  * fill: Yahoo bars for sessions this update missed (between the stored history and `prev`).
  */
-export function addSession(bars, { today, prev }, official, { fill = [], years = YEARS } = {}) {
+export function addSession(bars, { today, prev }, official, { fill = [], start = HISTORY_START } = {}) {
   if (!today || !official?.date || today.d !== official.date) return { bars, factor: null, added: false };
   today = { ...today, c: round2(official.price), h: Math.max(today.h, round2(official.price)), l: Math.min(today.l, round2(official.price)) };
   let out = bars.filter(b => b.d < today.d), factor = null;
@@ -299,8 +298,6 @@ export function addSession(bars, { today, prev }, official, { fill = [], years =
     out = out.filter(b => b.d !== prev.d).concat(prev);
   }
   out = out.concat(today).sort((a, b) => a.d < b.d ? -1 : 1);
-  const from = new Date(`${today.d}T12:00:00Z`); from.setUTCFullYear(from.getUTCFullYear() - years);
-  const start = from.toISOString().slice(0, 10);
   return { bars: out.filter(b => b.d >= start), factor, added: true };
 }
 
@@ -330,4 +327,33 @@ export function tvDistance(bars, tvRow, today) {
   let mismatches = 0, gap = 0;
   ours.forEach((a, i) => { const b = tvRow?.[i]; if (a == null || !(b > 0)) return; const off = Math.abs(a / b - 1); gap += off; if (off > (i < 4 ? 0.006 : 0.003)) mismatches += 1; });
   return { mismatches, gap };
+}
+
+/* ---------- Two files per stock ----------
+ * ohlc/<symbol>.json holds the recent sessions (from January 1 of last year) and changes every
+ * session; ohlc/history/<symbol>.json holds everything earlier and changes only when history is
+ * rebuilt or rescaled. The daily commit stays small, and the page joins the two. */
+export const historyBoundary = lastDate => `${Number(String(lastDate).slice(0, 4)) - 1}-01-01`;
+const pick = (file, keep) => {
+  const idx = file.d.map((d, i) => i).filter(i => keep(file.d[i]));
+  const at = key => idx.map(i => file[key][i]);
+  return { d: at('d'), o: at('o'), h: at('h'), l: at('l'), c: at('c'), v: at('v') };
+};
+/** A full candle file → { recent, history } (history is null when everything is recent). */
+export function splitFile(file, boundary = historyBoundary(file.d.at(-1))) {
+  if (!file.d.length || file.d[0] >= boundary) return { recent: { ...file, historyThrough: null }, history: null };
+  const recentPart = pick(file, d => d >= boundary), historyPart = pick(file, d => d < boundary);
+  const est = file.est || [], flags = file.flags || [];
+  const recent = { ...file, historyThrough: historyPart.d.at(-1), est: est.filter(d => d >= boundary), flags: flags.filter(f => f.date >= boundary), ...recentPart };
+  const history = { symbol: file.symbol, source: file.source, est: est.filter(d => d < boundary), flags: flags.filter(f => f.date < boundary), ...historyPart };
+  return { recent, history };
+}
+/** The recent file and its history file (or null) → one full candle file. */
+export function joinFiles(recent, history) {
+  if (!history || !recent.historyThrough) return recent;
+  const older = pick(history, d => d < recent.d[0]);
+  const full = { ...recent, est: [...(history.est || []), ...(recent.est || [])], flags: [...(history.flags || []), ...(recent.flags || [])] };
+  for (const key of ['d', 'o', 'h', 'l', 'c', 'v']) full[key] = [...older[key], ...recent[key]];
+  delete full.historyThrough;
+  return full;
 }

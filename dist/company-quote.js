@@ -39,8 +39,9 @@
   }
 
   async function loadCandles(symbol) {
-    if (!candleCache.has(symbol)) candleCache.set(symbol, fetch(`ohlc/${encodeURIComponent(symbol)}.json`, { cache: 'no-cache' }) // تتغير يوميًا
-      .then(r => r.ok ? r.json() : null).then(d => d?.d?.length > 1 ? d : null).catch(() => null));
+    // الملف الأخير وملف التاريخ معًا (company-chart.js)؛ تتغير يوميًا فلا تُؤخذ من ذاكرة المتصفح
+    if (!candleCache.has(symbol)) candleCache.set(symbol, window.CompanyChart?.load ? window.CompanyChart.load(symbol)
+      : fetch(`ohlc/${encodeURIComponent(symbol)}.json`, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(d => d?.d?.length > 1 ? d : null).catch(() => null));
     return candleCache.get(symbol);
   }
 
