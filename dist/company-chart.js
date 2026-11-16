@@ -340,7 +340,10 @@
       }).join('');
       // جلسة لم تصل شمعتها من المصدر: الإغلاق رسمي، والافتتاح والأعلى والأدنى والحجم تقديرية
       const estNote = state.interval === 'd' && estimated.has(b.time) ? '<span class="cc-est">تقديرية</span>' : '';
-      legend.innerHTML = `<b>${when}</b>${estNote}${cell('افتتاح', f2.format(b.open))}${cell('أعلى', f2.format(b.high))}${cell('أدنى', f2.format(b.low))}${cell('إغلاق', f2.format(b.close))}${ch == null ? '' : `<span class="cq-${dir}"><bdi>${ch > 0 ? '+' : ''}${f2.format(ch)}%</bdi></span>`}${state.ind.has('vol') ? cell('الحجم', big.format(b.volume)) : ''}${ind}`;
+      // التوزيع المستحق في هذه الجلسة يظهر في السطر نفسه (العلامة على الشارت حرف D فقط كما في TradingView)
+      const paid = state.interval === 'd' ? dividends.find(([d]) => d === b.time || (d > (data[i - 1]?.time ?? '') && d <= b.time)) : null;
+      const divNote = paid ? `<span class="cc-est">توزيع ${f2.format(paid[1])} ريال</span>` : '';
+      legend.innerHTML = `<b>${when}</b>${estNote}${divNote}${cell('افتتاح', f2.format(b.open))}${cell('أعلى', f2.format(b.high))}${cell('أدنى', f2.format(b.low))}${cell('إغلاق', f2.format(b.close))}${ch == null ? '' : `<span class="cq-${dir}"><bdi>${ch > 0 ? '+' : ''}${f2.format(ch)}%</bdi></span>`}${state.ind.has('vol') ? cell('الحجم', big.format(b.volume)) : ''}${ind}`;
     }
 
     // الرسوم محفوظة بالسعر والتاريخ، فتظهر في اليومي والأسبوعي والشهري (على أقرب شمعة)
@@ -495,7 +498,7 @@
       if (state.interval === 'd') {
         // علامة D على شمعة استحقاق كل توزيع، كما في TradingView، وعلامة القفزات غير المفسَّرة
         const marks = bigJumps(file).filter(f => data.some(b => b.time === f.date)).map(f => ({ time: f.date, position: 'aboveBar', color: colors.gold, shape: 'arrowDown', text: `${f.change > 0 ? '+' : ''}${f2.format(f.change)}%` }));
-        if (state.divMarks) for (const [date, amount] of dividends) { const b = data.find(x => x.time >= date); if (b) marks.push({ time: b.time, position: 'belowBar', color: colors.gold, shape: 'circle', text: `D ${f2.format(amount)}` }); }
+        if (state.divMarks) for (const [date, amount] of dividends) { const b = data.find(x => x.time >= date); if (b) marks.push({ time: b.time, position: 'belowBar', color: colors.gold, shape: 'circle', text: 'D', size: 0.6 }); }
         if (marks.length) LWC.createSeriesMarkers(main, marks.sort((a, b) => a.time < b.time ? -1 : 1));
       }
       main.attachPrimitive(overlay);
