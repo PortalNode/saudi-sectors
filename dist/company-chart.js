@@ -35,6 +35,57 @@
     { id: 'rsi', label: 'RSI', title: 'مؤشر القوة النسبية (14)', kind: 'pane', color: '#9085e9' },
     { id: 'macd', label: 'MACD', title: 'الماكد (12، 26، 9)', kind: 'pane', color: '#3987e5' }
   ];
+  // إعدادات كل مؤشر كما في TradingView: المدخلات، والنمط (الألوان والسماكة وما يظهر من خطوط)،
+  // والظهور (على أي فترة شمعة يظهر)، والإخفاء المؤقت. تُحفظ في هذا المتصفح، وcolor: null يعني لون الموقع.
+  const SOURCES = [['close', 'إغلاق'], ['open', 'افتتاح'], ['high', 'أعلى'], ['low', 'أدنى'], ['hl2', '(أعلى+أدنى)/2'], ['hlc3', '(أعلى+أدنى+إغلاق)/3'], ['ohlc4', '(افتتاح+أعلى+أدنى+إغلاق)/4']];
+  const srcOf = (b, key) => key === 'open' ? b.open : key === 'high' ? b.high : key === 'low' ? b.low : key === 'hl2' ? (b.high + b.low) / 2
+    : key === 'hlc3' ? (b.high + b.low + b.close) / 3 : key === 'ohlc4' ? (b.open + b.high + b.low + b.close) / 4 : b.close;
+  const plot = (color, width = 1.5) => ({ color, width, on: true });
+  const maDefault = color => ({ inputs: { length: 0, source: 'close' }, plots: { ma: plot(color) } });
+  const IND_DEFAULT = {
+    sma20: { ...maDefault('#3987e5'), inputs: { length: 20, source: 'close' } },
+    sma50: { ...maDefault('#d95926'), inputs: { length: 50, source: 'close' } },
+    sma200: { ...maDefault('#9085e9'), inputs: { length: 200, source: 'close' } },
+    ema20: { ...maDefault('#199e70'), inputs: { length: 20, source: 'close' } },
+    bb: { inputs: { length: 20, mult: 2, source: 'close' }, plots: { basis: plot('#c98500', 1), upper: plot('#c98500'), lower: plot('#c98500') } },
+    vol: { inputs: {}, plots: { up: plot(null), down: plot(null) } },
+    rsi: { inputs: { length: 14, source: 'close', upper: 70, lower: 30 }, plots: { rsi: plot('#9085e9'), upper: plot(null, 1), lower: plot(null, 1) } },
+    macd: { inputs: { source: 'close', fast: 12, slow: 26, signal: 9, osc: 'EMA', sig: 'EMA' }, plots: { hist: { on: true, colors: ['#26a69a', '#b2dfdb', '#ffcdd2', '#ff5252'] }, macd: plot('#3987e5'), signal: plot('#d95926'), zero: plot(null, 1) } }
+  };
+  for (const s of Object.values(IND_DEFAULT)) Object.assign(s, { hidden: false, vis: { d: true, w: true, m: true }, scaleLabels: true, statusValues: true, statusInputs: true });
+  // دمج المحفوظ مع الافتراضي حقلًا حقلًا، فلا يكسر إعدادٌ قديم أو تالف الشارت
+  function mergeInd(def, saved) {
+    const out = structuredClone(def);
+    if (!saved || typeof saved !== 'object') return out;
+    for (const k of ['hidden', 'scaleLabels', 'statusValues', 'statusInputs']) if (typeof saved[k] === 'boolean') out[k] = saved[k];
+    for (const k of ['d', 'w', 'm']) if (typeof saved.vis?.[k] === 'boolean') out.vis[k] = saved.vis[k];
+    for (const k of Object.keys(out.inputs)) if (typeof saved.inputs?.[k] === typeof out.inputs[k]) out.inputs[k] = saved.inputs[k];
+    for (const [k, p] of Object.entries(out.plots)) {
+      const s = saved.plots?.[k]; if (!s) continue;
+      if (typeof s.on === 'boolean') p.on = s.on;
+      if ('color' in p && (s.color === null || /^#[0-9a-f]{6}$/i.test(s.color))) p.color = s.color;
+      if ('width' in p && [1, 1.5, 2, 3, 4].includes(s.width)) p.width = s.width;
+      if (p.colors && Array.isArray(s.colors) && s.colors.length === 4 && s.colors.every(c => /^#[0-9a-f]{6}$/i.test(c))) p.colors = [...s.colors];
+    }
+    return out;
+  }
+  const loadInd = () => { let saved = {}; try { saved = JSON.parse(localStorage.getItem('cc-ind') || '{}') || {}; } catch { /* ignore */ } return Object.fromEntries(Object.entries(IND_DEFAULT).map(([id, def]) => [id, mergeInd(def, saved[id])])); };
+  const saveInd = () => { try { localStorage.setItem('cc-ind', JSON.stringify(indCfg)); } catch { /* ignore */ } };
+  let indCfg = loadInd();
+  // اسم المؤشر ومدخلاته في سطر الحالة كما في TradingView: «MACD close 12 26 9»
+  const IND_NAME = { sma20: 'SMA', sma50: 'SMA', sma200: 'SMA', ema20: 'EMA', bb: 'BB', vol: 'Vol', rsi: 'RSI', macd: 'MACD' };
+  const indParams = (id, s = indCfg[id]) => {
+    const i = s.inputs;
+    if (id === 'vol') return [];
+    if (id === 'bb') return [i.length, i.source, i.mult];
+    if (id === 'macd') return [i.source, i.fast, i.slow, i.signal];
+    return [i.length, i.source];
+  };
+  const indTitle = (id, s = indCfg[id]) => {
+    const i = s.inputs;
+    return { sma20: `متوسط متحرك بسيط ${i.length}`, sma50: `متوسط متحرك بسيط ${i.length}`, sma200: `متوسط متحرك بسيط ${i.length}`, ema20: `متوسط متحرك أسي ${i.length}`,
+      bb: `نطاقات بولنجر (${i.length}، ${i.mult})`, vol: 'حجم التداول', rsi: `مؤشر القوة النسبية (${i.length})`, macd: `الماكد (${i.fast}، ${i.slow}، ${i.signal})` }[id];
+  };
   const TOOLS = [['hline', 'خط أفقي'], ['hray', 'شعاع أفقي'], ['trend', 'خط اتجاه'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر']];
   // المغناطيس كما في TradingView: يلصق نقطة الرسم بأقرب سعر من الشمعة (افتتاح، أعلى، أدنى، إغلاق)؛
   // «ضعيف» حين يقترب المؤشر منه فقط، و«قوي» دائمًا
@@ -211,7 +262,17 @@
   const fromDate = (lastIso, months) => { const d = new Date(`${lastIso}T12:00:00Z`); d.setUTCMonth(d.getUTCMonth() - months); return d.toISOString().slice(0, 10); };
 
   /* ---------- المؤشرات (القيمة null حتى تكتمل الفترة) ---------- */
-  function sma(values, n) { const out = []; let sum = 0; values.forEach((v, i) => { sum += v; if (i >= n) sum -= values[i - n]; out.push(i >= n - 1 ? sum / n : null); }); return out; }
+  // يتخطى القيم الفارغة في أول السلسلة (مثل خط الماكد قبل اكتماله)
+  function sma(values, n) {
+    const out = []; let sum = 0, run = 0;
+    values.forEach((v, i) => {
+      if (v == null) { sum = 0; run = 0; out.push(null); return; }
+      sum += v; run += 1;
+      if (run > n) { sum -= values[i - n]; run = n; }
+      out.push(run === n ? sum / n : null);
+    });
+    return out;
+  }
   function ema(values, n) {
     // تبدأ بمتوسط بسيط لأول n قيمة كاملة، كما في TradingView
     const k = 2 / (n + 1), out = []; let prev = null, run = [];
@@ -232,12 +293,19 @@
     }
     return out;
   }
-  function macd(values) { const fast = ema(values, 12), slow = ema(values, 26), line = values.map((_, i) => fast[i] != null && slow[i] != null ? fast[i] - slow[i] : null), signal = ema(line, 9); return line.map((m, i) => m == null ? null : { macd: m, signal: signal[i], hist: signal[i] == null ? null : m - signal[i] }); }
+  const maOf = (values, n, type) => type === 'SMA' ? sma(values, n) : ema(values, n);
+  function macd(values, fastLen = 12, slowLen = 26, signalLen = 9, oscType = 'EMA', signalType = 'EMA') {
+    const fast = maOf(values, fastLen, oscType), slow = maOf(values, slowLen, oscType);
+    const line = values.map((_, i) => fast[i] != null && slow[i] != null ? fast[i] - slow[i] : null), signal = maOf(line, signalLen, signalType);
+    return line.map((m, i) => m == null ? null : { macd: m, signal: signal[i], hist: signal[i] == null ? null : m - signal[i] });
+  }
+  // ألوان المدرج كما في TradingView: 0 فوق الصفر ويزيد، 1 فوق الصفر ويتراجع، 2 تحت الصفر ويرتفع، 3 تحت الصفر ويهبط
+  const histColorIndex = (v, prev) => v >= 0 ? (prev == null || v >= prev ? 0 : 1) : (prev == null || v >= prev ? 2 : 3);
 
   /* ---------- الألوان من متغيرات الصفحة ---------- */
   function palette(el) {
     const css = getComputedStyle(el), v = name => css.getPropertyValue(name).trim();
-    return { ink: v('--pf-ink') || '#eef2f5', muted: v('--pf-muted') || '#9da7b2', line: v('--pf-line') || '#27313b', up: v('--cq-up') || '#22c55e', down: v('--cq-down') || '#f05252', gold: v('--pf-gold') || '#f59e0b' };
+    return { ink: v('--pf-ink') || '#eef2f5', muted: v('--pf-muted') || '#9da7b2', line: v('--pf-line') || '#27313b', up: v('--cq-up') || '#22c55e', down: v('--cq-down') || '#f05252', gold: v('--pf-gold') || '#f59e0b', bg: v('--pf-bg2') || '#11161c' };
   }
   // زر في الشريط الجانبي: أيقونة فقط، واسمه في تلميح يظهر بجانبه
   const side = (attrs, svgIcon, tip, pressed) => `<button type="button" ${attrs} aria-label="${tip}" data-tip="${tip}"${pressed == null ? '' : ` aria-pressed="${pressed}"`}>${svgIcon}</button>`;
@@ -311,6 +379,7 @@
           <div class="cc-legend" aria-live="polite"></div>
           <div class="cc-stage">
             <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div>
+            <div class="cc-ilegend" dir="ltr"></div>
             <div class="cc-float"><button type="button" data-reset title="إعادة تعيين عرض الرسم البياني (${RESET_KEY})" aria-label="إعادة تعيين عرض الرسم البياني">${ICON_RESET}</button></div>
           </div>
         </div>
@@ -318,12 +387,16 @@
         <div class="cc-tip" dir="rtl" role="tooltip" hidden></div>
       </div>
       <p class="cc-hint" hidden></p>
+      <div class="cc-dlg" hidden></div>
       ${String(symbol) !== home.symbol ? `<p class="cc-away" role="status">يعرض الشارت <b>${esc(away.name || symbol)}</b> <bdi>${esc(symbol)}</bdi>${away.page ? ` · <a href="${esc(away.page)}?symbol=${encodeURIComponent(symbol)}">نتائج الشركة</a>` : ''} · <button type="button" data-home>العودة إلى ${esc(home.name || home.symbol)}</button></p>` : ''}
       ${bigJumps(file).length ? `<p class="cq-source"><span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال.</span></p>` : ''}`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
     const body = panel.querySelector('.cc-body'), sideBar = panel.querySelector('.cc-side'), flyout = panel.querySelector('.cc-flyout'), tip = panel.querySelector('.cc-tip');
+    const ilegend = panel.querySelector('.cc-ilegend'), stage = panel.querySelector('.cc-stage'), dlg = panel.querySelector('.cc-dlg');
     let chart = null, LWC = null, colors = null, data = [], main = null, calc = {}, drawn = [], preview = null;
+    // المؤشرات على الشارت: المؤشر المحدد، ولوحة كل مؤشر، وخطوطه (لتحديده بالضغط عليه)
+    let selInd = null, paneIds = [null], indLines = [], selPrims = [];
     // تحرير الرسوم: الرسمة المحددة، والسحب الجاري، ونقطة المغناطيس تحت المؤشر قبل الضغطة الأولى
     let selected = -1, drag = null, hover = null;
 
@@ -340,21 +413,212 @@
       const b = data[i]; if (!b) return;
       const prev = data[i - 1], ch = prev ? (b.close / prev.close - 1) * 100 : null, dir = ch > 0 ? 'up' : ch < 0 ? 'down' : 'flat';
       const when = state.interval === 'd' ? longDate(b.time) : state.interval === 'w' ? `أسبوع ${longDate(b.time)} – ${longDate(b.end)}` : `${MONTHS[Number(b.time.slice(5, 7)) - 1]} ${b.time.slice(0, 4)}`;
-      const cell = (k, v, color) => `<span${color ? ` class="cc-ind" style="--c:${color}"` : ''}>${k} <bdi>${v}</bdi></span>`;
-      const ind = INDICATORS.filter(x => state.ind.has(x.id) && x.kind !== 'volume').map(x => {
-        const v = calc[x.id]?.[i];
-        if (v == null) return '';
-        if (x.id === 'bb') return cell('بولنجر', `${f2.format(v.low)} – ${f2.format(v.up)}`, x.color);
-        if (x.id === 'macd') return cell('MACD', `${f2.format(v.macd)}${v.signal != null ? ` / ${f2.format(v.signal)}` : ''}`, x.color);
-        return cell(x.label, f2.format(v), x.color);
-      }).join('');
+      const cell = (k, v) => `<span>${k} <bdi>${v}</bdi></span>`;
+      showIndValues(i);
       // جلسة لم تصل شمعتها من المصدر: الإغلاق رسمي، والافتتاح والأعلى والأدنى والحجم تقديرية
       const estNote = state.interval === 'd' && estimated.has(b.time) ? '<span class="cc-est">تقديرية</span>' : '';
       // التوزيع المستحق في هذه الجلسة يظهر في السطر نفسه (العلامة على الشارت حرف D فقط كما في TradingView)
       const paid = state.interval === 'd' ? dividends.find(([d]) => d === b.time || (d > (data[i - 1]?.time ?? '') && d <= b.time)) : null;
       const divNote = paid ? `<span class="cc-est">توزيع ${f2.format(paid[1])} ريال</span>` : '';
-      legend.innerHTML = `<b>${when}</b>${estNote}${divNote}${cell('افتتاح', f2.format(b.open))}${cell('أعلى', f2.format(b.high))}${cell('أدنى', f2.format(b.low))}${cell('إغلاق', f2.format(b.close))}${ch == null ? '' : `<span class="cq-${dir}"><bdi>${ch > 0 ? '+' : ''}${f2.format(ch)}%</bdi></span>`}${state.ind.has('vol') ? cell('الحجم', big.format(b.volume)) : ''}${ind}`;
+      legend.innerHTML = `<b>${when}</b>${estNote}${divNote}${cell('افتتاح', f2.format(b.open))}${cell('أعلى', f2.format(b.high))}${cell('أدنى', f2.format(b.low))}${cell('إغلاق', f2.format(b.close))}${ch == null ? '' : `<span class="cq-${dir}"><bdi>${ch > 0 ? '+' : ''}${f2.format(ch)}%</bdi></span>`}`;
     }
+
+    /* ---------- سطر حالة كل مؤشر على الشارت، كما في TradingView: الاسم والمدخلات والقيم، وأزرار الإخفاء والإعدادات والحذف ---------- */
+    const plotColor = (id, key) => indCfg[id].plots[key].color ?? (id === 'vol' ? colors[key] : colors.muted);
+    const shownInd = id => state.ind.has(id) && indCfg[id].vis[state.interval];
+    function renderIndRows() {
+      const ids = INDICATORS.map(x => x.id).filter(shownInd);
+      const groups = [['vol', 'sma20', 'sma50', 'sma200', 'ema20', 'bb'].filter(id => ids.includes(id)), ...paneIds.slice(1).map(id => [id])];
+      const row = id => {
+        const s = indCfg[id], params = s.statusInputs ? indParams(id).join(' ') : '';
+        return `<div class="cc-irow${s.hidden ? ' cc-off' : ''}${selInd === id ? ' cc-sel' : ''}" data-irow="${id}">
+          <button type="button" class="cc-iname" data-ipick="${id}" title="${esc(indTitle(id))}">${IND_NAME[id]}${params ? ` <span>${esc(params)}</span>` : ''}</button>
+          <span class="cc-ivals"></span>
+          <span class="cc-ibtns">
+            <button type="button" data-ieye="${id}" title="${s.hidden ? 'إظهار' : 'إخفاء'}" aria-label="${s.hidden ? 'إظهار' : 'إخفاء'} ${esc(indTitle(id))}">${s.hidden ? ICONS.eyeOff : ICONS.eye}</button>
+            <button type="button" data-iset="${id}" title="الإعدادات" aria-label="إعدادات ${esc(indTitle(id))}">${ICONS.gear}</button>
+            <button type="button" data-idel="${id}" title="حذف" aria-label="حذف ${esc(indTitle(id))}">${ICONS.trash}</button>
+          </span>
+        </div>`;
+      };
+      ilegend.innerHTML = groups.map((list, pane) => list.length ? `<div class="cc-igroup" data-pane="${pane}">${list.map(row).join('')}</div>` : '').join('');
+      rowsKey = '';
+      positionIndRows();
+    }
+    // كل مجموعة أعلى لوحتها: لوحة السعر، ثم لوحة كل مؤشر
+    let rowsKey = '';
+    function positionIndRows() {
+      if (!chart) return;
+      // يُستدعى مع كل رسم للشارت، فلا يعيد الحساب إلا إن تغيرت أحجام اللوحات
+      const key = `${chart.panes().map(p => p.getHeight()).join(',')}|${ilegend.childElementCount}`;
+      if (key === rowsKey) return;
+      rowsKey = key;
+      const top0 = stage.getBoundingClientRect().top;
+      let fallback = 0;
+      chart.panes().forEach((p, i) => {
+        const el = p.getHTMLElement?.(), top = el ? el.getBoundingClientRect().top - top0 : fallback;
+        fallback += p.getHeight() + 1;
+        const g = ilegend.querySelector(`[data-pane="${i}"]`);
+        if (g) g.style.top = `${Math.round(top) + 4}px`;
+      });
+    }
+    function showIndValues(i) {
+      const b = data[i];
+      for (const r of ilegend.querySelectorAll('[data-irow]')) {
+        const id = r.dataset.irow, s = indCfg[id], out = r.querySelector('.cc-ivals');
+        if (!s.statusValues || s.hidden || !b) { out.innerHTML = ''; continue; }
+        const val = (v, color) => v == null ? '' : `<bdi style="color:${color}">${f2.format(v)}</bdi>`;
+        const v = calc[id]?.[i];
+        if (id === 'vol') out.innerHTML = `<bdi style="color:${plotColor('vol', b.close >= b.open ? 'up' : 'down')}">${big.format(b.volume)}</bdi>`;
+        else if (id === 'bb') out.innerHTML = v ? `${val(v.mid, plotColor(id, 'basis'))}${val(v.up, plotColor(id, 'upper'))}${val(v.low, plotColor(id, 'lower'))}` : '';
+        else if (id === 'macd') {
+          const prev = calc.macd[i - 1]?.hist, hist = v?.hist;
+          out.innerHTML = v ? `${hist == null ? '' : val(hist, s.plots.hist.colors[histColorIndex(hist, prev)])}${val(v.macd, plotColor(id, 'macd'))}${val(v.signal, plotColor(id, 'signal'))}` : '';
+        } else out.innerHTML = val(v, plotColor(id, id === 'rsi' ? 'rsi' : 'ma'));
+      }
+    }
+    function selectInd(id) {
+      selInd = id;
+      ilegend.querySelectorAll('[data-irow]').forEach(r => r.classList.toggle('cc-sel', r.dataset.irow === id));
+      for (const p of selPrims) p.request?.();
+      if (id && selected >= 0) select(-1);
+    }
+    function removeInd(id) {
+      state.ind.delete(id);
+      if (selInd === id) selInd = null;
+      panel.querySelectorAll(`[data-ind="${id}"]`).forEach(x => x.setAttribute('aria-pressed', 'false'));
+      saveSettings(); build(true);
+    }
+    // أي مؤشر تحت الضغطة: لوحة المؤشر كلها له، وفي لوحة السعر الخط القريب من المؤشر (6px)
+    function indAt(x, y) {
+      if (!chart) return null;
+      const panes = chart.panes();
+      let top = 0, pane = -1;
+      for (let i = 0; i < panes.length; i++) { const h = panes[i].getHeight(); if (y >= top && y < top + h) { pane = i; break; } top += h + 1; }
+      if (pane > 0) return paneIds[pane] ?? null;
+      if (pane < 0) return null;
+      const logical = Math.round(chart.timeScale().coordinateToLogical(x) ?? -1);
+      for (const { id, series, values } of indLines) {
+        const v = values[logical]; if (v == null) continue;
+        const py = series.priceToCoordinate(v);
+        if (py != null && Math.abs(py - y) <= 6) return id;
+      }
+      return null;
+    }
+    // دوائر على خطوط المؤشر المحدد كما في TradingView
+    function selectionMarks(id, values, color) {
+      const p = {
+        series: null, request: null,
+        attached({ requestUpdate }) { this.request = requestUpdate; }, detached() { this.request = null; }, updateAllViews() {},
+        paneViews() {
+          return [{ zOrder: () => 'top', renderer: () => ({ draw: target => target.useMediaCoordinateSpace(({ context }) => {
+            if (selInd !== id || !chart || !p.series) return;
+            const ts = chart.timeScale(), r = ts.getVisibleLogicalRange(); if (!r) return;
+            const from = Math.max(0, Math.ceil(r.from)), to = Math.min(values.length - 1, Math.floor(r.to)), step = Math.max(1, Math.round((to - from) / 7));
+            for (let i = to; i >= from; i -= step) {
+              const v = values[i]; if (v == null) continue;
+              const x = ts.logicalToCoordinate(i), y = p.series.priceToCoordinate(v); if (x == null || y == null) continue;
+              context.beginPath(); context.arc(x, y, 4, 0, Math.PI * 2); context.fillStyle = colors.bg; context.fill(); context.lineWidth = 1.5; context.strokeStyle = color; context.stroke();
+            }
+          }) }) }];
+        }
+      };
+      selPrims.push(p);
+      return p;
+    }
+    ilegend.addEventListener('click', event => {
+      const b = event.target.closest('[data-ipick],[data-ieye],[data-iset],[data-idel]'); if (!b || !chart) return;
+      if (b.dataset.ipick) { selectInd(selInd === b.dataset.ipick ? null : b.dataset.ipick); return; }
+      if (b.dataset.ieye) { const s = indCfg[b.dataset.ieye]; s.hidden = !s.hidden; saveInd(); build(true); return; }
+      if (b.dataset.iset) { openIndSettings(b.dataset.iset); return; }
+      if (b.dataset.idel) removeInd(b.dataset.idel);
+    });
+
+    /* ---------- نافذة إعدادات المؤشر: مدخلات، نمط، الظهور ---------- */
+    let dlgState = null, dlgFrame = 0;
+    const toHex = color => { const c = document.createElement('canvas').getContext('2d'); c.fillStyle = '#000000'; c.fillStyle = color; return /^#[0-9a-f]{6}$/i.test(c.fillStyle) ? c.fillStyle : '#888888'; };
+    const PLOT_LABELS = { ma: 'المتوسط', basis: 'الأساس', upper: 'الحد العلوي', lower: 'الحد السفلي', up: 'شمعة صاعدة', down: 'شمعة هابطة', rsi: 'RSI', hist: 'المدرج التكراري', macd: 'الماكد', signal: 'خط الإشارة', zero: 'خط الصفر' };
+    const HIST_LABELS = ['فوق الصفر ويزيد', 'فوق الصفر ويتراجع', 'تحت الصفر ويرتفع', 'تحت الصفر ويهبط'];
+    const INPUT_FIELDS = {
+      ma: [['length', 'الطول', 'int'], ['source', 'المصدر', SOURCES]],
+      bb: [['length', 'الطول', 'int'], ['source', 'المصدر', SOURCES], ['mult', 'الانحراف المعياري', 'num']],
+      rsi: [['length', 'طول RSI', 'int'], ['source', 'المصدر', SOURCES], ['upper', 'الحد العلوي', 'num'], ['lower', 'الحد السفلي', 'num']],
+      macd: [['source', 'المصدر', SOURCES], ['fast', 'طول الخط السريع', 'int'], ['slow', 'طول الخط البطيء', 'int'], ['signal', 'طول خط الإشارة', 'int'], ['osc', 'نوع متوسط المذبذب', [['EMA', 'EMA'], ['SMA', 'SMA']]], ['sig', 'نوع متوسط الإشارة', [['EMA', 'EMA'], ['SMA', 'SMA']]]],
+      vol: []
+    };
+    const fieldsOf = id => INPUT_FIELDS[id] ?? INPUT_FIELDS.ma;
+    function renderIndSettings() {
+      const { id, tab } = dlgState, s = indCfg[id];
+      const check = (attr, on, label) => `<label class="cc-dlg-check"><input type="checkbox" ${attr}${on ? ' checked' : ''}><span>${label}</span></label>`;
+      const color = (attr, value) => `<input type="color" ${attr} value="${toHex(value)}" aria-label="اللون">`;
+      const widthSel = key => `<select data-dw="${key}" aria-label="السماكة">${[1, 1.5, 2, 3, 4].map(w => `<option value="${w}"${s.plots[key].width === w ? ' selected' : ''}>${w}px</option>`).join('')}</select>`;
+      let content = '';
+      if (tab === 'inputs') {
+        const fields = fieldsOf(id);
+        content = fields.length ? fields.map(([key, label, kind]) => `<label class="cc-dlg-row"><span>${label}</span>${Array.isArray(kind)
+          ? `<select data-din="${key}">${kind.map(([v, t]) => `<option value="${v}"${s.inputs[key] === v ? ' selected' : ''}>${t}</option>`).join('')}</select>`
+          : `<input type="number" data-din="${key}" value="${s.inputs[key]}" ${kind === 'int' ? 'min="1" max="1000" step="1"' : key === 'mult' ? 'min="0.1" max="10" step="0.1"' : 'min="0" max="100" step="1"'} dir="ltr">`}</label>`).join('')
+          : '<p class="cc-dlg-note">لا توجد مدخلات لهذا المؤشر.</p>';
+      } else if (tab === 'style') {
+        content = Object.entries(s.plots).map(([key, p]) => key === 'hist'
+          ? `<div class="cc-dlg-plot">${check(`data-don="hist"`, p.on, PLOT_LABELS.hist)}</div>${p.colors.map((c, k) => `<div class="cc-dlg-plot cc-dlg-sub"><span>لون ${k} <small>${HIST_LABELS[k]}</small></span>${color(`data-dhc="${k}"`, c)}</div>`).join('')}`
+          : `<div class="cc-dlg-plot">${check(`data-don="${key}"`, p.on, PLOT_LABELS[key])}${color(`data-dc="${key}"`, plotColor(id, key))}${id === 'vol' ? '' : widthSel(key)}</div>`).join('')
+          + `<h4>قيم الإخراج</h4>${check('data-dopt="scaleLabels"', s.scaleLabels, 'الملصقات على مقياس السعر')}${check('data-dopt="statusValues"', s.statusValues, 'القيم في سطر الحالة')}`
+          + `<h4>قيم الإدخال</h4>${check('data-dopt="statusInputs"', s.statusInputs, 'المدخلات في سطر الحالة')}`;
+      } else {
+        content = `<p class="cc-dlg-note">يظهر المؤشر على فترات الشموع المحددة فقط.</p>${INTERVALS.map(([k]) => check(`data-dvis="${k}"`, s.vis[k], { d: 'الأيام (يومي)', w: 'الأسابيع (أسبوعي)', m: 'الشهور (شهري)' }[k])).join('')}`;
+      }
+      const tabBtn = (k, t) => `<button type="button" role="tab" data-dtab="${k}" aria-selected="${tab === k}">${t}</button>`;
+      dlg.innerHTML = `<div class="cc-dlg-box" role="dialog" aria-modal="true" aria-label="إعدادات ${esc(indTitle(id))}" dir="rtl">
+        <div class="cc-dlg-head"><b>${IND_NAME[id]}</b><small>${esc(indTitle(id))}</small><button type="button" data-dclose aria-label="إغلاق">✕</button></div>
+        <div class="cc-dlg-tabs" role="tablist">${tabBtn('inputs', 'مدخلات')}${tabBtn('style', 'نمط')}${tabBtn('vis', 'الظهور')}</div>
+        <div class="cc-dlg-body">${content}</div>
+        <div class="cc-dlg-foot"><button type="button" data-dreset>الإعدادات الافتراضية</button><button type="button" data-dcancel>إلغاء</button><button type="button" data-dok class="cc-dlg-ok">موافق</button></div>
+      </div>`;
+    }
+    function openIndSettings(id) {
+      closeFlyout();
+      dlgState = { id, tab: 'inputs', backup: structuredClone(indCfg[id]) };
+      renderIndSettings(); dlg.hidden = false;
+      dlg.querySelector('[data-dtab="inputs"]')?.focus();
+    }
+    function closeIndSettings(keep) {
+      if (!dlgState) return;
+      cancelAnimationFrame(dlgFrame);
+      if (keep) saveInd(); else indCfg[dlgState.id] = dlgState.backup;
+      build(true);
+      dlgState = null; dlg.hidden = true; dlg.innerHTML = '';
+    }
+    // معاينة فورية: يُعاد رسم الشارت مع كل تعديل، ويُحفظ عند «موافق» فقط
+    const previewInd = () => { cancelAnimationFrame(dlgFrame); dlgFrame = requestAnimationFrame(() => build(true)); };
+    dlg.addEventListener('input', event => {
+      if (!dlgState) return;
+      const t = event.target, s = indCfg[dlgState.id];
+      if (t.dataset.din) {
+        const key = t.dataset.din, kind = fieldsOf(dlgState.id).find(f => f[0] === key)?.[2];
+        if (Array.isArray(kind)) s.inputs[key] = t.value;
+        else { const v = kind === 'int' ? Math.round(Number(t.value)) : Number(t.value); if (!Number.isFinite(v) || t.value === '' || v < Number(t.min) || v > Number(t.max)) return; s.inputs[key] = v; }
+      } else if (t.dataset.don) s.plots[t.dataset.don].on = t.checked;
+      else if (t.dataset.dc) s.plots[t.dataset.dc].color = t.value;
+      else if (t.dataset.dhc) s.plots.hist.colors[Number(t.dataset.dhc)] = t.value;
+      else if (t.dataset.dw) s.plots[t.dataset.dw].width = Number(t.value);
+      else if (t.dataset.dopt) s[t.dataset.dopt] = t.checked;
+      else if (t.dataset.dvis) s.vis[t.dataset.dvis] = t.checked;
+      else return;
+      previewInd();
+    });
+    dlg.addEventListener('click', event => {
+      if (!dlgState) return;
+      if (event.target === dlg || event.target.closest('[data-dclose],[data-dcancel]')) { closeIndSettings(false); return; }
+      if (event.target.closest('[data-dok]')) { closeIndSettings(true); return; }
+      const tab = event.target.closest('[data-dtab]');
+      if (tab) { dlgState.tab = tab.dataset.dtab; renderIndSettings(); dlg.querySelector(`[data-dtab="${dlgState.tab}"]`)?.focus(); return; }
+      if (event.target.closest('[data-dreset]')) { indCfg[dlgState.id] = structuredClone(IND_DEFAULT[dlgState.id]); renderIndSettings(); previewInd(); }
+    });
+    dlg.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeIndSettings(false); }
+      else if (event.key === 'Enter' && event.target.tagName === 'INPUT' && event.target.type === 'number') { event.preventDefault(); closeIndSettings(true); }
+    });
 
     // الرسوم محفوظة بالسعر والتاريخ، فتظهر في اليومي والأسبوعي والشهري (على أقرب شمعة)
     const barIndex = iso => { let k = 0; for (let i = 0; i < data.length && data[i].time <= iso; i++) k = i; return k; };
@@ -447,7 +711,7 @@
       attached({ requestUpdate }) { this.request = requestUpdate; },
       detached() { this.request = null; },
       updateAllViews() {},
-      paneViews() { return [{ zOrder: () => 'top', renderer: () => ({ draw: target => target.useMediaCoordinateSpace(({ context }) => drawShapes(context)) }) }]; }
+      paneViews() { return [{ zOrder: () => 'top', renderer: () => ({ draw: target => { target.useMediaCoordinateSpace(({ context }) => drawShapes(context)); queueMicrotask(positionIndRows); } }) }]; }
     };
 
     function build(keepRange) {
@@ -456,19 +720,25 @@
       box.innerHTML = '';
       daily = state.adj ? adjustDividends(raw, dividends) : raw;
       data = group(daily, state.interval);
-      const closes = data.map(b => b.close);
-      calc = {
-        sma20: state.ind.has('sma20') ? sma(closes, 20) : null, sma50: state.ind.has('sma50') ? sma(closes, 50) : null,
-        sma200: state.ind.has('sma200') ? sma(closes, 200) : null, ema20: state.ind.has('ema20') ? ema(closes, 20) : null,
-        bb: state.ind.has('bb') ? bollinger(closes) : null, rsi: state.ind.has('rsi') ? rsi(closes) : null, macd: state.ind.has('macd') ? macd(closes) : null
-      };
-      const panes = ['rsi', 'macd'].filter(id => state.ind.has(id));
+      // كل مؤشر بمدخلاته، ولا يُحسب ما لا يظهر على فترة الشمعة الحالية
+      const source = key => data.map(b => srcOf(b, key));
+      calc = {};
+      for (const id of INDICATORS.map(x => x.id).filter(shownInd)) {
+        const i = indCfg[id].inputs;
+        if (id === 'sma20' || id === 'sma50' || id === 'sma200') calc[id] = sma(source(i.source), i.length);
+        else if (id === 'ema20') calc[id] = ema(source(i.source), i.length);
+        else if (id === 'bb') calc[id] = bollinger(source(i.source), i.length, i.mult);
+        else if (id === 'rsi') calc[id] = rsi(source(i.source), i.length);
+        else if (id === 'macd') calc[id] = macd(source(i.source), i.fast, i.slow, i.signal, i.osc, i.sig);
+      }
+      const panes = ['rsi', 'macd'].filter(shownInd);
+      paneIds = [null, ...panes];
       box.style.setProperty('--cc-panes', panes.length);
       chart = LWC.createChart(box, {
         autoSize: true,
         layout: { background: { type: 'solid', color: 'transparent' }, textColor: colors.muted, fontFamily: getComputedStyle(document.body).fontFamily, fontSize: 11, panes: { separatorColor: colors.line, separatorHoverColor: colors.line } },
         grid: { vertLines: { visible: false }, horzLines: { color: colors.line } },
-        rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.08, bottom: state.ind.has('vol') ? 0.24 : 0.06 } },
+        rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.08, bottom: shownInd('vol') ? 0.24 : 0.06 } },
         timeScale: { borderVisible: false, rightOffset: 2, minBarSpacing: 0.05 },
         crosshair: { mode: LWC.CrosshairMode.Normal },
         localization: { priceFormatter: p => f2.format(p), timeFormatter: t => crosshairDate(t, state.interval) }
@@ -478,33 +748,55 @@
         ? chart.addSeries(LWC.CandlestickSeries, { upColor: up, downColor: down, borderUpColor: up, borderDownColor: down, wickUpColor: up, wickDownColor: down, priceLineColor: colors.muted })
         : chart.addSeries(LWC.AreaSeries, { lineColor: colors.gold, topColor: colors.gold + '55', bottomColor: colors.gold + '00', lineWidth: 2, priceLineColor: colors.muted });
       main.setData(state.type === 'candles' ? data.map(({ time, open, high, low, close }) => ({ time, open, high, low, close })) : data.map(b => ({ time: b.time, value: b.close })));
-      if (state.ind.has('vol')) {
-        const volume = chart.addSeries(LWC.HistogramSeries, { priceScaleId: 'vol', priceFormat: { type: 'volume' }, lastValueVisible: false, priceLineVisible: false });
+      indLines = []; selPrims = [];
+      if (shownInd('vol')) {
+        const s = indCfg.vol, upC = plotColor('vol', 'up'), downC = plotColor('vol', 'down');
+        const volume = chart.addSeries(LWC.HistogramSeries, { priceScaleId: 'vol', priceFormat: { type: 'volume' }, lastValueVisible: false, priceLineVisible: false, visible: !s.hidden });
         chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
-        volume.setData(data.map(b => ({ time: b.time, value: b.volume, color: (b.close >= b.open ? up : down) + '66' })));
+        volume.setData(data.map(b => { const plotKey = b.close >= b.open ? 'up' : 'down'; return s.plots[plotKey].on ? { time: b.time, value: b.volume, color: (plotKey === 'up' ? upC : downC) + '66' } : { time: b.time }; }));
       }
-      const line = (values, color, pane = 0, opts = {}) => {
-        const s = chart.addSeries(LWC.LineSeries, { color, lineWidth: 1.5, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false, ...opts }, pane);
-        s.setData(data.map((b, i) => values[i] == null ? { time: b.time } : { time: b.time, value: values[i] }));
-        return s;
+      // خط من خطوط المؤشر بلونه وسماكته؛ يُسجَّل لتحديد المؤشر بالضغط عليه ولدوائر التحديد
+      const line = (id, key, values, pane = 0, opts = {}) => {
+        const s = indCfg[id], p = s.plots[key];
+        if (!p.on) return null;
+        const color = plotColor(id, key);
+        const series = chart.addSeries(LWC.LineSeries, { color, lineWidth: p.width, lastValueVisible: s.scaleLabels, priceLineVisible: false, crosshairMarkerVisible: false, visible: !s.hidden, ...opts }, pane);
+        series.setData(data.map((b, i) => values[i] == null ? { time: b.time } : { time: b.time, value: values[i] }));
+        const marks = selectionMarks(id, values, color); series.attachPrimitive(marks); marks.series = series;
+        if (pane === 0) indLines.push({ id, series, values });
+        return series;
       };
-      for (const x of INDICATORS) if (x.kind === 'overlay' && calc[x.id]) {
-        if (x.id === 'bb') { line(calc.bb.map(v => v?.up ?? null), x.color, 0, { lineStyle: 2 }); line(calc.bb.map(v => v?.mid ?? null), x.color, 0, { lineWidth: 1 }); line(calc.bb.map(v => v?.low ?? null), x.color, 0, { lineStyle: 2 }); }
-        else line(calc[x.id], x.color);
+      for (const id of ['sma20', 'sma50', 'sma200', 'ema20']) if (calc[id]) line(id, 'ma', calc[id]);
+      if (calc.bb) {
+        line('bb', 'upper', calc.bb.map(v => v?.up ?? null), 0, { lineStyle: 2 });
+        line('bb', 'basis', calc.bb.map(v => v?.mid ?? null));
+        line('bb', 'lower', calc.bb.map(v => v?.low ?? null), 0, { lineStyle: 2 });
       }
+      // خط ثابت (حدود RSI وخط صفر الماكد) على لوحة المؤشر
+      const level = (series, id, key, price) => { const p = indCfg[id].plots[key]; if (p.on && series && !indCfg[id].hidden) series.createPriceLine({ price, color: plotColor(id, key), lineWidth: Math.max(1, Math.round(p.width)), lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: false }); };
+      // سلسلة غير مرئية تثبّت لوحة المؤشر حتى لو أُطفئت كل خطوطه
+      const anchor = (values, pane) => { const s = chart.addSeries(LWC.LineSeries, { visible: false, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false }, pane); s.setData(data.map((b, i) => values[i] == null ? { time: b.time } : { time: b.time, value: values[i] })); return s; };
       let pane = 1;
       if (calc.rsi) {
-        const s = line(calc.rsi, INDICATORS.find(x => x.id === 'rsi').color, pane, { lastValueVisible: true, priceFormat: { type: 'price', precision: 1, minMove: 0.1 } });
-        for (const level of [70, 30]) s.createPriceLine({ price: level, color: colors.muted, lineWidth: 1, lineStyle: LWC.LineStyle.Dotted, axisLabelVisible: false });
+        const s = indCfg.rsi;
+        const base = line('rsi', 'rsi', calc.rsi, pane, { priceFormat: { type: 'price', precision: 1, minMove: 0.1 } }) ?? anchor(calc.rsi, pane);
+        level(base, 'rsi', 'upper', s.inputs.upper); level(base, 'rsi', 'lower', s.inputs.lower);
         pane += 1;
       }
       if (calc.macd) {
-        const hist = chart.addSeries(LWC.HistogramSeries, { lastValueVisible: false, priceLineVisible: false }, pane);
-        hist.setData(data.map((b, i) => { const v = calc.macd[i]?.hist; return v == null ? { time: b.time } : { time: b.time, value: v, color: (v >= 0 ? up : down) + '99' }; }));
-        line(calc.macd.map(v => v?.macd ?? null), '#3987e5', pane, { lastValueVisible: true });
-        line(calc.macd.map(v => v?.signal ?? null), '#d95926', pane);
+        const s = indCfg.macd;
+        if (s.plots.hist.on) {
+          const hist = chart.addSeries(LWC.HistogramSeries, { lastValueVisible: false, priceLineVisible: false, visible: !s.hidden }, pane);
+          hist.setData(data.map((b, i) => { const v = calc.macd[i]?.hist; return v == null ? { time: b.time } : { time: b.time, value: v, color: s.plots.hist.colors[histColorIndex(v, calc.macd[i - 1]?.hist)] }; }));
+        }
+        const m = line('macd', 'macd', calc.macd.map(v => v?.macd ?? null), pane);
+        const sig = line('macd', 'signal', calc.macd.map(v => v?.signal ?? null), pane);
+        level(m ?? sig ?? anchor(calc.macd.map(v => v?.macd ?? null), pane), 'macd', 'zero', 0);
       }
       chart.panes().forEach((p, i) => p.setStretchFactor(i === 0 ? 3 : 1));
+      if (selInd && !shownInd(selInd)) selInd = null;
+      renderIndRows();
+      requestAnimationFrame(positionIndRows); setTimeout(positionIndRows, 80); // بعد أن ترسم المكتبة اللوحات بأحجامها
       if (state.interval === 'd') {
         // علامة D على شمعة استحقاق كل توزيع، كما في TradingView، وعلامة القفزات غير المفسَّرة
         const marks = bigJumps(file).filter(f => data.some(b => b.time === f.date)).map(f => ({ time: f.date, position: 'aboveBar', color: colors.gold, shape: 'arrowDown', text: `${f.change > 0 ? '+' : ''}${f2.format(f.change)}%` }));
@@ -638,6 +930,7 @@
     }
     function select(index) {
       selected = index;
+      if (index >= 0 && selInd) selectInd(null);
       const button = panel.querySelector('[data-delete]');
       if (button) button.disabled = selected < 0;
       if (!state.tool) { hint.hidden = selected < 0; hint.textContent = selected < 0 ? '' : 'اسحب الرسمة لتحريكها، أو اسحب أحد طرفيها لتعديله · Delete للحذف · Esc لإلغاء التحديد'; }
@@ -712,10 +1005,23 @@
       } else if (pending && moved) { const point = pointFrom(event) ?? preview?.b; if (point) finish(point); }
       press = null;
     });
+    // الضغط على خط مؤشر (أو داخل لوحته) يحدده فتظهر أزراره، والضغط في مكان آخر يلغي التحديد
+    let indPress = null;
+    box.addEventListener('pointerdown', event => { indPress = state.tool || event.button !== 0 ? null : { x: event.clientX, y: event.clientY }; });
+    box.addEventListener('pointerup', event => {
+      positionIndRows(); // بعد سحب الفاصل بين اللوحات
+      const p = indPress; indPress = null;
+      if (!p || state.tool || selected >= 0 || Math.hypot(event.clientX - p.x, event.clientY - p.y) > 5) return;
+      const { x, y } = local(event);
+      selectInd(indAt(x, y));
+    });
+    const resizeWatch = new ResizeObserver(() => positionIndRows());
+    resizeWatch.observe(box);
     document.addEventListener('keydown', event => {
-      if (!box.isConnected || /^(INPUT|SELECT|TEXTAREA)$/.test(event.target?.tagName)) return;
+      if (!box.isConnected || !dlg.hidden || /^(INPUT|SELECT|TEXTAREA)$/.test(event.target?.tagName)) return;
       if (event.key === 'Escape' && !flyout.hidden) { closeFlyout(); return; }
-      if (event.key === 'Escape') { if (state.tool) setTool(null); else if (selected >= 0) select(-1); else if (isFull()) setFull(false); }
+      if (event.key === 'Escape') { if (state.tool) setTool(null); else if (selected >= 0) select(-1); else if (selInd) selectInd(null); else if (isFull()) setFull(false); }
+      if ((event.key === 'Delete' || event.key === 'Backspace') && selInd && selected < 0 && !state.tool) { event.preventDefault(); removeInd(selInd); return; }
       // Alt/⌥ + R كما في TradingView (الحرف بالموضع حتى يعمل مع لوحة المفاتيح العربية و⌥ في ماك)
       if (event.altKey && !event.ctrlKey && !event.metaKey && event.code === 'KeyR') { event.preventDefault(); resetView(); }
       if ((event.key === 'Delete' || event.key === 'Backspace') && selected >= 0 && !state.tool) { event.preventDefault(); deleteSelected(); }
@@ -763,7 +1069,7 @@
       const row = (attr, id, on, inner) => `<button type="button" role="menuitemcheckbox" data-${attr}="${id}" aria-pressed="${on}">${inner}</button>`;
       flyout.innerHTML = kind === 'magnet'
         ? `<b>المغناطيس</b>${MAGNETS.map(([id, t]) => row('magnet', id, state.magnet === id, `<span>${t}<small>${id === 'weak' ? 'يلصق النقطة بأقرب سعر في الشمعة حين يقترب المؤشر منه' : id === 'strong' ? 'يلصق النقطة دائمًا بأقرب سعر (افتتاح، أعلى، أدنى، إغلاق)' : 'النقطة حيث المؤشر تمامًا'}</small></span>`)).join('')}`
-        : `<b>المؤشرات الفنية</b>${INDICATORS.map(x => row('ind', x.id, state.ind.has(x.id), `<i style="background:${x.color || colors?.muted || '#9da7b2'}"></i><span>${x.title}</span>`)).join('')}`;
+        : `<b>المؤشرات الفنية</b>${INDICATORS.map(x => { const p = Object.values(indCfg[x.id].plots)[0]; return row('ind', x.id, state.ind.has(x.id), `<i style="background:${p.color || p.colors?.[0] || colors?.muted || '#9da7b2'}"></i><span>${esc(indTitle(x.id))}</span>`); }).join('')}`;
       flyout.dataset.kind = kind; flyout.hidden = false; tip.hidden = true;
       sideBar.querySelectorAll('[data-menu]').forEach(x => x.setAttribute('aria-expanded', String(x === button)));
       // بجانب الزر، ولا تتجاوز أسفل منطقة الشارت
@@ -890,7 +1196,7 @@
     });
 
     const theme = new MutationObserver(() => { if (!chart) return; colors = palette(panel); build(true); });
-    current = { destroy({ keepFull = false } = {}) { if (isFull() && !keepFull) setFull(false); document.removeEventListener('fullscreenchange', onFullscreenChange); theme.disconnect(); chart?.remove(); chart = null; } };
+    current = { destroy({ keepFull = false } = {}) { if (isFull() && !keepFull) setFull(false); document.removeEventListener('fullscreenchange', onFullscreenChange); theme.disconnect(); resizeWatch.disconnect(); chart?.remove(); chart = null; } };
     loadLib().then(lib => {
       LWC = lib; colors = palette(panel);
       setTool(null);
@@ -902,5 +1208,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, load: loadCandleFile, calc: { joinCandles, adjustDividends, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
+  window.CompanyChart = { mount, load: loadCandleFile, calc: { joinCandles, adjustDividends, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, IND_DEFAULT, mergeInd, indParams, srcOf, histColorIndex, crosshairDate, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
 })();

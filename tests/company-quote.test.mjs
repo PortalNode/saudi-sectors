@@ -50,6 +50,32 @@ test('indicators follow TradingView\'s definitions', () => {
   assert.deepEqual({ macd: flat.macd, signal: flat.signal, hist: flat.hist }, { macd: 0, signal: 0, hist: 0 });
 });
 
+test('indicator settings: TradingView-style inputs, sources, and MACD options', () => {
+  const plain = value => JSON.parse(JSON.stringify(value));
+  assert.deepEqual([...calc.sma([null, null, 1, 2, 3], 2)], [null, null, null, 1.5, 2.5], 'SMA skips the empty start (MACD signal line)');
+  const values = Array.from({ length: 60 }, (_, i) => 10 + Math.sin(i / 4) * 3);
+  assert.deepEqual(plain(calc.macd(values)), plain(calc.macd(values, 12, 26, 9, 'EMA', 'EMA')), 'defaults are 12 26 9 EMA');
+  assert.notDeepEqual(plain(calc.macd(values, 12, 26, 9, 'SMA', 'SMA')).at(-1), plain(calc.macd(values)).at(-1), 'SMA option changes the result');
+  assert.equal(calc.histColorIndex(2, 1), 0); assert.equal(calc.histColorIndex(1, 2), 1);
+  assert.equal(calc.histColorIndex(-1, -2), 2); assert.equal(calc.histColorIndex(-2, -1), 3);
+  const b = { open: 1, high: 4, low: 0, close: 3 };
+  assert.deepEqual(['close', 'open', 'hl2', 'hlc3', 'ohlc4'].map(k => calc.srcOf(b, k)), [3, 1, 2, 7 / 3, 2]);
+  assert.deepEqual([...calc.indParams('macd', calc.IND_DEFAULT.macd)], ['close', 12, 26, 9], 'status line reads "MACD close 12 26 9"');
+  assert.deepEqual([...calc.indParams('rsi', calc.IND_DEFAULT.rsi)], [14, 'close']);
+  // saved settings merge field by field; bad values fall back to the defaults
+  const merged = plain(calc.mergeInd(calc.IND_DEFAULT.rsi, { hidden: true, inputs: { length: 21, source: 5 }, plots: { rsi: { color: 'red', width: 3 } }, vis: { m: false } }));
+  assert.equal(merged.hidden, true); assert.equal(merged.inputs.length, 21); assert.equal(merged.inputs.source, 'close');
+  assert.equal(merged.plots.rsi.color, '#9085e9'); assert.equal(merged.plots.rsi.width, 3);
+  assert.deepEqual(merged.vis, { d: true, w: true, m: false });
+  assert.deepEqual(plain(calc.mergeInd(calc.IND_DEFAULT.macd, null)), plain(calc.IND_DEFAULT.macd));
+});
+
+test('the crosshair date reads like TradingView', () => {
+  assert.equal(calc.crosshairDate('2026-11-16', 'd'), "الاثنين 16 نوفمبر '26");
+  assert.equal(calc.crosshairDate({ year: 2026, month: 11, day: 16 }, 'w'), "الاثنين 16 نوفمبر '26");
+  assert.equal(calc.crosshairDate('2024-10-01', 'm'), "أكتوبر '24");
+});
+
 test('ADJ adjusts earlier prices for cash dividends as TradingView does', () => {
   const daily = [
     { time: '2026-08-02', open: 44, high: 44.5, low: 43.8, close: 44 },
@@ -143,8 +169,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261116i/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116i" defer><\/script>\s*<script src="company-quote\.js\?v=no-notes-20261116" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261116j/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116j" defer><\/script>\s*<script src="company-quote\.js\?v=no-notes-20261116" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);

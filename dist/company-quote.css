@@ -151,3 +151,56 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cc-chips [data-delete]{border-style:dashed}
 .cc-chips [data-delete]:disabled{opacity:.4;cursor:default}
 .cc-chips [data-delete]:not(:disabled){color:var(--cq-down);border-color:var(--cq-down)}
+
+/* سطر حالة كل مؤشر أعلى لوحته كما في TradingView: الاسم والمدخلات والقيم، وأزرار الإخفاء والإعدادات والحذف عند المرور أو التحديد */
+.cc-ilegend{position:absolute;left:0;right:0;top:0;height:0;z-index:4;pointer-events:none}
+/* لا تتجاوز مقياس السعر على اليمين، وتلتف الأزرار على الشاشات الضيقة */
+.cc-igroup{position:absolute;left:8px;right:66px;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.cc-irow{pointer-events:auto;display:flex;flex-wrap:wrap;max-width:100%;box-sizing:border-box;align-items:center;gap:2px 7px;min-height:24px;padding:1px 5px;border:1px solid transparent;border-radius:5px;font-size:11.5px;color:var(--pf-ink);white-space:nowrap;background:color-mix(in srgb,var(--pf-bg2) 72%,transparent)}
+.cc-irow:hover{border-color:var(--pf-line)}
+.cc-irow.cc-sel{border-color:#2962ff}
+.cc-iname{border:0;background:none;color:inherit;font:inherit;font-weight:700;padding:0;cursor:pointer}
+.cc-iname span{color:var(--pf-muted);font-weight:400}
+.cc-ivals{display:flex;flex-wrap:wrap;gap:0 7px;font-variant-numeric:tabular-nums;font-weight:700}
+.cc-ivals:empty{display:none}
+.cc-ibtns{display:none;gap:1px}
+.cc-irow:hover .cc-ibtns,.cc-irow.cc-sel .cc-ibtns{display:flex}
+.cc-ibtns button{display:grid;place-items:center;width:26px;height:24px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--pf-ink);cursor:pointer}
+.cc-ibtns button:hover{background:var(--pf-line)}
+.cc-ibtns svg{width:17px;height:17px}
+.cc-irow.cc-off .cc-iname{opacity:.45}
+/* نافذة إعدادات المؤشر: مدخلات، نمط، الظهور */
+.cc-dlg{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.45)}
+.cc-dlg[hidden]{display:none}
+.cc-dlg-box{width:min(440px,100%);max-height:min(660px,calc(100dvh - 32px));display:flex;flex-direction:column;background:var(--pf-bg);color:var(--pf-ink);border:1px solid var(--pf-line);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.45);overflow:hidden}
+.cc-dlg-head{display:flex;align-items:center;gap:10px;padding:14px 18px 4px}
+.cc-dlg-head b{font-size:19px}
+.cc-dlg-head small{color:var(--pf-muted);font-size:11.5px}
+.cc-dlg-head button{margin-inline-start:auto;display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--pf-ink);font-size:18px;cursor:pointer}
+.cc-dlg-head button:hover{background:var(--pf-line)}
+.cc-dlg-tabs{display:flex;gap:20px;padding:0 18px;border-bottom:1px solid var(--pf-line)}
+.cc-dlg-tabs button{padding:10px 0 9px;border:0;border-bottom:2px solid transparent;background:none;color:var(--pf-muted);font:inherit;font-weight:700;font-size:13.5px;cursor:pointer}
+.cc-dlg-tabs [aria-selected="true"]{color:var(--pf-ink);border-bottom-color:var(--pf-ink)}
+.cc-dlg-body{flex:1 1 auto;overflow:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.cc-dlg-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px}
+.cc-dlg-body input[type=number],.cc-dlg-body select{box-sizing:border-box;width:160px;min-height:36px;padding:4px 10px;border:1px solid var(--pf-line);border-radius:7px;background:var(--pf-bg2);color:var(--pf-ink);font:inherit;font-size:13px}
+.cc-dlg-body input[type=number]{text-align:left;font-variant-numeric:tabular-nums}
+.cc-dlg-plot{display:flex;align-items:center;gap:10px;font-size:13px}
+.cc-dlg-plot>.cc-dlg-check,.cc-dlg-plot>span{flex:1}
+.cc-dlg-plot select{width:80px}
+.cc-dlg-plot input[type=color]{width:44px;height:34px;padding:3px;border:1px solid var(--pf-line);border-radius:7px;background:var(--pf-bg2);cursor:pointer}
+.cc-dlg-sub{padding-inline-start:26px;font-size:12.5px}
+.cc-dlg-sub small{color:var(--pf-muted);font-size:11px}
+.cc-dlg-check{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer}
+.cc-dlg-check input{width:17px;height:17px;margin:0;accent-color:var(--pf-gold)}
+.cc-dlg h4{margin:8px 0 0;font-size:11px;color:var(--pf-muted);font-weight:700}
+.cc-dlg-note{margin:0;font-size:12px;color:var(--pf-muted)}
+.cc-dlg-foot{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--pf-line)}
+.cc-dlg-foot button{min-height:38px;padding:0 18px;border:1px solid var(--pf-line);border-radius:8px;background:transparent;color:var(--pf-ink);font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.cc-dlg-foot [data-dreset]{margin-inline-end:auto;color:var(--pf-muted);font-weight:600;padding:0 12px}
+.cc-dlg-foot .cc-dlg-ok{background:var(--pf-ink);color:var(--pf-bg);border-color:var(--pf-ink)}
+@media (max-width:520px){
+  .cc-dlg{place-items:end center;padding:0}
+  .cc-dlg-box{width:100%;max-height:88dvh;border-radius:14px 14px 0 0}
+  .cc-dlg-body input[type=number],.cc-dlg-body select{width:130px}
+}
