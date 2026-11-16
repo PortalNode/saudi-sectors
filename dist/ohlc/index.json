@@ -1,11 +1,9 @@
 {
- "officialDate": "2026-11-15",
- "updatedAt": "2026-11-15T19:46:08.630Z",
+ "officialDate": null,
+ "updatedAt": "2026-11-16T08:19:39.063Z",
  "source": "TradingView · إغلاق تداول السعودية الرسمي",
- "symbols": 271,
- "failed": [
-  "1325 (too few valid bars)"
- ],
+ "symbols": 272,
+ "failed": [],
  "rebuiltAt": "2026-11-16T01:41:17.558Z",
  "estimatedSessions": 42476,
  "unexplainedJumps": [
@@ -99,5 +97,6 @@
   "7203: 2022-02-17 18.75%",
   "4072: 2024-01-09 30%",
   "1835: 2024-11-28 18%, 2024-12-01 -11.34%"
- ]
+ ],
+ "adjustedToday": []
 }
