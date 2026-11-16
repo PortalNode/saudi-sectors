@@ -41,6 +41,9 @@ test('candles are rebuilt on the exchange basis: official closes, scaled open/hi
   ]);
   const hourly = new Map([[d[5], { d: d[5], o: 21, h: 21.2, l: 20.6, c: 20.9, v: 500 }]]);
   const { bars, est } = rebuildBars({ official, daily, hourly });
+  // Hourly bars Yahoo left unadjusted (daily ones are ×2 here) follow their own close, not the daily factor.
+  const odd = rebuildBars({ official, daily, hourly: new Map([[d[5], { d: d[5], o: 10.5, h: 10.6, l: 10.3, c: 10.45, v: 500 }]]) }).bars.find(b => b.d === d[5]);
+  assert.deepEqual([odd.o, odd.h, odd.l, odd.c], [10.45, 10.55, 10.25, 10.4], 'an hourly bar on its own scale is not halved');
   assert.deepEqual(bars.map(b => b.d), [d[0], d[1], d[4], d[5], d[6], d[7]], 'days without a trade are left out');
   assert.deepEqual(bars[0], { d: d[0], o: 9.9, h: 10.2, l: 9.9, c: 10, v: 2000 }, 'Yahoo halved to the exchange basis, volume doubled');
   assert.deepEqual(bars[2], { d: d[4], o: 10.2, h: 10.5, l: 10.2, c: 10.5, v: 0 }, 'a missed session runs from the previous close');

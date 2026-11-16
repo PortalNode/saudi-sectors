@@ -161,7 +161,15 @@ export function rebuildBars({ official, daily, hourly = new Map(), years = YEARS
     const real = y && !isFakeBar(y) && y.c > 0 && Math.abs((c / y.c) / f - 1) <= 0.05;
     let bar;
     if (real) bar = { d, o: y.o * f, h: y.h * f, l: y.l * f, c, v: y.v / f };
-    else if (h?.v > 0) { bar = { d, o: h.o * f, h: h.h * f, l: h.l * f, c, v: h.v / f }; est.push(d); }
+    else if (h?.v > 0) {
+      // Yahoo's 60-minute bars are not always on its daily scale: their own close sets the factor
+      // when it is far from the daily one (the close itself misses the auction by a tick or two).
+      const fh = h.c > 0 && Math.abs(c / h.c / f - 1) > 0.03 ? c / h.c : f;
+      bar = { d, o: h.o * fh, h: h.h * fh, l: h.l * fh, c, v: h.v / fh };
+      // A session moves at most ±10% from the previous close; anything wider is not this session.
+      if (prev && (bar.h > prev.c * (1 + DAILY_LIMIT) || bar.l < prev.c * (1 - DAILY_LIMIT))) bar = { d, o: prev.c, h: Math.max(prev.c, c), l: Math.min(prev.c, c), c, v: bar.v };
+      est.push(d);
+    }
     else if (prev && c === prev.c && (!y || isFakeBar(y))) continue; // no trade that session (suspended)
     else if (prev) { bar = { d, o: prev.c, h: Math.max(prev.c, c), l: Math.min(prev.c, c), c, v: 0 }; est.push(d); }
     else continue;
