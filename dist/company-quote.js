@@ -140,11 +140,12 @@
               <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path class="cq-mini-area" d="${line}L${W} ${H}L0 ${H}Z"/><path class="cq-mini-line" d="${line}"/></svg>
               <i class="cq-mini-dot" style="top:${y(last.c).toFixed(2)}%"></i>
               <i class="cq-mini-cross" hidden></i>
+              <i class="cq-mini-hline" hidden></i>
             </span>
           </a>
-          <div class="cq-mini-yaxis" aria-hidden="true">${yTicks}</div>
+          <div class="cq-mini-yaxis" aria-hidden="true">${yTicks}<span class="cq-mini-ytag" hidden></span></div>
         </div>
-        <div class="cq-mini-xaxis" dir="ltr" aria-hidden="true">${xTicks}</div>
+        <div class="cq-mini-xaxis" dir="ltr" aria-hidden="true">${xTicks}<span class="cq-mini-xtag" hidden></span></div>
         <div class="cq-mini-meta">
           <span class="cq-${dir}"><bdi>${change > 0 ? '+' : ''}${f2.format(change)}%</bdi></span>
           <a class="cq-mini-open" href="${link}">التحليل الفني ←</a>
@@ -152,19 +153,30 @@
       </div>`;
   }
 
-  // يربط المؤشر بسطر O H L C والخط الشاقولي فوق الشارت الصغير
+  // يربط المؤشر بسطر O H L C، وبخط أفقي وشاقولي، وبوسمي السعر على محور الأسعار والتاريخ على محور الوقت (كما في المرجع)
   function bindMini(slot, { series }) {
-    const n = series.length, link = slot.querySelector('.cq-mini-plot-link'), legend = slot.querySelector('.cq-mini-ohlc'), cross = slot.querySelector('.cq-mini-cross');
+    const n = series.length, link = slot.querySelector('.cq-mini-plot-link'), legend = slot.querySelector('.cq-mini-ohlc');
+    const cross = slot.querySelector('.cq-mini-cross'), hline = slot.querySelector('.cq-mini-hline');
+    const ytag = slot.querySelector('.cq-mini-ytag'), xtag = slot.querySelector('.cq-mini-xtag');
+    const closes = series.map(p => p.c), min = Math.min(...closes), max = Math.max(...closes), span = max - min || 1;
+    const yAt = v => 4 + (1 - (v - min) / span) * 92;
     const show = i => {
       const p = series[i];
       legend.innerHTML = `<span class="cq-mini-when">${esc(p.label)}</span><span>O <bdi>${f2.format(p.o)}</bdi></span><span>H <bdi>${f2.format(p.h)}</bdi></span><span>L <bdi>${f2.format(p.l)}</bdi></span><span>C <bdi>${f2.format(p.c)}</bdi></span>`;
     };
-    show(n - 1);
+    const hide = () => { cross.hidden = hline.hidden = ytag.hidden = xtag.hidden = true; };
+    show(n - 1); hide();
     link.addEventListener('pointermove', event => {
       const r = link.getBoundingClientRect(), f = Math.min(1, Math.max(0, (event.clientX - r.left) / r.width)), i = Math.round(f * (n - 1));
-      show(i); cross.hidden = false; cross.style.left = `${(i / (n - 1)) * 100}%`;
+      const p = series[i], xPct = (i / (n - 1)) * 100, yPct = yAt(p.c);
+      show(i);
+      cross.hidden = hline.hidden = ytag.hidden = xtag.hidden = false;
+      cross.style.left = `${xPct}%`;
+      hline.style.top = `${yPct}%`;
+      ytag.style.top = `${yPct}%`; ytag.textContent = f2.format(p.c);
+      xtag.style.left = `${xPct}%`; xtag.textContent = p.label;
     });
-    link.addEventListener('pointerleave', () => { cross.hidden = true; show(n - 1); });
+    link.addEventListener('pointerleave', () => { hide(); show(n - 1); });
   }
 
   function card(stock) {
