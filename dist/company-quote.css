@@ -315,3 +315,6 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cc-head-logo{width:24px;height:24px;object-fit:contain;border-radius:50%;background:var(--pf-line)}
 .cc-head-sym{font-weight:800;font-variant-numeric:tabular-nums}
 .cc-head-int{color:var(--pf-muted);font-size:12px;font-weight:700;padding:1px 7px;border:1px solid var(--pf-line);border-radius:4px}
+/* سطر الأسعار (التاريخ والافتتاح والأعلى والأدنى والإغلاق) مباشرة تحت الإطار */
+.cq-chart-panel .cc-main > .cc-legend{margin:0;padding:6px 8px 0;min-height:0;margin-inline-start:76px;margin-inline-end:0}
+.cq-chart-panel .cc-main > .cc-head{padding:0 8px;margin-top:4px}
