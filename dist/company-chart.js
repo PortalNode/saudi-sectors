@@ -812,7 +812,7 @@
       chart = LWC.createChart(box, {
         autoSize: true,
         layout: { background: { type: 'solid', color: 'transparent' }, textColor: colors.muted, fontFamily: getComputedStyle(document.body).fontFamily, fontSize: 11, panes: { separatorColor: colors.line, separatorHoverColor: colors.line } },
-        grid: { vertLines: { visible: false }, horzLines: { color: colors.line } },
+        grid: { vertLines: { visible: false }, horzLines: { visible: false } },
         rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.08, bottom: shownInd('vol') ? 0.24 : 0.06 } },
         timeScale: { borderVisible: false, rightOffset: 2, minBarSpacing: 0.05 },
         crosshair: { mode: LWC.CrosshairMode.Normal },
