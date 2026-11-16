@@ -274,3 +274,30 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cc-dd-pt input{width:110px}
 .cc-dlg-link{align-self:flex-start;min-height:36px;padding:0 14px;border:1px solid var(--pf-line);border-radius:8px;background:transparent;color:var(--pf-ink);font:inherit;font-weight:700;cursor:pointer}
 .cc-dlg-link:hover{border-color:var(--pf-gold);color:var(--pf-gold)}
+
+/* شكل الإطار على نمط TradingView: شريط سفلي لمدة العرض، وأزرار علوية وجانبية بنفس الأسلوب */
+.cc-bottom{display:flex;flex-wrap:wrap;align-items:center;gap:2px;margin-top:4px;padding:6px 6px;border-top:1px solid var(--pf-line);background:var(--pf-bg)}
+.cc-bottom button{padding:5px 10px;border:0;border-radius:6px;background:transparent;color:var(--pf-muted);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.cc-bottom button:hover{background:var(--pf-line);color:var(--pf-ink)}
+.cc-bottom button[aria-pressed="true"]{color:var(--pf-gold);background:var(--pf-gold-soft)}
+.cc-bottom{justify-content:flex-start}
+.cc-side hr{width:28px;margin:4px 0}
+
+/* إطار الشارت كما في TradingView: شريط علوي بفواصل عمودية، وعمود أدوات جانبي بخطوط فاصلة، وشريط سفلي لمدة العرض */
+.cq-chart-panel .cc-toolbar{gap:6px 8px;padding:6px 8px;border-bottom:1px solid var(--pf-line);background:var(--pf-bg)}
+.cq-chart-panel .cc-groups{gap:0 6px}
+.cq-chart-panel .cc-groups > .cq-range{position:relative;border:0;gap:0;padding:0 2px}
+.cq-chart-panel .cc-groups > .cq-range + .cq-range::before{content:"";position:absolute;inset-inline-start:-4px;top:4px;bottom:4px;width:1px;background:var(--pf-line)}
+.cq-chart-panel .cc-groups > .cq-range button{padding:5px 9px;border-radius:5px;font-size:12px}
+.cq-chart-panel .cc-groups > .cq-range button:hover{background:var(--pf-line)}
+.cq-chart-panel .cc-search-btn{height:30px;border-radius:5px}
+.cq-chart-panel .cc-full-btn{border:0;border-radius:5px;padding:5px 8px}
+.cq-chart-panel .cc-body{padding-inline-start:46px;margin-top:0;border-bottom:1px solid var(--pf-line)}
+.cq-chart-panel .cc-side{width:44px;padding:6px 0;gap:2px;background:var(--pf-bg);border-inline-end:1px solid var(--pf-line)}
+.cq-chart-panel .cc-side button{width:34px;height:34px;border-radius:6px}
+.cq-chart-panel .cc-side button svg{width:20px;height:20px}
+.cq-chart-panel .cc-side hr{width:26px;margin:5px 0;border-top:1px solid var(--pf-line)}
+.cq-chart-panel .cc-tip{left:50px}
+.cq-chart-panel .cc-flyout{left:50px}
+.cq-chart-panel .cc-bottom{height:36px;padding:0 6px;margin-top:0;border-top:1px solid var(--pf-line);background:var(--pf-bg);align-items:center}
+.cq-chart-panel .cc-bottom button{height:26px;padding:0 9px;border-radius:5px}
