@@ -8,8 +8,8 @@ import { latestYearToDateColumns, setLatestResults } from './latest-results.mjs?
  * quarter (Q1–Q4 or the last eight in sequence), 6 months, 9 months, annual.
  *
  * The page HTML must keep the usual ids: <slug>-nav, -load-status, -panel, -title,
- * -subtitle, -table-wrap, -charts-context, -chart-metric, -chart-selection-status,
- * -charts-grid, -import-info; and link quarterly-periods.css.
+ * -table-wrap, -charts-context, -chart-metric, -chart-selection-status,
+ * -charts-grid; and link quarterly-periods.css.
  */
 export function initSectorResultsPage({ slug, sectorName, metrics, charts, version, quarterly: wantQuarterly = true }) {
   const $ = id => document.getElementById(`${slug}-${id}`);
@@ -30,19 +30,6 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     heading.insertAdjacentHTML('afterend', `<div class="period-bar"><div class="period-group"><span>الفترة</span><div class="period-seg" id="${slug}-period" role="group" aria-label="نوع الفترة">${['q', 'h1', 'm9', 'fy'].map(key => `<button type="button" data-period="${key}" aria-pressed="${key === period}">${PERIODS[key].label}</button>`).join('')}</div></div><div class="period-group" id="${slug}-quarter-group" hidden><span>الربع</span><div class="period-seg small" id="${slug}-quarter" role="group" aria-label="اختيار الربع">${['1', '2', '3', '4'].map(key => `<button type="button" data-quarter="${key}" aria-pressed="${key === quarter}">Q${key}</button>`).join('')}<button type="button" data-quarter="seq" aria-pressed="${quarter === 'seq'}">متتالية</button></div></div><p class="period-desc" id="${slug}-period-desc"></p></div>`);
     $('period').addEventListener('click', event => { const button = event.target.closest('[data-period]'); if (button && dataset) { period = button.dataset.period; selectCompany(activeCompany?.symbol); } });
     $('quarter').addEventListener('click', event => { const button = event.target.closest('[data-quarter]'); if (button && dataset) { quarter = button.dataset.quarter; selectCompany(activeCompany?.symbol); } });
-    const notes = $('panel').querySelector('.bank-notes ul');
-    // Drop the annual-only disclaimers ("سنوية فقط … لم تُدرج … بيانات ربع سنوية").
-    for (const item of notes?.querySelectorAll('li') ?? []) if (/ربع سنوية|سنوية فقط/.test(item.textContent)) item.remove();
-    const footnote = $('panel').querySelector('.bank-charts-footnote');
-    if (footnote) footnote.textContent = footnote.textContent.replace(/اختر أي بند لعرض مقارنة السنوات السنوية بين \d{4} و\d{4}\./, 'اختر أي بند لعرض المقارنة للفترة المختارة.');
-    notes?.insertAdjacentHTML('beforeend', [
-      `البيانات الربعية من ملف «${escapeHtml(quarterly.source.name)}» من ${quarterLabel(quarterly.quarters[0])} إلى ${quarterLabel(quarterly.quarters.at(-1))}.`,
-      'الأرباع مستقلة (Q4 هو الربع الرابع وحده وليس السنة). فترتا 6 و9 أشهر مجموع الأرباع، والهوامش محسوبة من المجاميع.',
-      ...(quarterly.companies.some(company => !isCalendarYear(company.fiscalYearEnd)) ? ['بعض الشركات سنتها المالية لا تنتهي في ديسمبر؛ أرباعها مرقّمة حسب سنتها المالية كما في أرقام، فقد لا يغطي الربع نفسه الأشهر نفسها في كل الشركات.'] : []),
-      'ربح السهم في فترتي 6 و9 أشهر مجموع ربح السهم للأرباع، فهو تقريبي إذا تغير عدد الأسهم خلال السنة.',
-      'العرض السنوي من الملف السنوي؛ قد يختلف قليلًا عن مجموع الأرباع عند تعديل أرقام سابقة.',
-      'في عرض «متتالية» يقارن التغير كل ربع بنفس الربع من العام السابق لتجنب أثر المواسم.'
-    ].map(text => `<li class="period-note">${text}</li>`).join(''));
     const hint = $('panel').querySelector('.bank-table-hint');
     if (hint) hint.textContent = 'اسحب الجدول أفقيًا لرؤية الفترات كاملة. «التغير» هو نسبة التغير مقارنةً بنفس الفترة من العام السابق، وليس فرق النسب بالنقاط المئوية.';
   }
@@ -89,7 +76,6 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     fiscal = { end: quarterCompany?.fiscalYearEnd ?? 12, note: quarterCompany?.fiscalNote ?? '' };
     $('nav').innerHTML = dataset.companies.map(item => `<button type="button" class="bank-tab" data-company="${escapeHtml(item.symbol)}" aria-pressed="${item.symbol === company.symbol}" title="نتائج ${escapeHtml(item.name)} ${escapeHtml(item.symbol)}">${escapeHtml(item.name)}</button>`).join('');
     $('title').innerHTML = `${escapeHtml(company.name)} <span class="symbol-badge">${escapeHtml(company.symbol)}</span>`;
-    $('subtitle').textContent = `${company.fullName || company.name} · قطاع ${sectorName} · ${quarterly ? periodSummary() : 'نتائج سنوية فقط'}`;
     syncPeriodControls(quarterCompany ? Object.keys(quarterCompany.quarters).sort().at(-1) : null);
     // The key figures strip always shows the latest 3/6/9/12 months, whatever the table shows.
     const latestColumns = quarterCompany ? latestYearToDateColumns(quarterCompany, (item, year, count) => sumQuarters(item, year, count, periodSpec)) : null;
@@ -145,7 +131,6 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
       quarterly = quarterlyData?.sector === dataset.sector ? quarterlyData : null;
       if (quarterlyData && !quarterly) console.error(`${slug}: quarterly file sector «${quarterlyData.sector}» ≠ «${dataset.sector}»`);
       if (quarterly) mountPeriodBar();
-      $('import-info').textContent = `المصدر المحفوظ: ${dataset.source.name}${quarterly ? ` و${quarterly.source.name}` : ''} · ${dataset.source.provider}.`;
       selectCompany(readUrlState(), true);
       // The loading line is only needed while loading or on failure; the sources are listed in the notes.
       $('load-status').hidden = true;

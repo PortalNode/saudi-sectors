@@ -29,17 +29,15 @@
     <nav id="reits-nav" class="bank-nav" aria-label="اختيار الصندوق العقاري"></nav>
     <p id="reits-load-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات قطاع الصناديق العقارية…</p>
     <section id="reits-panel" class="bank-panel" aria-labelledby="reits-title" hidden>
-      <div class="bank-heading"><div><h2 id="reits-title"></h2><p id="reits-subtitle"></p></div><span class="bank-period">السنوات المتاحة في الملف <bdi>2021–2025</bdi></span></div>
+      <div class="bank-heading"><div><h2 id="reits-title"></h2></div><span class="bank-period">السنوات المتاحة في الملف <bdi>2021–2025</bdi></span></div>
       <p class="bank-unit-note">المبالغ بمليون ريال؛ عدد الوحدات بالمليون؛ ربح الوحدة بالريال.</p>
       <div class="bank-table-hint">اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.</div>
       <div id="reits-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول نتائج الصناديق العقارية"></div>
-      <section id="reits-charts" class="bank-charts" aria-labelledby="reits-charts-title"><div class="bank-charts-heading"><h3 id="reits-charts-title">المقارنة بالأعمدة</h3><p id="reits-charts-context"></p></div><div class="bank-chart-control"><label for="reits-chart-metric">البند المراد مقارنته</label><select id="reits-chart-metric" aria-describedby="reits-chart-selection-status"></select></div><p id="reits-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p><div id="reits-charts-grid" class="bank-charts-grid"></div><p class="bank-charts-footnote">اختر أي بند لعرض مقارنة السنوات السنوية بين 2021 و2025. المبالغ بالمليار ريال بعد تحويلها من القيم الأصلية بالمليون ريال، وعدد الوحدات بالمليون، وربح الوحدة بالريال. «—» تعني أن القيمة غير متاحة.</p></section>
-      <details class="bank-notes"><summary id="reits-notes-title">ملاحظات البيانات</summary><ul><li>المصدر: ملف «الصناديق العقارية - الأرباح السنوية.xlsx» من أرقام (محفوظ باسم argaam_reits.xlsx)، بالبنود كما وردت فيه: إيرادات الإيجار، والدخل من العمليات التشغيلية (FFO)، وصافي الدخل، وعدد الوحدات، وربح الوحدة من العمليات التشغيلية، وربح الوحدة.</li><li>المبالغ بالمليون ريال، وعدد الوحدات بالمليون، وربح الوحدة بالريال. «نسبة التغير» محسوبة في الصفحة من القيم المحفوظة مقارنةً بالسنة السابقة.</li><li>بند «ربح الوحدة قبل البنود الاستثنائية» في ملف أرقام «غير متوفر» لكل الصناديق، فلم يُعرض.</li><li>الإنماء ريت الفندقي يبدأ في الملف من 2023، والاستثمار ريت من 2024، فيبدأ جدول كل منهما من سنته الأولى.</li><li>السنوات المتاحة في الملف 2021–2025. هذه نسخة ثابتة تُحدّث عند استيراد ملف جديد.</li></ul><p id="reits-import-info"></p></details>
+      <section id="reits-charts" class="bank-charts" aria-labelledby="reits-charts-title"><div class="bank-charts-heading"><h3 id="reits-charts-title">المقارنة بالأعمدة</h3><p id="reits-charts-context"></p></div><div class="bank-chart-control"><label for="reits-chart-metric">البند المراد مقارنته</label><select id="reits-chart-metric" aria-describedby="reits-chart-selection-status"></select></div><p id="reits-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p><div id="reits-charts-grid" class="bank-charts-grid"></div></section>
     </section>
-    <footer class="footer"><p>نتائج سنوية محفوظة داخل المشروع · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات قطاع الصناديق العقارية.</p></noscript>
   </main>
-  <script type="module" src="reits.js?v=latest-ytd-20261116"></script>
+  <script type="module" src="reits.js?v=no-notes-20261116"></script>
   <script src="company-profile.js?v=20261115-reits" defer></script>
   <script src="company-chart.js?v=chart-20261116h" defer></script>
   <script src="company-quote.js?v=no-notes-20261116" defer></script>

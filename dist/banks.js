@@ -1,7 +1,7 @@
 import { escapeHtml, validateDataset, renderAnnualTable } from './bank-metrics.mjs?v=compact-columns-20261104';
 import { renderBankCharts, fitBankCharts, getChartOptions } from './bank-charts.mjs?v=value-labels-20261106';
 import { buildCurrentBankPE } from './bank-current-pe.mjs?v=20261105';
-import { renderCurrentPEComparison, fitCurrentPEComparison } from './bank-current-pe-chart.mjs?v=20261105';
+import { renderCurrentPEComparison, fitCurrentPEComparison } from './bank-current-pe-chart.mjs?v=no-notes-20261116';
 import { marketCapMap, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
 import { PERIODS, QUARTER_NAMES, quarterLabel, validateQuarterly, sumBankQuarters, buildBankPeriodColumns, renderBankPeriodTable, getBankPeriodChartOptions, renderBankPeriodChart, fitBankPeriodChart } from './bank-quarterly.mjs?v=banks-quarterly-20261115';
 import { latestYearToDateColumns, setLatestResults } from './latest-results.mjs?v=latest-ytd-20261116';
@@ -96,7 +96,6 @@ function selectBank(symbol, replaceHistory = false) {
   if (period !== 'fy' && !quarterBank) period = 'fy';
   element('bank-nav').innerHTML = dataset.banks.map(item => `<button type="button" class="bank-tab" data-bank="${escapeHtml(item.symbol)}" aria-pressed="${item.symbol === bank.symbol}" title="نتائج ${escapeHtml(item.name)} ${escapeHtml(item.symbol)}">${escapeHtml(item.name)}</button>`).join('');
   element('bank-title').innerHTML = `${escapeHtml(bank.name)} <span class="symbol-badge">${escapeHtml(bank.symbol)}</span>`;
-  element('bank-subtitle').textContent = `${bank.fullName || bank.name} · قطاع البنوك · ${period === 'fy' ? 'نتائج سنوية كاملة في الملف' : periodSummary()}`;
   syncPeriodControls(quarterBank);
   // The key figures strip always shows the latest 3/6/9/12 months, whatever the table shows.
   const latestColumns = quarterBank ? latestYearToDateColumns(quarterBank, sumBankQuarters) : null;
@@ -186,9 +185,6 @@ async function load() {
     // Bank tabs from the largest market cap down (the cap itself is not shown); file order if prices fail.
     dataset.banks = sortByMarketCap(dataset.banks, marketCapMap(await prices.catch(() => null)));
     quarterly = quarterlyData;
-    const imported = new Date(dataset.source?.importedAt);
-    const date = Number.isNaN(imported.getTime()) ? 'غير محدد' : new Intl.DateTimeFormat('ar-SA', { timeZone: 'Asia/Riyadh', calendar: 'gregory', year: 'numeric', month: '2-digit', day: '2-digit' }).format(imported);
-    element('bank-import-info').textContent = `تاريخ استيراد الملف: ${date} · تاريخ الاستيراد ليس تاريخ إعلان النتائج · ورقة المصدر تظهر لكل بنك في الملف المحفوظ.`;
     selectBank(readUrlState(), true);
     refreshCurrentPE(prices);
   } catch (error) {

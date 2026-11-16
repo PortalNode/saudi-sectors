@@ -29,17 +29,15 @@
     <nav id="insurance-nav" class="bank-nav" aria-label="اختيار شركة التأمين"></nav>
     <p id="insurance-load-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات قطاع التأمين…</p>
     <section id="insurance-panel" class="bank-panel" aria-labelledby="insurance-title" hidden>
-      <div class="bank-heading"><div><h2 id="insurance-title"></h2><p id="insurance-subtitle"></p></div><span class="bank-period">السنوات المتاحة في الملف <bdi>2022–2025</bdi></span></div>
+      <div class="bank-heading"><div><h2 id="insurance-title"></h2></div><span class="bank-period">السنوات المتاحة في الملف <bdi>2022–2025</bdi></span></div>
       <p class="bank-unit-note">المبالغ بمليون ريال؛ ربح السهم بالريال.</p>
       <div class="bank-table-hint">اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.</div>
       <div id="insurance-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول نتائج التأمين"></div>
-      <section id="insurance-charts" class="bank-charts" aria-labelledby="insurance-charts-title"><div class="bank-charts-heading"><h3 id="insurance-charts-title">المقارنة بالأعمدة</h3><p id="insurance-charts-context"></p></div><div class="bank-chart-control"><label for="insurance-chart-metric">البند المراد مقارنته</label><select id="insurance-chart-metric" aria-describedby="insurance-chart-selection-status"></select></div><p id="insurance-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p><div id="insurance-charts-grid" class="bank-charts-grid"></div><p class="bank-charts-footnote">اختر أي بند لعرض مقارنة السنوات السنوية بين 2022 و2025. المبالغ بالمليار ريال بعد تحويلها من القيم الأصلية بالمليون ريال، وربحية السهم بالريال. «—» تعني أن القيمة غير متاحة.</p></section>
-      <details class="bank-notes"><summary id="insurance-notes-title">ملاحظات البيانات</summary><ul><li>المصدر: ملف «التأمين - الأرباح السنوية.xlsx» من أرقام (محفوظ باسم argaam_insurance.xlsx)، بالبنود كما وردت فيه: إجمالي الأقساط المكتتبة (GWP)، وإيرادات التأمين، وصافي الدخل، وربح السهم قبل البنود الاستثنائية، وربح السهم.</li><li>المبالغ بالمليون ريال وربح السهم بالريال. «نسبة التغير» محسوبة في الصفحة من القيم المحفوظة مقارنةً بالسنة السابقة.</li><li>إيرادات التأمين كما يعرضها أرقام (وفق معيار IFRS 17)، وهي بند مختلف عن إجمالي الأقساط المكتتبة.</li><li>السنوات المتاحة في الملف 2022–2025. هذه نسخة ثابتة تُحدّث عند استيراد ملف جديد.</li></ul><p id="insurance-import-info"></p></details>
+      <section id="insurance-charts" class="bank-charts" aria-labelledby="insurance-charts-title"><div class="bank-charts-heading"><h3 id="insurance-charts-title">المقارنة بالأعمدة</h3><p id="insurance-charts-context"></p></div><div class="bank-chart-control"><label for="insurance-chart-metric">البند المراد مقارنته</label><select id="insurance-chart-metric" aria-describedby="insurance-chart-selection-status"></select></div><p id="insurance-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p><div id="insurance-charts-grid" class="bank-charts-grid"></div></section>
     </section>
-    <footer class="footer"><p>نتائج سنوية محفوظة داخل المشروع · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات قطاع التأمين.</p></noscript>
   </main>
-  <script type="module" src="insurance.js?v=latest-ytd-20261116"></script>
+  <script type="module" src="insurance.js?v=no-notes-20261116"></script>
   <script src="company-profile.js?v=20261115-reits" defer></script>
   <script src="company-chart.js?v=chart-20261116h" defer></script>
   <script src="company-quote.js?v=no-notes-20261116" defer></script>

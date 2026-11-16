@@ -18,7 +18,7 @@ export function currentPEChartModel(records) {
 export function renderCurrentPEComparison(records) {
   const model = currentPEChartModel(records);
   const available = records.filter(record => record.pe !== null).length;
-  return `<article class="bank-chart-card bank-current-pe-comparison" data-chart-key="currentPE" dir="rtl"><h4>مكرر الربح الحالي — مقارنة جميع البنوك</h4><p class="bank-chart-unit">مرة · ${available} من ${records.length} بنوك تتوفر لها قيمة · سعر آخر لقطة ÷ ربحية السهم؛ تُفضّل الربحية المتكررة المتاحة في المشروع</p><div class="current-pe-chart-scroll" tabindex="0" aria-label="مقارنة المكرر الحالي للبنوك؛ مرر أفقيًا لرؤية جميع البنوك"><div class="bank-chart-canvas" data-current-pe-canvas>${renderChartSvg(model, 1050)}</div></div><p class="bank-charts-footnote">هذه مقارنة حالية بين البنوك، وليست مقارنة السنوات 2021–2025. البيانات الناقصة أو الربحية الصفرية تظهر «—»، ولا يُعرض مكرر عددي للبنك الخاسر.</p></article>`;
+  return `<article class="bank-chart-card bank-current-pe-comparison" data-chart-key="currentPE" dir="rtl"><h4>مكرر الربح الحالي — مقارنة جميع البنوك</h4><p class="bank-chart-unit">مرة · ${available} من ${records.length} بنوك تتوفر لها قيمة · سعر آخر لقطة ÷ ربحية السهم؛ تُفضّل الربحية المتكررة المتاحة في المشروع</p><div class="current-pe-chart-scroll" tabindex="0" aria-label="مقارنة المكرر الحالي للبنوك؛ مرر أفقيًا لرؤية جميع البنوك"><div class="bank-chart-canvas" data-current-pe-canvas>${renderChartSvg(model, 1050)}</div></div></article>`;
 }
 
 export function fitCurrentPEComparison(container, records) {

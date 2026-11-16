@@ -32,7 +32,7 @@
     <p id="bank-load-status" class="financial-status" role="status" aria-live="polite">جار تحميل بيانات البنوك من ملف المشروع…</p>
     <section id="bank-panel" class="bank-panel" aria-labelledby="bank-title" hidden>
       <div class="bank-heading">
-        <div><h2 id="bank-title"></h2><p id="bank-subtitle"></p></div>
+        <div><h2 id="bank-title"></h2></div>
         <span class="bank-period" id="bank-period-badge">آخر خمس سنوات في الملف <bdi>2021–2025</bdi></span>
       </div>
       <div class="period-bar" id="bank-period-bar" hidden>
@@ -48,27 +48,11 @@
         <div class="bank-chart-control"><label for="bank-chart-metric">البند المراد مقارنته</label><select id="bank-chart-metric" aria-describedby="bank-chart-selection-status"></select></div>
         <p id="bank-chart-selection-status" class="bank-chart-selection-status" role="status" aria-live="polite"></p>
         <div id="bank-charts-grid" class="bank-charts-grid"></div>
-        <p class="bank-charts-footnote">اختر أي بند من القائمة لعرض مقارنة السنوات، أو «مكرر الربح الحالي — جميع البنوك» لمقارنة البنوك العشرة بآخر لقطة متاحة. المبالغ بالمليار، وربحية السهم بالريال، والمكرر بالمرات، والنسب بالمئة. القيم التاريخية الأصلية في الجدول؛ «—» تعني أن القيمة غير متاحة. خيار الأفراد والشركات معًا يعرض عمودين لكل سنة دون تعديل النسب.</p>
       </section>
-      <details class="bank-notes"><summary id="bank-notes-title">ملاحظات البيانات</summary>
-        <ul>
-          <li>المصدر: ملف «البنوك.xlsx» المقدم من المستخدم. القيم من الجدول السنوي في الملف كما هي؛ لم تُراجع بمصدر خارجي، ولا يوجد جلب تلقائي من أرقام.</li>
-          <li>ربحية السهم محفوظة كما وردت في الملف؛ قد تختلف قواعدها أو تعديلات عدد الأسهم بين السنوات، ولا يُفترض أن نموها يطابق نمو صافي الربح.</li>
-          <li>نسبة القروض إلى الودائع = التمويل ÷ ودائع العملاء. العائد على حقوق المساهمين = صافي الربح ÷ حقوق المساهمين في نهاية السنة وفق صيغة الملف، وليس متوسط حقوق المساهمين.</li>
-          <li>مكرر الأرباح في الجدول السنوي تاريخي من الملف. المكرر الحالي مستقل: سعر آخر لقطة ÷ الربحية المتكررة المتاحة في لقطة أرقام، ثم المعلنة عند غيابها، ثم ربحية ملف الأسعار عند عدم توفر لقطة أرقام. لا تغيّر هذه الصفحة أسعار أو مؤشرات الجدول الرئيسي.</li>
-          <li>لم تُدرج سنة 2020 في العرض السنوي، ولا ورقة «الودائع تحت الطلب» لأنها بلا سنة محددة. هذه نسخة ثابتة تُحدّث عند استيراد ملف جديد.</li>
-          <li class="period-note">النتائج الربعية من ملف «البنوك - الأرباح الربعية.xlsx» (أرقام، محفوظ باسم argaam_banks_quarterly.xlsx) بالبنود الستة كما وردت فيه: صافي الدخل من الاستثمارات والتمويل، ودخل العمليات، والمخصصات، وصافي الدخل، وربح السهم، وربح السهم المخفض. «غير متوفر» في الملف يظهر «—».</li>
-          <li class="period-note">الأرباع مستقلة (Q4 هو الربع الرابع وحده وليس السنة). فترتا 6 و9 أشهر مجموع الأرباع، وربح السهم فيهما مجموع ربح السهم للأرباع، فهو تقريبي إذا تغير عدد الأسهم خلال السنة.</li>
-          <li class="period-note">العرض السنوي من الملف السنوي كما هو؛ قد يختلف قليلًا عن مجموع الأرباع عند تعديل أرقام سابقة. المركز المالي والمؤشرات المالية متاحة في العرض السنوي فقط.</li>
-          <li class="period-note">في عرض «متتالية» يقارن التغير كل ربع بنفس الربع من العام السابق لتجنب أثر المواسم.</li>
-        </ul>
-        <p id="bank-import-info"></p>
-      </details>
     </section>
-    <footer class="footer"><p>نتائج سنوية وربعية محفوظة داخل المشروع · المكرر الحالي من لقطة أسعار وربحية المشروع، وليس أسعارًا مباشرة · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات ملف البنوك.</p></noscript>
   </main>
-  <script type="module" src="banks.js?v=latest-ytd-20261116"></script>
+  <script type="module" src="banks.js?v=no-notes-20261116"></script>
   <script src="company-profile.js?v=20261115-reits" defer></script>
   <script src="company-chart.js?v=chart-20261116h" defer></script>
   <script src="company-quote.js?v=no-notes-20261116" defer></script>

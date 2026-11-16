@@ -40,7 +40,7 @@ test('ten banks produce ten observations and ten columns, not five annual observ
   for (const year of [2021, 2022, 2023, 2024, 2025]) {
     assert.doesNotMatch(html, new RegExp(`data-year="${year}"`));
   }
-  assert.match(html, /مقارنة حالية بين البنوك، وليست مقارنة السنوات 2021–2025/);
+  assert.doesNotMatch(html, /bank-charts-footnote/);
   assert.match(html, /10 من 10 بنوك/);
 });
 
