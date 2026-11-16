@@ -6,7 +6,7 @@ const dist = new URL('../dist/', import.meta.url);
 const read = name => readFileSync(new URL(name, dist), 'utf8');
 const page = read('comparison-page.js');
 const sectorPages = readdirSync(dist)
-  .filter(name => name.endsWith('.html') && !['index.html', 'comparison.html'].includes(name))
+  .filter(name => name.endsWith('.html') && !['index.html', 'comparison.html', 'technical-analysis.html'].includes(name))
   .map(name => name.replace(/\.html$/, ''));
 const listed = [...page.match(/const SECTORS = \[([\s\S]*?)\n\];/)[1].matchAll(/\['[^']+','([a-z-]+)'\]/g)].map(match => match[1]);
 
