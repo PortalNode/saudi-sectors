@@ -25,7 +25,7 @@
     { id: 'rsi', label: 'RSI', title: 'مؤشر القوة النسبية (14)', kind: 'pane', color: '#9085e9' },
     { id: 'macd', label: 'MACD', title: 'الماكد (12، 26، 9)', kind: 'pane', color: '#3987e5' }
   ];
-  const TOOLS = [['hline', 'خط أفقي'], ['trend', 'خط اتجاه'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر']];
+  const TOOLS = [['hline', 'خط أفقي'], ['hray', 'شعاع أفقي'], ['trend', 'خط اتجاه'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر']];
   // المغناطيس كما في TradingView: يلصق نقطة الرسم بأقرب سعر من الشمعة (افتتاح، أعلى، أدنى، إغلاق)؛
   // «ضعيف» حين يقترب المؤشر منه فقط، و«قوي» دائمًا
   const MAGNETS = [['off', 'إيقاف'], ['weak', 'ضعيف'], ['strong', 'قوي']];
@@ -78,6 +78,7 @@
   };
   const HINTS = {
     hline: 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي',
+    hray: 'اضغط على نقطة البداية لرسم شعاع أفقي يمتد منها إلى اليمين',
     trend: 'اضغط على نقطة البداية ثم على النهاية، أو اسحب من البداية إلى النهاية · Esc للإلغاء',
     fib: 'اضغط على بداية الموجة (قمة أو قاع) ثم على نهايتها، أو اسحب بينهما · Esc للإلغاء',
     range: 'اضغط على السعر الأول ثم على الثاني، أو اسحب بينهما، لقياس الفرق ونسبته · Esc للإلغاء'
@@ -93,6 +94,7 @@
     cursor: icon('<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>'),
     trend: icon('<path d="M7.4 16.6l9.2-9.2"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="5.5" r="2"/>'),
     hline: icon('<path d="M3 12h7M14 12h7"/><circle cx="12" cy="12" r="2"/>'),
+    hray: icon('<circle cx="5" cy="12" r="2"/><path d="M7 12h14M18 9l3 3-3 3"/>'),
     fib: icon('<path d="M3 5h13M3 10h18M3 15h13M3 20h18"/><circle cx="18.5" cy="5" r="1.8"/><circle cx="18.5" cy="15" r="1.8"/>'),
     range: icon('<path d="M6 3.5h12M6 20.5h12M12 7v13"/><path d="M8.5 10L12 6.5 15.5 10"/>'),
     magnet: icon('<path d="M5 3.5h4.5V12a2.5 2.5 0 0 0 5 0V3.5H19V12a7 7 0 0 1-14 0z"/><path d="M5 7.5h4.5M14.5 7.5H19"/>'),
@@ -138,9 +140,9 @@
   const RESET_KEY = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '') ? '⌥ + R' : 'Alt + R';
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
-  const state = { adj: true, type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off', locked: false, hidden: false };
-  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (typeof saved.adj === 'boolean') state.adj = saved.adj; if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; state.locked = saved.locked === true; state.hidden = saved.hidden === true; } } catch { /* storage unavailable */ }
-  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ adj: state.adj, type: state.type, ind: [...state.ind], magnet: state.magnet, locked: state.locked, hidden: state.hidden })); } catch { /* ignore */ } };
+  const state = { adj: true, divMarks: true, type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off', locked: false, hidden: false };
+  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (typeof saved.adj === 'boolean') state.adj = saved.adj; if (typeof saved.divMarks === 'boolean') state.divMarks = saved.divMarks; if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; state.locked = saved.locked === true; state.hidden = saved.hidden === true; } } catch { /* storage unavailable */ }
+  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ adj: state.adj, divMarks: state.divMarks, type: state.type, ind: [...state.ind], magnet: state.magnet, locked: state.locked, hidden: state.hidden })); } catch { /* ignore */ } };
   const loadDrawings = symbol => { try { return JSON.parse(localStorage.getItem(`cc-draw-${symbol}`) || '[]'); } catch { return []; } };
   const saveDrawings = (symbol, list) => { try { localStorage.setItem(`cc-draw-${symbol}`, JSON.stringify(list)); } catch { /* ignore */ } };
 
@@ -249,7 +251,7 @@
           <div class="cq-range" role="group" aria-label="نوع الشارت">${TYPES.map(([id, t]) => chip('type', id, t, id === state.type)).join('')}</div>
           <div class="cq-range" role="group" aria-label="الفترة الزمنية للشمعة">${INTERVALS.map(([id, t]) => chip('interval', id, t, id === state.interval)).join('')}</div>
           <div class="cq-range" role="group" aria-label="مدة العرض">${RANGES.map(([id, t]) => chip('crange', id, t, id === state.range)).join('')}</div>
-          ${dividends.length ? `<div class="cq-range" role="group" aria-label="التوزيعات">${chip('adj', '1', 'ADJ', state.adj, 'تعديل الأسعار للتوزيعات النقدية، كما في زر ADJ في TradingView')}</div>` : ''}
+          ${dividends.length ? `<div class="cq-range" role="group" aria-label="التوزيعات">${chip('adj', '1', 'ADJ', state.adj, 'تعديل الأسعار للتوزيعات النقدية، كما في زر ADJ في TradingView')}${chip('divmarks', '1', 'علامات D', state.divMarks, 'إظهار علامة D على شمعة استحقاق كل توزيع نقدي أو إخفاؤها')}</div>` : ''}
         </div>
         <div class="cc-end">
           <span class="cq-range-change cc-change"></span>
@@ -332,6 +334,11 @@
         const line = main.createPriceLine({ price: d.price, color: colors.gold, lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: true, title: '' });
         drawn.push({ remove: () => main.removePriceLine(line) });
       }
+      // الشعاع الأفقي يُرسم على اللوحة من نقطة البداية؛ هنا سعره على المحور فقط
+      for (const d of state.hidden ? [] : drawings) if (d.type === 'hray') {
+        const line = main.createPriceLine({ price: d.a.price, color: colors.gold, lineVisible: false, axisLabelVisible: true, title: '' });
+        drawn.push({ remove: () => main.removePriceLine(line) });
+      }
       overlay.redraw();
     }
     const xy = p => { const x = chart.timeScale().logicalToCoordinate(p.logical ?? logicalOf(p.time)), y = main.priceToCoordinate(p.price); return x == null || y == null ? null : { x, y }; };
@@ -345,10 +352,12 @@
       const drawSelection = () => drawings.forEach((d, i) => {
         if (i !== selected) return;
         if (d.type === 'hline') { const y = main.priceToCoordinate(d.price); if (y != null) { handle({ x: 24, y }, colors.gold); handle({ x: ts.width() - 24, y }, colors.gold); } return; }
+        if (d.type === 'hray') { const A = xy(d.a); if (A) handle(A, colors.gold); return; }
         const A = xy(d.a), B = xy(d.b);
         if (A && B) { handle(A, colors.gold); handle(B, colors.gold); }
       });
       for (const d of [...(state.hidden ? [] : drawings), ...(preview ? [preview] : [])]) {
+        if (d.type === 'hray') { const A = xy(d.a); if (A && A.x < ts.width()) { segment(A, { x: ts.width(), y: A.y }, colors.gold, 1.5); dotAt(A, colors.gold); } continue; }
         if (!['trend', 'fib', 'range'].includes(d.type)) continue;
         const A = xy(d.a), B = xy(d.b);
         if (!A || !B) continue;
@@ -463,7 +472,7 @@
       if (state.interval === 'd') {
         // علامة D على شمعة استحقاق كل توزيع، كما في TradingView، وعلامة القفزات غير المفسَّرة
         const marks = bigJumps(file).filter(f => data.some(b => b.time === f.date)).map(f => ({ time: f.date, position: 'aboveBar', color: colors.gold, shape: 'arrowDown', text: `${f.change > 0 ? '+' : ''}${f2.format(f.change)}%` }));
-        for (const [date, amount] of dividends) { const b = data.find(x => x.time >= date); if (b) marks.push({ time: b.time, position: 'belowBar', color: colors.gold, shape: 'circle', text: `D ${f2.format(amount)}` }); }
+        if (state.divMarks) for (const [date, amount] of dividends) { const b = data.find(x => x.time >= date); if (b) marks.push({ time: b.time, position: 'belowBar', color: colors.gold, shape: 'circle', text: `D ${f2.format(amount)}` }); }
         if (marks.length) LWC.createSeriesMarkers(main, marks.sort((a, b) => a.time < b.time ? -1 : 1));
       }
       main.attachPrimitive(overlay);
@@ -539,7 +548,7 @@
       const point = pointFrom(event); if (!point) return;
       event.preventDefault();
       press = { x: event.clientX, y: event.clientY, point };
-      if (state.tool === 'hline') return;
+      if (state.tool === 'hline' || state.tool === 'hray') return;
       if (pending) { finish(point); press = null; return; }
       pending = point; preview = { type: state.tool, a: point, b: point };
       hint.textContent = state.tool === 'fib' ? 'حرّك المؤشر إلى نهاية الموجة واضغط، أو اسحب وأفلت' : 'حرّك المؤشر إلى النقطة الثانية واضغط، أو اسحب وأفلت';
@@ -567,6 +576,12 @@
       for (let i = drawings.length - 1; i >= 0; i--) {
         const d = drawings[i];
         if (d.type === 'hline') { const py = main.priceToCoordinate(d.price); if (py != null && Math.abs(py - y) <= 5) return { index: i, part: 'body' }; continue; }
+        if (d.type === 'hray') {
+          const A = xy(d.a); if (!A) continue;
+          if (Math.hypot(A.x - x, A.y - y) <= 9) return { index: i, part: 'a' };
+          if (x >= A.x - 4 && Math.abs(A.y - y) <= 5) return { index: i, part: 'body' };
+          continue;
+        }
         const A = xy(d.a), B = xy(d.b);
         if (!A || !B) continue;
         if (Math.hypot(A.x - x, A.y - y) <= 9) return { index: i, part: 'a' };
@@ -628,10 +643,10 @@
       } else {
         // طرف الرسمة يتبع المؤشر، ويلتصق بالمغناطيس إن كان مفعّلًا
         const point = pointFrom(event);
-        if (point) { d[drag.part] = { time: point.time, price: point.price }; hover = point; }
+        if (point) { d[drag.part] = { time: point.time, price: point.price }; if (d.type === 'hray') d.b = { ...d.a }; hover = point; }
       }
       drag.moved = true;
-      if (d.type === 'hline') paintDrawings(); else overlay.redraw();
+      if (d.type === 'hline' || d.type === 'hray') paintDrawings(); else overlay.redraw();
     });
     box.addEventListener('pointerup', () => {
       if (!drag) return;
@@ -652,6 +667,10 @@
       const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6;
       if (state.tool === 'hline' && !moved) {
         drawings.push({ type: 'hline', price: Math.round(press.point.price * 100) / 100 });
+        saveDrawings(symbol, drawings); setTool(null); paintDrawings();
+      } else if (state.tool === 'hray' && !moved) {
+        const a = { time: press.point.time, price: Math.round(press.point.price * 100) / 100 };
+        drawings.push({ type: 'hray', a, b: { ...a } });
         saveDrawings(symbol, drawings); setTool(null); paintDrawings();
       } else if (pending && moved) { const point = pointFrom(event) ?? preview?.b; if (point) finish(point); }
       press = null;
@@ -797,7 +816,7 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-adj],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
+      const b = event.target.closest('[data-adj],[data-divmarks],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
       if (b.hasAttribute('data-search')) { openSearch(searchPop.hidden); return; }
       if (!chart) return;
       if (b.dataset.menu) { openFlyout(b.dataset.menu, b); return; }
@@ -814,6 +833,7 @@
       if (b.hasAttribute('data-undo')) { select(-1); drawings.pop(); saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
       if (b.hasAttribute('data-clear')) { select(-1); drawings = []; saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
       if (b.dataset.adj) { state.adj = !state.adj; b.setAttribute('aria-pressed', String(state.adj)); }
+      if (b.dataset.divmarks) { state.divMarks = !state.divMarks; b.setAttribute('aria-pressed', String(state.divMarks)); }
       if (b.dataset.type) state.type = b.dataset.type;
       if (b.dataset.interval) { state.interval = b.dataset.interval; state.range = DEFAULT_RANGE[state.interval]; keep = false; }
       if (b.dataset.crange) { state.range = b.dataset.crange; keep = false; }
