@@ -25,16 +25,8 @@ function syncPeriodControls(quarterBank) {
   for (const button of element('bank-period-seg').querySelectorAll('[data-period]')) button.setAttribute('aria-pressed', String(button.dataset.period === period));
   for (const button of element('bank-quarter-seg').querySelectorAll('[data-quarter]')) button.setAttribute('aria-pressed', String(button.dataset.quarter === quarter));
   element('bank-quarter-group').hidden = period !== 'q';
-  element('bank-period-desc').innerHTML = period === 'fy'
-    ? ''
-    : period === 'q'
-      ? (quarter === 'seq' ? 'الأرباع بالترتيب · التغير مقارنةً بنفس الربع من العام السابق' : `الربع <b>${QUARTER_NAMES[quarter]}</b> مقارنةً بنفسه في السنوات السابقة`)
-      : `تراكمي ${PERIODS[period].range} · مقارنةً بنفس الفترة من العام السابق`;
   const latest = quarterBank ? Object.keys(quarterBank.quarters).sort().at(-1) : null;
   element('bank-period-badge').innerHTML = period !== 'fy' && latest ? `آخر ربع متاح <bdi dir="ltr">${quarterLabel(latest)}</bdi>` : 'آخر خمس سنوات في الملف <bdi>2021–2025</bdi>';
-  element('bank-table-hint').textContent = period === 'fy'
-    ? 'اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.'
-    : 'اسحب الجدول أفقيًا لرؤية الفترات كاملة. «التغير» هو نسبة التغير مقارنةً بنفس الفترة من العام السابق. المركز المالي والمؤشرات المالية في العرض السنوي فقط.';
 }
 const checkedTime = value => {
   const date = new Date(value);

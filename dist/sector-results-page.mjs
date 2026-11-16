@@ -27,11 +27,9 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
   function mountPeriodBar() {
     const heading = $('panel').querySelector('.bank-heading');
     if (!heading || $('period')) return;
-    heading.insertAdjacentHTML('afterend', `<div class="period-bar"><div class="period-group"><span>الفترة</span><div class="period-seg" id="${slug}-period" role="group" aria-label="نوع الفترة">${['q', 'h1', 'm9', 'fy'].map(key => `<button type="button" data-period="${key}" aria-pressed="${key === period}">${PERIODS[key].label}</button>`).join('')}</div></div><div class="period-group" id="${slug}-quarter-group" hidden><span>الربع</span><div class="period-seg small" id="${slug}-quarter" role="group" aria-label="اختيار الربع">${['1', '2', '3', '4'].map(key => `<button type="button" data-quarter="${key}" aria-pressed="${key === quarter}">Q${key}</button>`).join('')}<button type="button" data-quarter="seq" aria-pressed="${quarter === 'seq'}">متتالية</button></div></div><p class="period-desc" id="${slug}-period-desc"></p></div>`);
+    heading.insertAdjacentHTML('afterend', `<div class="period-bar"><div class="period-group"><span>الفترة</span><div class="period-seg" id="${slug}-period" role="group" aria-label="نوع الفترة">${['q', 'h1', 'm9', 'fy'].map(key => `<button type="button" data-period="${key}" aria-pressed="${key === period}">${PERIODS[key].label}</button>`).join('')}</div></div><div class="period-group" id="${slug}-quarter-group" hidden><span>الربع</span><div class="period-seg small" id="${slug}-quarter" role="group" aria-label="اختيار الربع">${['1', '2', '3', '4'].map(key => `<button type="button" data-quarter="${key}" aria-pressed="${key === quarter}">Q${key}</button>`).join('')}<button type="button" data-quarter="seq" aria-pressed="${quarter === 'seq'}">متتالية</button></div></div></div>`);
     $('period').addEventListener('click', event => { const button = event.target.closest('[data-period]'); if (button && dataset) { period = button.dataset.period; selectCompany(activeCompany?.symbol); } });
     $('quarter').addEventListener('click', event => { const button = event.target.closest('[data-quarter]'); if (button && dataset) { quarter = button.dataset.quarter; selectCompany(activeCompany?.symbol); } });
-    const hint = $('panel').querySelector('.bank-table-hint');
-    if (hint) hint.textContent = 'اسحب الجدول أفقيًا لرؤية الفترات كاملة. «التغير» هو نسبة التغير مقارنةً بنفس الفترة من العام السابق، وليس فرق النسب بالنقاط المئوية.';
   }
   function syncPeriodControls(latestKey) {
     const badge = $('panel').querySelector('.bank-period');
@@ -39,14 +37,6 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     for (const button of $('period').querySelectorAll('[data-period]')) button.setAttribute('aria-pressed', String(button.dataset.period === period));
     for (const button of $('quarter').querySelectorAll('[data-quarter]')) button.setAttribute('aria-pressed', String(button.dataset.quarter === quarter));
     $('quarter-group').hidden = period !== 'q';
-    $('period-desc').innerHTML = period === 'fy'
-      ? ''
-      : period === 'q'
-        ? (quarter === 'seq' ? 'الأرباع بالترتيب · التغير مقارنةً بنفس الربع من العام السابق' : `الربع <b>${QUARTER_NAMES[quarter]}</b>${isCalendarYear(fiscal.end) ? '' : ` (${monthRange(fiscal.end, Number(quarter))})`} مقارنةً بنفسه في السنوات السابقة`)
-        : `تراكمي ${periodRange(period, fiscal.end)} · مقارنةً بنفس الفترة من العام السابق`;
-    if (period !== 'fy' && !isCalendarYear(fiscal.end)) {
-      $('period-desc').innerHTML += `<br><span class="period-fiscal">السنة المالية للشركة تنتهي في ${MONTH_NAMES[fiscal.end]}، والأرباع والسنوات مرقّمة حسبها كما في أرقام (الربع الأول ${monthRange(fiscal.end, 1)}).${fiscal.note ? ` ${escapeHtml(fiscal.note)}` : ''}</span>`;
-    }
     if (badge) badge.innerHTML = latestKey ? `آخر ربع متاح <bdi dir="ltr">${quarterLabel(latestKey)}</bdi>` : `السنوات المتاحة <bdi>${annualRange()}</bdi>`;
   }
   function drawSelectedChart() {
