@@ -148,7 +148,6 @@
         <div class="cq-mini-xaxis" dir="ltr" aria-hidden="true">${xTicks}<span class="cq-mini-xtag" hidden></span></div>
         <div class="cq-mini-meta">
           <span class="cq-${dir}"><bdi>${change > 0 ? '+' : ''}${f2.format(change)}%</bdi></span>
-          <a class="cq-mini-open" href="${link}">التحليل الفني ←</a>
         </div>
       </div>`;
   }
