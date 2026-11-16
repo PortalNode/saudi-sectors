@@ -36,13 +36,18 @@ export function parseIntraday(json) {
   const result = json?.chart?.result?.[0];
   if (!result || result.meta?.currency !== 'SAR') throw new Error('no SAR intraday result');
   const quote = result.indicators?.quote?.[0] || {};
-  const t = [], c = [], v = [];
+  const t = [], o = [], h = [], l = [], c = [], v = [];
+  const round = value => Math.round(value * 100) / 100;
   (result.timestamp || []).forEach((time, i) => {
     const close = quote.close?.[i];
     if (!Number.isFinite(close) || close <= 0) return;
-    t.push(time); c.push(Math.round(close * 100) / 100); v.push(Number.isFinite(quote.volume?.[i]) ? quote.volume[i] : 0);
+    const open = Number.isFinite(quote.open?.[i]) ? quote.open[i] : close;
+    const high = Number.isFinite(quote.high?.[i]) ? quote.high[i] : close;
+    const low = Number.isFinite(quote.low?.[i]) ? quote.low[i] : close;
+    t.push(time); o.push(round(open)); h.push(round(Math.max(high, open, close))); l.push(round(Math.min(low, open, close))); c.push(round(close));
+    v.push(Number.isFinite(quote.volume?.[i]) ? quote.volume[i] : 0);
   });
-  return { t, c, v };
+  return { t, o, h, l, c, v };
 }
 
 const data = JSON.parse(await readFile(new URL('data.json', DIST), 'utf8'));
