@@ -44,7 +44,14 @@ jobs:
           /opt/curl-impersonate/curl_chrome116 --version
       - name: Test candles and existing UI
         run: node --test scripts/*.test.mjs tests/*.test.mjs
+      # Seconds, not an hour: fails at once when the exchange or Yahoo cannot be reached.
+      - name: Check the exchange and Yahoo can be reached
+        timeout-minutes: 3
+        env:
+          CURL_IMPERSONATE_BIN: /opt/curl-impersonate/curl_chrome116
+        run: node scripts/backfill-ohlc.mjs --probe
       - name: Rebuild candles from the exchange's adjusted closes
+        timeout-minutes: 45
         env:
           CURL_IMPERSONATE_BIN: /opt/curl-impersonate/curl_chrome116
           SYMBOLS: ${{ github.event.inputs.symbols }}
