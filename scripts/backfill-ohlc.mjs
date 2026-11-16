@@ -114,7 +114,16 @@ async function worker() {
       }
       // Explicit dates: Yahoo has answered `range=6y` with a shorter history from some networks.
       const now = Math.floor(Date.now() / 1000), dailyJson = await yahooJson(stock.symbol, `period1=${now - 6 * 366 * 86400}&period2=${now}&interval=1d&events=split`);
-      const daily = new Map(parseYahoo(dailyJson).map(b => [b.d, b])), splits = parseYahooSplits(dailyJson);
+      let daily = new Map(parseYahoo(dailyJson).map(b => [b.d, b])), splits = parseYahooSplits(dailyJson);
+      // A history shorter than five years may be cut short by the Yahoo server that answered: ask another.
+      const fiveYears = new Date(Date.now() - 5 * 365 * 864e5).toISOString().slice(0, 10);
+      if (([...daily.keys()].sort()[0] ?? '9') > fiveYears) {
+        try {
+          const other = JSON.parse(await getText(`https://query2.finance.yahoo.com/v8/finance/chart/${stock.symbol}.SR?range=max&interval=1d&events=split`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } }));
+          const longer = new Map(parseYahoo(other).map(b => [b.d, b]));
+          if (longer.size > daily.size) { daily = longer; splits = parseYahooSplits(other); }
+        } catch { /* keep the first answer */ }
+      }
       let hourly = new Map();
       try { hourly = hourlyDays(await yahooJson(stock.symbol, 'range=730d&interval=60m')); } catch { /* estimated candles then use the closes only */ }
       const rebuilt = rebuildBars({ official, daily, hourly, splits });
