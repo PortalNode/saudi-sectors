@@ -54,7 +54,7 @@ test('all ten banks cover only FY 2021-2025; no invented screenshot fields', () 
   const invalid = structuredClone(data); invalid.banks[0].years[0].period = 'Q1';
   assert.throws(() => validateDataset(invalid));
 });
-test('bank results are local; file source and data limitations are disclosed', () => {
+test('bank results are local and the page carries no notes block', () => {
   const script = readFileSync(new URL('../dist/banks.js', import.meta.url), 'utf8');
   const page = readFileSync(new URL('../dist/banks.html', import.meta.url), 'utf8');
   const app = readFileSync(new URL('../dist/app.js', import.meta.url), 'utf8');
@@ -62,9 +62,8 @@ test('bank results are local; file source and data limitations are disclosed', (
   assert.doesNotMatch(script, /argaam\.com|OPENAI|invokeLLM/);
   assert.match(script, /setInterval\(refreshCurrentPE, 60 \* 1000\)/);
   assert.match(script, /readCurrentJSON\('data\.json'\)/);
-  assert.match(page, /لم تُراجع بمصدر خارجي/);
-  assert.match(page, /ليس متوسط حقوق المساهمين/);
-  assert.match(page, /لا تغيّر هذه الصفحة أسعار/);
+  // The data notes, chart footnote and footer were removed from the page at the user's request.
+  assert.doesNotMatch(page, /class="bank-notes"|bank-charts-footnote|class="footer"/);
   assert.match(app, /company-results-link.*banks\.html\?symbol=/);
   assert.match(app, /name==='البنوك'.*bank-results-link/);
 });
