@@ -27,7 +27,7 @@
 .cq-body{display:flex;align-items:stretch;min-width:0}
 .cq-body .cq-figures{flex:1 1 auto;min-width:0;border-bottom:0}
 .cq-body .cq-tile{display:flex;flex-direction:column;justify-content:center}
-.cq-mini-slot{flex:none;box-sizing:border-box;width:clamp(250px,26vw,310px);aspect-ratio:1 / 1.1;padding:10px 12px;border-inline-start:1px solid var(--pf-line);background:var(--pf-bg2);min-width:0}
+.cq-mini-slot{flex:none;box-sizing:border-box;height:clamp(240px,25vw,300px);width:calc(clamp(240px,25vw,300px) * 1.2);padding:10px 12px;border-inline-start:1px solid var(--pf-line);background:var(--pf-bg2);min-width:0}
 /* الشارت الصغير: الأزرار، وسطر O H L C، والشارت مع محور الأسعار على اليمين ومحور الوقت أسفله */
 .cq-mini{display:flex;flex-direction:column;height:100%;min-width:0;color:inherit}
 .cq-mini a:focus-visible,.cq-mini button:focus-visible{outline:2px solid var(--pf-gold);outline-offset:2px}
