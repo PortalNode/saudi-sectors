@@ -129,7 +129,7 @@ async function worker() {
       await writeFile(new URL(`${stock.symbol}.json`, DIR), JSON.stringify(file) + '\n');
       report.rebuilt += 1; report.estimated += file.est.length; failedInARow = 0;
       if (file.flags.length) report.flags.push(`${stock.symbol}: ${file.flags.map(f => `${f.date} ${f.change}%`).join(', ')}`);
-      console.log(`[${++done}/${stocks.length} ${secs()}s] ${stock.symbol} ok: ${bars.length} candles, ${file.est.length} estimated, ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+      console.log(`[${++done}/${stocks.length} ${secs()}s] ${stock.symbol} ok: ${bars.length} candles from ${bars[0]?.d}, ${file.est.length} estimated (exchange from ${official[0]?.d}, Yahoo ${daily.size} days from ${[...daily.keys()].sort()[0]}), ${((Date.now() - t0) / 1000).toFixed(1)}s`);
     } catch (error) {
       report.failed.push(`${stock.symbol} (${error.message})`);
       console.warn(`[${++done}/${stocks.length} ${secs()}s] ${stock.symbol} failed: ${error.message}`);
