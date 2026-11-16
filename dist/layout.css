@@ -17,6 +17,8 @@
 .sector-switch select{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:6px 10px;min-width:190px;max-width:100%;direction:rtl;color-scheme:dark;cursor:pointer}
 .sector-switch select:hover,.sector-switch select:focus-visible{border-color:#f59e0b;outline:none}
 :root[data-theme="light"] .sector-switch select{color-scheme:light}
+.company-switch select{min-width:170px}
+body.has-company-switch nav.bank-nav{display:none}
 @media(max-width:760px){.site-bar{padding:8px 10px}.sector-switch{order:3;flex:1 1 100%}.sector-switch select{flex:1;min-width:0}.site-nav{margin-inline-start:0}.site-bar .theme-switch{margin-inline-start:auto}}
 
 /* ---------- Market summary in four groups ---------- */

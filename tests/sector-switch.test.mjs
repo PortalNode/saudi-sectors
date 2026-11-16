@@ -13,7 +13,7 @@ test('the sector switcher lists every results page once, under its main-table se
   assert.deepEqual(listed.map(item => item.page).sort(), [...sectorPages].sort());
   const site = JSON.parse(read('data.json'));
   assert.deepEqual(listed.map(item => item.name).sort(), site.sectors.map(sector => sector.name).sort());
-  for (const page of sectorPages) assert.match(read(`${page}.html`), /layout\.js\?v=latest-ytd-20261116/, page);
+  for (const page of sectorPages) assert.match(read(`${page}.html`), /layout\.js\?v=company-switch-20261116/, page);
 });
 
 test('the top bar has a «نتائج الشركات» tab on every page, current on the results pages', () => {

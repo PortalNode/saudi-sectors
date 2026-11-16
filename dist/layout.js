@@ -44,6 +44,33 @@
     });
     label.append(caption, select);
     siteName.after(label);
+
+    // Company picker beside the sector picker; it mirrors the page's company buttons
+    // (nav.bank-nav), which stay in the page but are hidden, and clicks the chosen one.
+    const nav = document.querySelector('nav.bank-nav');
+    if (nav) {
+      const companyLabel = document.createElement('label');
+      companyLabel.className = 'sector-switch company-switch';
+      const companyCaption = document.createElement('span');
+      companyCaption.textContent = 'الشركة';
+      const companySelect = document.createElement('select');
+      companySelect.setAttribute('aria-label', 'اختيار شركة من القطاع');
+      companySelect.disabled = true;
+      const sync = () => {
+        const buttons = [...nav.querySelectorAll('button')];
+        if (!buttons.length) return;
+        companySelect.replaceChildren(...buttons.map(button => new Option(button.textContent.trim(), button.dataset.company || button.dataset.bank || button.textContent.trim(), false, button.getAttribute('aria-pressed') === 'true')));
+        companySelect.disabled = false;
+        document.body.classList.add('has-company-switch');
+      };
+      companySelect.addEventListener('change', () => {
+        [...nav.querySelectorAll('button')].find(button => (button.dataset.company || button.dataset.bank || button.textContent.trim()) === companySelect.value)?.click();
+      });
+      new MutationObserver(sync).observe(nav, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-pressed'] });
+      sync();
+      companyLabel.append(companyCaption, companySelect);
+      label.after(companyLabel);
+    }
   }
 
   // ----- Home page: column views -----
