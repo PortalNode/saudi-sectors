@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="theme.css?v=20261105">
   <link rel="stylesheet" href="quarterly-periods.css?v=quarterly-20261115">
   <link rel="stylesheet" href="company-profile.css?v=20261115"><link rel="stylesheet" href="company-quote.css?v=chart-20261116h">
-  <link rel="stylesheet" href="layout.css?v=results-tab-20261115">
+  <link rel="stylesheet" href="layout.css?v=no-pe-card-20261116">
   <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261109-favicon1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20261109-favicon1">
@@ -40,8 +40,6 @@
         <div class="period-group" id="bank-quarter-group" hidden><span>الربع</span><div class="period-seg small" id="bank-quarter-seg" role="group" aria-label="اختيار الربع"><button type="button" data-quarter="1" aria-pressed="false">Q1</button><button type="button" data-quarter="2" aria-pressed="false">Q2</button><button type="button" data-quarter="3" aria-pressed="true">Q3</button><button type="button" data-quarter="4" aria-pressed="false">Q4</button><button type="button" data-quarter="seq" aria-pressed="false">متتالية</button></div></div>
         <p class="period-desc" id="bank-period-desc"></p>
       </div>
-      <div id="bank-current-pe" aria-live="polite"></div>
-      <p id="bank-current-pe-status" class="bank-charts-footnote" role="status">جار تحميل مكرر الربح الحالي…</p>
       <p class="bank-unit-note">المبالغ بمليون ريال؛ ربحية السهم بالريال؛ النسب بالمئة؛ مكرر الأرباح بالمرات.</p>
       <div class="bank-table-hint" id="bank-table-hint">اسحب الجدول أفقيًا لرؤية السنوات كاملة. «التغير» هو نسبة تغير السنة عن السابقة، وليس فرق النسب بالنقاط المئوية.</div>
       <div id="bank-table-wrap" class="table-wrap annual-table-wrap" tabindex="0" aria-label="جدول النتائج السنوية؛ يمكن تمريره أفقيًا وعموديًا"></div>
@@ -57,7 +55,7 @@
           <li>المصدر: ملف «البنوك.xlsx» المقدم من المستخدم. القيم من الجدول السنوي في الملف كما هي؛ لم تُراجع بمصدر خارجي، ولا يوجد جلب تلقائي من أرقام.</li>
           <li>ربحية السهم محفوظة كما وردت في الملف؛ قد تختلف قواعدها أو تعديلات عدد الأسهم بين السنوات، ولا يُفترض أن نموها يطابق نمو صافي الربح.</li>
           <li>نسبة القروض إلى الودائع = التمويل ÷ ودائع العملاء. العائد على حقوق المساهمين = صافي الربح ÷ حقوق المساهمين في نهاية السنة وفق صيغة الملف، وليس متوسط حقوق المساهمين.</li>
-          <li>مكرر الأرباح في الجدول السنوي تاريخي من الملف. المكرر الحالي مستقل: سعر آخر لقطة ÷ الربحية المتكررة المتاحة في لقطة أرقام، ثم المعلنة عند غيابها، ثم ربحية ملف الأسعار عند عدم توفر لقطة أرقام؛ يظهر الأساس والمصدر وتاريخهما في البطاقة. لا تغيّر هذه الصفحة أسعار أو مؤشرات الجدول الرئيسي.</li>
+          <li>مكرر الأرباح في الجدول السنوي تاريخي من الملف. المكرر الحالي مستقل: سعر آخر لقطة ÷ الربحية المتكررة المتاحة في لقطة أرقام، ثم المعلنة عند غيابها، ثم ربحية ملف الأسعار عند عدم توفر لقطة أرقام. لا تغيّر هذه الصفحة أسعار أو مؤشرات الجدول الرئيسي.</li>
           <li>لم تُدرج سنة 2020 في العرض السنوي، ولا ورقة «الودائع تحت الطلب» لأنها بلا سنة محددة. هذه نسخة ثابتة تُحدّث عند استيراد ملف جديد.</li>
           <li class="period-note">النتائج الربعية من ملف «البنوك - الأرباح الربعية.xlsx» (أرقام، محفوظ باسم argaam_banks_quarterly.xlsx) بالبنود الستة كما وردت فيه: صافي الدخل من الاستثمارات والتمويل، ودخل العمليات، والمخصصات، وصافي الدخل، وربح السهم، وربح السهم المخفض. «غير متوفر» في الملف يظهر «—».</li>
           <li class="period-note">الأرباع مستقلة (Q4 هو الربع الرابع وحده وليس السنة). فترتا 6 و9 أشهر مجموع الأرباع، وربح السهم فيهما مجموع ربح السهم للأرباع، فهو تقريبي إذا تغير عدد الأسهم خلال السنة.</li>
@@ -70,7 +68,7 @@
     <footer class="footer"><p>نتائج سنوية وربعية محفوظة داخل المشروع · المكرر الحالي من لقطة أسعار وربحية المشروع، وليس أسعارًا مباشرة · لا يحتاج العرض إلى خدمة ذكاء اصطناعي.</p></footer>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض بيانات ملف البنوك.</p></noscript>
   </main>
-  <script type="module" src="banks.js?v=mcap-order-20261115"></script>
+  <script type="module" src="banks.js?v=no-pe-card-20261116"></script>
   <script src="company-profile.js?v=20261115-reits" defer></script>
   <script src="company-chart.js?v=chart-20261116h" defer></script>
   <script src="company-quote.js?v=chart-20261116h" defer></script>

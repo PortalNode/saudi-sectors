@@ -106,26 +106,6 @@
 .key-figures-title{margin:14px 0 0;font-size:11px;color:var(--muted)}
 @media(max-width:560px){.key-figures{grid-template-columns:repeat(2,minmax(0,1fr))}.key-figure{border-inline-start:0;border-top:1px solid var(--line)}.key-figure:nth-child(-n+2){border-top:0}.key-figure:nth-child(even){border-inline-start:1px solid var(--line)}}
 
-/* Current PE card (banks): heading, then five equal cells on one row */
-.banks-page .bank-current-pe-card{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;padding:0}
-.banks-page .bank-current-pe-card>h3{grid-column:1/-1;margin:0;padding:10px 14px;border-bottom:1px solid var(--line);font-size:14px}
-.banks-page .bank-current-pe-card>.bank-current-pe-value{display:grid;gap:3px;align-content:start;margin:0;padding:12px 14px;font-size:17px;line-height:1.5;white-space:nowrap}
-.banks-page .bank-current-pe-card>.bank-current-pe-value::before{content:"مكرر الربح الحالي";font-size:10.5px;font-weight:400;line-height:1.5;color:var(--muted)}
-.banks-page .bank-current-pe-card dl{display:contents}
-.banks-page .bank-current-pe-card dl>div{display:grid;gap:3px;align-content:start;min-width:0;padding:12px 14px;border-inline-start:1px solid var(--line)}
-.banks-page .bank-current-pe-card dt{font-size:10.5px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.banks-page .bank-current-pe-card dd{margin:0;font-size:17px;font-weight:700;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.banks-page .bank-current-pe-card dd time{font-size:12px;font-weight:500}
-.banks-page .bank-current-pe-card>p{grid-column:1/-1;margin:0;padding:3px 14px;font-size:10.5px;line-height:1.7}
-.banks-page .bank-current-pe-card>p:first-of-type{border-top:1px solid var(--line);padding-top:8px}
-.banks-page .bank-current-pe-card>p:last-child{padding-bottom:10px}
-@media(max-width:760px){
-  .banks-page .bank-current-pe-card{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .banks-page .bank-current-pe-card>.bank-current-pe-value{grid-column:1/-1;border-bottom:1px solid var(--line)}
-  .banks-page .bank-current-pe-card dl>div{border-inline-start:0;border-bottom:1px solid var(--line)}
-  .banks-page .bank-current-pe-card dl>div:nth-child(even){border-inline-start:1px solid var(--line)}
-}
-
 /* Annual table: balanced columns, every number on its row's centre line */
 .banks-page .annual-table{min-width:900px;table-layout:fixed}
 .banks-page .annual-table .annual-col-label{width:23%}

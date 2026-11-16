@@ -152,14 +152,13 @@ function harness(initial = priceFixture(), { map = { snapshot: {} } } = {}) {
 const groups = [];
 async function test(name, run) { await run(); groups.push(name); console.log(`PASS ${name}`); }
 
-await test('successful initial and later current refresh paint card/options without rewriting annual data', async () => {
+await test('successful initial and later current refresh update options without rewriting annual data', async () => {
   const h = harness(); await settle();
   assert.equal(h.errors.length, 0);
   assert.equal(h.node('bank-panel').hidden, false);
   assert.equal(h.evaluate('currentRatios.length'), 10);
   assert.equal(h.evaluate('currentRatios[0].pe'), 10);
-  assert.match(h.node('bank-current-pe').innerHTML, /data-current-card="1120".*>10 \| financial-map/);
-  assert.match(h.node('bank-current-pe-status').textContent, /ليس سعرًا مباشرًا.*2025.*الجدول السنوي/);
+  assert.equal(h.calls.card.length, 0, 'The per-bank current PE card is no longer shown');
   assert.match(h.node('bank-chart-metric').innerHTML, /optgroup label="المؤشرات الحالية"/);
   assert.match(h.node('bank-chart-metric').innerHTML, /option value="currentPE">مكرر الربح الحالي — جميع البنوك<\/option>/);
   assert.equal(h.node('bank-chart-metric').value, 'netProfit');
@@ -176,7 +175,6 @@ await test('successful initial and later current refresh paint card/options with
   assert.equal(h.evaluate('currentPriceTime'), Date.parse('2026-11-04T09:30:00Z'));
   assert.equal(h.evaluate('currentRefreshRunning'), false);
   assert.equal(h.evaluate('currentPEError'), '');
-  assert.match(h.node('bank-current-pe').innerHTML, />20 \| financial-map/);
   assert.equal(h.node('bank-table-wrap').innerHTML, annualHTML);
   assert.equal(h.node('bank-table-wrap').writes, annualWrites);
   assert.equal(h.calls.annual.length, 1);
@@ -194,7 +192,6 @@ await test('older, missing, invalid, and future timestamps retain the prior snap
   const ratios = h.evaluate('currentRatios');
   const saved = h.evaluate('JSON.stringify(currentRatios)');
   const priceTime = h.evaluate('currentPriceTime');
-  const card = h.node('bank-current-pe').innerHTML;
   const comparison = h.node('bank-charts-grid').innerHTML;
   const annual = h.node('bank-table-wrap').innerHTML;
   const annualWrites = h.node('bank-table-wrap').writes;
@@ -206,27 +203,23 @@ await test('older, missing, invalid, and future timestamps retain the prior snap
     assert.equal(h.evaluate('JSON.stringify(currentRatios)'), saved);
     assert.equal(h.evaluate('currentPriceTime'), priceTime);
     assert.equal(h.calls.build.length, 1);
-    assert.equal(h.node('bank-current-pe').innerHTML, card);
     assert.equal(h.node('bank-charts-grid').innerHTML, comparison);
     assert.equal(h.node('bank-table-wrap').innerHTML, annual);
     assert.equal(h.node('bank-table-wrap').writes, annualWrites);
     assert.equal(h.evaluate('selectedChartKey'), 'currentPE');
     assert.equal(h.evaluate('currentRefreshRunning'), false);
-    assert.match(h.node('bank-current-pe-status').textContent, /تعذر تحديث المكرر الحالي.*احتُفظ باللقطة المعروضة وتاريخها/);
     assert.match(h.node('bank-chart-selection-status').textContent, /آخر فحص للأسعار.*احتُفظ باللقطة المعروضة وتاريخها/);
   }
   assert.equal(h.warnings.length, 6);
   await h.refresh(priceFixture('2026-11-04T09:45:00Z', 50));
   assert.equal(h.evaluate('currentRatios[0].pe'), 25);
   assert.equal(h.evaluate('currentPEError'), '');
-  assert.doesNotMatch(h.node('bank-current-pe-status').textContent, /تعذر تحديث|احتُفظ/);
   assert.doesNotMatch(h.node('bank-chart-selection-status').textContent, /تعذر تحديث|احتُفظ/);
 });
 
 await test('network, HTTP, JSON, and malformed price failures retain usable current and annual data', async () => {
   const h = harness(); await settle();
   const saved = h.evaluate('JSON.stringify({currentRatios,currentPriceTime,dataset})');
-  const card = h.node('bank-current-pe').innerHTML;
   const annualWrites = h.node('bank-table-wrap').writes;
   for (const failure of [
     new Error('offline'),
@@ -237,11 +230,9 @@ await test('network, HTTP, JSON, and malformed price failures retain usable curr
   ]) {
     await h.refresh(failure);
     assert.equal(h.evaluate('JSON.stringify({currentRatios,currentPriceTime,dataset})'), saved);
-    assert.equal(h.node('bank-current-pe').innerHTML, card);
     assert.equal(h.node('bank-table-wrap').writes, annualWrites);
     assert.equal(h.node('bank-panel').hidden, false);
     assert.equal(h.evaluate('currentRefreshRunning'), false);
-    assert.match(h.node('bank-current-pe-status').textContent, /احتُفظ باللقطة المعروضة وتاريخها/);
   }
 });
 
@@ -253,19 +244,15 @@ await test('missing financial-map falls back successfully to prices, including i
   assert.equal(h.evaluate('currentRatios.length'), 10);
   assert.equal(h.evaluate('currentRatios[0].pe'), 10);
   assert.equal(h.calls.build[0].financials, null);
-  assert.match(h.node('bank-current-pe').innerHTML, />10 \| price-file/);
-  assert.match(h.node('bank-current-pe-status').textContent, /تعذر تحميل لقطة ربحية أرقام.*استُخدمت ربحية ملف الأسعار.*مصدرها/);
   assert.match(h.node('bank-chart-metric').innerHTML, /option value="currentPE">/);
   const annualWrites = h.node('bank-table-wrap').writes;
   await h.refresh(priceFixture('2026-11-04T09:30:00Z', 44));
   assert.equal(h.evaluate('currentRatios[0].pe'), 22);
   assert.equal(h.calls.build[1].financials, null);
-  assert.match(h.node('bank-current-pe').innerHTML, />22 \| price-file/);
   assert.equal(h.node('bank-table-wrap').writes, annualWrites);
   h.setMap({ snapshot: {} });
   await h.refresh(priceFixture('2026-11-04T09:45:00Z', 46));
   assert.equal(h.evaluate('currentPEError'), '');
-  assert.match(h.node('bank-current-pe').innerHTML, />23 \| financial-map/);
 });
 
 await test('currentPE selection uses all-bank comparison while historical rendering stays unchanged', async () => {
@@ -312,8 +299,6 @@ await test('initial price failure leaves historical data available and current s
   assert.equal(h.node('bank-panel').hidden, false);
   assert.equal(h.evaluate('currentRatios.length'), 0);
   assert.match(h.node('bank-table-wrap').innerHTML, /5000/);
-  assert.equal(h.node('bank-current-pe').innerHTML, '');
-  assert.match(h.node('bank-current-pe-status').textContent, /لم تُستخدم قيم المكرر التاريخي بدلًا منه/);
   assert.match(h.node('bank-chart-metric').innerHTML, /value="currentPE"[^>]*>[^<]*غير متاح حاليًا/);
   h.selectChart('currentPE');
   assert.match(h.node('bank-charts-grid').innerHTML, /المكرر الحالي غير متاح بعد.*المقارنات التاريخية متاحة/);
@@ -324,7 +309,6 @@ await test('initial price failure leaves historical data available and current s
   assert.equal(h.calls.comparison.length, 1);
   assert.equal(h.evaluate('currentRatios[0].pe'), 20);
   assert.equal(h.evaluate('selectedChartKey'), 'currentPE');
-  assert.match(h.node('bank-current-pe').innerHTML, />20 \|/);
   assert.equal(h.node('bank-table-wrap').writes, annualWrites);
 });
 

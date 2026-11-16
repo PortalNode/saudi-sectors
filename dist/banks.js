@@ -1,6 +1,6 @@
 import { escapeHtml, validateDataset, renderAnnualTable } from './bank-metrics.mjs?v=compact-columns-20261104';
 import { renderBankCharts, fitBankCharts, getChartOptions } from './bank-charts.mjs?v=value-labels-20261106';
-import { buildCurrentBankPE, renderCurrentBankPECard } from './bank-current-pe.mjs?v=20261105';
+import { buildCurrentBankPE } from './bank-current-pe.mjs?v=20261105';
 import { renderCurrentPEComparison, fitCurrentPEComparison } from './bank-current-pe-chart.mjs?v=20261105';
 import { marketCapMap, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
 import { PERIODS, QUARTER_NAMES, quarterLabel, validateQuarterly, buildBankPeriodColumns, renderBankPeriodTable, getBankPeriodChartOptions, renderBankPeriodChart, fitBankPeriodChart } from './bank-quarterly.mjs?v=banks-quarterly-20261115';
@@ -89,14 +89,6 @@ function populateChartOptions(bank) {
   element('bank-chart-metric').innerHTML = [...grouped].map(([group, options]) => `<optgroup label="${escapeHtml(group)}">${options.map(option => `<option value="${escapeHtml(option.key)}"${option.key === selectedChartKey ? ' selected' : ''}>${escapeHtml(option.label + (option.available ? '' : ' (غير متاح حاليًا)'))}</option>`).join('')}</optgroup>`).join('');
   if (element('bank-chart-metric').value !== selectedChartKey) selectedChartKey = element('bank-chart-metric').value;
 }
-function paintCurrentCard() {
-  if (!activeChartBank) return;
-  const record = currentRatios.find(item => item.symbol === activeChartBank.symbol);
-  element('bank-current-pe').innerHTML = record ? renderCurrentBankPECard(record) : '';
-  element('bank-current-pe-status').textContent = currentPEError || (record
-    ? 'المكرر الحالي من آخر لقطة أسعار وربحية متاحة في المشروع؛ ليس سعرًا مباشرًا، ولا يُحسب بربحية 2025 من الجدول السنوي.'
-    : 'جار تحميل مكرر الربح الحالي من بيانات المشروع…');
-}
 function selectBank(symbol, replaceHistory = false) {
   const bank = dataset.banks.find(item => item.symbol === symbol) || dataset.banks.find(item => item.symbol === '1120') || dataset.banks[0];
   const quarterBank = quarterly?.companies.find(item => item.symbol === bank.symbol);
@@ -116,7 +108,6 @@ function selectBank(symbol, replaceHistory = false) {
   element('bank-table-wrap').scrollTop = 0;
   element('bank-panel').hidden = false;
   activeChartBank = bank;
-  paintCurrentCard();
   populateChartOptions(bank);
   drawSelectedChart();
   element('bank-load-status').hidden = true; // sources are listed in the notes
@@ -158,7 +149,6 @@ async function refreshCurrentPE(initialPrices) {
     console.warn('Current bank PE snapshot unavailable:', error);
   } finally {
     currentRefreshRunning = false;
-    paintCurrentCard();
     if (activeChartBank) {
       populateChartOptions(activeChartBank);
       if (selectedChartKey === 'currentPE') drawSelectedChart();
