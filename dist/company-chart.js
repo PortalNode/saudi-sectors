@@ -21,6 +21,11 @@
     return interval === 'm' ? `${month} ${yy}` : `${WEEKDAYS[d.getUTCDay()]} ${d.getUTCDate()} ${month} ${yy}`;
   };
   const TYPES = [['line', 'خطي'], ['candles', 'شموع']];
+  // أيقونات نوع الشارت كما في TradingView: الشموع والخط
+  const TYPE_ICONS = {
+    candles: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 3v3M7 18v3M17 4v4M17 16v4"/><rect x="5" y="6" width="4" height="12" rx="0.6"/><rect x="15" y="8" width="4" height="8" rx="0.6"/></svg>',
+    line: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 3 8-8"/><path d="M3 21h18" opacity=".4"/></svg>'
+  };
   const INTERVALS = [['d', 'يومي'], ['w', 'أسبوعي'], ['m', 'شهري']];
   const RANGES = [['3m', '3 أشهر', 3], ['6m', '6 أشهر', 6], ['1y', 'سنة', 12], ['3y', '3 سنوات', 36], ['5y', '5 سنوات', 60], ['all', 'الكل', null]];
   const DEFAULT_RANGE = { d: '1y', w: '3y', m: '5y' };
@@ -381,7 +386,7 @@
           </div>
         </div>
         <div class="cc-groups">
-          <div class="cq-range" role="group" aria-label="نوع الشارت">${TYPES.map(([id, t]) => chip('type', id, t, id === state.type)).join('')}</div>
+          <div class="cq-range cc-typegroup" role="group" aria-label="نوع الشارت">${TYPES.map(([id, t]) => `<button type="button" data-type="${id}" aria-pressed="${id === state.type}" aria-label="${t}" title="${t}">${TYPE_ICONS[id]}</button>`).join('')}</div>
           <div class="cq-range" role="group" aria-label="الفترة الزمنية للشمعة">${INTERVALS.map(([id, t]) => chip('interval', id, t, id === state.interval)).join('')}</div>
           ${dividends.length ? `<div class="cq-range" role="group" aria-label="التوزيعات">${chip('adj', '1', 'ADJ', state.adj, 'تعديل الأسعار للتوزيعات النقدية، كما في زر ADJ في TradingView')}${chip('divmarks', '1', 'علامات D', state.divMarks, 'إظهار علامة D على شمعة استحقاق كل توزيع نقدي أو إخفاؤها')}</div>` : ''}
         </div>

@@ -301,3 +301,11 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cq-chart-panel .cc-flyout{left:50px}
 .cq-chart-panel .cc-bottom{height:36px;padding:0 6px;margin-top:0;border-top:1px solid var(--pf-line);background:var(--pf-bg);align-items:center}
 .cq-chart-panel .cc-bottom button{height:26px;padding:0 9px;border-radius:5px}
+
+/* الشريط العلوي كما في TradingView: أيقونات نوع الشارت في صندوق مرفوع عند الاختيار، والفترات نصًا بخلفية للمختار */
+.cq-chart-panel .cc-typegroup{gap:2px}
+.cq-chart-panel .cc-typegroup button{display:grid;place-items:center;width:34px;height:32px;padding:0;color:var(--pf-muted)}
+.cq-chart-panel .cc-typegroup button svg{width:20px;height:20px}
+.cq-chart-panel .cc-typegroup button[aria-pressed="true"]{background:var(--pf-line);color:var(--pf-ink)}
+.cq-chart-panel .cc-typegroup button:hover{color:var(--pf-ink)}
+.cq-chart-panel .cc-groups > .cq-range button[data-interval][aria-pressed="true"],.cq-chart-panel .cc-groups > .cq-range button[data-crange][aria-pressed="true"]{background:var(--pf-line);color:var(--pf-ink);border-radius:6px}
