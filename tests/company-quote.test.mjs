@@ -169,8 +169,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261117o/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261117o" defer><\/script>\s*<script src="company-quote\.js\?v=wide-chart-20261117" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261117p/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261117p" defer><\/script>\s*<script src="company-quote\.js\?v=wide-chart-20261117" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
@@ -241,8 +241,7 @@ test('picking a stock in the chart search switches the chart only, without reloa
   assert.doesNotMatch(source, /location\.href\s*=/, 'the search no longer navigates away');
   assert.match(source, /show\(target\.symbol, \{ name: target\.name, page: target\.page \}\)/);
   assert.match(source, /mount\(panel, next, \{ home, away, keepFull: isFull\(\) \}\)/, 'fullscreen stays on');
-  assert.match(source, /data-home/, 'a way back to the page\'s company');
-  assert.match(source, /\?symbol=\$\{encodeURIComponent\(symbol\)\}">نتائج الشركة<\/a>/, 'a link to the shown stock\'s results page');
+  assert.doesNotMatch(source, /cc-away/, 'no banner when another stock is shown');
 });
 
 test('the chart symbol search finds any stock on the site by name or symbol and links to its sector page', () => {

@@ -421,7 +421,6 @@
       </div>
       <p class="cc-hint" hidden></p>
       <div class="cc-dlg" hidden></div><div class="cc-dlg cc-ddlg" hidden></div>
-      ${String(symbol) !== home.symbol ? `<p class="cc-away" role="status">يعرض الشارت <b>${esc(away.name || symbol)}</b> <bdi>${esc(symbol)}</bdi>${away.page ? ` · <a href="${esc(away.page)}?symbol=${encodeURIComponent(symbol)}">نتائج الشركة</a>` : ''} · <button type="button" data-home>العودة إلى ${esc(home.name || home.symbol)}</button></p>` : ''}
       ${bigJumps(file).length ? `<p class="cq-source"><span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال.</span></p>` : ''}`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
