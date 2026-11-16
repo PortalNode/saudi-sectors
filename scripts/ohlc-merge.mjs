@@ -156,9 +156,9 @@ export function scaleFactors(official, daily, { step = 0.02 } = {}) {
  * daily: Map date → Yahoo daily bar; hourly: Map date → Yahoo session bar from 60-minute data.
  * Returns { bars, est, flags }: est lists sessions whose open/high/low/volume are estimated.
  */
-export function rebuildBars({ official, daily, hourly = new Map(), splits = [], years = YEARS }) {
+export function rebuildBars({ official, daily, hourly = new Map(), splits = [], exactSplits = false, earlier = false, years = YEARS }) {
   if (!official.length) return { bars: [], est: [], flags: [] };
-  official = withEarlierHistory(official, daily);
+  if (earlier) official = withEarlierHistory(official, daily);
   const from = new Date(`${official.at(-1).d}T12:00:00Z`); from.setUTCFullYear(from.getUTCFullYear() - years);
   const start = from.toISOString().slice(0, 10);
   const k = scaleFactors(official, daily);
@@ -184,7 +184,7 @@ export function rebuildBars({ official, daily, hourly = new Map(), splits = [], 
     if (d < start) continue;
     bars.push({ d, o: round2(bar.o), h: round2(Math.max(bar.h, bar.o, c)), l: round2(Math.min(bar.l, bar.o, c)), c: round2(c), v: Math.round(bar.v || 0) });
   }
-  const exact = splitRatios(bars, daily, splits);
+  const exact = exactSplits ? splitRatios(bars, daily, splits) : bars;
   return { bars: exact, est: est.filter(d => d >= start && exact.some(b => b.d === d)), flags: jumpFlags(exact) };
 }
 
@@ -288,4 +288,32 @@ export function addSession(bars, { today, prev }, official, { fill = [], years =
   const from = new Date(`${today.d}T12:00:00Z`); from.setUTCFullYear(from.getUTCFullYear() - years);
   const start = from.toISOString().slice(0, 10);
   return { bars: out.filter(b => b.d >= start), factor, added: true };
+}
+
+/* ---------- Choosing between adjustment bases with TradingView's own figures ----------
+ * The exchange and Yahoo sometimes adjust a bonus issue by slightly different factors, and a stock
+ * that moved from Nomu may or may not show its earlier sessions on TradingView. TradingView's
+ * screener publishes figures computed on its own history; the rebuild keeps the candidate closest
+ * to them, and the exchange's own basis when they cannot tell the candidates apart. */
+export const TV_FIGURES = ['price_52_week_high', 'price_52_week_low', 'High.6M', 'Low.6M', 'SMA50', 'SMA200', 'EMA20'];
+const smaLast = (values, n) => values.length >= n ? values.slice(-n).reduce((a, b) => a + b, 0) / n : null;
+function emaLast(values, n) {
+  if (values.length < n) return null;
+  const k = 2 / (n + 1); let prev = values.slice(0, n).reduce((a, b) => a + b, 0) / n;
+  for (const v of values.slice(n)) prev = v * k + prev * (1 - k);
+  return prev;
+}
+/** Figures for `bars` as TradingView computes them (windows of 364 and 180 days back from `today`). */
+export function tvFigures(bars, today) {
+  const back = n => new Date(Date.parse(`${today}T12:00:00Z`) - n * 864e5).toISOString().slice(0, 10);
+  const y = bars.filter(b => b.d > back(365)), m6 = bars.filter(b => b.d > back(181)), closes = bars.map(b => b.c);
+  const ext = (list, key, fn) => list.length ? fn(...list.map(b => b[key])) : null;
+  return [ext(y, 'h', Math.max), ext(y, 'l', Math.min), ext(m6, 'h', Math.max), ext(m6, 'l', Math.min), smaLast(closes, 50), smaLast(closes, 200), emaLast(closes, 20)];
+}
+/** How far `bars` are from TradingView's figures (row in TV_FIGURES order): mismatches, then total relative gap. */
+export function tvDistance(bars, tvRow, today) {
+  const ours = tvFigures(bars, today);
+  let mismatches = 0, gap = 0;
+  ours.forEach((a, i) => { const b = tvRow?.[i]; if (a == null || !(b > 0)) return; const off = Math.abs(a / b - 1); gap += off; if (off > (i < 4 ? 0.006 : 0.003)) mismatches += 1; });
+  return { mismatches, gap };
 }

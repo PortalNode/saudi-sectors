@@ -17,7 +17,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { execFile as execFileCb } from 'node:child_process';
 import { promisify } from 'node:util';
-import { parseYahoo, parseYahooSplits, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, round2Price, SOURCE } from './ohlc-merge.mjs';
+import { parseYahoo, parseYahooSplits, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, round2Price, SOURCE, TV_FIGURES, tvDistance } from './ohlc-merge.mjs';
 
 const execFile = promisify(execFileCb);
 const DIST = new URL('../dist/', import.meta.url);
@@ -40,7 +40,7 @@ const MODES = {
 let mode = 'plain';
 export const officialUrl = symbol => `https://www.saudiexchange.sa/tadawul.eportal.charts.v2/ChartGenerator?chart-type=SQL_CI_CV_COM&chart-parameter=${symbol}&methodType=parsingMethod`;
 
-async function getText(url, { headers = {}, impersonate = false, attempts = 3, maxTime = 30, extra = [] } = {}) {
+async function getText(url, { headers = {}, impersonate = false, attempts = 3, maxTime = 30, extra = [], method = 'GET', body } = {}) {
   let last;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
@@ -51,7 +51,7 @@ async function getText(url, { headers = {}, impersonate = false, attempts = 3, m
       }
       const controller = new AbortController(), timer = setTimeout(() => controller.abort(), maxTime * 1000);
       try {
-        const response = await fetch(url, { headers, signal: controller.signal });
+        const response = await fetch(url, { method, body, headers, signal: controller.signal });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.text();
       } finally { clearTimeout(timer); }
@@ -98,6 +98,17 @@ const started = Date.now(), secs = () => ((Date.now() - started) / 1000).toFixed
 }
 await mkdir(DIR, { recursive: true });
 
+// TradingView's own figures for every stock, to choose between adjustment bases (see ohlc-merge.mjs).
+const tvRows = new Map(), today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+try {
+  for (let i = 0; i < stocks.length; i += 100) {
+    const json = JSON.parse(await getText('https://scanner.tradingview.com/ksa/scan', { method: 'POST', body: JSON.stringify({ symbols: { tickers: stocks.slice(i, i + 100).map(s => `TADAWUL:${s.symbol}`) }, columns: TV_FIGURES }), headers: { 'Content-Type': 'application/json' } }));
+    for (const row of json.data ?? []) tvRows.set(String(row.s).split(':')[1], row.d);
+  }
+  console.log(`[tv ${secs()}s] TradingView figures for ${tvRows.size} stocks`);
+} catch (error) { console.warn(`[tv ${secs()}s] TradingView figures unavailable (${error.message}); the exchange's basis is kept everywhere.`); }
+const chosen = [];
+
 const report = { rebuilt: 0, failed: [], estimated: 0, flags: [] };
 const queue = [...stocks];
 let done = 0, failedInARow = 0, aborted = null;
@@ -126,7 +137,18 @@ async function worker() {
       }
       let hourly = new Map();
       try { hourly = hourlyDays(await yahooJson(stock.symbol, 'range=730d&interval=60m')); } catch { /* estimated candles then use the closes only */ }
-      const rebuilt = rebuildBars({ official, daily, hourly, splits });
+      // Candidates: the exchange's basis first (kept on a tie), then Yahoo's exact split ratios and/or Nomu history.
+      const variants = [{ exactSplits: false, earlier: false }];
+      if (splits.length) variants.push({ exactSplits: true, earlier: false });
+      if ([...daily.keys()].some(d => d < official[0].d)) variants.push({ exactSplits: false, earlier: true }, ...(splits.length ? [{ exactSplits: true, earlier: true }] : []));
+      let rebuilt = null, best = null, pick = variants[0];
+      for (const variant of variants) {
+        const candidate = rebuildBars({ official, daily, hourly, splits, ...variant });
+        const score = tvRows.has(stock.symbol) ? tvDistance(candidate.bars, tvRows.get(stock.symbol), today) : { mismatches: 0, gap: 0 };
+        // A candidate replaces the exchange's basis only when it matches more of TradingView's figures.
+        if (!best || score.mismatches < best.mismatches) { rebuilt = candidate; best = score; pick = variant; }
+      }
+      if (pick.exactSplits || pick.earlier) chosen.push(`${stock.symbol}${pick.exactSplits ? ' exact-splits' : ''}${pick.earlier ? ' nomu-history' : ''}`);
       // Sessions the daily update stored from TradingView stay as they are while their close still
       // matches (a later capital action changes every earlier close, and then the rebuild wins).
       let before = null; try { before = JSON.parse(await readFile(new URL(`${stock.symbol}.json`, DIR), 'utf8')); } catch { /* new */ }
@@ -160,6 +182,7 @@ if (!only) {
   await writeFile(indexUrl, JSON.stringify({ ...index, officialDate, rebuiltAt: new Date().toISOString(), source: SOURCE, symbols: report.rebuilt, failed: report.failed, estimatedSessions: report.estimated, unexplainedJumps: report.flags }, null, 1) + '\n');
 }
 console.log(`Rebuilt ${report.rebuilt}/${stocks.length} stocks in ${secs()}s; ${report.estimated} estimated sessions.`);
+if (chosen.length) console.log(`Closer to TradingView on another basis: ${chosen.join(', ')}`);
 if (process.env.GITHUB_STEP_SUMMARY) {
   const { appendFile } = await import('node:fs/promises');
   await appendFile(process.env.GITHUB_STEP_SUMMARY, `### Candle rebuild\n\n- Rebuilt: **${report.rebuilt}/${stocks.length}** stocks in ${secs()}s\n- Estimated sessions: ${report.estimated}\n- Failed: ${report.failed.length ? report.failed.join(', ') : 'none'}\n- Moves beyond the daily limit left unexplained: ${report.flags.length}\n\n`);
