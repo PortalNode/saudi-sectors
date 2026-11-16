@@ -19,9 +19,9 @@ test('the sector switcher lists every results page once, under its main-table se
 test('the top bar has a «نتائج الشركات» tab on every page, current on the results pages', () => {
   for (const page of [...sectorPages, 'index', 'comparison']) {
     const nav = read(`${page}.html`).match(/<nav class="site-nav"[^>]*>(.*?)<\/nav>/)[1];
-    assert.deepEqual([...nav.matchAll(/>([^<]+)<\/a>/g)].map(match => match[1]), ['الشركات', 'نتائج الشركات', 'مقارنة النتائج المالية', 'التحليل الفني'], page);
+    assert.deepEqual([...nav.matchAll(/>([^<]+)<\/a>/g)].map(match => match[1]), ['الرئيسية', 'نتائج الشركات', 'مقارنة النتائج المالية', 'التحليل الفني'], page);
     const current = nav.match(/<a [^>]*aria-current="page"[^>]*>([^<]+)</)[1];
-    assert.equal(current, page === 'index' ? 'الشركات' : page === 'comparison' ? 'مقارنة النتائج المالية' : 'نتائج الشركات', page);
+    assert.equal(current, page === 'index' ? 'الرئيسية' : page === 'comparison' ? 'مقارنة النتائج المالية' : 'نتائج الشركات', page);
     assert.match(nav, /<a href="banks\.html" data-results-link/, page);
   }
   assert.match(layout, /write\('saudi-sectors-results-page', currentPage\)/);

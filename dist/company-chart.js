@@ -23,8 +23,8 @@
   const TYPES = [['line', 'خطي'], ['candles', 'شموع']];
   // أيقونات نوع الشارت كما في TradingView: الشموع والخط
   const TYPE_ICONS = {
-    candles: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 3v3M7 18v3M17 4v4M17 16v4"/><rect x="5" y="6" width="4" height="12" rx="0.6"/><rect x="15" y="8" width="4" height="8" rx="0.6"/></svg>',
-    line: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 3 8-8"/><path d="M3 21h18" opacity=".4"/></svg>'
+    candles: '<svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5v4M9 19.5v4M19 6v4M19 18v4"/><rect x="6.5" y="8.5" width="5" height="11" rx=".8"/><rect x="16.5" y="10" width="5" height="8" rx=".8"/></svg>',
+    line: '<svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l6.5-6.5 4.5 3.5L24 7.5"/></svg>'
   };
   const INTERVALS = [['d', 'يوم'], ['w', 'أسبوع'], ['m', 'شهر']];
   const RANGES = [['3m', '3 أشهر', 3], ['6m', '6 أشهر', 6], ['1y', 'سنة', 12], ['3y', '3 سنوات', 36], ['5y', '5 سنوات', 60], ['all', 'الكل', null]];
@@ -180,31 +180,31 @@
   const ICON_RESET = svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>');
   const ICON_FULL = svg('<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>');
   const ICON_EXIT = svg('<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>');
-  // أيقونات الشريط الجانبي على نمط TradingView: خطوط رفيعة بمقاس 20
-  const icon = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  // أيقونات الشريط الجانبي مرسومة من جديد على شبكة TradingView (28×28): خط 1.2 رفيع، ودوائر نقاط الارتكاز مفرغة بنصف قطر 2.5
+  const icon = d => `<svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICONS = {
-    cursor: icon('<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>'),
-    vline: icon('<path d="M12 3v18"/><circle cx="12" cy="7.5" r="1.8"/><circle cx="12" cy="16.5" r="1.8"/>'),
-    hline: icon('<path d="M3 12h7M14 12h7"/><circle cx="12" cy="12" r="2"/>'),
-    hray: icon('<circle cx="5" cy="12" r="2"/><path d="M7 12h14M18 9l3 3-3 3"/>'),
-    trend: icon('<path d="M5 19L19 5"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/>'),
-    ray: icon('<path d="M7 17L18 6"/><circle cx="7" cy="17" r="2"/><path d="M14 6h4v4"/>'),
-    ext: icon('<path d="M2.5 19L21.5 5"/><circle cx="8.5" cy="14.5" r="1.8"/><circle cx="15.5" cy="9.5" r="1.8"/>'),
-    arrow: icon('<path d="M5 19L18 6"/><path d="M10 6h8v8"/>'),
-    rect: icon('<rect x="4" y="6" width="16" height="12" rx="1"/><path d="M4 12h16"/>'),
-    fib: icon('<path d="M3 5h13M3 10h18M3 15h13M3 20h18"/><circle cx="18.5" cy="5" r="1.8"/><circle cx="18.5" cy="15" r="1.8"/>'),
-    range: icon('<path d="M6 3.5h12M6 20.5h12M12 7v13"/><path d="M8.5 10L12 6.5 15.5 10"/>'),
-    text: icon('<path d="M5 6h14M12 6v13M9 19h6"/>'),
-    magnet: icon('<path d="M5 3.5h4.5V12a2.5 2.5 0 0 0 5 0V3.5H19V12a7 7 0 0 1-14 0z"/><path d="M5 7.5h4.5M14.5 7.5H19"/>'),
-    ind: icon('<path d="M3 20.5h18"/><path d="M4 16c2.5-6 4.5-6 6.5-1.5S15 18 16.5 11 19 4 20.5 4"/>'),
-    gear: icon('<path d="M12 3.2l7.2 4.1v9.4L12 20.8l-7.2-4.1V7.3z"/><circle cx="12" cy="12" r="3"/>'),
-    undo: icon('<path d="M9 14.5L4 9.5l5-5"/><path d="M4 9.5h10.5a5 5 0 0 1 0 10H11"/>'),
-    redo: icon('<path d="M15 14.5l5-5-5-5"/><path d="M20 9.5H9.5a5 5 0 0 0 0 10H13"/>'),
-    lock: icon('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>'),
-    unlock: icon('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 7.7-1.5"/>'),
-    eye: icon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>'),
-    eyeOff: icon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 20L20 4"/>'),
-    trash: icon('<path d="M4 6.5h16M9.5 6.5V4h5v2.5M6.5 6.5l1 14h9l1-14M10 10.5v6.5M14 10.5v6.5"/>')
+    cursor: icon('<path d="M14 4.5v7.5M14 16v7.5M4.5 14H12M16 14h7.5"/><circle cx="14" cy="14" r=".9" fill="currentColor"/>'),
+    vline: icon('<path d="M14 4v4.5M14 12.5v3M14 19.5V24"/><circle cx="14" cy="10.5" r="2"/><circle cx="14" cy="17.5" r="2"/>'),
+    hline: icon('<path d="M4 14h7.5M16.5 14H24"/><circle cx="14" cy="14" r="2.5"/>'),
+    hray: icon('<path d="M10 14h14M21 10.5l3.5 3.5-3.5 3.5"/><circle cx="7.5" cy="14" r="2.5"/>'),
+    trend: icon('<path d="M9.8 18.2l8.4-8.4"/><circle cx="8" cy="20" r="2.5"/><circle cx="20" cy="8" r="2.5"/>'),
+    ray: icon('<path d="M9 19l13-13M16.5 6H22v5.5"/><circle cx="7.5" cy="20.5" r="2.5"/>'),
+    ext: icon('<path d="M4 24l5.4-5.4M12.6 15.4l2.8-2.8M18.6 9.4L24 4"/><circle cx="11" cy="17" r="2"/><circle cx="17" cy="11" r="2"/>'),
+    arrow: icon('<path d="M6 22L22 6M12 6h10v10"/>'),
+    rect: icon('<rect x="5" y="8" width="18" height="12" rx="1.5"/><path d="M5 14h18"/>'),
+    fib: icon('<path d="M4 6h15M4 11.5h20M4 17h15M4 22.5h20"/><circle cx="22" cy="6" r="2"/><circle cx="22" cy="17" r="2"/>'),
+    range: icon('<path d="M8 4.5h12M8 23.5h12M14 8.5v15M10.5 12L14 8.5l3.5 3.5"/>'),
+    text: icon('<path d="M7 7.5h14M14 7.5v14M11 21.5h6"/>'),
+    magnet: icon('<path d="M7 4.5h5V14a2 2 0 0 0 4 0V4.5h5V14a7 7 0 0 1-14 0z"/><path d="M7 9h5M16 9h5"/>'),
+    ind: icon('<path d="M4 23.5h20"/><path d="M5 18c2.5-7 5-7 7.5-2.5S17.5 20 19.5 12 22.5 5 23.5 4.5"/>'),
+    gear: icon('<path d="M14 4l8.7 5v10L14 24l-8.7-5V9z"/><circle cx="14" cy="14" r="3.5"/>'),
+    undo: icon('<path d="M10.5 7.5L5.5 12.5l5 5M5.5 12.5H17a5.5 5.5 0 0 1 0 11h-4"/>'),
+    redo: icon('<path d="M17.5 7.5l5 5-5 5M22.5 12.5H11a5.5 5.5 0 0 0 0 11h4"/>'),
+    lock: icon('<rect x="6.5" y="13" width="15" height="10.5" rx="2"/><path d="M9.5 13V9.5a4.5 4.5 0 0 1 9 0V13"/><circle cx="14" cy="18.2" r="1" fill="currentColor"/>'),
+    unlock: icon('<rect x="6.5" y="13" width="15" height="10.5" rx="2"/><path d="M9.5 13V9.5a4.5 4.5 0 0 1 8.7-1.6"/><circle cx="14" cy="18.2" r="1" fill="currentColor"/>'),
+    eye: icon('<path d="M3.5 14S7.5 7.5 14 7.5 24.5 14 24.5 14 20.5 20.5 14 20.5 3.5 14 3.5 14z"/><circle cx="14" cy="14" r="3.2"/>'),
+    eyeOff: icon('<path d="M3.5 14S7.5 7.5 14 7.5 24.5 14 24.5 14 20.5 20.5 14 20.5 3.5 14 3.5 14z"/><circle cx="14" cy="14" r="3.2"/><path d="M5 23L23 5"/>'),
+    trash: icon('<path d="M5.5 8.5h17M11 8.5V5.5h6v3M8 8.5l1.2 15h9.6l1.2-15M12 12.5v7M16 12.5v7"/>')
   };
 
   const LOCK_TIP = locked => locked ? 'فتح قفل الرسوم' : 'قفل الرسوم (يمنع تحريكها وتعديلها)';
@@ -424,13 +424,21 @@
         <div class="cc-flyout" dir="rtl" role="menu" hidden></div>
         <div class="cc-tip" dir="rtl" role="tooltip" hidden></div>
       </div>
-      <div class="cc-bottom" role="group" aria-label="مدة العرض">${RANGES.map(([id, t]) => chip('crange', id, t, id === state.range)).join('')}</div>
+      <div class="cc-bottom" role="group" aria-label="مدة العرض">${RANGES.map(([id, t]) => chip('crange', id, t, id === state.range)).join('')}<span class="cc-clock" dir="ltr" aria-label="توقيت السعودية"></span></div>
       <p class="cc-hint" hidden></p>
       <div class="cc-dlg" hidden></div><div class="cc-dlg cc-ddlg" hidden></div>
       ${bigJumps(file).length ? `<p class="cq-source"><span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال.</span></p>` : ''}`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
     const body = panel.querySelector('.cc-body'), sideBar = panel.querySelector('.cc-side'), flyout = panel.querySelector('.cc-flyout'), tip = panel.querySelector('.cc-tip');
+    // ساعة بتوقيت السعودية في الشريط السفلي كما في TradingView (UTC+3)
+    const clock = panel.querySelector('.cc-clock');
+    if (clock) {
+      const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const tick = () => { if (!clock.isConnected) return clearInterval(timer); clock.textContent = `UTC+3  ${fmt.format(new Date())}`; };
+      const timer = setInterval(tick, 1000);
+      tick();
+    }
     const ilegend = panel.querySelector('.cc-ilegend'), stage = panel.querySelector('.cc-stage'), dlg = panel.querySelector('.cc-dlg');
     let chart = null, LWC = null, colors = null, data = [], main = null, calc = {}, drawn = [], preview = null;
     // المؤشرات على الشارت: المؤشر المحدد، ولوحة كل مؤشر، وخطوطه (لتحديده بالضغط عليه)

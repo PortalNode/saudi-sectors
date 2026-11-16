@@ -318,3 +318,21 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 /* سطر الأسعار (التاريخ والافتتاح والأعلى والأدنى والإغلاق) مباشرة تحت الإطار */
 .cq-chart-panel .cc-main > .cc-legend{margin:0;padding:6px 8px 0;min-height:0;margin-inline-start:76px;margin-inline-end:0}
 .cq-chart-panel .cc-main > .cc-head{padding:0 8px;margin-top:4px}
+
+/* مطابقة إطار TradingView: عمود أدوات بعرض 52px وأيقونات 28px، وفواصل رفيعة، وشريط سفلي بارتفاع 38px وساعته على الطرف المقابل */
+.cq-chart-panel .cc-body,.ta-chart .cc-body{padding-inline-start:52px;padding-left:52px}
+.cq-chart-panel .cc-side{width:52px;padding:8px 0;gap:0}
+.cq-chart-panel .cc-side button{width:40px;height:40px;border-radius:6px}
+.cq-chart-panel .cc-side button svg{width:28px;height:28px}
+.cq-chart-panel .cc-side hr{width:36px;margin:6px 0}
+.cq-chart-panel .cc-side [data-menu]::after{right:5px;bottom:5px}
+.cq-chart-panel .cc-tip,.cq-chart-panel .cc-flyout{left:58px}
+.cq-chart-panel .cc-ibtns svg,.cq-chart-panel .cc-ftb svg{width:20px;height:20px}
+.cq-chart-panel .cc-typegroup button{width:40px;height:36px}
+.cq-chart-panel .cc-typegroup button svg{width:28px;height:28px}
+.cq-chart-panel .cc-bottom{height:38px}
+.cq-chart-panel .cc-bottom button{height:28px;padding:0 10px}
+.cc-clock{margin-inline-start:auto;padding:0 10px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--pf-muted);white-space:nowrap}
+.cq-chart-panel .cc-side button{height:34px}
+.cq-chart-panel .cc-side hr{margin:4px 0}
+.ta-page .cc-chart{--cc-base:max(690px,calc(100vh - 280px))}

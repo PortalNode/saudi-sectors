@@ -4,7 +4,7 @@
 .ta-heading p{margin:6px 0 0;font-size:12.5px;color:var(--pf-muted)}
 .ta-panel{border:1px solid var(--pf-line);background:var(--pf-bg2)}
 .ta-chart{padding:14px 16px 12px}
-.ta-chart .cc-body{padding-left:48px}
+.ta-chart .cc-body{padding-left:52px}
 
 /* الإطار يلتصق بالشارت من كل الجهات: لا فراغ فوقه ولا على يمينه ويساره ولا تحته */
 .ta-page .ta-panel{overflow:hidden;border-radius:8px}
