@@ -21,20 +21,18 @@
     // نفس منطق الصفحة الرئيسية: الربحية المتكررة من أرقام، ثم المعلنة، ثم ربحية ملف الأسعار
     const recurring = num(record?.recurring), reported = num(record?.reported);
     const eps = recurring ?? reported ?? num(stock.eps);
-    const epsKind = recurring != null ? 'ربحية متكررة' : reported != null ? 'ربحية معلنة' : 'من ملف الأسعار';
     const price = num(stock.price), book = num(record?.book) ?? num(stock.bookValue);
     const pe = eps > 0 && price > 0 ? price / eps : null;
-    const pb = book > 0 && price > 0 ? price / book : null;
-    const period = record?.period ? ` · حتى ${dotDate(record.period)}` : '';
     const day = num(stock.day), dir = day > 0 ? 'up' : day < 0 ? 'down' : 'flat';
-    const tile = (label, value, unit, note, cls = '') => `<div class="cq-tile ${cls}"><span class="cq-label">${label}</span><span class="cq-value"><bdi>${value}</bdi>${unit ? `<small>${unit}</small>` : ''}</span>${note ? `<span class="cq-note">${note}</span>` : ''}</div>`;
+    // بلا سطر تعليق تحت الأرقام؛ التاريخ والمصدر في وسم رأس الصندوق
+    const tile = (label, value, unit, cls = '') => `<div class="cq-tile ${cls}"><span class="cq-label">${label}</span><span class="cq-value"><bdi>${value}</bdi>${unit ? `<small>${unit}</small>` : ''}</span></div>`;
     return [
-      tile(`سعر ${UNIT}`, fmt(price), 'ريال', stock.priceStatus === 'official_close' ? `إغلاق ${dotDate(stock.priceDate)}` : esc(dotDate(stock.priceDate)), 'cq-price'),
-      tile('التغير اليومي', day == null ? '—' : `${day > 0 ? '▲' : day < 0 ? '▼' : ''} ${f2.format(Math.abs(day))}%`, '', day == null ? '' : day > 0 ? 'ارتفاع' : day < 0 ? 'انخفاض' : 'دون تغيير', `cq-${dir}`),
-      tile(`ربح ${UNIT}`, fmt(eps), 'ريال', `${epsKind}${recurring != null || reported != null ? period : ''}`),
-      tile('مكرر الأرباح', pe == null ? (eps != null && eps <= 0 ? 'سالب' : '—') : fmt(pe), pe == null ? '' : 'مرة', `السعر ÷ ربح ${UNIT}`),
-      tile('القيمة الدفترية', fmt(book), 'ريال', pb == null ? '' : `مكرر القيمة الدفترية <bdi>${fmt(pb)}</bdi>`),
-      tile('عائد التوزيع', num(stock.dividendYield) == null ? '—' : `${f2.format(stock.dividendYield)}%`, '', 'آخر سنة')
+      tile(`سعر ${UNIT}`, fmt(price), 'ريال', 'cq-price'),
+      tile('التغير اليومي', day == null ? '—' : `${day > 0 ? '▲' : day < 0 ? '▼' : ''} ${f2.format(Math.abs(day))}%`, '', `cq-${dir}`),
+      tile(`ربح ${UNIT}`, fmt(eps), 'ريال'),
+      tile('مكرر الأرباح', pe == null ? (eps != null && eps <= 0 ? 'سالب' : '—') : fmt(pe), pe == null ? '' : 'مرة'),
+      tile('القيمة الدفترية', fmt(book), 'ريال'),
+      tile('عائد التوزيع', num(stock.dividendYield) == null ? '—' : `${f2.format(stock.dividendYield)}%`, '')
     ].join('');
   }
 
