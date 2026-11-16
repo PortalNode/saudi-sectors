@@ -27,7 +27,7 @@
 .cq-body{display:flex;align-items:stretch;min-width:0}
 .cq-body .cq-figures{flex:1 1 auto;min-width:0;border-bottom:0}
 .cq-body .cq-tile{display:flex;flex-direction:column;justify-content:center}
-.cq-mini-slot{flex:none;box-sizing:border-box;width:clamp(240px,25vw,300px);aspect-ratio:1;padding:10px 12px;border-inline-start:1px solid var(--pf-line);background:var(--pf-bg2);min-width:0}
+.cq-mini-slot{flex:none;box-sizing:border-box;width:clamp(250px,26vw,310px);aspect-ratio:1 / 1.1;padding:10px 12px;border-inline-start:1px solid var(--pf-line);background:var(--pf-bg2);min-width:0}
 /* الشارت الصغير: الأزرار، وسطر O H L C، والشارت مع محور الأسعار على اليمين ومحور الوقت أسفله */
 .cq-mini{display:flex;flex-direction:column;height:100%;min-width:0;color:inherit}
 .cq-mini a:focus-visible,.cq-mini button:focus-visible{outline:2px solid var(--pf-gold);outline-offset:2px}
@@ -47,7 +47,11 @@
 .cq-mini-line{fill:none;stroke:var(--pf-gold);stroke-width:1.5;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .cq-mini-dot{position:absolute;left:100%;width:7px;height:7px;margin:0;border-radius:50%;background:var(--pf-gold);border:2px solid var(--pf-bg2);transform:translate(-50%,-50%);box-sizing:content-box}
 .cq-mini-cross{position:absolute;top:0;bottom:0;width:0;border-inline-start:1px dashed var(--pf-muted);opacity:.8;pointer-events:none}
-.cq-mini-cross[hidden]{display:none}
+.cq-mini-hline{position:absolute;inset-inline-start:0;inset-inline-end:0;height:0;border-top:1px dashed var(--pf-muted);opacity:.8;pointer-events:none}
+.cq-mini-cross[hidden],.cq-mini-hline[hidden],.cq-mini-ytag[hidden],.cq-mini-xtag[hidden]{display:none}
+.cq-mini-ytag,.cq-mini-xtag{position:absolute;z-index:2;padding:1px 4px;border-radius:3px;background:var(--pf-ink);color:var(--pf-bg);font-weight:700;white-space:nowrap;pointer-events:none;font-size:9.5px}
+.cq-mini-ytag{inset-inline-start:0;transform:translateY(-50%)}
+.cq-mini-xtag{top:0;transform:translateX(-50%)}
 .cq-mini-yaxis{position:relative;flex:none;width:38px;margin-inline-start:4px;font-size:9.5px;color:var(--pf-muted);font-variant-numeric:tabular-nums}
 .cq-mini-yaxis span{position:absolute;inset-inline-start:0;transform:translateY(-50%);white-space:nowrap}
 .cq-mini-xaxis{position:relative;height:14px;margin-inline-end:42px;margin-top:4px;font-size:9.5px;color:var(--pf-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
