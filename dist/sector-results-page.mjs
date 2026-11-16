@@ -40,7 +40,7 @@ export function initSectorResultsPage({ slug, sectorName, metrics, charts, versi
     for (const button of $('quarter').querySelectorAll('[data-quarter]')) button.setAttribute('aria-pressed', String(button.dataset.quarter === quarter));
     $('quarter-group').hidden = period !== 'q';
     $('period-desc').innerHTML = period === 'fy'
-      ? 'من الملف السنوي · «نسبة التغير» مقارنةً بالسنة السابقة'
+      ? ''
       : period === 'q'
         ? (quarter === 'seq' ? 'الأرباع بالترتيب · التغير مقارنةً بنفس الربع من العام السابق' : `الربع <b>${QUARTER_NAMES[quarter]}</b>${isCalendarYear(fiscal.end) ? '' : ` (${monthRange(fiscal.end, Number(quarter))})`} مقارنةً بنفسه في السنوات السابقة`)
         : `تراكمي ${periodRange(period, fiscal.end)} · مقارنةً بنفس الفترة من العام السابق`;

@@ -26,7 +26,7 @@ function syncPeriodControls(quarterBank) {
   for (const button of element('bank-quarter-seg').querySelectorAll('[data-quarter]')) button.setAttribute('aria-pressed', String(button.dataset.quarter === quarter));
   element('bank-quarter-group').hidden = period !== 'q';
   element('bank-period-desc').innerHTML = period === 'fy'
-    ? 'من الملف السنوي · «نسبة التغير» مقارنةً بالسنة السابقة'
+    ? ''
     : period === 'q'
       ? (quarter === 'seq' ? 'الأرباع بالترتيب · التغير مقارنةً بنفس الربع من العام السابق' : `الربع <b>${QUARTER_NAMES[quarter]}</b> مقارنةً بنفسه في السنوات السابقة`)
       : `تراكمي ${PERIODS[period].range} · مقارنةً بنفس الفترة من العام السابق`;

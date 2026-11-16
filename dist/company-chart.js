@@ -309,7 +309,7 @@
       </div>
       <p class="cc-hint" hidden></p>
       ${String(symbol) !== home.symbol ? `<p class="cc-away" role="status">يعرض الشارت <b>${esc(away.name || symbol)}</b> <bdi>${esc(symbol)}</bdi>${away.page ? ` · <a href="${esc(away.page)}?symbol=${encodeURIComponent(symbol)}">نتائج الشركة</a>` : ''} · <button type="button" data-home>العودة إلى ${esc(home.name || home.symbol)}</button></p>` : ''}
-      <p class="cq-source">${bigJumps(file).length ? `<span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال. </span>` : ''}شموع يومية على أساس TradingView حتى آخر إغلاق رسمي من تداول السعودية، معدّلة لإجراءات رأس المال (المنح والتجزئة والتخفيض وحقوق الأولوية)، وللتوزيعات النقدية عند تفعيل ADJ كما في TradingView، والأسبوعية (الأحد – الخميس) والشهرية مجمّعة منها · اسحب للتنقل وكبّر بعجلة الماوس · الرسوم تُحفظ في هذا المتصفح فقط</p>`;
+      ${bigJumps(file).length ? `<p class="cq-source"><span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال.</span></p>` : ''}`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
     const body = panel.querySelector('.cc-body'), sideBar = panel.querySelector('.cc-side'), flyout = panel.querySelector('.cc-flyout'), tip = panel.querySelector('.cc-tip');
