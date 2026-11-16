@@ -192,7 +192,7 @@
     text: icon('<path d="M5 6h14M12 6v13M9 19h6"/>'),
     magnet: icon('<path d="M5 3.5h4.5V12a2.5 2.5 0 0 0 5 0V3.5H19V12a7 7 0 0 1-14 0z"/><path d="M5 7.5h4.5M14.5 7.5H19"/>'),
     ind: icon('<path d="M3 20.5h18"/><path d="M4 16c2.5-6 4.5-6 6.5-1.5S15 18 16.5 11 19 4 20.5 4"/>'),
-    gear: icon('<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>'),
+    gear: icon('<path d="M12 3.2l7.2 4.1v9.4L12 20.8l-7.2-4.1V7.3z"/><circle cx="12" cy="12" r="3"/>'),
     undo: icon('<path d="M9 14.5L4 9.5l5-5"/><path d="M4 9.5h10.5a5 5 0 0 1 0 10H11"/>'),
     redo: icon('<path d="M15 14.5l5-5-5-5"/><path d="M20 9.5H9.5a5 5 0 0 0 0 10H13"/>'),
     lock: icon('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>'),
@@ -1089,7 +1089,8 @@
       const { x, y } = local(event);
       if (!drag) {
         const hit = chart && main && y <= chart.panes()[0].getHeight() ? hitTest(x, y) : null;
-        box.style.cursor = hit && !drawings[hit.index].locked ? (hit.part === 'body' ? 'move' : 'grab') : '';
+        // المؤشر على الرسم يصير يدًا بإصبع مرفوع، كما يُعرف الرسم القابل للتحديد
+        box.style.cursor = hit ? 'pointer' : '';
         return;
       }
       if (drag.locked) return; // الرسم المقفل يُحدَّد ولا يتحرك
