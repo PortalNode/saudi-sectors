@@ -130,7 +130,7 @@ test('placed drawings can be selected, moved, reshaped and deleted, and the magn
   assert.match(chart, /function hitTest\(x, y\)/);
   assert.match(chart, /box\.addEventListener\('pointerdown', event => \{\s*if \(state\.tool \|\| event\.button !== 0/, 'a capture-phase handler grabs drawings before the chart pans');
   assert.match(chart, /\}, true\);/);
-  assert.match(chart, /data-delete disabled/);
+  assert.match(chart, /data-menu="trash"/, "the bin opens the delete menu");
   assert.match(chart, /event\.key === 'Delete' \|\| event\.key === 'Backspace'/);
   assert.match(chart, /CrosshairMode\.MagnetOHLC/, 'the crosshair snaps with the strong magnet');
   assert.match(chart, /hover\.snapped \? colors\.gold/, 'the snapped point is drawn');
@@ -169,8 +169,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261117k/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116j" defer><\/script>\s*<script src="company-quote\.js\?v=wide-chart-20261117" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261117m/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261117m" defer><\/script>\s*<script src="company-quote\.js\?v=wide-chart-20261117" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
@@ -261,4 +261,16 @@ test('the chart symbol search finds any stock on the site by name or symbol and 
   const pages = new Set(Object.values(calc.SECTOR_PAGES));
   assert.equal(pages.size, 31, 'every results page has a sector');
   for (const page of pages) assert.ok(existsSync(new URL(`../dist/${page}`, import.meta.url)), page);
+});
+
+test('drawing tools match TradingView: more tools, per-drawing style, floating bar, settings dialog, undo and a delete menu', () => {
+  const chart = read('company-chart.js');
+  for (const id of ['vline', 'hline', 'hray', 'trend', 'ray', 'ext', 'arrow', 'rect', 'fib', 'range', 'text']) assert.match(chart, new RegExp(`\\['${id}', '`), `tool ${id}`);
+  assert.match(chart, /DRAW_DEFAULT = \{[\s\S]*color: TV_BLUE/, 'TradingView blue by default');
+  assert.match(chart, /data-ftb="lock"/, 'floating bar locks a drawing');
+  assert.match(chart, /dblclick', event => \{/, 'double-click opens the drawing settings');
+  assert.match(chart, /function undo\(\)/);
+  assert.match(chart, /KeyZ/, 'Ctrl+Z');
+  assert.match(chart, /data-menu="trash"/);
+  assert.match(chart, /function deleteAction\(t\)/);
 });

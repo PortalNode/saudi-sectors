@@ -255,3 +255,22 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
   .cc-dlg-box{width:100%;max-height:88dvh;border-radius:14px 14px 0 0}
   .cc-dlg-body input[type=number],.cc-dlg-body select{width:130px}
 }
+
+/* الشريط العائم فوق الرسم المحدد، ونافذة إعدادات الرسم */
+.cc-ftb{position:absolute;z-index:6;display:flex;align-items:center;gap:4px;padding:4px 6px;background:var(--pf-bg);border:1px solid var(--pf-line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.25);direction:ltr;white-space:nowrap}
+.cc-ftb[hidden],.cc-ftb [hidden]{display:none}
+.cc-ftb input[type=color]{width:26px;height:24px;padding:2px;border:1px solid var(--pf-line);border-radius:5px;background:var(--pf-bg2);cursor:pointer}
+.cc-ftb select{height:26px;padding:0 4px;border:1px solid var(--pf-line);border-radius:5px;background:var(--pf-bg2);color:var(--pf-ink);font:inherit;font-size:11.5px}
+.cc-ftb button{display:grid;place-items:center;width:28px;height:26px;padding:0;border:0;border-radius:5px;background:transparent;color:var(--pf-ink);cursor:pointer}
+.cc-ftb button:hover{background:var(--pf-line)}
+.cc-ftb button[aria-pressed="true"]{color:var(--pf-gold)}
+.cc-ftb button[data-ftb="delete"]{color:var(--cq-down)}
+.cc-ftb svg{width:17px;height:17px}
+.cc-ftb-sep{width:1px;height:18px;margin:0 2px;background:var(--pf-line)}
+.cc-flyout button[disabled]{opacity:.4;cursor:default;background:transparent}
+.cc-dlg-row input[type=color]{width:44px;height:34px;padding:3px;border:1px solid var(--pf-line);border-radius:7px;background:var(--pf-bg2);cursor:pointer}
+.cc-dlg-body input[type=text]{box-sizing:border-box;width:200px;min-height:36px;padding:4px 10px;border:1px solid var(--pf-line);border-radius:7px;background:var(--pf-bg2);color:var(--pf-ink);font:inherit}
+.cc-dd-pt{display:inline-flex;align-items:center;gap:8px}
+.cc-dd-pt input{width:110px}
+.cc-dlg-link{align-self:flex-start;min-height:36px;padding:0 14px;border:1px solid var(--pf-line);border-radius:8px;background:transparent;color:var(--pf-ink);font:inherit;font-weight:700;cursor:pointer}
+.cc-dlg-link:hover{border-color:var(--pf-gold);color:var(--pf-gold)}

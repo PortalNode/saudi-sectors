@@ -86,7 +86,27 @@
     return { sma20: `متوسط متحرك بسيط ${i.length}`, sma50: `متوسط متحرك بسيط ${i.length}`, sma200: `متوسط متحرك بسيط ${i.length}`, ema20: `متوسط متحرك أسي ${i.length}`,
       bb: `نطاقات بولنجر (${i.length}، ${i.mult})`, vol: 'حجم التداول', rsi: `مؤشر القوة النسبية (${i.length})`, macd: `الماكد (${i.fast}، ${i.slow}، ${i.signal})` }[id];
   };
-  const TOOLS = [['hline', 'خط أفقي'], ['hray', 'شعاع أفقي'], ['trend', 'خط اتجاه'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر']];
+  const TOOLS = [['vline', 'خط عمودي'], ['hline', 'خط أفقي'], ['hray', 'شعاع أفقي'], ['trend', 'خط اتجاه'], ['ray', 'شعاع'], ['ext', 'خط ممتد'], ['arrow', 'سهم'], ['rect', 'مستطيل'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر'], ['text', 'نص']];
+  // الألوان والسماكات الافتراضية كما في TradingView: الأزرق #2962FF، والخطوط الأفقية والعمودية رفيعة، وخط الاتجاه والسهم والشعاع أعرض
+  const TV_BLUE = '#2962ff';
+  const DRAW_DEFAULT = {
+    vline: { color: TV_BLUE, width: 1, line: 'solid' },
+    hline: { color: TV_BLUE, width: 1, line: 'solid' },
+    hray: { color: TV_BLUE, width: 1, line: 'solid' },
+    trend: { color: TV_BLUE, width: 2, line: 'solid', extL: false, extR: false },
+    ray: { color: TV_BLUE, width: 2, line: 'solid', extL: false, extR: true },
+    ext: { color: TV_BLUE, width: 2, line: 'solid', extL: true, extR: true },
+    arrow: { color: TV_BLUE, width: 2, line: 'solid' },
+    rect: { color: TV_BLUE, width: 1, line: 'solid', fill: false },
+    text: { size: 14 }
+  };
+  const LINE_OPTIONS = [['solid', 'متصل'], ['dotted', 'منقط'], ['dashed', 'متقطع']];
+  const TEXT_SIZES = [10, 12, 14, 16, 20, 24, 32];
+  // أدوات تُوضع بنقرة واحدة (لا بنقطتين)
+  const SINGLE_CLICK_TOOLS = ['hline', 'hray', 'vline', 'text'];
+  const DRAW_TITLE = { vline: 'خط عمودي', hline: 'خط أفقي', hray: 'شعاع أفقي', trend: 'خط اتجاه', ray: 'شعاع', ext: 'خط ممتد', arrow: 'سهم', rect: 'مستطيل', fib: 'فيبوناتشي', range: 'نطاق السعر', text: 'نص' };
+  // نمط الخط على الشاشة: المنقط والمتقطع يتناسبان مع السماكة
+  const dashFor = (line, width) => { const u = Math.max(1, width || 1); return line === 'dotted' ? [u, 3 * u] : line === 'dashed' ? [6 * u, 4 * u] : []; };
   // المغناطيس كما في TradingView: يلصق نقطة الرسم بأقرب سعر من الشمعة (افتتاح، أعلى، أدنى، إغلاق)؛
   // «ضعيف» حين يقترب المؤشر منه فقط، و«قوي» دائمًا
   const MAGNETS = [['off', 'إيقاف'], ['weak', 'ضعيف'], ['strong', 'قوي']];
@@ -138,11 +158,17 @@
       .map(level => ({ ratio: level.value, color: level.color, price: p0 + (p1 - p0) * level.value }));
   };
   const HINTS = {
-    hline: 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي',
-    hray: 'اضغط على نقطة البداية لرسم شعاع أفقي يمتد منها إلى اليمين',
+    vline: 'اضغط على الشارت عند التاريخ المطلوب لرسم خط عمودي · Esc للإلغاء',
+    hline: 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي · Esc للإلغاء',
+    hray: 'اضغط على نقطة البداية لرسم شعاع أفقي يمتد منها إلى اليمين · Esc للإلغاء',
     trend: 'اضغط على نقطة البداية ثم على النهاية، أو اسحب من البداية إلى النهاية · Esc للإلغاء',
+    ray: 'اضغط على نقطة البداية ثم على نقطة ثانية، فيمتد الشعاع بعدها إلى اليمين · Esc للإلغاء',
+    ext: 'اضغط على نقطتين ليمتد الخط في الاتجاهين · Esc للإلغاء',
+    arrow: 'اضغط على بداية السهم ثم على نهايته، أو اسحب بينهما · Esc للإلغاء',
+    rect: 'اضغط على إحدى زاويتي المستطيل ثم على الزاوية المقابلة · Esc للإلغاء',
     fib: 'اضغط على بداية الموجة (قمة أو قاع) ثم على نهايتها، أو اسحب بينهما · Esc للإلغاء',
-    range: 'اضغط على السعر الأول ثم على الثاني، أو اسحب بينهما، لقياس الفرق ونسبته · Esc للإلغاء'
+    range: 'اضغط على السعر الأول ثم على الثاني، أو اسحب بينهما، لقياس الفرق ونسبته · Esc للإلغاء',
+    text: 'اضغط على الشارت حيث تريد النص · Esc للإلغاء'
   };
   // أيقونات أزرار العرض: إعادة تعيين العرض، وملء الشاشة والخروج منه
   const svg = d => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -153,22 +179,29 @@
   const icon = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICONS = {
     cursor: icon('<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>'),
-    trend: icon('<path d="M7.4 16.6l9.2-9.2"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="5.5" r="2"/>'),
+    vline: icon('<path d="M12 3v18"/><circle cx="12" cy="7.5" r="1.8"/><circle cx="12" cy="16.5" r="1.8"/>'),
     hline: icon('<path d="M3 12h7M14 12h7"/><circle cx="12" cy="12" r="2"/>'),
     hray: icon('<circle cx="5" cy="12" r="2"/><path d="M7 12h14M18 9l3 3-3 3"/>'),
+    trend: icon('<path d="M5 19L19 5"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/>'),
+    ray: icon('<path d="M7 17L18 6"/><circle cx="7" cy="17" r="2"/><path d="M14 6h4v4"/>'),
+    ext: icon('<path d="M2.5 19L21.5 5"/><circle cx="8.5" cy="14.5" r="1.8"/><circle cx="15.5" cy="9.5" r="1.8"/>'),
+    arrow: icon('<path d="M5 19L18 6"/><path d="M10 6h8v8"/>'),
+    rect: icon('<rect x="4" y="6" width="16" height="12" rx="1"/><path d="M4 12h16"/>'),
     fib: icon('<path d="M3 5h13M3 10h18M3 15h13M3 20h18"/><circle cx="18.5" cy="5" r="1.8"/><circle cx="18.5" cy="15" r="1.8"/>'),
     range: icon('<path d="M6 3.5h12M6 20.5h12M12 7v13"/><path d="M8.5 10L12 6.5 15.5 10"/>'),
+    text: icon('<path d="M5 6h14M12 6v13M9 19h6"/>'),
     magnet: icon('<path d="M5 3.5h4.5V12a2.5 2.5 0 0 0 5 0V3.5H19V12a7 7 0 0 1-14 0z"/><path d="M5 7.5h4.5M14.5 7.5H19"/>'),
     ind: icon('<path d="M3 20.5h18"/><path d="M4 16c2.5-6 4.5-6 6.5-1.5S15 18 16.5 11 19 4 20.5 4"/>'),
     gear: icon('<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>'),
     undo: icon('<path d="M9 14.5L4 9.5l5-5"/><path d="M4 9.5h10.5a5 5 0 0 1 0 10H11"/>'),
-    erase: icon('<path d="M14.5 4l5.5 5.5-9 9H6.5l-3-3z"/><path d="M9.5 9l5.5 5.5M11 20.5h9"/>'),
+    redo: icon('<path d="M15 14.5l5-5-5-5"/><path d="M20 9.5H9.5a5 5 0 0 0 0 10H13"/>'),
     lock: icon('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>'),
     unlock: icon('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 7.7-1.5"/>'),
     eye: icon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>'),
     eyeOff: icon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 20L20 4"/>'),
     trash: icon('<path d="M4 6.5h16M9.5 6.5V4h5v2.5M6.5 6.5l1 14h9l1-14M10 10.5v6.5M14 10.5v6.5"/>')
   };
+
   const LOCK_TIP = locked => locked ? 'فتح قفل الرسوم' : 'قفل الرسوم (يمنع تحريكها وتعديلها)';
   const HIDE_TIP = hidden => hidden ? 'إظهار الرسوم' : 'إخفاء الرسوم';
   // البحث عن سهم: كل أسهم الموقع من data.json، واختيار سهم يفتح صفحة نتائجه (صفحة قطاعه ?symbol=)
@@ -368,17 +401,17 @@
           ${side('data-menu="ind" aria-haspopup="true" aria-expanded="false"', ICONS.ind, 'المؤشرات الفنية')}
           ${side('data-fibset aria-expanded="false"', ICONS.gear, 'إعدادات فيبوناتشي')}
           <hr>
-          ${side('data-undo', ICONS.undo, 'تراجع عن آخر رسمة')}
-          ${side('data-delete disabled', ICONS.erase, 'حذف الرسمة المحددة (Delete)')}
+          ${side('data-undo', ICONS.undo, 'تراجع (Ctrl+Z)')}
+          ${side('data-redo', ICONS.redo, 'إعادة (Ctrl+Shift+Z)')}
           ${side('data-lock', state.locked ? ICONS.lock : ICONS.unlock, LOCK_TIP(state.locked), state.locked)}
           ${side('data-hide', state.hidden ? ICONS.eyeOff : ICONS.eye, HIDE_TIP(state.hidden), state.hidden)}
           <hr>
-          ${side('data-clear', ICONS.trash, 'مسح كل الرسوم')}
+          ${side('data-menu="trash" aria-haspopup="true" aria-expanded="false"', ICONS.trash, 'حذف الرسوم')}
         </div>
         <div class="cc-main" dir="rtl">
           <div class="cc-legend" aria-live="polite"></div>
           <div class="cc-stage">
-            <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div>
+            <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div><div class="cc-ftb" role="toolbar" aria-label="خيارات الرسم المحدد" hidden><input type="color" data-ftb="color" aria-label="لون الرسم" title="لون الرسم"><select data-ftb="width" aria-label="السماكة" title="السماكة">${[1, 2, 3, 4].map(w => `<option value="${w}">${w}px</option>`).join('')}</select><select data-ftb="line" aria-label="نمط الخط" title="نمط الخط">${LINE_OPTIONS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select><span class="cc-ftb-sep"></span><button type="button" data-ftb="lock" aria-pressed="false" aria-label="قفل الرسم" title="قفل الرسم">${ICONS.unlock}</button><button type="button" data-ftb="hide" aria-label="إخفاء الرسم" title="إخفاء الرسم">${ICONS.eye}</button><button type="button" data-ftb="settings" aria-label="إعدادات الرسم" title="إعدادات الرسم">${ICONS.gear}</button><button type="button" data-ftb="delete" aria-label="حذف الرسم" title="حذف الرسم (Delete)">${ICONS.trash}</button></div>
             <div class="cc-ilegend" dir="ltr"></div>
             <div class="cc-float"><button type="button" data-reset title="إعادة تعيين عرض الرسم البياني (${RESET_KEY})" aria-label="إعادة تعيين عرض الرسم البياني">${ICON_RESET}</button></div>
           </div>
@@ -387,7 +420,7 @@
         <div class="cc-tip" dir="rtl" role="tooltip" hidden></div>
       </div>
       <p class="cc-hint" hidden></p>
-      <div class="cc-dlg" hidden></div>
+      <div class="cc-dlg" hidden></div><div class="cc-dlg cc-ddlg" hidden></div>
       ${String(symbol) !== home.symbol ? `<p class="cc-away" role="status">يعرض الشارت <b>${esc(away.name || symbol)}</b> <bdi>${esc(symbol)}</bdi>${away.page ? ` · <a href="${esc(away.page)}?symbol=${encodeURIComponent(symbol)}">نتائج الشركة</a>` : ''} · <button type="button" data-home>العودة إلى ${esc(home.name || home.symbol)}</button></p>` : ''}
       ${bigJumps(file).length ? `<p class="cq-source"><span class="cc-flag-note">▼ علامة على الشارت: قفزة تتجاوز 15% في جلسة واحدة، غالبًا إجراء على رأس المال.</span></p>` : ''}`;
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
@@ -622,48 +655,76 @@
 
     // الرسوم محفوظة بالسعر والتاريخ، فتظهر في اليومي والأسبوعي والشهري (على أقرب شمعة)
     const barIndex = iso => { let k = 0; for (let i = 0; i < data.length && data[i].time <= iso; i++) k = i; return k; };
-    // موضع نقطة الرسم: داخل الشموع على أقرب شمعة، وبعد آخر شمعة بعدد الفترات المقبلة
     const lastIndex = () => data.length - 1;
     const logicalOf = iso => iso > data[lastIndex()].time ? lastIndex() + periodsBetween(data[lastIndex()].time, iso, state.interval) : barIndex(iso);
     const timeAt = index => index <= lastIndex() ? data[Math.max(0, index)].time : addPeriods(data[lastIndex()].time, index - lastIndex(), state.interval);
-    // الخط الأفقي يمتد بعرض الشارت كما في TradingView؛ خط الاتجاه وفيبوناتشي يُرسمان على اللوحة بين النقطتين
+    // نمط كل رسم: الافتراضي لنوعه، مع ما خصّصه المستخدم له
+    const styleOf = d => ({ ...(DRAW_DEFAULT[d.type] || {}), ...(d.style || {}) });
+    // لون الرسم؛ نطاق السعر أزرق للصعود وأحمر للهبوط إن لم يُخصَّص، وفيبوناتشي لونه من إعداداتها
+    const colorOf = d => styleOf(d).color ?? (d.type === 'range' ? (d.b.price >= d.a.price ? TV_BLUE : '#f23645') : colors.ink);
+    const textFont = s => `${s.size ?? 14}px ${getComputedStyle(document.body).fontFamily}`;
+    const measureCtx = document.createElement('canvas').getContext('2d');
+    // مستطيل النص كما يُرسم، من أعلى يسار نقطته
+    function textBox(d, A) {
+      const s = styleOf(d);
+      measureCtx.font = textFont(s);
+      return { x: A.x, y: A.y, w: measureCtx.measureText(d.text || ' ').width, h: (s.size ?? 14) * 1.3 };
+    }
+    // الخط الأفقي يمتد بعرض الشارت كما في TradingView، ويُرسم كخط سعر على المحور؛ الشعاع الأفقي يُرسم على اللوحة من نقطته
     function paintDrawings() {
       for (const d of drawn) d.remove();
       drawn = [];
-      for (const d of state.hidden ? [] : drawings) if (d.type === 'hline') {
-        const line = main.createPriceLine({ price: d.price, color: colors.gold, lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: true, title: '' });
-        drawn.push({ remove: () => main.removePriceLine(line) });
-      }
-      // الشعاع الأفقي يُرسم على اللوحة من نقطة البداية؛ هنا سعره على المحور فقط
-      for (const d of state.hidden ? [] : drawings) if (d.type === 'hray') {
-        const line = main.createPriceLine({ price: d.a.price, color: colors.gold, lineVisible: false, axisLabelVisible: true, title: '' });
+      if (!state.hidden) for (const d of drawings) {
+        if (d.hidden || (d.type !== 'hline' && d.type !== 'hray')) continue;
+        const s = styleOf(d), isH = d.type === 'hline';
+        const line = main.createPriceLine({ price: isH ? d.price : d.a.price, color: colorOf(d), lineWidth: Math.round(s.width) || 1, lineStyle: LWC.LineStyle[{ dotted: 'Dotted', dashed: 'Dashed' }[s.line] || 'Solid'], lineVisible: isH, axisLabelVisible: true, title: '' });
         drawn.push({ remove: () => main.removePriceLine(line) });
       }
       overlay.redraw();
+      syncFtb();
+      positionFtb();
     }
     const xy = p => { const x = chart.timeScale().logicalToCoordinate(p.logical ?? logicalOf(p.time)), y = main.priceToCoordinate(p.price); return x == null || y == null ? null : { x, y }; };
+    const paneH = () => chart.panes()[0].getHeight();
+    // طرفا الخط بعد التمديد: يُمدّ إلى ما بعد حدود اللوحة، فيقصّه الرسم عند الحدّ
+    function ends(A, B, left, right) {
+      const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy);
+      if (!len || (!left && !right)) return [A, B];
+      const k = 2 * Math.max(chart.timeScale().width(), paneH()) / len;
+      return [left ? { x: A.x - dx * k, y: A.y - dy * k } : A, right ? { x: B.x + dx * k, y: B.y + dy * k } : B];
+    }
     function drawShapes(ctx) {
-      const ts = chart.timeScale();
+      const ts = chart.timeScale(), W = ts.width(), H = paneH();
+      const font12 = `600 12px ${getComputedStyle(document.body).fontFamily}`;
       const handle = (pt, color) => { ctx.beginPath(); ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.stroke(); };
       const dotAt = (pt, color) => { ctx.beginPath(); ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill(); };
       const segment = (a, b, color, width, dash = []) => { ctx.beginPath(); ctx.setLineDash(dash); ctx.lineWidth = width; ctx.strokeStyle = color; ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]); };
-      ctx.font = `600 12px ${getComputedStyle(document.body).fontFamily}`;
-      ctx.textBaseline = 'bottom';
-      const drawSelection = () => drawings.forEach((d, i) => {
-        if (i !== selected) return;
-        if (d.type === 'hline') { const y = main.priceToCoordinate(d.price); if (y != null) { handle({ x: 24, y }, colors.gold); handle({ x: ts.width() - 24, y }, colors.gold); } return; }
-        if (d.type === 'hray') { const A = xy(d.a); if (A) handle(A, colors.gold); return; }
-        const A = xy(d.a), B = xy(d.b);
-        if (A && B) { handle(A, colors.gold); handle(B, colors.gold); }
-      });
-      for (const d of [...(state.hidden ? [] : drawings), ...(preview ? [preview] : [])]) {
-        if (d.type === 'hray') { const A = xy(d.a); if (A && A.x < ts.width()) { segment(A, { x: ts.width(), y: A.y }, colors.gold, 1.5); dotAt(A, colors.gold); } continue; }
-        if (!['trend', 'fib', 'range'].includes(d.type)) continue;
-        const A = xy(d.a), B = xy(d.b);
-        if (!A || !B) continue;
+      // رأس السهم عند النقطة الثانية
+      const headAt = (from, to, color, width) => { const a = Math.atan2(to.y - from.y, to.x - from.x), s = 6 + width * 3; ctx.beginPath(); ctx.fillStyle = color; ctx.moveTo(to.x, to.y); ctx.lineTo(to.x - s * Math.cos(a - 0.45), to.y - s * Math.sin(a - 0.45)); ctx.lineTo(to.x - s * Math.cos(a + 0.45), to.y - s * Math.sin(a + 0.45)); ctx.closePath(); ctx.fill(); };
+      const drawOne = d => {
+        const s = styleOf(d), color = colorOf(d), dash = dashFor(s.line, s.width);
+        ctx.font = font12; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        if (d.type === 'hline') return; // يُرسم على المحور في paintDrawings
+        if (d.type === 'hray') { const A = xy(d.a); if (A && A.x < W) { segment(A, { x: W, y: A.y }, color, s.width, dash); dotAt(A, color); } return; }
+        if (d.type === 'vline') { const x = ts.logicalToCoordinate(logicalOf(d.a.time)); if (x != null) segment({ x, y: 0 }, { x, y: H }, color, s.width, dash); return; }
+        if (d.type === 'text') {
+          const A = xy(d.a); if (!A) return;
+          ctx.font = textFont(s); ctx.textBaseline = 'top'; ctx.fillStyle = color;
+          ctx.fillText(d.text || '', A.x, A.y);
+          return;
+        }
+        const A = xy(d.a), B = d.b ? xy(d.b) : null;
+        if (!A || !B) return;
+        if (d.type === 'trend' || d.type === 'ray' || d.type === 'ext') { const [P, Q] = ends(A, B, !!s.extL, !!s.extR); segment(P, Q, color, s.width, dash); return; }
+        if (d.type === 'arrow') { segment(A, B, color, s.width, dash); headAt(A, B, color, s.width); return; }
+        if (d.type === 'rect') {
+          const x = Math.min(A.x, B.x), y = Math.min(A.y, B.y), w = Math.abs(B.x - A.x), h = Math.abs(B.y - A.y);
+          if (s.fill) { ctx.fillStyle = color + '26'; ctx.fillRect(x, y, w, h); }
+          ctx.beginPath(); ctx.setLineDash(dash); ctx.lineWidth = s.width; ctx.strokeStyle = color; ctx.strokeRect(x, y, w, h); ctx.setLineDash([]);
+          return;
+        }
         if (d.type === 'range') {
           // نطاق السعر: مستطيل بين السعرين، وسهم من الأول إلى الثاني، والفرق ونسبته
-          const color = d.b.price >= d.a.price ? '#2962ff' : '#f23645';
           const x1 = Math.min(A.x, B.x), x2 = Math.max(A.x, B.x, x1 + 1), cx = (x1 + x2) / 2;
           ctx.fillStyle = color + '26'; ctx.fillRect(x1, Math.min(A.y, B.y), x2 - x1, Math.abs(B.y - A.y));
           segment({ x: x1, y: A.y }, { x: x2, y: A.y }, color, 1);
@@ -671,15 +732,14 @@
           segment({ x: cx, y: A.y }, { x: cx, y: B.y }, color, 1.5);
           const dir = B.y < A.y ? -1 : 1;
           if (Math.abs(B.y - A.y) > 8) { ctx.beginPath(); ctx.moveTo(cx, B.y); ctx.lineTo(cx - 5, B.y - dir * 7); ctx.lineTo(cx + 5, B.y - dir * 7); ctx.closePath(); ctx.fillStyle = color; ctx.fill(); }
-          const text = rangeLabel(d.a.price, d.b.price), w = ctx.measureText(text).width + 14, h = 20;
+          const label = rangeLabel(d.a.price, d.b.price), w = ctx.measureText(label).width + 14, h = 20;
           const ly = dir < 0 ? B.y - h - 6 : B.y + 6;
           ctx.fillStyle = color; ctx.fillRect(cx - w / 2, ly, w, h);
-          ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.fillText(text, cx, ly + h - 4);
-          continue;
+          ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.fillText(label, cx, ly + h - 4);
+          return;
         }
-        if (d.type === 'trend') { segment(A, B, colors.gold, 2); dotAt(A, colors.gold); dotAt(B, colors.gold); continue; }
         // فيبوناتشي: المستويات بين نقطتي الموجة (أو ممتدة حسب الإعداد)، والعناوين على يمينها فوق الخط كما في TradingView
-        const paneWidth = ts.width();
+        const paneWidth = W;
         const x1 = ['left', 'both'].includes(fib.extend) ? 0 : Math.min(A.x, B.x);
         const x2 = ['right', 'both'].includes(fib.extend) ? paneWidth : Math.max(A.x, B.x);
         const levels = fibLevels(d.a.price, d.b.price, fib).map(level => ({ ...level, y: main.priceToCoordinate(level.price) })).filter(level => level.y != null);
@@ -697,10 +757,26 @@
           ctx.textAlign = align;
           ctx.fillText(text, x, level.y - 2);
         }
-        if (fib.trend) { segment(A, B, colors.muted, 1, [4, 4]); }
+        if (fib.trend) segment(A, B, colors.muted, 1, [4, 4]);
         dotAt(A, colors.muted); dotAt(B, colors.muted);
-      }
-      drawSelection();
+      };
+      // إطار التحديد: مقابض عند الطرفين، وللنص إطار منقط
+      const drawSelection = d => {
+        if (d.type === 'hline') { const y = main.priceToCoordinate(d.price); if (y != null) { handle({ x: 24, y }, colors.gold); handle({ x: W - 24, y }, colors.gold); } return; }
+        if (d.type === 'vline') { const x = ts.logicalToCoordinate(logicalOf(d.a.time)); if (x != null) handle({ x, y: H / 2 }, colors.gold); return; }
+        if (d.type === 'hray') { const A = xy(d.a); if (A) handle(A, colors.gold); return; }
+        if (d.type === 'text') {
+          const A = xy(d.a); if (!A) return;
+          const bb = textBox(d, A);
+          ctx.save(); ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.strokeStyle = colors.gold; ctx.strokeRect(bb.x - 3, bb.y - 3, bb.w + 6, bb.h + 6); ctx.restore();
+          return;
+        }
+        const A = xy(d.a), B = d.b ? xy(d.b) : null;
+        if (A && B) { handle(A, colors.gold); handle(B, colors.gold); }
+      };
+      if (!state.hidden) for (const d of drawings) if (!d.hidden) drawOne(d);
+      if (preview) drawOne(preview);
+      if (selected >= 0 && drawings[selected] && !drawings[selected].hidden) drawSelection(drawings[selected]);
       // نقطة المغناطيس قبل الضغطة الأولى وأثناء الرسم: دائرة حيث ستقع النقطة فعلًا
       if (hover && (state.tool || drag)) { const h = xy(hover); if (h) handle(h, hover.snapped ? colors.gold : colors.muted); }
     }
@@ -711,7 +787,7 @@
       attached({ requestUpdate }) { this.request = requestUpdate; },
       detached() { this.request = null; },
       updateAllViews() {},
-      paneViews() { return [{ zOrder: () => 'top', renderer: () => ({ draw: target => { target.useMediaCoordinateSpace(({ context }) => drawShapes(context)); queueMicrotask(positionIndRows); } }) }]; }
+      paneViews() { return [{ zOrder: () => 'top', renderer: () => ({ draw: target => { target.useMediaCoordinateSpace(({ context }) => drawShapes(context)); queueMicrotask(() => { positionIndRows(); positionFtb(); }); } }) }]; }
     };
 
     function build(keepRange) {
@@ -864,20 +940,43 @@
       return { time: b.time, price: snapped ?? price, logical: index, snapped: snapped != null };
     }
     let press = null;
+    // التراجع والإعادة: كل تعديل يحفظ نسخة من الرسوم قبله
+    const past = [], future = [];
+    let liveBefore = null; // نسخة قبل سلسلة تعديلات مباشرة (لون يُسحب في الشريط، أو نافذة إعدادات مفتوحة)
+    const snap = () => structuredClone(drawings);
+    function record(before) { past.push(before); if (past.length > 80) past.shift(); future.length = 0; }
+    function commit(mutate) { const before = snap(); mutate(); record(before); saveDrawings(symbol, drawings); paintDrawings(); }
+    function restoreDrawings(list) { drawings = list; select(-1); saveDrawings(symbol, drawings); paintDrawings(); }
+    function undo() { if (!past.length) return; future.push(snap()); restoreDrawings(past.pop()); }
+    function redo() { if (!future.length) return; past.push(snap()); restoreDrawings(future.pop()); }
+
+    // الرسم بنقطتين: النقطة الثانية تُثبّت الرسم
     function finish(point) {
       if (point.logical === pending.logical) return; // النقطتان على الشمعة نفسها: انتظر نقطة أخرى
       const strip = p => ({ time: p.time, price: p.price });
-      drawings.push({ type: state.tool, a: strip(pending), b: strip(point) });
-      saveDrawings(symbol, drawings);
+      const d = { type: state.tool, a: strip(pending), b: strip(point) };
+      commit(() => drawings.push(d));
       setTool(null);
-      paintDrawings();
+    }
+    // الرسم بنقرة واحدة: يُثبَّت الرسم في مكان النقرة، والنص يفتح نافذته فورًا ليُكتب
+    function placeAt(point) {
+      const type = state.tool, before = snap();
+      let d;
+      if (type === 'hline') d = { type, price: Math.round(point.price * 100) / 100 };
+      else if (type === 'hray') { const a = { time: point.time, price: Math.round(point.price * 100) / 100 }; d = { type, a, b: { ...a } }; }
+      else if (type === 'vline') d = { type, a: { time: point.time, price: point.price } };
+      else d = { type, a: { time: point.time, price: point.price }, text: '' };
+      drawings.push(d);
+      setTool(null);
+      if (type === 'text') { openDrawDialog(drawings.length - 1, before); return; }
+      record(before); saveDrawings(symbol, drawings); paintDrawings();
     }
     box.addEventListener('pointerdown', event => {
       if (!state.tool || event.button !== 0) return;
       const point = pointFrom(event); if (!point) return;
       event.preventDefault();
       press = { x: event.clientX, y: event.clientY, point };
-      if (state.tool === 'hline' || state.tool === 'hray') return;
+      if (SINGLE_CLICK_TOOLS.includes(state.tool)) return;
       if (pending) { finish(point); press = null; return; }
       pending = point; preview = { type: state.tool, a: point, b: point };
       hint.textContent = state.tool === 'fib' ? 'حرّك المؤشر إلى نهاية الموجة واضغط، أو اسحب وأفلت' : 'حرّك المؤشر إلى النقطة الثانية واضغط، أو اسحب وأفلت';
@@ -893,30 +992,50 @@
     });
     box.addEventListener('pointerleave', () => { if (hover) { hover = null; overlay.redraw(); } if (!drag) box.style.cursor = ''; });
 
-    /* ---------- تحرير الرسوم بعد تثبيتها: تحديد، سحب الرسمة كاملة أو أحد طرفيها، حذف ---------- */
+    /* ---------- تحرير الرسوم بعد تثبيتها: تحديد، سحب الرسم كاملًا أو أحد طرفيه، قفل وإخفاء، حذف ---------- */
     const local = event => { const rect = box.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
     function distanceToSegment(x, y, A, B) {
       const dx = B.x - A.x, dy = B.y - A.y, len = dx * dx + dy * dy;
       const t = len ? Math.max(0, Math.min(1, ((x - A.x) * dx + (y - A.y) * dy) / len)) : 0;
       return Math.hypot(x - (A.x + t * dx), y - (A.y + t * dy));
     }
+    // أي رسم تحت الضغطة: الطرف أولًا (مقبض)، ثم جسم الرسم. الرسوم المخفية لا تُحدَّد
     function hitTest(x, y) {
-      if (state.hidden || state.locked) return null; // الرسوم المخفية أو المقفلة لا تُحدَّد ولا تُسحب
+      if (state.hidden || state.locked) return null; // الرسوم المخفية أو المقفلة كلها لا تُحدَّد ولا تُسحب
       for (let i = drawings.length - 1; i >= 0; i--) {
         const d = drawings[i];
+        if (d.hidden) continue;
         if (d.type === 'hline') { const py = main.priceToCoordinate(d.price); if (py != null && Math.abs(py - y) <= 5) return { index: i, part: 'body' }; continue; }
+        if (d.type === 'vline') { const px = chart.timeScale().logicalToCoordinate(logicalOf(d.a.time)); if (px != null && Math.abs(px - x) <= 5) return { index: i, part: 'body' }; continue; }
         if (d.type === 'hray') {
           const A = xy(d.a); if (!A) continue;
           if (Math.hypot(A.x - x, A.y - y) <= 9) return { index: i, part: 'a' };
           if (x >= A.x - 4 && Math.abs(A.y - y) <= 5) return { index: i, part: 'body' };
           continue;
         }
-        const A = xy(d.a), B = xy(d.b);
+        if (d.type === 'text') {
+          const A = xy(d.a); if (!A) continue;
+          const bb = textBox(d, A);
+          if (x >= bb.x - 4 && x <= bb.x + bb.w + 4 && y >= bb.y - 4 && y <= bb.y + bb.h + 4) return { index: i, part: 'body' };
+          continue;
+        }
+        const A = xy(d.a), B = d.b ? xy(d.b) : null;
         if (!A || !B) continue;
         if (Math.hypot(A.x - x, A.y - y) <= 9) return { index: i, part: 'a' };
         if (Math.hypot(B.x - x, B.y - y) <= 9) return { index: i, part: 'b' };
         const inBox = (x1, x2, y1, y2) => x >= x1 - 4 && x <= x2 + 4 && y >= y1 - 4 && y <= y2 + 4;
-        if (d.type === 'trend' && distanceToSegment(x, y, A, B) <= 6) return { index: i, part: 'body' };
+        if (['trend', 'ray', 'ext', 'arrow'].includes(d.type)) {
+          const s = styleOf(d), [P, Q] = d.type === 'arrow' ? [A, B] : ends(A, B, !!s.extL, !!s.extR);
+          if (distanceToSegment(x, y, P, Q) <= 6) return { index: i, part: 'body' };
+          continue;
+        }
+        if (d.type === 'rect') {
+          const x1 = Math.min(A.x, B.x), x2 = Math.max(A.x, B.x), y1 = Math.min(A.y, B.y), y2 = Math.max(A.y, B.y);
+          const edges = [[{ x: x1, y: y1 }, { x: x2, y: y1 }], [{ x: x2, y: y1 }, { x: x2, y: y2 }], [{ x: x2, y: y2 }, { x: x1, y: y2 }], [{ x: x1, y: y2 }, { x: x1, y: y1 }]];
+          const inside = x >= x1 && x <= x2 && y >= y1 && y <= y2;
+          if ((styleOf(d).fill && inside) || edges.some(([P, Q]) => distanceToSegment(x, y, P, Q) <= 6)) return { index: i, part: 'body' };
+          continue;
+        }
         if (d.type === 'range' && inBox(Math.min(A.x, B.x), Math.max(A.x, B.x), Math.min(A.y, B.y), Math.max(A.y, B.y))) return { index: i, part: 'body' };
         if (d.type === 'fib') {
           const width = chart.timeScale().width();
@@ -931,17 +1050,16 @@
     function select(index) {
       selected = index;
       if (index >= 0 && selInd) selectInd(null);
-      const button = panel.querySelector('[data-delete]');
-      if (button) button.disabled = selected < 0;
-      if (!state.tool) { hint.hidden = selected < 0; hint.textContent = selected < 0 ? '' : 'اسحب الرسمة لتحريكها، أو اسحب أحد طرفيها لتعديله · Delete للحذف · Esc لإلغاء التحديد'; }
+      if (!state.tool) { hint.hidden = selected < 0; hint.textContent = selected < 0 ? '' : 'اسحب الرسم لتحريكه، أو أحد طرفيه لتعديله · نقرتان للإعدادات · Delete للحذف'; }
       overlay.redraw();
+      syncFtb();
+      positionFtb();
     }
     function deleteSelected() {
       if (selected < 0 || !drawings[selected]) return;
-      drawings.splice(selected, 1);
-      saveDrawings(symbol, drawings);
+      const index = selected;
+      commit(() => drawings.splice(index, 1));
       select(-1);
-      paintDrawings();
     }
     // في مرحلة الالتقاط: قبل أن تبدأ المكتبة سحب الشارت
     box.addEventListener('pointerdown', event => {
@@ -949,29 +1067,44 @@
       const { x, y } = local(event);
       const hit = y <= chart.panes()[0].getHeight() ? hitTest(x, y) : null;
       if (!hit) { if (selected >= 0) select(-1); return; }
-      chart.applyOptions({ handleScroll: false, handleScale: false });
       event.preventDefault(); event.stopPropagation();
-      drag = { ...hit, logical: chart.timeScale().coordinateToLogical(x), price: main.coordinateToPrice(y), orig: structuredClone(drawings[hit.index]), moved: false };
+      const d = drawings[hit.index];
+      chart.applyOptions({ handleScroll: false, handleScale: false });
+      drag = { ...hit, logical: chart.timeScale().coordinateToLogical(x), price: main.coordinateToPrice(y), orig: structuredClone(d), before: snap(), locked: !!d.locked, moved: false };
       try { box.setPointerCapture(event.pointerId); } catch { /* not capturable */ }
       select(hit.index);
       applyCrosshair();
     }, true);
+    // نقرتان على الرسم تفتحان نافذة إعداداته كما في TradingView
+    box.addEventListener('dblclick', event => {
+      if (state.tool || event.button !== 0 || !chart || !main) return;
+      const { x, y } = local(event);
+      const hit = y <= chart.panes()[0].getHeight() ? hitTest(x, y) : null;
+      if (!hit) return;
+      select(hit.index);
+      openDrawDialog(hit.index);
+    });
     box.addEventListener('pointermove', event => {
       if (state.tool) return;
       const { x, y } = local(event);
       if (!drag) {
         const hit = chart && main && y <= chart.panes()[0].getHeight() ? hitTest(x, y) : null;
-        box.style.cursor = hit ? (hit.part === 'body' ? 'move' : 'grab') : '';
+        box.style.cursor = hit && !drawings[hit.index].locked ? (hit.part === 'body' ? 'move' : 'grab') : '';
         return;
       }
+      if (drag.locked) return; // الرسم المقفل يُحدَّد ولا يتحرك
       const d = drawings[drag.index];
       if (drag.part === 'body') {
         const dl = Math.round((chart.timeScale().coordinateToLogical(x) ?? drag.logical) - drag.logical);
         const dp = (main.coordinateToPrice(y) ?? drag.price) - drag.price;
         if (d.type === 'hline') d.price = Math.round((drag.orig.price + dp) * 100) / 100;
-        else { const shift = p => ({ time: timeAt(Math.max(0, logicalOf(p.time) + dl)), price: p.price + dp }); d.a = shift(drag.orig.a); d.b = shift(drag.orig.b); }
+        else {
+          const shift = p => ({ time: timeAt(Math.max(0, logicalOf(p.time) + dl)), price: p.price + dp });
+          if (drag.orig.a) d.a = shift(drag.orig.a);
+          if (drag.orig.b) d.b = shift(drag.orig.b);
+        }
       } else {
-        // طرف الرسمة يتبع المؤشر، ويلتصق بالمغناطيس إن كان مفعّلًا
+        // طرف الرسم يتبع المؤشر، ويلتصق بالمغناطيس إن كان مفعّلًا
         const point = pointFrom(event);
         if (point) { d[drag.part] = { time: point.time, price: point.price }; if (d.type === 'hray') d.b = { ...d.a }; hover = point; }
       }
@@ -980,7 +1113,7 @@
     });
     box.addEventListener('pointerup', () => {
       if (!drag) return;
-      if (drag.moved) saveDrawings(symbol, drawings);
+      if (drag.moved) { record(drag.before); saveDrawings(symbol, drawings); }
       drag = null; hover = null;
       chart.applyOptions({ handleScroll: true, handleScale: true });
       applyCrosshair();
@@ -995,14 +1128,8 @@
     box.addEventListener('pointerup', event => {
       if (!state.tool || !press) return;
       const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6;
-      if (state.tool === 'hline' && !moved) {
-        drawings.push({ type: 'hline', price: Math.round(press.point.price * 100) / 100 });
-        saveDrawings(symbol, drawings); setTool(null); paintDrawings();
-      } else if (state.tool === 'hray' && !moved) {
-        const a = { time: press.point.time, price: Math.round(press.point.price * 100) / 100 };
-        drawings.push({ type: 'hray', a, b: { ...a } });
-        saveDrawings(symbol, drawings); setTool(null); paintDrawings();
-      } else if (pending && moved) { const point = pointFrom(event) ?? preview?.b; if (point) finish(point); }
+      if (SINGLE_CLICK_TOOLS.includes(state.tool)) { if (!moved) placeAt(press.point); }
+      else if (pending && moved) { const point = pointFrom(event) ?? preview?.b; if (point) finish(point); }
       press = null;
     });
     // الضغط على خط مؤشر (أو داخل لوحته) يحدده فتظهر أزراره، والضغط في مكان آخر يلغي التحديد
@@ -1017,15 +1144,198 @@
     });
     const resizeWatch = new ResizeObserver(() => positionIndRows());
     resizeWatch.observe(box);
+
+    /* ---------- الشريط العائم فوق الرسم المحدد: لون وسماكة ونمط وقفل وإخفاء وإعدادات وحذف ---------- */
+    const ftb = panel.querySelector('.cc-ftb');
+    const ftbInput = name => ftb.querySelector(`[data-ftb="${name}"]`);
+    // تعديل نمط الرسم المحدد. الحي (سحب اللون) يُسجَّل تراجعًا واحدًا عند الانتهاء
+    function styleSet(key, value, live = false) {
+      const d = drawings[selected]; if (!d) return;
+      const before = liveBefore ?? snap();
+      liveBefore = live ? before : null;
+      d.style = { ...(d.style || {}), [key]: value };
+      if (!live) record(before);
+      saveDrawings(symbol, drawings); paintDrawings();
+    }
+    function patchSelected(mutate) {
+      const d = drawings[selected]; if (!d) return;
+      commit(() => mutate(d));
+      syncFtb();
+    }
+    ftb.addEventListener('input', event => { if (event.target.dataset.ftb === 'color') styleSet('color', event.target.value, true); });
+    ftb.addEventListener('change', event => {
+      const t = event.target.dataset.ftb;
+      if (t === 'color') styleSet('color', event.target.value);
+      else if (t === 'width') styleSet('width', Number(event.target.value));
+      else if (t === 'line') styleSet('line', event.target.value);
+    });
+    ftb.addEventListener('click', event => {
+      const b = event.target.closest('[data-ftb]'); if (!b) return;
+      const t = b.dataset.ftb;
+      if (t === 'lock') patchSelected(d => { d.locked = !d.locked; });
+      else if (t === 'hide') { patchSelected(d => { d.hidden = true; }); select(-1); }
+      else if (t === 'settings') { if (selected >= 0) openDrawDialog(selected); }
+      else if (t === 'delete') deleteSelected();
+    });
+    // قيم الشريط تتبع الرسم المحدد، ولا تُكتب فوق ما يختاره المستخدم الآن
+    function syncFtb() {
+      const d = drawings[selected];
+      if (!ftb || !d) return;
+      const s = styleOf(d), setVal = (el, v) => { if (el.value !== v) el.value = v; };
+      const noStyle = d.type === 'fib', noLine = ['text', 'fib', 'range'].includes(d.type);
+      ftbInput('color').hidden = noStyle;
+      ftbInput('width').hidden = noLine;
+      ftbInput('line').hidden = noLine;
+      setVal(ftbInput('color'), toHex(colorOf(d)));
+      setVal(ftbInput('width'), String(s.width ?? 1));
+      setVal(ftbInput('line'), s.line ?? 'solid');
+      const lock = ftbInput('lock');
+      lock.innerHTML = d.locked ? ICONS.lock : ICONS.unlock;
+      lock.setAttribute('aria-pressed', String(!!d.locked));
+      lock.title = d.locked ? 'فتح قفل الرسم' : 'قفل الرسم (يمنع تحريكه وتعديله)';
+    }
+    // موضع الشريط: فوق منتصف الرسم، أو تحته إن لم يتسع الأعلى
+    function selectedAnchor() {
+      const d = drawings[selected];
+      if (!d || d.hidden || !chart || !main) return null;
+      const ts = chart.timeScale();
+      if (d.type === 'hline') { const y = main.priceToCoordinate(d.price); return y == null ? null : { x: ts.width() / 2, y }; }
+      if (d.type === 'vline') { const x = ts.logicalToCoordinate(logicalOf(d.a.time)); return x == null ? null : { x, y: 40 }; }
+      const A = xy(d.a), B = d.b ? xy(d.b) : A;
+      if (!A || !B) return null;
+      return { x: (A.x + B.x) / 2, y: Math.min(A.y, B.y) };
+    }
+    function positionFtb() {
+      if (!ftb) return;
+      const a = !state.tool && !state.hidden ? selectedAnchor() : null;
+      ftb.hidden = !a;
+      if (!a) return;
+      const rect = box.getBoundingClientRect(), base = stage.getBoundingClientRect();
+      const ox = rect.left - base.left, oy = rect.top - base.top, bw = ftb.offsetWidth, bh = ftb.offsetHeight;
+      let top = oy + a.y - bh - 10;
+      if (top < 0) top = oy + a.y + 12;
+      const left = Math.max(4, Math.min(ox + a.x - bw / 2, base.width - bw - 4));
+      ftb.style.left = `${Math.round(left)}px`;
+      ftb.style.top = `${Math.round(top)}px`;
+    }
+
+    /* ---------- حذف الرسوم: من القائمة المنسدلة لسلة المهملات، أو من الشريط العائم ---------- */
+    function deleteAction(t) {
+      closeFlyout();
+      if (t === 'sel') deleteSelected();
+      else if (t === 'all') { if (drawings.length && window.confirm('حذف كل الرسوم في هذا السهم؟ يمكن التراجع بـ Ctrl+Z.')) { commit(() => { drawings = []; }); select(-1); setTool(null); } }
+      else if (t === 'show') commit(() => drawings.forEach(d => { d.hidden = false; }));
+      else if (t === 'ind') { state.ind.clear(); panel.querySelectorAll('[data-ind]').forEach(x => x.setAttribute('aria-pressed', 'false')); if (selInd) selInd = null; saveSettings(); build(true); }
+    }
+    function trashMenu() {
+      const hiddenCount = drawings.filter(d => d.hidden).length;
+      const item = (attr, label, extra = '', disabled = false) => `<button type="button" role="menuitem" data-tdel="${attr}"${disabled ? ' disabled' : ''}>${label}${extra ? `<small>${extra}</small>` : ''}</button>`;
+      return `<b>حذف الرسوم</b>`
+        + item('sel', 'حذف الرسم المحدد', 'Delete', selected < 0)
+        + item('all', 'حذف كل الرسوم في هذا السهم', '', drawings.length === 0)
+        + (hiddenCount ? item('show', `إظهار الرسوم المخفية (${hiddenCount})`) : '')
+        + item('ind', 'حذف كل المؤشرات', '', !state.ind.size);
+    }
+
+    /* ---------- نافذة إعدادات الرسم: نمط وإحداثيات، تُفتح بنقرتين أو من الشريط العائم ---------- */
+    const ddlg = panel.querySelector('.cc-ddlg');
+    let ddState = null;
+    const drawColorRow = value => `<label class="cc-dlg-row"><span>اللون</span><input type="color" data-dd="color" value="${toHex(value)}" aria-label="لون الرسم"></label>`;
+    function renderDrawDialog() {
+      const { index, tab } = ddState, d = drawings[index];
+      if (!d) return;
+      const s = styleOf(d), t = d.type;
+      const check = (key, on, label) => `<label class="cc-dlg-check"><input type="checkbox" data-dd="${key}"${on ? ' checked' : ''}><span>${label}</span></label>`;
+      const widthRow = `<label class="cc-dlg-row"><span>السماكة</span><select data-dd="width">${[1, 2, 3, 4].map(w => `<option value="${w}"${s.width === w ? ' selected' : ''}>${w}px</option>`).join('')}</select></label>`;
+      const lineRow = `<label class="cc-dlg-row"><span>نمط الخط</span><select data-dd="line">${LINE_OPTIONS.map(([v, l]) => `<option value="${v}"${(s.line ?? 'solid') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`;
+      let content = '';
+      if (tab === 'style') {
+        if (t === 'fib') content = `<p class="cc-dlg-note">مستويات فيبوناتشي وألوانها تُضبط من زر الإعدادات في الشريط، وتنطبق على كل رسوم فيبوناتشي.</p><button type="button" class="cc-dlg-link" data-ddfib>فتح إعدادات فيبوناتشي</button>`;
+        else if (t === 'text') content = `<label class="cc-dlg-row"><span>النص</span><input type="text" data-dd="text" value="${esc(d.text || '')}" maxlength="300"></label>${drawColorRow(colorOf(d))}<label class="cc-dlg-row"><span>حجم الخط</span><select data-dd="size">${TEXT_SIZES.map(v => `<option value="${v}"${s.size === v ? ' selected' : ''}>${v}px</option>`).join('')}</select></label>`;
+        else if (t === 'range') content = drawColorRow(colorOf(d)) + `<p class="cc-dlg-note">يظهر الصعود بالأزرق والهبوط بالأحمر ما لم تختر لونًا.</p>`;
+        else content = drawColorRow(colorOf(d)) + widthRow + lineRow
+          + (t === 'trend' || t === 'ext' ? check('extL', s.extL, 'تمديد إلى اليسار') + check('extR', s.extR, 'تمديد إلى اليمين') : '')
+          + (t === 'rect' ? check('fill', s.fill, 'تعبئة داخلية') : '');
+      } else {
+        const rows = t === 'hline' ? [['السعر', 'price']] : t === 'vline' ? [['التاريخ', 'a']] : (t === 'hray' || t === 'text') ? [['النقطة', 'a']] : [['النقطة الأولى', 'a'], ['النقطة الثانية', 'b']];
+        content = rows.map(([label, key]) => key === 'price'
+          ? `<label class="cc-dlg-row"><span>${label}</span><input type="number" step="0.01" min="0" data-dcp="price" value="${d.price}" dir="ltr"></label>`
+          : `<div class="cc-dlg-row"><span>${label}</span><span class="cc-dd-pt">${t === 'vline' ? '' : `<input type="number" step="0.01" min="0" data-dcp="${key}" value="${d[key].price}" dir="ltr">`}<bdi dir="ltr">${dot(d[key].time)}</bdi></span></div>`).join('')
+          + `<p class="cc-dlg-note">يمكن تعديل السعر مباشرة، والتاريخ يتغير بسحب الرسم في الشارت.</p>`;
+      }
+      const tabBtn = (k, label) => `<button type="button" role="tab" data-ddtab="${k}" aria-selected="${tab === k}">${label}</button>`;
+      ddlg.innerHTML = `<div class="cc-dlg-box" role="dialog" aria-modal="true" aria-label="إعدادات ${esc(DRAW_TITLE[t])}" dir="rtl">
+        <div class="cc-dlg-head"><b>${esc(DRAW_TITLE[t])}</b><button type="button" data-ddclose aria-label="إغلاق">✕</button></div>
+        <div class="cc-dlg-tabs" role="tablist">${tabBtn('style', 'نمط')}${tabBtn('coords', 'إحداثيات')}</div>
+        <div class="cc-dlg-body">${content}</div>
+        <div class="cc-dlg-foot"><button type="button" data-ddreset>الإعدادات الافتراضية</button><button type="button" data-ddcancel>إلغاء</button><button type="button" data-ddok class="cc-dlg-ok">موافق</button></div>
+      </div>`;
+    }
+    // backup: حالة الرسوم قبل الفتح. الرسم الجديد (نص) يمرّ به قبل أن يُكتب، فيُلغى إن أُغلقت النافذة فارغة
+    function openDrawDialog(index, backup = null) {
+      if (!drawings[index]) return;
+      closeFlyout();
+      ddState = { index, tab: 'style', backup: backup ?? snap(), fresh: backup !== null };
+      renderDrawDialog(); ddlg.hidden = false;
+      (ddlg.querySelector('[data-dd="text"]') || ddlg.querySelector('[data-ddtab="style"]'))?.focus();
+    }
+    function closeDrawDialog(keep) {
+      if (!ddState) return;
+      const { index, backup, fresh } = ddState;
+      ddState = null; ddlg.hidden = true; ddlg.innerHTML = '';
+      if (keep && !(fresh && !drawings[index]?.text)) {
+        if (JSON.stringify(backup) !== JSON.stringify(drawings)) record(backup);
+        saveDrawings(symbol, drawings);
+        select(index < drawings.length ? index : -1);
+      } else {
+        drawings = backup;
+        select(-1);
+      }
+      paintDrawings();
+    }
+    ddlg.addEventListener('input', event => {
+      if (!ddState) return;
+      const d = drawings[ddState.index], t = event.target;
+      if (!d) return;
+      const key = t.dataset.dd, cp = t.dataset.dcp;
+      if (cp) {
+        const v = Number(t.value);
+        if (t.value === '' || !Number.isFinite(v) || v <= 0) return;
+        if (cp === 'price') d.price = v; else d[cp].price = v;
+      } else if (key === 'text') d.text = t.value;
+      else if (key) d.style = { ...(d.style || {}), [key]: t.type === 'checkbox' ? t.checked : (key === 'width' || key === 'size') ? Number(t.value) : t.value };
+      else return;
+      paintDrawings();
+    });
+    ddlg.addEventListener('click', event => {
+      if (!ddState) return;
+      if (event.target === ddlg || event.target.closest('[data-ddclose],[data-ddcancel]')) { closeDrawDialog(false); return; }
+      if (event.target.closest('[data-ddok]')) { closeDrawDialog(true); return; }
+      const tab = event.target.closest('[data-ddtab]');
+      if (tab) { ddState.tab = tab.dataset.ddtab; renderDrawDialog(); ddlg.querySelector(`[data-ddtab="${ddState.tab}"]`)?.focus(); return; }
+      if (event.target.closest('[data-ddfib]')) { closeDrawDialog(true); toggleFibSettings(true); return; }
+      if (event.target.closest('[data-ddreset]')) { const d = drawings[ddState.index]; if (d) delete d.style; renderDrawDialog(); paintDrawings(); }
+    });
+    ddlg.addEventListener('keydown', event => {
+      if (!ddState) return;
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeDrawDialog(false); }
+      else if (event.key === 'Enter' && event.target.tagName === 'INPUT' && event.target.type !== 'color') { event.preventDefault(); closeDrawDialog(true); }
+    });
+
+    const SHORTCUT_MOD = event => event.ctrlKey || event.metaKey;
     document.addEventListener('keydown', event => {
-      if (!box.isConnected || !dlg.hidden || /^(INPUT|SELECT|TEXTAREA)$/.test(event.target?.tagName)) return;
+      if (!box.isConnected || !dlg.hidden || !ddlg.hidden || /^(INPUT|SELECT|TEXTAREA)$/.test(event.target?.tagName)) return;
       if (event.key === 'Escape' && !flyout.hidden) { closeFlyout(); return; }
       if (event.key === 'Escape') { if (state.tool) setTool(null); else if (selected >= 0) select(-1); else if (selInd) selectInd(null); else if (isFull()) setFull(false); }
       if ((event.key === 'Delete' || event.key === 'Backspace') && selInd && selected < 0 && !state.tool) { event.preventDefault(); removeInd(selInd); return; }
+      // التراجع والإعادة كما في TradingView: Ctrl+Z وCtrl+Shift+Z وCtrl+Y (وكذلك ⌘ على ماك)
+      if (SHORTCUT_MOD(event) && !event.altKey && event.code === 'KeyZ') { event.preventDefault(); if (event.shiftKey) redo(); else undo(); return; }
+      if (SHORTCUT_MOD(event) && !event.altKey && event.code === 'KeyY') { event.preventDefault(); redo(); return; }
       // Alt/⌥ + R كما في TradingView (الحرف بالموضع حتى يعمل مع لوحة المفاتيح العربية و⌥ في ماك)
       if (event.altKey && !event.ctrlKey && !event.metaKey && event.code === 'KeyR') { event.preventDefault(); resetView(); }
       if ((event.key === 'Delete' || event.key === 'Backspace') && selected >= 0 && !state.tool) { event.preventDefault(); deleteSelected(); }
     });
+
     /* ---------- إعدادات فيبوناتشي ---------- */
     function renderFibSettings() {
       const opt = (value, label, current) => `<option value="${value}"${value === current ? ' selected' : ''}>${label}</option>`;
@@ -1067,7 +1377,7 @@
     function openFlyout(kind, button) {
       if (!flyout.hidden && flyout.dataset.kind === kind) { closeFlyout(); return; }
       const row = (attr, id, on, inner) => `<button type="button" role="menuitemcheckbox" data-${attr}="${id}" aria-pressed="${on}">${inner}</button>`;
-      flyout.innerHTML = kind === 'magnet'
+      flyout.innerHTML = kind === 'trash' ? trashMenu() : kind === 'magnet'
         ? `<b>المغناطيس</b>${MAGNETS.map(([id, t]) => row('magnet', id, state.magnet === id, `<span>${t}<small>${id === 'weak' ? 'يلصق النقطة بأقرب سعر في الشمعة حين يقترب المؤشر منه' : id === 'strong' ? 'يلصق النقطة دائمًا بأقرب سعر (افتتاح، أعلى، أدنى، إغلاق)' : 'النقطة حيث المؤشر تمامًا'}</small></span>`)).join('')}`
         : `<b>المؤشرات الفنية</b>${INDICATORS.map(x => { const p = Object.values(indCfg[x.id].plots)[0]; return row('ind', x.id, state.ind.has(x.id), `<i style="background:${p.color || p.colors?.[0] || colors?.muted || '#9da7b2'}"></i><span>${esc(indTitle(x.id))}</span>`); }).join('')}`;
       flyout.dataset.kind = kind; flyout.hidden = false; tip.hidden = true;
@@ -1163,26 +1473,27 @@
       hint.hidden = !tool;
       hint.textContent = HINTS[tool] ?? '';
       applyCrosshair();
+      positionFtb();
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-home],[data-adj],[data-divmarks],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-clear],[data-undo],[data-fibset],[data-magnet],[data-delete],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
+      const b = event.target.closest('[data-home],[data-adj],[data-divmarks],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-tdel],[data-undo],[data-redo],[data-fibset],[data-magnet],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
       if (b.hasAttribute('data-search')) { openSearch(searchPop.hidden); return; }
       if (b.hasAttribute('data-home')) { show(home.symbol); return; }
       if (!chart) return;
       if (b.dataset.menu) { openFlyout(b.dataset.menu, b); return; }
+      if (b.dataset.tdel) { deleteAction(b.dataset.tdel); return; }
       if (b.hasAttribute('data-cursor')) { setTool(null); return; }
       if (b.hasAttribute('data-lock')) { setLocked(!state.locked); return; }
       if (b.hasAttribute('data-hide')) { setHidden(!state.hidden); return; }
       if (b.hasAttribute('data-reset')) { resetView(); return; }
       if (b.hasAttribute('data-full')) { setFull(!isFull()); return; }
       if (b.hasAttribute('data-fibset')) { toggleFibSettings(); return; }
+      if (b.hasAttribute('data-undo')) { undo(); return; }
+      if (b.hasAttribute('data-redo')) { redo(); return; }
       if (b.dataset.magnet) { state.magnet = b.dataset.magnet; panel.querySelectorAll('[data-magnet]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.magnet === state.magnet))); sideBar.querySelector('[data-menu="magnet"]')?.setAttribute('aria-pressed', String(state.magnet !== 'off')); saveSettings(); applyCrosshair(); closeFlyout(); return; }
       let keep = true;
       if (b.dataset.tool) { setTool(state.tool === b.dataset.tool ? null : b.dataset.tool); return; }
-      if (b.hasAttribute('data-delete')) { deleteSelected(); return; }
-      if (b.hasAttribute('data-undo')) { select(-1); drawings.pop(); saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
-      if (b.hasAttribute('data-clear')) { select(-1); drawings = []; saveDrawings(symbol, drawings); setTool(null); paintDrawings(); return; }
       if (b.dataset.adj) { state.adj = !state.adj; b.setAttribute('aria-pressed', String(state.adj)); }
       if (b.dataset.divmarks) { state.divMarks = !state.divMarks; b.setAttribute('aria-pressed', String(state.divMarks)); }
       if (b.dataset.type) state.type = b.dataset.type;
