@@ -28,15 +28,25 @@ const OFFICIAL_DIR = arg('--official-dir') ? dirUrl(arg('--official-dir')) : nul
 const only = arg('--symbols') ? new Set(arg('--symbols').split(',')) : null;
 const IMPERSONATE = process.env.CURL_IMPERSONATE_BIN || null;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const COMPANY_PAGE = symbol => `https://www.saudiexchange.sa/wps/portal/saudiexchange/hidden/company-profile-main/!ut/p/z1/04_Sj9CPykssy0xPLMnMz0vMAfIjo8ziTR3NDIw8LAz83d2MXA0C3SydAl1c3Q0NvE30I4EKzBEKDMKcTQzMDPxN3H19LAzdTU31w8syU8v1wwkpK8hOMgUA-oskdg!!/?companySymbol=${symbol}`;
+const JAR = `${process.env.RUNNER_TEMP || '/tmp'}/saudiexchange-cookies.txt`;
+// How the chart endpoint is asked: as is, with the company page as referrer, or after opening the
+// company page so its cookies come along (what a browser does). The probe picks the first that works.
+const MODES = {
+  plain: () => [],
+  referer: symbol => ['--referer', COMPANY_PAGE(symbol)],
+  cookies: symbol => ['--cookie', JAR, '--cookie-jar', JAR, '--referer', COMPANY_PAGE(symbol)]
+};
+let mode = 'plain';
 export const officialUrl = symbol => `https://www.saudiexchange.sa/tadawul.eportal.charts.v2/ChartGenerator?chart-type=SQL_CI_CV_COM&chart-parameter=${symbol}&methodType=parsingMethod`;
 
-async function getText(url, { headers = {}, impersonate = false, attempts = 3, maxTime = 30 } = {}) {
+async function getText(url, { headers = {}, impersonate = false, attempts = 3, maxTime = 30, extra = [] } = {}) {
   let last;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       if (impersonate && IMPERSONATE) {
         // No custom headers: Akamai matches the header set against the impersonated Chrome fingerprint.
-        const { stdout } = await execFile(IMPERSONATE, [url, '--silent', '--show-error', '--fail', '--max-time', String(maxTime), '--compressed'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: (maxTime + 15) * 1000 });
+        const { stdout } = await execFile(IMPERSONATE, [url, ...extra, '--silent', '--show-error', '--fail', '--max-time', String(maxTime), '--compressed'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: (maxTime + 15) * 1000 });
         return stdout;
       }
       const controller = new AbortController(), timer = setTimeout(() => controller.abort(), maxTime * 1000);
@@ -50,10 +60,13 @@ async function getText(url, { headers = {}, impersonate = false, attempts = 3, m
   throw new Error(String(last?.stderr || last?.message || last).trim().split('\n').at(-1));
 }
 const yahooJson = async (symbol, query) => JSON.parse(await getText(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.SR?${query}`, { headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } }));
-async function officialCloses(symbol) {
-  const text = OFFICIAL_DIR ? await readFile(new URL(`${symbol}.json`, OFFICIAL_DIR), 'utf8') : await getText(officialUrl(symbol), { impersonate: true, attempts: 2, maxTime: 25, headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } });
+async function officialCloses(symbol, { attempts = 2 } = {}) {
+  const text = OFFICIAL_DIR ? await readFile(new URL(`${symbol}.json`, OFFICIAL_DIR), 'utf8')
+    : await getText(officialUrl(symbol), { impersonate: true, attempts, maxTime: 25, extra: MODES[mode](symbol), headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' } });
   return parseOfficialCloses(JSON.parse(text));
 }
+// Opening the company page stores the portal's cookies in JAR (as a browser would).
+const openCompanyPage = symbol => IMPERSONATE ? getText(COMPANY_PAGE(symbol), { impersonate: true, attempts: 1, maxTime: 30, extra: ['--cookie-jar', JAR, '--location'] }) : Promise.resolve('');
 
 const data = JSON.parse(await readFile(new URL('data.json', DIST), 'utf8'));
 const officialDate = data.priceSource?.officialDate || null;
@@ -63,13 +76,17 @@ const started = Date.now(), secs = () => ((Date.now() - started) / 1000).toFixed
 // Quick check before the long run: can the exchange and Yahoo be reached at all? (--probe stops here.)
 {
   const symbol = stocks[0]?.symbol ?? '2222';
-  try {
-    const official = await officialCloses(symbol);
-    console.log(`[probe ${secs()}s] Saudi Exchange ${symbol}: ${official.length} adjusted closes, ${official[0].d} → ${official.at(-1).d} (last ${official.at(-1).c})`);
-  } catch (error) {
-    console.error(`[probe ${secs()}s] Saudi Exchange unreachable for ${symbol}: ${error.message}. Nothing was changed.`);
-    process.exit(1);
+  let reached = false;
+  for (const name of OFFICIAL_DIR ? ['plain'] : Object.keys(MODES)) {
+    mode = name;
+    try {
+      if (name === 'cookies') { const page = await openCompanyPage(symbol); console.log(`[probe ${secs()}s] company page opened (${page.length} bytes)`); }
+      const official = await officialCloses(symbol, { attempts: 1 });
+      console.log(`[probe ${secs()}s] Saudi Exchange ${symbol} (${name}): ${official.length} adjusted closes, ${official[0].d} → ${official.at(-1).d} (last ${official.at(-1).c})`);
+      reached = true; break;
+    } catch (error) { console.warn(`[probe ${secs()}s] Saudi Exchange ${symbol} (${name}): ${error.message}`); }
   }
+  if (!reached) { console.error(`[probe ${secs()}s] Saudi Exchange unreachable for ${symbol} in every way tried. Nothing was changed.`); process.exit(1); }
   try {
     const daily = parseYahoo(await yahooJson(symbol, 'range=6y&interval=1d'));
     console.log(`[probe ${secs()}s] Yahoo ${symbol}: ${daily.length} daily bars`);
