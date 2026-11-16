@@ -5,3 +5,8 @@
 .ta-panel{border:1px solid var(--pf-line);background:var(--pf-bg2)}
 .ta-chart{padding:14px 16px 12px}
 .ta-chart .cc-body{padding-left:48px}
+
+/* الإطار يلتصق بالشارت من كل الجهات: لا فراغ فوقه ولا على يمينه ويساره ولا تحته */
+.ta-page .ta-panel{overflow:hidden;border-radius:8px}
+.ta-page .ta-chart{padding:0}
+.ta-page .ta-chart .cc-toolbar{padding-inline:12px}
