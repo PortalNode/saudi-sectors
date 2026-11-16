@@ -26,6 +26,15 @@ export function tStat(trades) {
   return sd ? m / (sd / Math.sqrt(n)) : null;
 }
 
+// t-statistic of the mean trade return after averaging within each signal month. Trades signalled in the
+// same month are driven by the same market, so they are not independent; this is the safer figure.
+export function tStatClustered(trades, keyFn = t => t.signalDate.slice(0, 7)) {
+  const groups = [...groupBy(trades, keyFn).values()].map(g => mean(g.map(t => t.ret)));
+  const n = groups.length; if (n < 3) return null;
+  const m = mean(groups), sd = Math.sqrt(groups.reduce((a, x) => a + (x - m) ** 2, 0) / (n - 1));
+  return sd ? m / (sd / Math.sqrt(n)) : null;
+}
+
 /** Equity-curve statistics from daily equity values ({date, equity}[]). */
 export function curveStats(curve) {
   if (curve.length < 2) return { totalReturn: null, cagr: null, maxDrawdown: null };
