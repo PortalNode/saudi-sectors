@@ -170,9 +170,11 @@ export function scaleFactors(official, daily, { step = 0.02 } = {}) {
 export function rebuildBars({ official, daily, hourly = new Map(), splits = [], exactSplits = false, earlier = false, start: from = HISTORY_START }) {
   if (!official.length) return { bars: [], est: [], flags: [] };
   if (earlier) official = withEarlierHistory(official, daily);
-  // From HISTORY_START, and not before Yahoo's first real session: earlier closes would give no candles.
+  // From HISTORY_START, and not before Yahoo's daily candles begin (March 2010): earlier closes would
+  // give no candles. A stock Yahoo barely covers (1325) keeps its exchange closes as estimated candles.
   const firstReal = [...daily.values()].filter(b => !isFakeBar(b)).reduce((m, b) => b.d < m ? b.d : m, '9999');
-  const start = firstReal > from ? firstReal : from;
+  const yahooStart = firstReal < '2010-12-31' ? firstReal : '2010-12-31';
+  const start = yahooStart > from ? yahooStart : from;
   const k = scaleFactors(official, daily);
   const bars = [], est = [];
   for (let i = 0; i < official.length; i++) {
