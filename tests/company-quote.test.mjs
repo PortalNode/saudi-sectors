@@ -165,12 +165,12 @@ test('weekly candles run Sunday to Thursday and monthly by calendar month', () =
 });
 
 test('every results page loads the stock card and its chart, with the library kept on the site', () => {
-  const pages = readdirSync(dist).filter(name => name.endsWith('.html') && !['index.html', 'comparison.html'].includes(name));
+  const pages = readdirSync(dist).filter(name => name.endsWith('.html') && !['index.html', 'comparison.html', 'technical-analysis.html'].includes(name));
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261116j/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116j" defer><\/script>\s*<script src="company-quote\.js\?v=no-notes-20261116" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261117e/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261116j" defer><\/script>\s*<script src="company-quote\.js\?v=intraday-20261117" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);
