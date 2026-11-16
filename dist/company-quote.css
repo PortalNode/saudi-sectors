@@ -309,3 +309,9 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cq-chart-panel .cc-typegroup button[aria-pressed="true"]{background:var(--pf-line);color:var(--pf-ink)}
 .cq-chart-panel .cc-typegroup button:hover{color:var(--pf-ink)}
 .cq-chart-panel .cc-groups > .cq-range button[data-interval][aria-pressed="true"],.cq-chart-panel .cc-groups > .cq-range button[data-crange][aria-pressed="true"]{background:var(--pf-line);color:var(--pf-ink);border-radius:6px}
+
+/* رأس الشارت في أعلى اليسار: شعار الشركة ورمزها ونوع الفاصل */
+.cc-head{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:14px;color:var(--pf-ink)}
+.cc-head-logo{width:24px;height:24px;object-fit:contain;border-radius:50%;background:var(--pf-line)}
+.cc-head-sym{font-weight:800;font-variant-numeric:tabular-nums}
+.cc-head-int{color:var(--pf-muted);font-size:12px;font-weight:700;padding:1px 7px;border:1px solid var(--pf-line);border-radius:4px}

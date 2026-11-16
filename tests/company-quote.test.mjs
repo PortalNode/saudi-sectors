@@ -169,8 +169,8 @@ test('every results page loads the stock card and its chart, with the library ke
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);
-    assert.match(html, /company-quote\.css\?v=chart-20261117u/, page);
-    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261117u" defer><\/script>\s*<script src="company-quote\.js\?v=wide-chart-20261117" defer><\/script>/, page);
+    assert.match(html, /company-quote\.css\?v=chart-20261117v/, page);
+    assert.match(html, /company-profile\.js\?v=[^"]+" defer><\/script>\s*<script src="company-chart\.js\?v=chart-20261117v" defer><\/script>\s*<script src="company-quote\.js\?v=wide-chart-20261117" defer><\/script>/, page);
   }
   const chart = read('company-chart.js');
   assert.match(chart, /const LIB = 'vendor\/lightweight-charts-5\.2\.1\.js'/);

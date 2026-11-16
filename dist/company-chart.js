@@ -413,6 +413,7 @@
           ${side('data-menu="trash" aria-haspopup="true" aria-expanded="false"', ICONS.trash, 'حذف الرسوم')}
         </div>
         <div class="cc-main" dir="rtl">
+          <div class="cc-head" dir="ltr"><img class="cc-head-logo" src="logos/${esc(symbol)}.svg" alt="" width="24" height="24" onerror="this.remove()"><b class="cc-head-sym">${esc(symbol)}</b><span class="cc-head-int">${INTERVALS.find(([id]) => id === state.interval)?.[1] ?? ''}</span></div>
           <div class="cc-legend" aria-live="polite"></div>
           <div class="cc-stage">
             <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div><div class="cc-ftb" role="toolbar" aria-label="خيارات الرسم المحدد" hidden><input type="color" data-ftb="color" aria-label="لون الرسم" title="لون الرسم"><select data-ftb="width" aria-label="السماكة" title="السماكة">${[1, 2, 3, 4].map(w => `<option value="${w}">${w}px</option>`).join('')}</select><select data-ftb="line" aria-label="نمط الخط" title="نمط الخط">${LINE_OPTIONS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select><span class="cc-ftb-sep"></span><button type="button" data-ftb="lock" aria-pressed="false" aria-label="قفل الرسم" title="قفل الرسم">${ICONS.unlock}</button><button type="button" data-ftb="hide" aria-label="إخفاء الرسم" title="إخفاء الرسم">${ICONS.eye}</button><button type="button" data-ftb="settings" aria-label="إعدادات الرسم" title="إعدادات الرسم">${ICONS.gear}</button><button type="button" data-ftb="delete" aria-label="حذف الرسم" title="حذف الرسم (Delete)">${ICONS.trash}</button></div>
@@ -1508,6 +1509,7 @@
       for (const [attr, key] of [['type', 'type'], ['interval', 'interval'], ['crange', 'range']]) panel.querySelectorAll(`[data-${attr}]`).forEach(x => x.setAttribute('aria-pressed', String(x.dataset[attr] === state[key])));
       panel.querySelectorAll('[data-ind]').forEach(x => x.setAttribute('aria-pressed', String(state.ind.has(x.dataset.ind))));
       saveSettings();
+      { const head = panel.querySelector('.cc-head-int'); if (head) head.textContent = INTERVALS.find(([id]) => id === state.interval)?.[1] ?? ''; }
       build(keep);
     });
 
