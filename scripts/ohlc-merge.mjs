@@ -104,6 +104,13 @@ export function parseOfficialCloses(json) {
   return [...byDate].sort(([a], [b]) => a < b ? -1 : 1).map(([d, c]) => ({ d, c }));
 }
 
+/** Yahoo chart JSON (requested with events=split) → [{ d, ratio }]: share splits and bonus issues. */
+export function parseYahooSplits(json) {
+  const r = json?.chart?.result?.[0], offset = r?.meta?.gmtoffset ?? 10800;
+  return Object.values(r?.events?.splits ?? {}).filter(e => Number.isFinite(e?.date) && e.numerator > 0 && e.denominator > 0)
+    .map(e => ({ d: iso(e.date, offset), ratio: e.numerator / e.denominator })).sort((a, b) => a.d < b.d ? -1 : 1);
+}
+
 /** Yahoo 60-minute chart → one bar per Riyadh session. Open/high/low match the session; the close
  * and volume miss the closing auction, so only the open/high/low/volume are used (marked estimated). */
 export function hourlyDays(json) {
@@ -149,8 +156,9 @@ export function scaleFactors(official, daily, { step = 0.02 } = {}) {
  * daily: Map date → Yahoo daily bar; hourly: Map date → Yahoo session bar from 60-minute data.
  * Returns { bars, est, flags }: est lists sessions whose open/high/low/volume are estimated.
  */
-export function rebuildBars({ official, daily, hourly = new Map(), years = YEARS }) {
+export function rebuildBars({ official, daily, hourly = new Map(), splits = [], years = YEARS }) {
   if (!official.length) return { bars: [], est: [], flags: [] };
+  official = withEarlierHistory(official, daily);
   const from = new Date(`${official.at(-1).d}T12:00:00Z`); from.setUTCFullYear(from.getUTCFullYear() - years);
   const start = from.toISOString().slice(0, 10);
   const k = scaleFactors(official, daily);
@@ -176,7 +184,44 @@ export function rebuildBars({ official, daily, hourly = new Map(), years = YEARS
     if (d < start) continue;
     bars.push({ d, o: round2(bar.o), h: round2(Math.max(bar.h, bar.o, c)), l: round2(Math.min(bar.l, bar.o, c)), c: round2(c), v: Math.round(bar.v || 0) });
   }
-  return { bars, est: est.filter(d => d >= start && bars.some(b => b.d === d)), flags: jumpFlags(bars) };
+  const exact = splitRatios(bars, daily, splits);
+  return { bars: exact, est: est.filter(d => d >= start && exact.some(b => b.d === d)), flags: jumpFlags(exact) };
+}
+
+/**
+ * A stock that moved to the main market from Nomu has exchange closes only from the move, while
+ * TradingView (and Yahoo) carry its earlier sessions. Yahoo's earlier closes are put in front when
+ * they continue the exchange's history without a jump.
+ */
+function withEarlierHistory(official, daily) {
+  const first = official[0];
+  const earlier = [...daily.values()].filter(b => b.d < first.d && !isFakeBar(b) && b.c > 0).sort((a, b) => a.d < b.d ? -1 : 1);
+  const y = daily.get(first.d);
+  if (earlier.length < 5 || !y || isFakeBar(y)) return official;
+  const k = first.c / y.c, before = earlier.at(-1);
+  if (Math.abs(k - 1) > 0.05 || Math.abs((first.c / k) / before.c - 1) > DAILY_LIMIT) return official;
+  return earlier.map(b => ({ d: b.d, c: round2(b.c * k) })).concat(official);
+}
+
+/**
+ * The exchange adjusts a bonus issue or split by its change in capital; TradingView by the exact
+ * share ratio, which is what Yahoo applies. Where the two differ slightly around a split Yahoo
+ * reports, history before it is moved onto the exact ratio.
+ */
+function splitRatios(bars, daily, splits) {
+  let out = bars;
+  for (const { d } of [...splits].reverse()) { // latest first: an earlier split sees history already on later ratios
+    const ratio = side => {
+      const list = out.filter(b => side < 0 ? b.d < d : b.d >= d).map(b => { const y = daily.get(b.d); return y && !isFakeBar(y) && y.c > 0 ? b.c / y.c : null; }).filter(Boolean);
+      const near = side < 0 ? list.slice(-15) : list.slice(0, 15);
+      return near.length >= 5 ? median(near) : null;
+    };
+    const before = ratio(-1), after = ratio(1);
+    if (!before || !after) continue;
+    const r = before / after;
+    if (Math.abs(r - 1) > 0.002 && Math.abs(r - 1) < 0.08) out = applyFactor(out, d, 1 / r);
+  }
+  return out;
 }
 
 /** Session-to-session moves beyond the ±10% limit that no capital action explains. */

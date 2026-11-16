@@ -17,7 +17,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { execFile as execFileCb } from 'node:child_process';
 import { promisify } from 'node:util';
-import { parseYahoo, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, round2Price, SOURCE } from './ohlc-merge.mjs';
+import { parseYahoo, parseYahooSplits, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, round2Price, SOURCE } from './ohlc-merge.mjs';
 
 const execFile = promisify(execFileCb);
 const DIST = new URL('../dist/', import.meta.url);
@@ -112,10 +112,11 @@ async function worker() {
         official = official.filter(x => x.d <= last.date);
         if (official.at(-1)?.d === last.date) official.at(-1).c = round2Price(last.price);
       }
-      const daily = new Map(parseYahoo(await yahooJson(stock.symbol, 'range=6y&interval=1d')).map(b => [b.d, b]));
+      const dailyJson = await yahooJson(stock.symbol, 'range=6y&interval=1d&events=split');
+      const daily = new Map(parseYahoo(dailyJson).map(b => [b.d, b])), splits = parseYahooSplits(dailyJson);
       let hourly = new Map();
       try { hourly = hourlyDays(await yahooJson(stock.symbol, 'range=730d&interval=60m')); } catch { /* estimated candles then use the closes only */ }
-      const rebuilt = rebuildBars({ official, daily, hourly });
+      const rebuilt = rebuildBars({ official, daily, hourly, splits });
       // Sessions the daily update stored from TradingView stay as they are while their close still
       // matches (a later capital action changes every earlier close, and then the rebuild wins).
       let before = null; try { before = JSON.parse(await readFile(new URL(`${stock.symbol}.json`, DIR), 'utf8')); } catch { /* new */ }

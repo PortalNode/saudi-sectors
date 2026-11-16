@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isFakeBar, parseOfficialCloses, scaleFactors, rebuildBars, candleFile, validOhlc, addSession, scanBars, applyFactor } from './ohlc-merge.mjs';
+import { isFakeBar, parseYahooSplits, parseOfficialCloses, scaleFactors, rebuildBars, candleFile, validOhlc, addSession, scanBars, applyFactor } from './ohlc-merge.mjs';
 
 const bar = (d, c, extra = {}) => ({ d, o: c, h: c + 0.1, l: c - 0.1, c, v: 1000, ...extra });
 const days = n => Array.from({ length: n }, (_, i) => new Date(Date.UTC(2026, 0, 4 + i)).toISOString().slice(0, 10));
@@ -92,4 +92,27 @@ test('sessions an update missed are filled, never with flat no-volume bars', () 
   const prev = bar('2026-11-10', 10.4), today = bar('2026-11-11', 10.5);
   const { bars } = addSession(stored, { today, prev }, { date: '2026-11-11', price: 10.5 }, { fill });
   assert.deepEqual(bars.map(b => b.d), ['2026-11-04', '2026-11-05', '2026-11-09', '2026-11-10', '2026-11-11']);
+});
+
+test('a bonus issue follows the exact share ratio Yahoo reports, not the exchange\'s capital factor', () => {
+  const d = days(30), split = d[15];
+  // A 6:5 bonus issue: Yahoo divides earlier prices by 1.2 exactly; the exchange by 1.22 (its capital factor).
+  const daily = new Map(d.map((x, i) => [x, bar(x, 10)]));
+  const official = d.map((x, i) => ({ d: x, c: i < 15 ? Math.round(10 * 1.2 / 1.22 * 100) / 100 : 10 }));
+  const { bars } = rebuildBars({ official, daily, splits: [{ d: split, ratio: 1.2 }] });
+  assert.equal(bars[0].c, 10, 'history before the split is on the exact ratio');
+  assert.equal(bars.at(-1).c, 10);
+  const json = { chart: { result: [{ meta: { gmtoffset: 10800 }, events: { splits: { a: { date: Date.parse('2026-01-11T07:00:00Z') / 1000, numerator: 6, denominator: 5 } } } }] } };
+  assert.deepEqual(parseYahooSplits(json), [{ d: '2026-01-11', ratio: 1.2 }]);
+});
+
+test('a stock that moved from Nomu keeps its earlier sessions when they continue without a jump', () => {
+  const d = days(12);
+  const daily = new Map(d.map((x, i) => [x, bar(x, 5 + i * 0.1)]));
+  const official = d.slice(8).map((x, i) => ({ d: x, c: Math.round((5 + (i + 8) * 0.1) * 100) / 100 }));
+  const { bars } = rebuildBars({ official, daily });
+  assert.equal(bars[0].d, d[0], 'the sessions before the move are kept');
+  assert.equal(bars.length, 12);
+  const jumped = new Map(d.map((x, i) => [x, bar(x, i < 8 ? 2 : 5 + i * 0.1)]));
+  assert.equal(rebuildBars({ official, daily: jumped }).bars[0].d, d[8], 'a history that does not continue is not joined');
 });
