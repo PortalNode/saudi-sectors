@@ -26,7 +26,7 @@
     candles: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M7 3v3M7 18v3M17 4v4M17 16v4"/><rect x="5" y="6" width="4" height="12" rx="0.6"/><rect x="15" y="8" width="4" height="8" rx="0.6"/></svg>',
     line: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 3 8-8"/><path d="M3 21h18" opacity=".4"/></svg>'
   };
-  const INTERVALS = [['d', 'يومي'], ['w', 'أسبوعي'], ['m', 'شهري']];
+  const INTERVALS = [['d', 'يوم'], ['w', 'أسبوع'], ['m', 'شهر']];
   const RANGES = [['3m', '3 أشهر', 3], ['6m', '6 أشهر', 6], ['1y', 'سنة', 12], ['3y', '3 سنوات', 36], ['5y', '5 سنوات', 60], ['all', 'الكل', null]];
   const DEFAULT_RANGE = { d: '1y', w: '3y', m: '5y' };
   // المؤشرات: على الشارت نفسه (overlay) أو في لوحة تحته (pane)
