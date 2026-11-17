@@ -20,3 +20,8 @@ test('the yellow drawing instructions stay removed', () => {
   assert.equal(source.includes('HINTS'), false);
   assert.equal(source.includes('Esc للإلغاء'), false);
 });
+
+test('plain F toggles full screen while Alt + F stays the Fibonacci shortcut', () => {
+  assert.match(source, /event\.code === 'KeyF'\) \{ event\.preventDefault\(\); setFull\(!isFull\(\)\)/);
+  assert.match(source, /!event\.altKey && !event\.ctrlKey && !event\.metaKey && !event\.shiftKey && !event\.repeat/);
+});

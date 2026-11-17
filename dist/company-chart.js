@@ -405,7 +405,7 @@
         </div>
         <div class="cc-end">
           <span class="cq-range-change cc-change"></span>
-          <button type="button" class="cc-full-btn" data-full aria-pressed="false" title="تكبير الرسم البياني ليملأ الشاشة">${ICON_FULL}<span>ملء الشاشة</span></button>
+          <button type="button" class="cc-full-btn" data-full aria-pressed="false" title="تكبير الرسم البياني ليملأ الشاشة (F)">${ICON_FULL}<span>ملء الشاشة</span></button>
         </div>
       </div>
       <div class="cc-fib-settings" hidden></div>
@@ -953,7 +953,7 @@
       const button = panel.querySelector('[data-full]');
       if (button) {
         button.setAttribute('aria-pressed', String(on));
-        button.title = on ? 'الخروج من ملء الشاشة (Esc)' : 'تكبير الرسم البياني ليملأ الشاشة';
+        button.title = on ? 'الخروج من ملء الشاشة (F أو Esc)' : 'تكبير الرسم البياني ليملأ الشاشة (F)';
         button.innerHTML = `${on ? ICON_EXIT : ICON_FULL}<span>${on ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}</span>`;
       }
       if (on && panel.requestFullscreen && !document.fullscreenElement) panel.requestFullscreen().catch(() => { /* تبقى التغطية بالـ CSS */ });
@@ -1370,6 +1370,8 @@
       if (SHORTCUT_MOD(event) && !event.altKey && event.code === 'KeyY') { event.preventDefault(); redo(); return; }
       // Alt/⌥ + R كما في TradingView (الحرف بالموضع حتى يعمل مع لوحة المفاتيح العربية و⌥ في ماك)
       if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.code === 'KeyR') { event.preventDefault(); resetView(); return; }
+      // حرف F وحده يبدّل ملء الشاشة (بموضع المفتاح حتى يعمل مع لوحة المفاتيح العربية)، وAlt + F يبقى لفيبوناتشي
+      if (!event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.repeat && event.code === 'KeyF') { event.preventDefault(); setFull(!isFull()); return; }
       // اختصارات أدوات الرسم (Alt/⌥ + T وH وJ وV وF، وAlt + Shift + R للمستطيل)
       if (event.altKey && !event.ctrlKey && !event.metaKey && chart) {
         const hit = Object.entries(SHORTCUTS).find(([, k]) => k[0] === event.code && !!k[2] === event.shiftKey);
