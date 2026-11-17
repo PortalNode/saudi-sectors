@@ -127,7 +127,7 @@ if (HOLDOUT) {
       yearsPositive: ys.length > 0 && posYears / ys.length >= 0.6, doubledCosts: dbl.expectancyR > 0, walkForward: wfS.n >= 30 && wfS.expectancyR > 0, portfolioPositive: pfH.cagr > 0,
     };
     const pass = Object.values(checks).every(Boolean);
-    out.verdicts[name] = { pass, checks, hold: s, baseline: base, doubled: dbl, walkForward: wfS, positiveYears: `${posYears}/${ys.length}` };
+    out.verdicts[name] = { pass, checks, hold: s, baseline: base, doubled: dbl, walkForward: wfS, positiveYears: `${posYears}/${ys.length}`, portfolio: { totalReturn: pfH.totalReturn, cagr: pfH.cagr, maxDrawdown: pfH.maxDrawdown } };
     console.log(`\n${pass ? '✔ مثبتة ' : '✘ غير مثبتة'}  ${name} (${NAMES[name]}) exit=${ex}`);
     console.log('  ' + row('hold-out', hold)); console.log('  ' + row('baseline hold-out', inWin(tradesFor('baseline', {}, ex), HOLD_START, lastDate)));
     console.log('  ' + row('doubled costs', inWin(tradesFor(name, params, ex, double, 'x2'), HOLD_START, lastDate)));

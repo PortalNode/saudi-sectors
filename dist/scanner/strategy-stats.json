@@ -1,0 +1,310 @@
+{
+ "note": "نتائج اختبار تاريخي بعد العمولة والانزلاق. لا توجد استراتيجية اجتازت معايير القبول، فكلها غير مثبتة.",
+ "generatedFrom": "docs/scanner-research.md",
+ "dataThrough": "2026-11-16",
+ "windows": {
+  "development": "2014-01-01 → 2021-12-31",
+  "holdOut": "2022-01-01 → 2026-11-16"
+ },
+ "strategies": {
+  "breakout": {
+   "name": "اختراق المقاومة",
+   "verdict": "unproven",
+   "exit": "trail",
+   "development": {
+    "trades": 2430,
+    "winRate": 0.35473251028806585,
+    "avgWin": 0.12001615587819728,
+    "avgLoss": -0.049307129316826445,
+    "profitFactor": 1.3381081048698862,
+    "expectancyR": 0.23950811256881316
+   },
+   "holdOut": {
+    "trades": 1078,
+    "winRate": 0.2894248608534323,
+    "avgWin": 0.1255071639220338,
+    "avgLoss": -0.05405559290517397,
+    "profitFactor": 0.9457006882598766,
+    "expectancyR": -0.06569537203259145
+   },
+   "walkForward": {
+    "trades": 3195,
+    "winRate": 0.3236306729264476,
+    "avgWin": 0.12175467480683204,
+    "avgLoss": -0.05178698892657617,
+    "profitFactor": 1.1249436188994297,
+    "expectancyR": 0.08562743720262403
+   },
+   "positiveYears": "6/12",
+   "failed": [
+    "expR",
+    "yearsPositive",
+    "doubledCosts",
+    "portfolioPositive"
+   ],
+   "portfolioHoldOut": {
+    "totalReturn": -0.19215058974107824,
+    "cagr": -0.04318730462100724,
+    "maxDrawdown": -0.4311639339124277
+   }
+  },
+  "pullback": {
+   "name": "ارتداد من المتوسط",
+   "verdict": "unproven",
+   "exit": "trail",
+   "development": {
+    "trades": 2824,
+    "winRate": 0.3626062322946176,
+    "avgWin": 0.11874145745988127,
+    "avgLoss": -0.05131897152385043,
+    "profitFactor": 1.3162909114031058,
+    "expectancyR": 0.24868528094903752
+   },
+   "holdOut": {
+    "trades": 1435,
+    "winRate": 0.2627177700348432,
+    "avgWin": 0.11470542103243823,
+    "avgLoss": -0.05539996594509976,
+    "profitFactor": 0.737785521208599,
+    "expectancyR": -0.22278125321574754
+   },
+   "walkForward": {
+    "trades": 3623,
+    "winRate": 0.32983715153187965,
+    "avgWin": 0.11870245795119173,
+    "avgLoss": -0.05334801311838229,
+    "profitFactor": 1.0951174153833603,
+    "expectancyR": 0.07404419395546093
+   },
+   "positiveYears": "4/12",
+   "failed": [
+    "expR",
+    "yearsPositive",
+    "doubledCosts",
+    "portfolioPositive"
+   ],
+   "portfolioHoldOut": {
+    "totalReturn": -0.4967178247284899,
+    "cagr": -0.13172827044110516,
+    "maxDrawdown": -0.5456804762021742
+   }
+  },
+  "squeeze": {
+   "name": "انكماش التذبذب ثم اختراق",
+   "verdict": "unproven",
+   "exit": "trail",
+   "development": {
+    "trades": 2335,
+    "winRate": 0.3473233404710921,
+    "avgWin": 0.11213931638202018,
+    "avgLoss": -0.0451578097660973,
+    "profitFactor": 1.3214809952335433,
+    "expectancyR": 0.2525316682773432
+   },
+   "holdOut": {
+    "trades": 1261,
+    "winRate": 0.2624900872323553,
+    "avgWin": 0.11120069180360993,
+    "avgLoss": -0.04991537497945913,
+    "profitFactor": 0.7928995955146915,
+    "expectancyR": -0.19033303836070162
+   },
+   "walkForward": {
+    "trades": 2434,
+    "winRate": 0.3114215283483977,
+    "avgWin": 0.11124234122956614,
+    "avgLoss": -0.04563726872392314,
+    "profitFactor": 1.1024164036430295,
+    "expectancyR": 0.07500274122585292
+   },
+   "positiveYears": "4/12",
+   "failed": [
+    "expR",
+    "yearsPositive",
+    "doubledCosts",
+    "portfolioPositive"
+   ],
+   "portfolioHoldOut": {
+    "totalReturn": -0.40517676805163994,
+    "cagr": -0.10144048309267521,
+    "maxDrawdown": -0.5039680276877698
+   }
+  },
+  "rs": {
+   "name": "القوة النسبية",
+   "verdict": "unproven",
+   "exit": "trail",
+   "development": {
+    "trades": 1556,
+    "winRate": 0.32519280205655526,
+    "avgWin": 0.1373591339528113,
+    "avgLoss": -0.05622730584719151,
+    "profitFactor": 1.1772575574378181,
+    "expectancyR": 0.13015496263775747
+   },
+   "holdOut": {
+    "trades": 1037,
+    "winRate": 0.28736740597878496,
+    "avgWin": 0.12622651409467597,
+    "avgLoss": -0.058511220843917675,
+    "profitFactor": 0.8699278901028972,
+    "expectancyR": -0.1011705721318739
+   },
+   "walkForward": {
+    "trades": 1733,
+    "winRate": 0.3190998268897865,
+    "avgWin": 0.13548754553259118,
+    "avgLoss": -0.05942954589418397,
+    "profitFactor": 1.0684152725519296,
+    "expectancyR": 0.06368160206358935
+   },
+   "positiveYears": "5/12",
+   "failed": [
+    "expR",
+    "yearsPositive",
+    "doubledCosts",
+    "portfolioPositive"
+   ],
+   "portfolioHoldOut": {
+    "totalReturn": -0.28067822358340067,
+    "cagr": -0.06557359964359728,
+    "maxDrawdown": -0.46553616624231464
+   }
+  },
+  "cross": {
+   "name": "تقاطع المتوسطات",
+   "verdict": "unproven",
+   "exit": "trail",
+   "development": {
+    "trades": 1126,
+    "winRate": 0.3836589698046181,
+    "avgWin": 0.11237914014114526,
+    "avgLoss": -0.049717092083207265,
+    "profitFactor": 1.4070329309855127,
+    "expectancyR": 0.2731119360031963
+   },
+   "holdOut": {
+    "trades": 564,
+    "winRate": 0.2907801418439716,
+    "avgWin": 0.14865348922615185,
+    "avgLoss": -0.055680370084362864,
+    "profitFactor": 1.0946035468223068,
+    "expectancyR": 0.010719215789131873
+   },
+   "walkForward": {
+    "trades": 831,
+    "winRate": 0.3104693140794224,
+    "avgWin": 0.13623052790617712,
+    "avgLoss": -0.05313506739642098,
+    "profitFactor": 1.1544052356612162,
+    "expectancyR": 0.0727861191015437
+   },
+   "positiveYears": "7/12",
+   "failed": [
+    "expR",
+    "yearsPositive",
+    "doubledCosts",
+    "portfolioPositive"
+   ],
+   "portfolioHoldOut": {
+    "totalReturn": -0.24191498070656708,
+    "cagr": -0.05557226287227337,
+    "maxDrawdown": -0.42974751096807856
+   }
+  },
+  "base": {
+   "name": "اختراق قاعدة سعرية",
+   "verdict": "unproven",
+   "exit": "trail",
+   "development": {
+    "trades": 2973,
+    "winRate": 0.34678775647494114,
+    "avgWin": 0.11428873452858561,
+    "avgLoss": -0.04514479273456073,
+    "profitFactor": 1.3440183562212749,
+    "expectancyR": 0.21907962280788662
+   },
+   "holdOut": {
+    "trades": 1820,
+    "winRate": 0.2571428571428571,
+    "avgWin": 0.10012150006209192,
+    "avgLoss": -0.049224634462069386,
+    "profitFactor": 0.7040670328571227,
+    "expectancyR": -0.25109336404668237
+   },
+   "walkForward": {
+    "trades": 3301,
+    "winRate": 0.2941532868827628,
+    "avgWin": 0.09961190523860974,
+    "avgLoss": -0.0447095851057112,
+    "profitFactor": 0.9284829132958047,
+    "expectancyR": -0.058393218791509376
+   },
+   "positiveYears": "4/12",
+   "failed": [
+    "expR",
+    "yearsPositive",
+    "doubledCosts",
+    "walkForward",
+    "portfolioPositive"
+   ],
+   "portfolioHoldOut": {
+    "totalReturn": -0.5326382439974733,
+    "cagr": -0.14509905962617992,
+    "maxDrawdown": -0.6061857020691563
+   }
+  },
+  "volume": {
+   "name": "اختراق بحجم مرتفع",
+   "verdict": "unproven",
+   "exit": "trail",
+   "development": {
+    "trades": 1890,
+    "winRate": 0.335978835978836,
+    "avgWin": 0.11976898950505536,
+    "avgLoss": -0.04999562781384415,
+    "profitFactor": 1.2121109052068784,
+    "expectancyR": 0.16220556210156
+   },
+   "holdOut": {
+    "trades": 793,
+    "winRate": 0.2837326607818411,
+    "avgWin": 0.12599443274588104,
+    "avgLoss": -0.054822939273532545,
+    "profitFactor": 0.9103810768632393,
+    "expectancyR": -0.0982560473041073
+   },
+   "walkForward": {
+    "trades": 2312,
+    "winRate": 0.3235294117647059,
+    "avgWin": 0.11978720052547387,
+    "avgLoss": -0.05222582245213751,
+    "profitFactor": 1.0969579414206323,
+    "expectancyR": 0.08308865883576712
+   },
+   "positiveYears": "5/12",
+   "failed": [
+    "expR",
+    "yearsPositive",
+    "doubledCosts",
+    "portfolioPositive"
+   ],
+   "portfolioHoldOut": {
+    "totalReturn": -0.013265094982129643,
+    "cagr": -0.003100223432560156,
+    "maxDrawdown": -0.30541674903038607
+   }
+  }
+ },
+ "baseline": {
+  "holdOut": {
+   "trades": 3907,
+   "winRate": 0.2364985922702841,
+   "avgWin": 0.11968275413632662,
+   "avgLoss": -0.05737957001400231,
+   "profitFactor": 0.6460899759268511,
+   "expectancyR": -0.32638854846041826
+  },
+  "description": "أي سهم في اتجاه صاعد (متوسط 50 فوق 200) بنفس المخرج والتكاليف"
+ }
+}

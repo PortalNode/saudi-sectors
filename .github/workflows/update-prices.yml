@@ -86,6 +86,9 @@ jobs:
       # Five-day intraday bars for the small chart (dist/intraday); a failure keeps the previous files.
       - name: Update intraday bars
         run: node scripts/update-intraday.mjs || echo "::warning::Intraday bars were not updated."
+      # Market scanner: signals for every stock from the candles just written. A failure keeps the previous file.
+      - name: Build scanner signals
+        run: node scripts/build-scanner.mjs || echo "::warning::Scanner signals were not updated."
       # A push made meanwhile (site edits) used to reject the bot's push and
       # lose the update. Rebase onto it; if that conflicts, start again from
       # the newest main and refetch, so prices land on the latest content.
@@ -97,7 +100,7 @@ jobs:
           git config user.name "price-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
-            git add -A dist/data.json dist/ohlc dist/intraday
+            git add -A dist/data.json dist/ohlc dist/intraday dist/scanner/signals.json
             if git diff --cached --quiet; then
               echo "No price changes to commit."
               echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -119,6 +122,7 @@ jobs:
             node scripts/update-prices.mjs
             node scripts/update-ohlc.mjs || true
             node scripts/update-intraday.mjs || true
+            node scripts/build-scanner.mjs || true
           done
           echo "Could not publish the refreshed data after 3 attempts."
           exit 1

@@ -370,7 +370,8 @@
 
   // home: سهم الصفحة. اختيار سهم آخر من البحث يغيّر الشارت وحده دون إعادة تحميل الصفحة، كما في TradingView
   // away: اسم السهم المعروض وصفحة قطاعه حين يختلف عن سهم الصفحة
-  function mount(panel, file, { home = null, away = {}, keepFull = false } = {}) {
+  // levels: [{price, title, color}] — خطوط سعر مرجعية (دخول/وقف/أهداف) من الماسح؛ لا تُحفظ ولا تُعدَّل كرسومات المستخدم
+  function mount(panel, file, { home = null, away = {}, keepFull = false, levels = [] } = {}) {
     current?.destroy({ keepFull });
     home ??= { symbol: String(file.symbol), file };
     const raw = bars(file), symbol = file.symbol, estimated = new Set(file.est || []), dividends = (file.div || []).filter(([d]) => d > raw[0]?.time && d <= raw.at(-1)?.time);
@@ -691,6 +692,11 @@
         if (d.hidden || (d.type !== 'hline' && d.type !== 'hray')) continue;
         const s = styleOf(d), isH = d.type === 'hline';
         const line = main.createPriceLine({ price: isH ? d.price : d.a.price, color: colorOf(d), lineWidth: Math.round(s.width) || 1, lineStyle: LWC.LineStyle[{ dotted: 'Dotted', dashed: 'Dashed' }[s.line] || 'Solid'], lineVisible: isH, axisLabelVisible: true, title: '' });
+        drawn.push({ remove: () => main.removePriceLine(line) });
+      }
+      for (const lv of levels) {
+        if (!(lv.price > 0)) continue;
+        const line = main.createPriceLine({ price: lv.price, color: lv.color || colors.gold, lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, lineVisible: true, axisLabelVisible: true, title: lv.title || '' });
         drawn.push({ remove: () => main.removePriceLine(line) });
       }
       overlay.redraw();

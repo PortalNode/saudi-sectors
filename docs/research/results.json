@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-16T23:56:46.645Z",
+ "generated": "2026-11-17T00:04:42.148Z",
  "lastDate": "2026-11-16",
  "costs": {
   "commission": 0.0015,
@@ -508,7 +508,12 @@
     "expectancyR": 0.08562743720262403,
     "avgBars": 17.32363067292645
    },
-   "positiveYears": "6/12"
+   "positiveYears": "6/12",
+   "portfolio": {
+    "totalReturn": -0.19215058974107824,
+    "cagr": -0.04318730462100724,
+    "maxDrawdown": -0.4311639339124277
+   }
   },
   "pullback": {
    "pass": false,
@@ -565,7 +570,12 @@
     "expectancyR": 0.07404419395546093,
     "avgBars": 21.2489649461772
    },
-   "positiveYears": "4/12"
+   "positiveYears": "4/12",
+   "portfolio": {
+    "totalReturn": -0.4967178247284899,
+    "cagr": -0.13172827044110516,
+    "maxDrawdown": -0.5456804762021742
+   }
   },
   "squeeze": {
    "pass": false,
@@ -622,7 +632,12 @@
     "expectancyR": 0.07500274122585292,
     "avgBars": 16.52013147082991
    },
-   "positiveYears": "4/12"
+   "positiveYears": "4/12",
+   "portfolio": {
+    "totalReturn": -0.40517676805163994,
+    "cagr": -0.10144048309267521,
+    "maxDrawdown": -0.5039680276877698
+   }
   },
   "reversal": {
    "pass": false,
@@ -679,7 +694,12 @@
     "expectancyR": -0.28745304893540286,
     "avgBars": 20.058005680968755
    },
-   "positiveYears": "2/12"
+   "positiveYears": "2/12",
+   "portfolio": {
+    "totalReturn": -0.7202792583468396,
+    "cagr": -0.23041287034832864,
+    "maxDrawdown": -0.7401940131141183
+   }
   },
   "rs": {
    "pass": false,
@@ -736,7 +756,12 @@
     "expectancyR": 0.06368160206358935,
     "avgBars": 19.349682631275247
    },
-   "positiveYears": "5/12"
+   "positiveYears": "5/12",
+   "portfolio": {
+    "totalReturn": -0.28067822358340067,
+    "cagr": -0.06557359964359728,
+    "maxDrawdown": -0.46553616624231464
+   }
   },
   "cross": {
    "pass": false,
@@ -793,7 +818,12 @@
     "expectancyR": 0.0727861191015437,
     "avgBars": 19.886883273164862
    },
-   "positiveYears": "7/12"
+   "positiveYears": "7/12",
+   "portfolio": {
+    "totalReturn": -0.24191498070656708,
+    "cagr": -0.05557226287227337,
+    "maxDrawdown": -0.42974751096807856
+   }
   },
   "base": {
    "pass": false,
@@ -850,7 +880,12 @@
     "expectancyR": -0.058393218791509376,
     "avgBars": 16.469251741896397
    },
-   "positiveYears": "4/12"
+   "positiveYears": "4/12",
+   "portfolio": {
+    "totalReturn": -0.5326382439974733,
+    "cagr": -0.14509905962617992,
+    "maxDrawdown": -0.6061857020691563
+   }
   },
   "volume": {
    "pass": false,
@@ -907,7 +942,12 @@
     "expectancyR": 0.08308865883576712,
     "avgBars": 16.397923875432525
    },
-   "positiveYears": "5/12"
+   "positiveYears": "5/12",
+   "portfolio": {
+    "totalReturn": -0.013265094982129643,
+    "cagr": -0.003100223432560156,
+    "maxDrawdown": -0.30541674903038607
+   }
   }
  }
 }
