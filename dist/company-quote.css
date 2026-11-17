@@ -376,3 +376,15 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cc-favbar button:hover{background:var(--pf-line)}
 .cc-favbar button[aria-pressed="true"]{background:var(--pf-gold-soft);color:var(--pf-gold)}
 .cc-favbar svg{width:26px;height:26px}
+
+/* توحيد أبعاد الشريط الجانبي على مقاسات TradingView: عمود 52px، أزرار 40×38 بأيقونة 28px، وفواصل بين المجموعات، وحالة نشطة بصندوق مدوّر (الألوان من ألوان الموقع) */
+.cq-chart-panel .cc-side{width:52px;padding:6px 0;gap:1px}
+.cq-chart-panel .cc-side button{width:40px;height:38px;border-radius:6px;transition:background .12s,color .12s}
+.cq-chart-panel .cc-side button svg{display:block;width:28px;height:28px}
+.cq-chart-panel .cc-side button:not([aria-pressed="true"]):not([aria-expanded="true"]){color:var(--pf-ink)}
+.cq-chart-panel .cc-side button:hover:not(:disabled){background:var(--pf-line)}
+.cq-chart-panel .cc-side button[aria-pressed="true"],.cq-chart-panel .cc-side button[aria-expanded="true"]{background:var(--pf-gold-soft);color:var(--pf-gold)}
+.cq-chart-panel .cc-side button:focus-visible{outline:2px solid var(--pf-gold);outline-offset:-2px}
+.cq-chart-panel .cc-side hr{width:34px;margin:5px 0;border-top:1px solid var(--pf-line)}
+.cq-chart-panel .cc-side [data-menu]:not(.cc-grp-arrow)::after{right:4px;bottom:4px;border-width:2.5px;opacity:.5}
+.cq-chart-panel .cc-side .cc-grp-arrow{right:0;width:12px;height:24px;border-radius:5px 0 0 5px}

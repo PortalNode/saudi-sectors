@@ -110,6 +110,6 @@ test('the technical page carries the three tabs and loads only files that exist'
 
 test('results pages are untouched by the scanner work: they still load the pinned chart version', () => {
   const dist = new URL('../dist/', import.meta.url);
-  assert.match(readFileSync(new URL('banks.html', dist), 'utf8'), /company-chart\.js\?v=chart-20261117B/);
+  assert.match(readFileSync(new URL('banks.html', dist), 'utf8'), /company-chart\.js\?v=chart-20261117C/);
   assert.doesNotMatch(readFileSync(new URL('banks.html', dist), 'utf8'), /scanner/);
 });

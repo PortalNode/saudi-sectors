@@ -183,33 +183,34 @@
   const ICON_RESET = svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>');
   const ICON_FULL = svg('<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>');
   const ICON_EXIT = svg('<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>');
-  // أيقونات الشريط الجانبي مرسومة من جديد على شبكة TradingView (28×28): خط 1.2 رفيع، ودوائر نقاط الارتكاز مفرغة بنصف قطر 2.5
-  const icon = d => `<svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  // أيقونات الشريط الجانبي مرسومة على شبكة TradingView (28×28): خط 1 موحّد، وعقد الارتكاز دوائر مفرغة نصف قطرها 2 (2.5 بالخارج)،
+  // والخطوط تنتهي عند حافة الدائرة، والمقابض والأسهم بنفس السماكة والنهايات المدوّرة
+  const icon = d => `<svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICONS = {
-    cursor: icon('<path d="M14 4.5v7.5M14 16v7.5M4.5 14H12M16 14h7.5"/><circle cx="14" cy="14" r=".9" fill="currentColor"/>'),
-    vline: icon('<path d="M14 4v4.5M14 12.5v3M14 19.5V24"/><circle cx="14" cy="10.5" r="2"/><circle cx="14" cy="17.5" r="2"/>'),
-    hline: icon('<path d="M4 14h7.5M16.5 14H24"/><circle cx="14" cy="14" r="2.5"/>'),
-    hray: icon('<path d="M10 14h14M21 10.5l3.5 3.5-3.5 3.5"/><circle cx="7.5" cy="14" r="2.5"/>'),
-    trend: icon('<path d="M9.8 18.2l8.4-8.4"/><circle cx="8" cy="20" r="2.5"/><circle cx="20" cy="8" r="2.5"/>'),
-    ray: icon('<path d="M9 19l13-13M16.5 6H22v5.5"/><circle cx="7.5" cy="20.5" r="2.5"/>'),
-    ext: icon('<path d="M4 24l5.4-5.4M12.6 15.4l2.8-2.8M18.6 9.4L24 4"/><circle cx="11" cy="17" r="2"/><circle cx="17" cy="11" r="2"/>'),
-    arrow: icon('<path d="M6 22L22 6M12 6h10v10"/>'),
-    rect: icon('<rect x="5" y="8" width="18" height="12" rx="1.5"/><path d="M5 14h18"/>'),
-    fib: icon('<path d="M4 6h15M4 11.5h20M4 17h15M4 22.5h20"/><circle cx="22" cy="6" r="2"/><circle cx="22" cy="17" r="2"/>'),
-    range: icon('<path d="M8 4.5h12M8 23.5h12M14 8.5v15M10.5 12L14 8.5l3.5 3.5"/>'),
-    text: icon('<path d="M7 7.5h14M14 7.5v14M11 21.5h6"/>'),
-    magnet: icon('<path d="M7 4.5h5V14a2 2 0 0 0 4 0V4.5h5V14a7 7 0 0 1-14 0z"/><path d="M7 9h5M16 9h5"/>'),
+    cursor: icon('<path d="M14 4v7M14 17v7M4 14h7M17 14h7"/>'),
+    vline: icon('<path d="M14 4v7.5M14 16.5V24"/><circle cx="14" cy="14" r="2"/>'),
+    hline: icon('<path d="M4 14h7.5M16.5 14H24"/><circle cx="14" cy="14" r="2"/>'),
+    hray: icon('<path d="M9.5 14H24"/><circle cx="7" cy="14" r="2"/>'),
+    trend: icon('<path d="M9.8 18.2l8.4-8.4"/><circle cx="8" cy="20" r="2"/><circle cx="20" cy="8" r="2"/>'),
+    ray: icon('<path d="M9.3 18.7L23.5 4.5"/><circle cx="7.5" cy="20.5" r="2"/>'),
+    ext: icon('<path d="M4 24l5.2-5.2M12.8 15.2l2.4-2.4M18.8 9.2L24 4"/><circle cx="11" cy="17" r="2"/><circle cx="17" cy="11" r="2"/>'),
+    arrow: icon('<path d="M6 22L22 6M13 6h9v9"/>'),
+    rect: icon('<rect x="5.5" y="8.5" width="17" height="11"/>'),
+    fib: icon('<path d="M4 7h15.5M4 14h20M8.5 21H24"/><circle cx="22" cy="7" r="2"/><circle cx="6" cy="21" r="2"/>'),
+    range: icon('<path d="M4 7h15.5M14 22.5V10M10.5 13.5L14 10l3.5 3.5M8.5 22.5H24"/><circle cx="22" cy="7" r="2"/><circle cx="6" cy="22.5" r="2"/>'),
+    text: icon('<path d="M7.5 10.5v-3h13v3M14 7.5v14M11 21.5h6"/>'),
+    magnet: icon('<path d="M6.5 22.5V14a7.5 7.5 0 0 1 15 0v8.5h-5V14a2.5 2.5 0 0 0-5 0v8.5z"/><path d="M6.5 18h5M16.5 18h5"/>'),
     ind: icon('<path d="M4 23.5h20"/><path d="M5 18c2.5-7 5-7 7.5-2.5S17.5 20 19.5 12 22.5 5 23.5 4.5"/>'),
-    stay: icon('<path d="M15.5 5.5l4.5 4.5L9.5 20.5l-5.5 1 1-5.5z"/><path d="M13.5 7.5l4.5 4.5"/><rect x="16.5" y="17.5" width="7.5" height="6" rx="1.2"/><path d="M18.3 17.5V16a2 2 0 0 1 4 0v1.5"/>'),
+    stay: icon('<path d="M16.5 5.5l4.5 4.5L10 21l-5.5 1 1-5.5z"/><path d="M14.5 7.5l4.5 4.5"/><rect x="16.5" y="17.5" width="8" height="6" rx="1.3"/><path d="M18.3 17.5V16a2.2 2.2 0 0 1 4.4 0v1.5"/>'),
     starBtn: icon('<path d="M14 4.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L14 19.3l-5.9 3.2 1.2-6.5-4.8-4.6 6.6-.9z"/>'),
     gear: icon('<path d="M14 4l8.7 5v10L14 24l-8.7-5V9z"/><circle cx="14" cy="14" r="3.5"/>'),
     undo: icon('<path d="M10.5 7.5L5.5 12.5l5 5M5.5 12.5H17a5.5 5.5 0 0 1 0 11h-4"/>'),
     redo: icon('<path d="M17.5 7.5l5 5-5 5M22.5 12.5H11a5.5 5.5 0 0 0 0 11h4"/>'),
-    lock: icon('<rect x="6.5" y="13" width="15" height="10.5" rx="2"/><path d="M9.5 13V9.5a4.5 4.5 0 0 1 9 0V13"/><circle cx="14" cy="18.2" r="1" fill="currentColor"/>'),
-    unlock: icon('<rect x="6.5" y="13" width="15" height="10.5" rx="2"/><path d="M9.5 13V9.5a4.5 4.5 0 0 1 8.7-1.6"/><circle cx="14" cy="18.2" r="1" fill="currentColor"/>'),
-    eye: icon('<path d="M3.5 14S7.5 7.5 14 7.5 24.5 14 24.5 14 20.5 20.5 14 20.5 3.5 14 3.5 14z"/><circle cx="14" cy="14" r="3.2"/>'),
-    eyeOff: icon('<path d="M3.5 14S7.5 7.5 14 7.5 24.5 14 24.5 14 20.5 20.5 14 20.5 3.5 14 3.5 14z"/><circle cx="14" cy="14" r="3.2"/><path d="M5 23L23 5"/>'),
-    trash: icon('<path d="M5.5 8.5h17M11 8.5V5.5h6v3M8 8.5l1.2 15h9.6l1.2-15M12 12.5v7M16 12.5v7"/>')
+    lock: icon('<rect x="7" y="13" width="14" height="10" rx="2"/><path d="M10 13V9.5a4 4 0 0 1 8 0V13"/><circle cx="14" cy="17.2" r="1.2"/><path d="M14 18.4v2"/>'),
+    unlock: icon('<rect x="7" y="13" width="14" height="10" rx="2"/><path d="M10 13V9.5a4 4 0 0 1 7.6-1.7"/><circle cx="14" cy="17.2" r="1.2"/><path d="M14 18.4v2"/>'),
+    eye: icon('<path d="M3.5 12.5C6 8.8 9.7 6.5 14 6.5s8 2.3 10.5 6C22 16.2 18.3 18.5 14 18.5s-8-2.3-10.5-6z"/><circle cx="14" cy="12.5" r="3"/><path d="M24 18l-4.2 4.5"/><path d="M19.6 22.4c-2 0-2.6 1.7-3.4 2.6 2.2.4 4.4-.2 4.6-2.2"/>'),
+    eyeOff: icon('<path d="M3.5 12.5C6 8.8 9.7 6.5 14 6.5s8 2.3 10.5 6C22 16.2 18.3 18.5 14 18.5s-8-2.3-10.5-6z"/><circle cx="14" cy="12.5" r="3"/><path d="M24 18l-4.2 4.5"/><path d="M19.6 22.4c-2 0-2.6 1.7-3.4 2.6 2.2.4 4.4-.2 4.6-2.2"/><path d="M5 20.5L22 4.5"/>'),
+    trash: icon('<path d="M5.5 8.5h17M11 8.5V5.5h6v3M7.5 8.5l1.3 15h10.4l1.3-15M12 12.5v7M16 12.5v7"/>')
   };
 
   const ICON_CHEVRON = '<svg viewBox="0 0 10 16" width="8" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3L3 8l4 5"/></svg>';
