@@ -1,37 +1,69 @@
-// صفحة «التحليل الفني»: شارت السهم كاملًا (company-chart.js) في صفحة مستقلة.
+// صفحة «التحليل الفني»: ماسح السوق وقائمة المراقبة وشارت السهم (company-chart.js) في صفحة واحدة.
 // السهم من ?symbol= في الرابط، وإن لم يوجد أو لم يكن في القائمة يُعرض أرامكو (2222).
+// الصفحة تُفتح على الماسح، وعلى الشارت إن جاء الرابط بـ ?symbol= أو #chart.
 // اختيار سهم آخر يتم من زر البحث داخل الشارت نفسه، كما كان في صفحات النتائج.
 (() => {
   const DEFAULT_SYMBOL = '2222';
+  const SCANNER_MODULE = './scanner/scanner-ui.mjs?v=sc-20261118a';
+  const TABS = ['scanner', 'chart', 'watch'];
   const status = document.getElementById('ta-status');
   const panel = document.getElementById('ta-chart');
   const params = new URLSearchParams(location.search);
+  let stocks = null, mounted = null;
 
   function fail(message) {
     if (status) status.textContent = message;
   }
 
-  async function start() {
-    let data;
-    try {
-      data = await fetch('data.json').then(r => r.json());
-    } catch (error) {
-      console.warn('Price snapshot unavailable:', error);
-      return fail('تعذر تحميل قائمة الأسهم.');
-    }
-    const stocks = new Map(data.sectors.flatMap(sector => sector.stocks).map(stock => [String(stock.symbol), stock]));
-    const requested = params.get('symbol');
-    const symbol = requested && stocks.has(requested) ? requested : DEFAULT_SYMBOL;
-    const stock = stocks.get(symbol);
-    if (!stock) return fail('لا يوجد سهم بهذا الرمز.');
+  const ready = fetch('data.json').then(r => r.json()).then(data => {
+    stocks = new Map(data.sectors.flatMap(sector => sector.stocks).map(stock => [String(stock.symbol), stock]));
+    return stocks;
+  }).catch(error => {
+    console.warn('Price snapshot unavailable:', error);
+    fail('تعذر تحميل قائمة الأسهم.');
+    return null;
+  });
 
+  // يعرض شارت السهم؛ levels: خطوط سعر مرجعية (دخول/وقف/أهداف) يرسمها الشارت دون حفظها
+  async function mountChart(requested, levels = []) {
+    const map = stocks || await ready;
+    if (!map) return false;
+    const symbol = requested && map.has(String(requested)) ? String(requested) : DEFAULT_SYMBOL;
+    const stock = map.get(symbol);
+    if (!stock) { fail('لا يوجد سهم بهذا الرمز.'); return false; }
     document.title = `${stock.name} · التحليل الفني | السوق السعودي`;
-    if (!window.CompanyChart) return fail('تعذر تحميل مكتبة الشارت.');
+    if (!window.CompanyChart) { fail('تعذر تحميل مكتبة الشارت.'); return false; }
     const file = await window.CompanyChart.load(symbol);
-    if (!file) return fail(`لا تتوفر شموع للسهم ${symbol} بعد.`);
+    if (!file) { fail(`لا تتوفر شموع للسهم ${symbol} بعد.`); return false; }
+    document.getElementById('ta-status')?.remove();
+    window.CompanyChart.mount(panel, file, { home: { symbol, file, name: stock.name }, levels });
+    mounted = symbol;
+    return true;
+  }
 
-    if (status) status.remove();
-    window.CompanyChart.mount(panel, file, { home: { symbol, file, name: stock.name } });
+  function setTab(name, { remember = true, mount = true } = {}) {
+    if (!TABS.includes(name)) name = 'chart';
+    document.body.dataset.tab = name;
+    for (const b of document.querySelectorAll('[data-tab-button]')) b.setAttribute('aria-selected', String(b.dataset.tabButton === name));
+    if (remember) { try { history.replaceState(null, '', `${location.pathname}${location.search}#${name}`); } catch { /* ignore */ } }
+    if (name === 'chart' && mount && !mounted) mountChart(params.get('symbol'));
+  }
+
+  const api = { ready, mountChart, setTab, current: () => mounted, chartPanel: panel };
+  window.TA = api;
+
+  function start() {
+    for (const b of document.querySelectorAll('[data-tab-button]')) b.addEventListener('click', () => setTab(b.dataset.tabButton));
+    const hash = location.hash.slice(1);
+    const initial = params.has('symbol') || hash === 'chart' ? 'chart' : TABS.includes(hash) ? hash : 'scanner';
+    setTab(initial, { remember: false });
+    // الماسح وحدة منفصلة: إن تعذر تحميلها يبقى الشارت يعمل كما كان
+    import(SCANNER_MODULE).then(m => m.init(api, initial)).catch(error => {
+      console.warn('Scanner unavailable:', error);
+      const box = document.getElementById('sc-scanner');
+      if (box) box.innerHTML = '<p class="cq-empty">تعذر تحميل الماسح. الشارت يعمل من تبويب «الشارت».</p>';
+      if (initial !== 'chart') setTab('chart', { remember: false });
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();

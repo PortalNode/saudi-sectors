@@ -4,14 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#11161d">
-  <meta name="description" content="شارت السهم مع المتوسطات المتحركة وبولنجر وRSI وMACD وأدوات الرسم، لأي سهم في السوق السعودي.">
+  <meta name="description" content="ماسح فني وصفي للسوق السعودي مع شارت السهم والمتوسطات المتحركة وبولنجر وRSI وMACD وأدوات الرسم.">
   <title>التحليل الفني | السوق السعودي</title>
   <script src="theme.js?v=20261105"></script>
   <link rel="stylesheet" href="styles.css?v=sticky-page-20261105-summary-fit">
   <link rel="stylesheet" href="theme.css?v=20261105">
   <link rel="stylesheet" href="company-profile.css?v=20261115">
   <link rel="stylesheet" href="company-quote.css?v=chart-20261117B">
-  <link rel="stylesheet" href="technical-analysis.css?v=ta-20261117b">
+  <link rel="stylesheet" href="technical-analysis.css?v=ta-20261118a">
+  <link rel="stylesheet" href="scanner/scanner.css?v=sc-20261118b">
   <link rel="stylesheet" href="layout.css?v=logos-20261116">
   <link rel="stylesheet" href="mobile.css?v=mobile-20261116">
   <link rel="icon" href="favicon.ico?v=20261109-favicon1" sizes="any" type="image/x-icon">
@@ -29,14 +30,24 @@
     </header>
     <div class="ta-heading">
       <h2>التحليل الفني</h2>
-      <p>شارت السهم مع المتوسطات المتحركة وبولنجر وRSI وMACD وأدوات الرسم. اختر السهم من زر البحث أعلى الشارت.</p>
+      <p>ماسح وصفي للأسهم التي يتطابق رسمها مع استراتيجيات فنية معروفة، وشارت السهم بأدواته. الماسح لا يتنبأ ولا يوصي.</p>
     </div>
-    <section class="ta-panel company-quote" aria-label="شارت السهم">
-      <div id="ta-chart" class="cq-chart-panel ta-chart"><p class="cq-empty" id="ta-status" role="status">جار تحميل الشارت…</p></div>
-    </section>
+    <div class="sc-tabs" role="tablist" aria-label="أقسام التحليل الفني">
+      <button type="button" role="tab" data-tab-button="scanner" aria-selected="false">ماسح السوق</button>
+      <button type="button" role="tab" data-tab-button="chart" aria-selected="true">الشارت</button>
+      <button type="button" role="tab" data-tab-button="watch" aria-selected="false">قائمة المراقبة <span class="sc-count" id="sc-watch-count" hidden></span></button>
+    </div>
+    <section id="sc-scanner" class="sc-section" data-tabpanel="scanner" aria-label="ماسح السوق"><p class="cq-empty" role="status">جار تحميل الماسح…</p></section>
+    <section id="sc-watch" class="sc-section" data-tabpanel="watch" aria-label="قائمة المراقبة"></section>
+    <div data-tabpanel="chart">
+      <div id="sc-card" class="sc-card-slot" hidden></div>
+      <section class="ta-panel company-quote" aria-label="شارت السهم">
+        <div id="ta-chart" class="cq-chart-panel ta-chart"><p class="cq-empty" id="ta-status" role="status">جار تحميل الشارت…</p></div>
+      </section>
+    </div>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض الشارت.</p></noscript>
   </main>
-  <script src="company-chart.js?v=chart-20261117B" defer></script>
-  <script src="technical-analysis.js?v=ta-20261117a" defer></script>
+  <script src="company-chart.js?v=chart-20261118-levels" defer></script>
+  <script src="technical-analysis.js?v=ta-20261118a" defer></script>
 </body>
 </html>

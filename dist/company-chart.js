@@ -694,6 +694,9 @@
         const line = main.createPriceLine({ price: isH ? d.price : d.a.price, color: colorOf(d), lineWidth: Math.round(s.width) || 1, lineStyle: LWC.LineStyle[{ dotted: 'Dotted', dashed: 'Dashed' }[s.line] || 'Solid'], lineVisible: isH, axisLabelVisible: true, title: '' });
         drawn.push({ remove: () => main.removePriceLine(line) });
       }
+      // المحور يتسع للمستويات المرجعية (وإلا خرجت الأهداف خارج النطاق المرئي)
+      const lvPrices = levels.map(lv => lv.price).filter(p => p > 0);
+      if (lvPrices.length) main.applyOptions({ autoscaleInfoProvider: base => { const r = base(); if (!r) return r; return { ...r, priceRange: { minValue: Math.min(r.priceRange.minValue, ...lvPrices), maxValue: Math.max(r.priceRange.maxValue, ...lvPrices) } }; } });
       for (const lv of levels) {
         if (!(lv.price > 0)) continue;
         const line = main.createPriceLine({ price: lv.price, color: lv.color || colors.gold, lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, lineVisible: true, axisLabelVisible: true, title: lv.title || '' });

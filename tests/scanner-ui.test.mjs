@@ -92,3 +92,24 @@ test('the strategy statistics shown on the page say nothing is proven', () => {
   assert.ok(Object.keys(st.strategies).length >= 7);
   for (const [id, s] of Object.entries(st.strategies)) assert.equal(s.verdict, 'unproven', id);
 });
+
+test('the technical page carries the three tabs and loads only files that exist', () => {
+  const dist = new URL('../dist/', import.meta.url);
+  const html = readFileSync(new URL('technical-analysis.html', dist), 'utf8');
+  for (const tab of ['scanner', 'chart', 'watch']) assert.match(html, new RegExp(`data-tab-button="${tab}"`));
+  for (const id of ['sc-scanner', 'sc-watch', 'sc-card', 'ta-chart']) assert.match(html, new RegExp(`id="${id}"`));
+  for (const m of html.matchAll(/(?:src|href)="([^"?#]+\.(?:js|css|mjs))\?v=[^"]+"/g)) readFileSync(new URL(m[1], dist), 'utf8');
+  // the loader names the scanner module with a path that resolves from a classic script
+  const loader = readFileSync(new URL('technical-analysis.js', dist), 'utf8');
+  const mod = loader.match(/SCANNER_MODULE = '(\.\/scanner\/scanner-ui\.mjs)\?v=[^']+'/);
+  assert.ok(mod, 'dynamic import needs a ./ path');
+  readFileSync(new URL(mod[1], dist), 'utf8');
+  // the chart still works if the scanner fails to load
+  assert.match(loader, /catch\(error => \{[\s\S]*setTab\('chart'/);
+});
+
+test('results pages are untouched by the scanner work: they still load the pinned chart version', () => {
+  const dist = new URL('../dist/', import.meta.url);
+  assert.match(readFileSync(new URL('banks.html', dist), 'utf8'), /company-chart\.js\?v=chart-20261117B/);
+  assert.doesNotMatch(readFileSync(new URL('banks.html', dist), 'utf8'), /scanner/);
+});
