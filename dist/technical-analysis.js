@@ -6,7 +6,7 @@
   const DEFAULT_SYMBOL = '2222';
   const INDEX = { symbol: 'TASI', name: 'مؤشر السوق السعودي' }; // شموعه في ohlc/TASI.json وشعاره في logos/TASI.svg
   const SCANNER_MODULE = './scanner/scanner-ui.mjs?v=sc-20261118a';
-  const TABS = ['scanner', 'chart', 'watch'];
+  const TABS = ['chart', 'scanner', 'watch'];
   const status = document.getElementById('ta-status');
   const panel = document.getElementById('ta-chart');
   const params = new URLSearchParams(location.search);
@@ -57,7 +57,7 @@
   function start() {
     for (const b of document.querySelectorAll('[data-tab-button]')) b.addEventListener('click', () => setTab(b.dataset.tabButton));
     const hash = location.hash.slice(1);
-    const initial = params.has('symbol') || hash === 'chart' ? 'chart' : TABS.includes(hash) ? hash : 'scanner';
+    const initial = TABS.includes(hash) && !params.has('symbol') ? hash : 'chart';
     setTab(initial, { remember: false });
     // الماسح وحدة منفصلة: إن تعذر تحميلها يبقى الشارت يعمل كما كان
     import(SCANNER_MODULE).then(m => m.init(api, initial)).catch(error => {
