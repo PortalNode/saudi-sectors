@@ -224,16 +224,20 @@
   // تطبيع البحث العربي كما في الصفحة الرئيسية: بلا تشكيل، والهمزات ألف، والتاء المربوطة هاء، والألف المقصورة ياء
   const norm = value => String(value ?? '').normalize('NFKD').replace(/[\u064B-\u065F\u0670]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').toLowerCase().trim();
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // مؤشر السوق السعودي في بحث الشارت كأنه سهم: رمزه TASI وشموعه في ohlc/TASI.json وشعاره في logos/TASI.svg
+  const INDEX_ENTRY = { symbol: 'TASI', name: 'مؤشر السوق السعودي (تاسي)', sector: 'المؤشر', page: null };
   let stockListPromise = null;
   const loadStockList = () => stockListPromise ??= fetch('data.json').then(r => r.json())
-    .then(d => d.sectors.flatMap(sector => SECTOR_PAGES[sector.name] ? sector.stocks.map(x => ({ symbol: String(x.symbol), name: x.name, sector: sector.name, page: SECTOR_PAGES[sector.name] })) : []))
+    .then(d => [INDEX_ENTRY, ...d.sectors.flatMap(sector => SECTOR_PAGES[sector.name] ? sector.stocks.map(x => ({ symbol: String(x.symbol), name: x.name, sector: sector.name, page: SECTOR_PAGES[sector.name] })) : [])])
     .catch(() => { stockListPromise = null; return []; });
   // الرمز المطابق أولًا، ثم ما يبدأ به الرمز، ثم ما يبدأ به الاسم
-  const searchRank = (x, q) => x.symbol === q ? 0 : x.symbol.startsWith(q) ? 1 : norm(x.name).startsWith(q) ? 2 : 3;
+  // الرمز يُقارن بحروف صغيرة لأن الاستعلام مُطبَّع هكذا (رمز المؤشر TASI حروف لا أرقام)
+  const symbolOf = x => x.symbol.toLowerCase();
+  const searchRank = (x, q) => symbolOf(x) === q ? 0 : symbolOf(x).startsWith(q) ? 1 : norm(x.name).startsWith(q) ? 2 : 3;
   function searchStocks(list, query) {
     const q = norm(query);
     if (!q) return list;
-    return list.filter(x => x.symbol.includes(q) || norm(x.name).includes(q)).sort((a, b) => searchRank(a, q) - searchRank(b, q));
+    return list.filter(x => symbolOf(x).includes(q) || norm(x.name).includes(q)).sort((a, b) => searchRank(a, q) - searchRank(b, q));
   }
   const ICON_SEARCH = svg('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/>');
   const RESET_KEY = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '') ? '⌥ + R' : 'Alt + R';
@@ -1543,5 +1547,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, load: loadCandleFile, calc: { joinCandles, adjustDividends, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, IND_DEFAULT, mergeInd, indParams, srcOf, histColorIndex, crosshairDate, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
+  window.CompanyChart = { mount, load: loadCandleFile, indexEntry: INDEX_ENTRY, calc: { joinCandles, adjustDividends, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, IND_DEFAULT, mergeInd, indParams, srcOf, histColorIndex, crosshairDate, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
 })();

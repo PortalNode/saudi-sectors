@@ -1,9 +1,10 @@
 // صفحة «التحليل الفني»: ماسح السوق وقائمة المراقبة وشارت السهم (company-chart.js) في صفحة واحدة.
-// السهم من ?symbol= في الرابط، وإن لم يوجد أو لم يكن في القائمة يُعرض أرامكو (2222).
+// السهم من ?symbol= في الرابط (أو TASI لمؤشر السوق)، وإن لم يوجد أو لم يكن في القائمة يُعرض أرامكو (2222).
 // الصفحة تُفتح على الماسح، وعلى الشارت إن جاء الرابط بـ ?symbol= أو #chart.
 // اختيار سهم آخر يتم من زر البحث داخل الشارت نفسه، كما كان في صفحات النتائج.
 (() => {
   const DEFAULT_SYMBOL = '2222';
+  const INDEX = { symbol: 'TASI', name: 'مؤشر السوق السعودي' }; // شموعه في ohlc/TASI.json وشعاره في logos/TASI.svg
   const SCANNER_MODULE = './scanner/scanner-ui.mjs?v=sc-20261118a';
   const TABS = ['scanner', 'chart', 'watch'];
   const status = document.getElementById('ta-status');
@@ -28,8 +29,9 @@
   async function mountChart(requested, levels = []) {
     const map = stocks || await ready;
     if (!map) return false;
-    const symbol = requested && map.has(String(requested)) ? String(requested) : DEFAULT_SYMBOL;
-    const stock = map.get(symbol);
+    const isIndex = String(requested).toUpperCase() === INDEX.symbol;
+    const symbol = isIndex ? INDEX.symbol : requested && map.has(String(requested)) ? String(requested) : DEFAULT_SYMBOL;
+    const stock = isIndex ? INDEX : map.get(symbol);
     if (!stock) { fail('لا يوجد سهم بهذا الرمز.'); return false; }
     document.title = `${stock.name} · التحليل الفني | السوق السعودي`;
     if (!window.CompanyChart) { fail('تعذر تحميل مكتبة الشارت.'); return false; }

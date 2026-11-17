@@ -83,6 +83,9 @@ jobs:
       # never blocks the price update.
       - name: Update daily candles
         run: node scripts/update-ohlc.mjs || echo "::warning::Daily candles were not updated."
+      # TASI (the market index) daily candles from TradingView's chart socket; a failure keeps the previous files.
+      - name: Update TASI candles
+        run: node scripts/update-tasi.mjs || echo "::warning::TASI candles were not updated."
       # Five-day intraday bars for the small chart (dist/intraday); a failure keeps the previous files.
       - name: Update intraday bars
         run: node scripts/update-intraday.mjs || echo "::warning::Intraday bars were not updated."
@@ -121,6 +124,7 @@ jobs:
             git reset --hard origin/main
             node scripts/update-prices.mjs
             node scripts/update-ohlc.mjs || true
+            node scripts/update-tasi.mjs || true
             node scripts/update-intraday.mjs || true
             node scripts/build-scanner.mjs || true
           done

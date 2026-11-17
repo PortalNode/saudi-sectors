@@ -11,7 +11,7 @@ const files = readdirSync(new URL('logos/', dist)).filter(name => name.endsWith(
 test('the logo manifest lists exactly the logo files, each a market symbol', () => {
   assert.deepEqual(manifest.symbols, files);
   const site = JSON.parse(read('data.json'));
-  const symbols = new Set(site.sectors.flatMap(sector => sector.stocks.map(stock => String(stock.symbol))));
+  const symbols = new Set([...site.sectors.flatMap(sector => sector.stocks.map(stock => String(stock.symbol))), 'TASI']); // TASI: the market index
   for (const symbol of files) assert.ok(symbols.has(symbol), symbol);
 });
 
