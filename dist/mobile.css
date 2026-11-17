@@ -84,6 +84,39 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   /* الترويسة تتبع الشاشة أثناء النزول (الإزاحة من mobile-tables.js) */
   .banks-page .annual-table.m-merged thead{position:relative;z-index:30;transform:translateY(var(--table-head-offset,0px))}
   .m-legend{margin:8px 0 4px;font-size:11px;color:var(--muted)}
+
+  /* ---------- بطاقات الفترات (mobile-tables.js): بطاقة لكل فترة تُسحب أفقيًا، الأحدث أولًا ---------- */
+  .m-view{margin:10px 0 8px}
+  .m-view .m-legend{margin:0 0 8px}
+  .m-switch{display:inline-flex;margin-bottom:10px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .m-switch button{min-height:38px;padding:0 18px;border:0;border-inline-start:1px solid var(--line);background:transparent;color:var(--muted);font-size:12.5px;font-weight:700}
+  .m-switch button:first-child{border-inline-start:0}
+  .m-switch button[aria-pressed="true"]{background:var(--teal);color:var(--on-accent)}
+  .m-view[data-view="table"] .q-tabs,.m-view[data-view="table"] .q-cards{display:none}
+  .annual-table-wrap[data-view="cards"]{display:none}
+  /* أزرار القفز بين الفترات */
+  .q-tabs{display:flex;gap:6px;margin-bottom:8px;padding:2px 0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .q-tabs::-webkit-scrollbar{display:none}
+  .q-tab{flex:none;min-height:36px;padding:0 14px;border:1px solid var(--line);border-radius:18px;background:transparent;color:var(--muted);font-size:12.5px;font-weight:700;white-space:nowrap}
+  .q-tab .period-sub{display:none}
+  .q-tab[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:var(--on-accent)}
+  /* البطاقات: كل بطاقة 88% من العرض فتظهر حافة التالية */
+  .q-cards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;padding-bottom:2px}
+  .q-cards::-webkit-scrollbar{display:none}
+  .q-card{flex:0 0 88%;min-width:0;scroll-snap-align:start;background:var(--panel);border:1px solid var(--line)}
+  .q-card>header{display:flex;align-items:baseline;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);font-size:17px;font-weight:800;color:var(--teal)}
+  .q-card>header .period-sub{display:inline;font-size:11px;font-weight:400;color:var(--muted)}
+  .q-card dl{margin:0}
+  .q-card h4{margin:0;padding:8px 14px;background:var(--head);color:var(--teal);font-size:12px;font-weight:700}
+  .q-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--line)}
+  .q-card h4+.q-row{border-top:0}
+  .q-row dt{flex:1;min-width:0;margin:0;font-size:12px;font-weight:600;line-height:1.5;color:var(--ink)}
+  .q-row dt small{display:block;margin-top:2px;font-size:10.5px;font-weight:400;color:var(--muted)}
+  .q-row dd{flex:none;margin:0;text-align:left;direction:ltr;unicode-bidi:isolate}
+  .q-val{display:block;font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .q-val .num{font-size:inherit}
+  .q-chg{display:block;margin-top:1px;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+  .q-chg .num{font-size:inherit}
   /* أرقام «آخر النتائج»: اسم البند يلتف بدل القص، والبطاقة الأخيرة الفردية بعرض الصف كله */
   .key-figure dt{white-space:normal;overflow:visible;line-height:1.4}
   .key-figure:last-child:nth-child(odd){grid-column:1/-1}
