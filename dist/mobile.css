@@ -73,6 +73,20 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
   /* ---------- الجدول السنوي: بلا تمرير عمودي داخلي، فيتحرك الإصبع مع الصفحة ---------- */
   .annual-table-wrap{max-height:none}
+  /* بعد دمج نسبة التغير تحت القيمة (mobile-tables.js): عمود بند أضيق وأعمدة قيم مضغوطة */
+  .banks-page .annual-table.m-merged .annual-col-label{width:112px}
+  .banks-page .annual-table.m-merged .annual-col-value{width:88px}
+  .banks-page .annual-table.m-merged .annual-label{padding:8px;font-size:11.5px;line-height:1.5}
+  .banks-page .annual-table.m-merged tbody td{height:auto;padding:7px 4px;line-height:1.35}
+  .banks-page .annual-table.m-merged .m-change{display:block;margin-top:2px;font-size:10.5px;font-weight:600}
+  .banks-page .annual-table.m-merged .m-change .num{font-size:10.5px}
+  .banks-page .annual-table.m-merged .m-none{visibility:hidden}
+  /* الترويسة تتبع الشاشة أثناء النزول (الإزاحة من mobile-tables.js) */
+  .banks-page .annual-table.m-merged thead{position:relative;z-index:30;transform:translateY(var(--table-head-offset,0px))}
+  .m-legend{margin:8px 0 4px;font-size:11px;color:var(--muted)}
+  /* أرقام «آخر النتائج»: اسم البند يلتف بدل القص، والبطاقة الأخيرة الفردية بعرض الصف كله */
+  .key-figure dt{white-space:normal;overflow:visible;line-height:1.4}
+  .key-figure:last-child:nth-child(odd){grid-column:1/-1}
   .period-seg button,.period-seg.small button{min-height:40px}
 
   /* ---------- شارت السهم الكامل (التحليل الفني) ----------
@@ -146,6 +160,18 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .annual-table .annual-label small{font-size:10.5px}
   .bank-charts-heading p,.bank-chart-selection-status,.bank-chart-unit{font-size:11px}
   .cq-mini-yaxis,.cq-mini-xaxis{font-size:10px}
+}
+
+/* ملخص السوق في الرئيسية: شعار المؤشر بجانب قيمته، والقيمة المتداولة في سطر واحد (نقطة الكسر نفسها في layout.css) */
+@media (max-width:560px){
+  .market-summary h2{margin-bottom:8px}
+  .market-group-index{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"logo label" "logo cards";align-items:center;column-gap:12px;text-align:start}
+  .market-group-index .market-group-logo{grid-area:logo;width:40px;height:40px;margin:0}
+  .market-group-index .market-group-label{grid-area:label;margin:0 0 2px;text-align:start}
+  .market-group-index .market-group-cards{grid-area:cards;justify-content:start}
+  .market-group-turnover{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .market-group-turnover .market-group-label{margin:0}
+  .market-group-turnover .market-group-cards{display:block}
 }
 
 /* الشارت المصغّر في صفحات الشركات (نقطة الكسر نفسها في company-quote.css).
