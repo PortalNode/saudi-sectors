@@ -49,6 +49,26 @@
       </div>`;
   }
 
+  // تسميات الخط الزمني (تأسيس/إدراج/اليوم) تتداخل إذا تقاربت سنواتها (إدراج 2026 واليوم 2026 مثلًا):
+  // نضع كل تسمية متداخلة في صف أدنى، ونعيد الحساب عند تغيّر العرض.
+  function layoutTicks(timeline) {
+    const ticks = [...timeline.querySelectorAll('.cp-tick')];
+    ticks.forEach(tick => tick.classList.remove('row2', 'row3'));
+    timeline.dataset.rows = '1';
+    const rects = ticks.map(tick => tick.getBoundingClientRect());
+    if (!rects.length || !rects[0].width) return; // مخفي أو لم يُرسم بعد
+    const rows = [];
+    ticks.forEach((tick, i) => {
+      const r = rects[i];
+      let k = 0;
+      while ((rows[k] ??= []).some(o => !(r.right + 4 <= o.left || r.left >= o.right + 4))) k++;
+      rows[k].push(r);
+      if (k) tick.classList.add(`row${Math.min(k + 1, 3)}`);
+    });
+    timeline.dataset.rows = String(Math.min(rows.length, 3));
+  }
+  const tickObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(entries => entries.forEach(e => layoutTicks(e.target))) : null;
+
   let profiles = null, shown = null;
   function paint() {
     const heading = document.querySelector('.bank-heading');
@@ -65,7 +85,10 @@
       box.setAttribute('aria-labelledby', 'cp-title');
       heading.after(box);
     }
+    tickObserver?.disconnect();
     box.innerHTML = card(profile);
+    const timeline = box.querySelector('.cp-timeline');
+    if (timeline) { layoutTicks(timeline); tickObserver?.observe(timeline); }
   }
 
   async function start() {

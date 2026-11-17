@@ -195,6 +195,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .cq-mini-yaxis,.cq-mini-xaxis{font-size:10px}
 }
 
+/* الآيفون في الوضع الأفقي (نحو 734×343): الشريط العلوي في سطر واحد بدل ثلاثة، وارتفاع الشارت بقدر الشاشة.
+   عرضه أقل من 760px فيأخذ تخطيط الجوال، لذلك نوفّر الارتفاع. */
+@media (max-width:760px) and (orientation:landscape) and (max-height:500px){
+  .site-bar{padding:6px 10px;gap:0 10px}
+  .site-bar .site-name{order:1;flex:none;font-size:17px}
+  .site-nav{order:2;flex:1 1 0;min-width:0}
+  .site-nav a{padding:10px 8px}
+  .site-bar .theme-switch{order:3}
+  .site-bar .hero-date{order:4}
+  .sector-switch{order:5;flex-basis:calc(50% - 6px)}
+  .ta-page .cc-chart,.cc-chart{--cc-base:clamp(240px,calc(100vh - 110px),420px)}
+}
+
 /* ملخص السوق في الرئيسية: شعار المؤشر بجانب قيمته، والقيمة المتداولة في سطر واحد (نقطة الكسر نفسها في layout.css) */
 @media (max-width:560px){
   .market-summary h2{margin-bottom:8px}

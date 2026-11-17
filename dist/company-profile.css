@@ -33,6 +33,13 @@
 .cp-dot.gold{border-color:var(--pf-gold);background:var(--pf-gold)}
 .cp-dot.today{border-color:var(--pf-ink);background:var(--pf-ink);width:9px;height:9px}
 .cp-tick{position:absolute;top:14px;transform:translateX(50%);font-size:10.5px;white-space:nowrap;color:var(--pf-muted);text-align:center;line-height:1.35}
+/* تسمية متداخلة مع جارتها تنزل إلى صف أدنى بخط منقّط يربطها بموضعها على الخط (company-profile.js) */
+.cp-tick.row2{top:56px}
+.cp-tick.row3{top:98px}
+.cp-tick.row2::before,.cp-tick.row3::before{content:"";position:absolute;left:50%;top:-40px;height:38px;border-left:1px dotted var(--pf-muted)}
+.cp-tick.row3::before{top:-82px;height:80px}
+.cp-timeline[data-rows="2"] .cp-track{margin-bottom:96px}
+.cp-timeline[data-rows="3"] .cp-track{margin-bottom:138px}
 .cp-tick b{display:block;color:var(--pf-ink);font-size:11.5px;font-variant-numeric:tabular-nums}
 .cp-tick.gold b{color:var(--pf-gold)}
 .cp-legend{display:flex;gap:16px;font-size:10px;color:var(--pf-muted)}
