@@ -162,19 +162,6 @@
     return settings.levels.filter(level => level.on && Number.isFinite(level.value)).sort((x, y) => x.value - y.value)
       .map(level => ({ ratio: level.value, color: level.color, price: p0 + (p1 - p0) * level.value }));
   };
-  const HINTS = {
-    vline: 'اضغط على الشارت عند التاريخ المطلوب لرسم خط عمودي · Esc للإلغاء',
-    hline: 'اضغط على الشارت عند السعر المطلوب لرسم خط أفقي · Esc للإلغاء',
-    hray: 'اضغط على نقطة البداية لرسم شعاع أفقي يمتد منها إلى اليمين · Esc للإلغاء',
-    trend: 'اضغط على نقطة البداية ثم على النهاية، أو اسحب من البداية إلى النهاية · Esc للإلغاء',
-    ray: 'اضغط على نقطة البداية ثم على نقطة ثانية، فيمتد الشعاع بعدها إلى اليمين · Esc للإلغاء',
-    ext: 'اضغط على نقطتين ليمتد الخط في الاتجاهين · Esc للإلغاء',
-    arrow: 'اضغط على بداية السهم ثم على نهايته، أو اسحب بينهما · Esc للإلغاء',
-    rect: 'اضغط على إحدى زاويتي المستطيل ثم على الزاوية المقابلة · Esc للإلغاء',
-    fib: 'اضغط على بداية الموجة (قمة أو قاع) ثم على نهايتها، أو اسحب بينهما · Esc للإلغاء',
-    range: 'اضغط على السعر الأول ثم على الثاني، أو اسحب بينهما، لقياس الفرق ونسبته · Esc للإلغاء',
-    text: 'اضغط على الشارت حيث تريد النص · Esc للإلغاء'
-  };
   // أيقونات أزرار العرض: إعادة تعيين العرض، وملء الشاشة والخروج منه
   const svg = d => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const ICON_RESET = svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>');
@@ -1005,7 +992,6 @@
       if (SINGLE_CLICK_TOOLS.includes(state.tool)) return;
       if (pending) { finish(point); press = null; return; }
       pending = point; preview = { type: state.tool, a: point, b: point };
-      hint.textContent = state.tool === 'fib' ? 'حرّك المؤشر إلى نهاية الموجة واضغط، أو اسحب وأفلت' : 'حرّك المؤشر إلى النقطة الثانية واضغط، أو اسحب وأفلت';
       try { box.setPointerCapture(event.pointerId); } catch { /* not capturable */ }
       overlay.redraw();
     });
@@ -1076,7 +1062,6 @@
     function select(index) {
       selected = index;
       if (index >= 0 && selInd) selectInd(null);
-      if (!state.tool) { hint.hidden = selected < 0; hint.textContent = selected < 0 ? '' : 'اسحب الرسم لتحريكه، أو أحد طرفيه لتعديله · نقرتان للإعدادات · Delete للحذف'; }
       overlay.redraw();
       syncFtb();
       positionFtb();
@@ -1472,7 +1457,7 @@
       const button = panel.querySelector('.cc-search-btn b'); if (button) button.textContent = sym;
       const next = sym === home.symbol ? home.file : await loadCandleFile(sym);
       if (!box.isConnected) return;
-      if (!next) { if (button) button.textContent = String(symbol); hint.textContent = `لا تتوفر شموع للسهم ${sym} بعد`; return; }
+      if (!next) { if (button) button.textContent = String(symbol); hint.textContent = `لا تتوفر شموع للسهم ${sym} بعد`; hint.hidden = false; return; }
       mount(panel, next, { home, away, keepFull: isFull() });
     }
     searchInput.addEventListener('input', renderMatches);
@@ -1497,8 +1482,6 @@
       panel.querySelector('[data-cursor]')?.setAttribute('aria-pressed', String(!tool));
       if (tool && state.hidden) setHidden(false); // الرسم الجديد يحتاج أن تكون الرسوم ظاهرة
       box.classList.toggle('cc-drawing', !!tool);
-      hint.hidden = !tool;
-      hint.textContent = HINTS[tool] ?? '';
       applyCrosshair();
       positionFtb();
     }
