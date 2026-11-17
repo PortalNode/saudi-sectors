@@ -1,12 +1,43 @@
-/* تحسينات الجوال فقط. كل القواعد داخل max-width:760px (نقطة الكسر نفسها في styles.css)،
+/* تحسينات الجوال (الآيفون خصوصًا) فقط.
+   كل القواعد داخل استعلامات للجوال (max-width:760px، وهي نقطة الكسر نفسها في styles.css)،
    فلا تتأثر الشاشات الأعرض (الكمبيوتر والتابلت الأفقي) إطلاقًا. يُحمَّل هذا الملف آخر ملفات CSS. */
+
+/* لا يكبّر الآيفون الخط تلقائيًا عند تدوير الجهاز أفقيًا (لا أثر له على الكمبيوتر) */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+/* شاشات اللمس: لا انتظار 300ms ولا تكبير بالنقر المزدوج على الأزرار والروابط */
+@media (pointer:coarse){
+  a,button,select,summary,label,[role="tab"]{touch-action:manipulation}
+}
+
+/* Safari على الآيفون يكبّر الصفحة كلها عند الضغط على أي حقل خطه أصغر من 16px ولا يعيدها.
+   لذلك خط الحقول 16px على الجوال (ويشمل الآيفون في الوضع الأفقي). */
+@media (max-width:760px),(pointer:coarse) and (max-height:500px){
+  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]):not([type="hidden"]):not([type="button"]):not([type="submit"]),
+  select,textarea{font-size:16px!important}
+}
+
 @media (max-width:760px){
 
-  /* ---------- الشريط العلوي: الصفحات وزر المظهر في سطر واحد ---------- */
-  .site-bar{gap:6px 8px}
-  .site-nav a{padding:8px 7px}
-  .site-bar .theme-switch{padding:2px}
-  .site-bar .theme-switch button{min-width:0;min-height:32px;padding:4px 9px;font-size:11.5px}
+  /* ---------- الشريط العلوي: أقل ارتفاعًا ليبقى المحتوى ظاهرًا ---------- */
+  /* سطر 1: اسم الموقع + المظهر، سطر 2: الصفحات، سطر 3: القطاع والشركة جنبًا إلى جنب */
+  .site-bar{gap:2px 8px;padding:8px 10px}
+  .site-bar .site-name{order:1;flex:1 1 auto;min-width:0;font-size:18px}
+  .site-bar .theme-switch{order:2;margin-inline-start:0;padding:2px}
+  .site-bar .theme-switch button{min-width:0;min-height:34px;padding:4px 11px;font-size:12px}
+  .site-bar .hero-date{order:3;flex:1 1 100%;font-size:11px}
+  .site-nav{order:4;flex:1 1 100%;margin-inline-start:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .site-nav::-webkit-scrollbar{display:none}
+  .site-nav a{flex:none;padding:12px 8px}
+  .sector-switch{order:5;flex:1 1 calc(50% - 4px);min-width:0;flex-direction:column;align-items:stretch;gap:3px;margin-top:4px;font-size:11px}
+  .sector-switch select{width:100%;min-width:0;min-height:42px;padding:6px 10px;text-overflow:ellipsis}
+  .company-switch select{min-width:0}
+
+  /* مسار التنقل: منطقة لمس مريحة */
+  .bank-breadcrumb{font-size:11.5px;margin:14px 0 10px}
+  .bank-breadcrumb a{display:inline-block;padding:9px 2px}
+  .bank-back{min-height:38px}
+  .bank-period{font-size:11px}
 
   /* ---------- جدول الشركات المضغوط ---------- */
   /* عرض الجدول = الرمز 66 + الاسم 122 + نحو 58px لكل عمود رقمي ظاهر في كل مجموعة */
@@ -34,22 +65,97 @@
   .sections td.company-name.has-co-logo .company-results-link{white-space:normal;line-height:1.25;max-width:calc(100% - 26px);overflow:visible}
   .sections .co-logo-sm{width:20px;height:20px;margin-inline-end:6px}
 
-  /* أزرار مجموعات الأعمدة ونوع الربحية */
-  .col-switch button,.eps-switch button{min-height:36px}
-
-  /* ---------- شارت السهم: أدوات الرسم شريط أفقي فوق الشارت ليأخذ الشارت العرض كاملًا ---------- */
-  .cc-body{padding-left:0}
-  .cc-side{position:static;width:auto;flex-direction:row;align-items:center;gap:2px;padding:2px 0 4px;margin-bottom:6px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--pf-line)}
-  .cc-side button{width:34px;height:34px}
-  .cc-side hr{width:0;height:20px;margin:0 3px;border-top:0;border-left:1px solid var(--pf-line)}
-  /* القوائم تحت الشريط بدل يساره (السكربت يضع top بالسطر، فنتجاوزه هنا) */
-  .cc-flyout{top:44px!important;left:0;max-width:calc(100vw - 32px)}
-  .cc-tip{display:none!important}
-  .cc-chart{--cc-base:300px}
+  /* أزرار مجموعات الأعمدة ونوع الربحية ودليل القراءة */
+  .col-switch button,.eps-switch button{min-height:38px}
+  .read-guide summary{padding:10px 0}
+  /* أزرار اختيار القطاع بمنطقة لمس مريحة */
+  .group-button,.workspace .sector-nav .sector-button{min-height:38px}
 
   /* ---------- الجدول السنوي: بلا تمرير عمودي داخلي، فيتحرك الإصبع مع الصفحة ---------- */
   .annual-table-wrap{max-height:none}
+  .period-seg button,.period-seg.small button{min-height:40px}
+
+  /* ---------- شارت السهم الكامل (التحليل الفني) ----------
+     أدوات الرسم شريط أفقي قابل للتمرير فوق الشارت ليأخذ الشارت العرض كاملًا بدل عمود جانبي بعرض 52px.
+     القواعد الأصلية في company-quote.css بخصوصية .cq-chart-panel، لذلك نكررها هنا بالخصوصية نفسها. */
+  .cq-chart-panel .cc-body,.ta-chart .cc-body,.ta-page .ta-chart .cc-body{padding-inline-start:0;padding-left:0}
+  .cq-chart-panel .cc-side{position:static;width:auto;flex-direction:row;align-items:center;gap:0;padding:4px 6px;overflow-x:auto;overflow-y:hidden;border-inline-end:0;border-right:0;border-bottom:1px solid var(--pf-line);-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .cq-chart-panel .cc-side button{flex:none;width:40px;height:40px}
+  .cq-chart-panel .cc-side .cc-grp{flex:none;width:auto}
+  .cq-chart-panel .cc-side hr{flex:none;width:0;height:22px;margin:0 5px;border-top:0;border-left:1px solid var(--pf-line)}
+  .cq-chart-panel .cc-side [data-favbar]{margin-top:0}
+  /* سهم القائمة الجانبية لكل مجموعة: منطقة لمس أكبر وخلفية شفافة فلا يثقل الشريط */
+  .cq-chart-panel .cc-side .cc-grp-arrow{width:16px;height:34px;opacity:.75;background:transparent;border-radius:6px}
+  .cq-chart-panel .cc-side .cc-grp{margin-inline-end:2px}
+  /* القوائم تحت الشريط (السكربت يضع top بالسطر، فنتجاوزه هنا) وتتسع للشاشة */
+  .cq-chart-panel .cc-flyout{top:52px!important;left:8px!important;max-width:calc(100vw - 48px);max-height:min(60vh,420px)!important;overflow-y:auto}
+  .cq-chart-panel .cc-flyout[data-kind^="grp:"]{width:min(300px,calc(100vw - 48px))}
+  .cq-chart-panel .cc-favbar{top:56px}
+  .cc-tip{display:none!important}
+  /* سطر الأسعار بلا الإزاحة التي كانت تفسح مكانًا للعمود الجانبي */
+  .cq-chart-panel .cc-main>.cc-legend{margin-inline-start:0}
+  /* ارتفاع الشارت يناسب شاشة الجوال بدل 690px */
+  .ta-page .cc-chart{--cc-base:clamp(380px,calc(100vh - 340px),560px)}
+  .cc-chart{--cc-base:300px}
+  /* أزرار الشريط العلوي والسفلي بحجم يناسب الإصبع */
+  .cq-chart-panel .cc-search-btn{height:42px}
+  .cq-chart-panel .cc-groups>.cq-range:not(.cc-typegroup) button{padding:10px 11px}
+  .cq-chart-panel .cc-typegroup button{width:44px;height:40px}
+  .cq-chart-panel .cc-full-btn{padding:9px 11px}
+  .cq-chart-panel .cc-bottom{height:auto;min-height:44px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .cq-chart-panel .cc-bottom::-webkit-scrollbar{display:none}
+  .cq-chart-panel .cc-bottom button{flex:none;height:34px;padding:0 9px}
+  /* ساعة التوقيت لا تتسع مع كل أزرار المدة على عرض الجوال فكانت تُقص من الطرف */
+  .cc-clock{display:none}
+  /* الفواصل العمودية بين مجموعات الشريط العلوي تظهر شاذة عندما تلتف المجموعات على سطرين */
+  .cq-chart-panel .cc-groups>.cq-range+.cq-range::before{display:none}
+  /* السحب على الشارت للرسم أو التحريك لا يحدد النصوص ولا يفتح قائمة النسخ في iOS */
+  .cq-chart-panel .cc-body,.cq-chart-panel .cc-toolbar,.cq-chart-panel .cc-bottom{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .cc-search-list li{padding:10px 8px}
+  .cc-ibtns button{width:32px;height:30px}
+  .cc-irow{min-height:30px}
+  .cc-iname{padding:6px 2px}
+  .cc-ftb button{width:34px;height:32px}
+  .cc-ftb select{height:32px}
+  /* ملء الشاشة: هوامش أقل ليأخذ الشارت أكبر مساحة، وشريط الأدوات لا ينكمش */
+  .cq-chart-panel.cc-full{padding:8px 8px max(8px,env(safe-area-inset-bottom))}
+  .cq-chart-panel.cc-full .cc-side{flex:none}
+
+  /* ---------- ماسح السوق وقائمة المراقبة ---------- */
+  /* بلا تمرير عمودي داخلي (فخ تمرير على الآيفون): الجدول يتمرر أفقيًا فقط والصفحة عموديًا */
+  .ta-page .sc-wrap{max-height:none}
+  .ta-page .sc-tabs button{padding:13px 14px}
+  .ta-page .sc-filters select,.ta-page .sc-filters input{height:42px}
+  .ta-page .sc-reset,.ta-page .sc-btn{height:42px}
+  .ta-page .sc-open{height:36px;padding:0 12px}
+  .ta-page .sc-chip{height:32px;padding:0 11px}
+
+  /* ---------- صفحة المقارنة ---------- */
+  .cx-seg button{padding:10px 12px}
+  .cx-chip{min-height:38px}
+  .cx-ghost{min-height:40px}
+  .cx-quick button{padding:10px 8px}
+  .cx-search{min-height:40px}
+  .cx-select select{min-height:42px}
+  .cx-legend button{padding:8px 8px}
+  .cx-table thead button{min-height:38px}
 
   /* ---------- خطوط صغيرة جدًا ---------- */
   .market-group-label,.financial-status,.sector-performance,.source-tag,.count{font-size:11px}
+  .cp-tag,.cp-label,.cq-label,.cq-source,.cq-mini-when,.cp-legend span{font-size:11px}
+  .annual-table .annual-label small{font-size:10.5px}
+  .bank-charts-heading p,.bank-chart-selection-status,.bank-chart-unit{font-size:11px}
+  .cq-mini-yaxis,.cq-mini-xaxis{font-size:10px}
+}
+
+/* الشارت المصغّر في صفحات الشركات (نقطة الكسر نفسها في company-quote.css).
+   كان ارتفاع الحاوية ثابتًا 240px من قاعدة الكمبيوتر بينما محتواها أطول، فيتجاوز الرسم حاويته
+   ويتداخل مع ما تحته؛ الآن ارتفاعها تلقائي والشارت يملأ العرض. */
+@media (max-width:720px){
+  .cq-mini-slot{height:auto}
+  .cq-mini{width:100%}
+  .cq-mini-ranges{flex-wrap:nowrap;gap:3px}
+  .cq-mini-ranges button{flex:1 1 auto;padding:9px 2px;font-size:11px;white-space:nowrap}
+  .cq-mini-ohlc{font-size:11px}
+  .cq-range button{padding:9px 12px}
 }
