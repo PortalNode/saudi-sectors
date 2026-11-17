@@ -208,16 +208,51 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .ta-page .cc-chart,.cc-chart{--cc-base:clamp(240px,calc(100vh - 110px),420px)}
 }
 
-/* ملخص السوق في الرئيسية: شعار المؤشر بجانب قيمته، والقيمة المتداولة في سطر واحد (نقطة الكسر نفسها في layout.css) */
+/* الرئيسية: شاشة أولى مختصرة ليظهر الجدول أبكر (نقطة الكسر نفسها في layout.css). الجدول كان يبدأ عند 902px ويبدأ الآن عند نحو 664px */
 @media (max-width:560px){
-  .market-summary h2{margin-bottom:8px}
-  .market-group-index{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"logo label" "logo cards";align-items:center;column-gap:12px;text-align:start}
-  .market-group-index .market-group-logo{grid-area:logo;width:40px;height:40px;margin:0}
+  /* ملخص السوق: المؤشر واتساع السوق جنبًا إلى جنب، ثم القيمة المتداولة، ثم الأداء */
+  .market-summary{margin:8px 0;padding:8px 10px}
+  .market-summary h2{margin:0 0 6px;font-size:13px}
+  .market-summary .market-stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr);row-gap:8px;column-gap:0}
+  .market-summary .market-group{padding:0 8px;border-inline-start:0;border-top:0}
+  .market-summary .market-group+.market-group{border-top:0;padding-top:0}
+  .market-summary .market-group-index{grid-column:1;padding-inline-start:0}
+  .market-summary .market-group-breadth{grid-column:2;border-inline-start:1px solid var(--line);padding-inline-end:0}
+  .market-summary .market-group-turnover,.market-summary .market-group-performance{grid-column:1/-1;padding:8px 0 0;border-top:1px solid var(--line)}
+  .market-group-index{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"logo label" "logo cards";align-items:center;column-gap:8px;text-align:start}
+  .market-group-index .market-group-logo{grid-area:logo;width:32px;height:32px;margin:0}
   .market-group-index .market-group-label{grid-area:label;margin:0 0 2px;text-align:start}
-  .market-group-index .market-group-cards{grid-area:cards;justify-content:start}
-  .market-group-turnover{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .market-group-index .market-group-cards{grid-area:cards;justify-content:start;grid-auto-flow:row;gap:2px}
+  .market-summary .market-group-turnover{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .market-group-turnover .market-group-label{margin:0}
   .market-group-turnover .market-group-cards{display:block}
+  .market-summary .market-group-index .market-card>span{display:none}
+  .market-summary .market-group-index .market-card:first-child strong{font-size:17px}
+  .market-group-label{margin-bottom:4px}
+  /* تسميات اتساع السوق تلتف على سطرين بدل القص في العمود الأضيق */
+  .market-summary .market-group-breadth .market-card>span{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25;font-size:10px}
+
+  /* شاشات أضيق من 360px (iPhone SE): نسبة التغير اليومي لا تتسع بالخط الأصلي في نصف العرض */
+  @media (max-width:360px){
+    .market-summary .market-group-index .market-card:last-child strong{font-size:13px}
+    .market-summary .market-group-index .market-card:first-child strong{font-size:15px}
+  }
+
+  /* عنوان القائمة والعدد في سطر واحد */
+  .toolbar-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 10px}
+  .toolbar-heading h2{margin:0;font-size:20px}
+  .toolbar-heading p{margin:0}
+
+  /* منتقي القطاعات: صفّ مجموعات واحد قابل للتمرير بدل ثلاثة صفوف، وصفّ القطاعات الفرعية كذلك */
+  .workspace .sector-nav{padding:8px;margin:8px 0}
+  .sector-groups,.sector-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .sector-groups::-webkit-scrollbar,.sector-chips::-webkit-scrollbar{display:none}
+  .sector-groups>*,.sector-chips>*{flex:none}
+  .sector-chips{margin-top:8px;padding-top:8px}
+
+  /* أدوات الجدول أقل ارتفاعًا */
+  .table-tools{gap:4px 10px;margin-bottom:6px}
+  .col-switch button,.eps-switch button{min-height:36px}
 }
 
 /* الشارت المصغّر في صفحات الشركات (نقطة الكسر نفسها في company-quote.css).
