@@ -92,6 +92,22 @@
       bb: `نطاقات بولنجر (${i.length}، ${i.mult})`, vol: 'حجم التداول', rsi: `مؤشر القوة النسبية (${i.length})`, macd: `الماكد (${i.fast}، ${i.slow}، ${i.signal})` }[id];
   };
   const TOOLS = [['vline', 'خط عمودي'], ['hline', 'خط أفقي'], ['hray', 'شعاع أفقي'], ['trend', 'خط اتجاه'], ['ray', 'شعاع'], ['ext', 'خط ممتد'], ['arrow', 'سهم'], ['rect', 'مستطيل'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر'], ['text', 'نص']];
+  // شريط الأدوات الجانبي كما في TradingView: مجموعات، لكل منها قائمة جانبية بأقسام وأسماء واختصارات ونجمة للمفضلة.
+  // تُعرض هنا الأدوات الموجودة في الشارت فقط؛ زر المجموعة يُشغّل آخر أداة استُخدمت منها، وسهمه الصغير يفتح قائمتها
+  const TOOL_GROUPS = [
+    { id: 'lines', label: 'أدوات الخطوط', sections: [['الخطوط', ['trend', 'ray', 'ext', 'hline', 'hray', 'vline']]] },
+    { id: 'fib', label: 'أدوات غان وفيبوناتشي', sections: [['فيبوناتشي', ['fib']]] },
+    { id: 'measure', label: 'أدوات التنبؤ والقياس', sections: [['المقاييس', ['range']]] },
+    { id: 'shapes', label: 'الأسهم والأشكال', sections: [['أسهم', ['arrow']], ['أشكال', ['rect']]] },
+    { id: 'text', label: 'نص وملاحظات', sections: [['نص وملاحظات', ['text']]] }
+  ].map(g => ({ ...g, tools: g.sections.flatMap(([, tools]) => tools) }));
+  const groupOf = tool => TOOL_GROUPS.find(g => g.tools.includes(tool));
+  const FLY_NAME = { fib: 'تصحيح فيبوناتشي' };
+  const DEFAULT_FAV = ['trend', 'hray', 'fib', 'range', 'rect'];
+  // الاختصارات كما في TradingView: Alt/⌥ + حرف (بموضع المفتاح حتى تعمل مع لوحة المفاتيح العربية)، و Shift للمستطيل
+  const IS_MAC = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '');
+  const SHORTCUTS = { trend: ['KeyT', 'T'], hline: ['KeyH', 'H'], hray: ['KeyJ', 'J'], vline: ['KeyV', 'V'], fib: ['KeyF', 'F'], rect: ['KeyR', 'R', true] };
+  const shortcutLabel = id => { const k = SHORTCUTS[id]; return !k ? '' : IS_MAC ? `${k[1]}${k[2] ? ' ⇧' : ''} ⌥` : `Alt + ${k[2] ? 'Shift + ' : ''}${k[1]}`; };
   // الألوان والسماكات الافتراضية كما في TradingView: الأزرق #2962FF، والخطوط الأفقية والعمودية رفيعة، وخط الاتجاه والسهم والشعاع أعرض
   const TV_BLUE = '#2962ff';
   const DRAW_DEFAULT = {
@@ -184,6 +200,8 @@
     text: icon('<path d="M7 7.5h14M14 7.5v14M11 21.5h6"/>'),
     magnet: icon('<path d="M7 4.5h5V14a2 2 0 0 0 4 0V4.5h5V14a7 7 0 0 1-14 0z"/><path d="M7 9h5M16 9h5"/>'),
     ind: icon('<path d="M4 23.5h20"/><path d="M5 18c2.5-7 5-7 7.5-2.5S17.5 20 19.5 12 22.5 5 23.5 4.5"/>'),
+    stay: icon('<path d="M15.5 5.5l4.5 4.5L9.5 20.5l-5.5 1 1-5.5z"/><path d="M13.5 7.5l4.5 4.5"/><rect x="16.5" y="17.5" width="7.5" height="6" rx="1.2"/><path d="M18.3 17.5V16a2 2 0 0 1 4 0v1.5"/>'),
+    starBtn: icon('<path d="M14 4.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L14 19.3l-5.9 3.2 1.2-6.5-4.8-4.6 6.6-.9z"/>'),
     gear: icon('<path d="M14 4l8.7 5v10L14 24l-8.7-5V9z"/><circle cx="14" cy="14" r="3.5"/>'),
     undo: icon('<path d="M10.5 7.5L5.5 12.5l5 5M5.5 12.5H17a5.5 5.5 0 0 1 0 11h-4"/>'),
     redo: icon('<path d="M17.5 7.5l5 5-5 5M22.5 12.5H11a5.5 5.5 0 0 0 0 11h4"/>'),
@@ -194,6 +212,8 @@
     trash: icon('<path d="M5.5 8.5h17M11 8.5V5.5h6v3M8 8.5l1.2 15h9.6l1.2-15M12 12.5v7M16 12.5v7"/>')
   };
 
+  const ICON_CHEVRON = '<svg viewBox="0 0 10 16" width="8" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3L3 8l4 5"/></svg>';
+  const ICON_STAR = '<svg viewBox="0 0 18 18" width="18" height="18" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M9 1.8l2.2 4.8 5.2.6-3.9 3.6 1.1 5.2L9 13.3l-4.6 2.7 1.1-5.2L1.6 7.2l5.2-.6z"/></svg>';
   const LOCK_TIP = locked => locked ? 'فتح قفل الرسوم' : 'قفل الرسوم (يمنع تحريكها وتعديلها)';
   const HIDE_TIP = hidden => hidden ? 'إظهار الرسوم' : 'إخفاء الرسوم';
   // البحث عن سهم: كل أسهم الموقع من data.json، واختيار سهم يفتح صفحة نتائجه (صفحة قطاعه ?symbol=)
@@ -230,9 +250,9 @@
   const RESET_KEY = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '') ? '⌥ + R' : 'Alt + R';
   const bigJumps = file => (file.flags || []).filter(f => Math.abs(f.change) >= 15);
 
-  const state = { adj: true, divMarks: true, type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off', locked: false, hidden: false };
-  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (typeof saved.adj === 'boolean') state.adj = saved.adj; if (typeof saved.divMarks === 'boolean') state.divMarks = saved.divMarks; if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; state.locked = saved.locked === true; state.hidden = saved.hidden === true; } } catch { /* storage unavailable */ }
-  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ adj: state.adj, divMarks: state.divMarks, type: state.type, ind: [...state.ind], magnet: state.magnet, locked: state.locked, hidden: state.hidden })); } catch { /* ignore */ } };
+  const state = { adj: true, divMarks: true, type: 'candles', interval: 'd', range: '1y', ind: new Set(['vol', 'sma50']), tool: null, magnet: 'off', locked: false, hidden: false, stay: false, favBar: false, fav: [...DEFAULT_FAV], last: {} };
+  try { const saved = JSON.parse(localStorage.getItem('cc-settings') || 'null'); if (saved) { if (typeof saved.adj === 'boolean') state.adj = saved.adj; if (typeof saved.divMarks === 'boolean') state.divMarks = saved.divMarks; if (saved.type) state.type = saved.type; if (Array.isArray(saved.ind)) state.ind = new Set(saved.ind); if (MAGNETS.some(([id]) => id === saved.magnet)) state.magnet = saved.magnet; state.locked = saved.locked === true; state.hidden = saved.hidden === true; state.stay = saved.stay === true; state.favBar = saved.favBar === true; if (Array.isArray(saved.fav)) state.fav = saved.fav.filter(id => TOOLS.some(([t]) => t === id)); if (saved.last && typeof saved.last === 'object') for (const g of TOOL_GROUPS) if (g.tools.includes(saved.last[g.id])) state.last[g.id] = saved.last[g.id]; } } catch { /* storage unavailable */ }
+  const saveSettings = () => { try { localStorage.setItem('cc-settings', JSON.stringify({ adj: state.adj, divMarks: state.divMarks, type: state.type, ind: [...state.ind], magnet: state.magnet, locked: state.locked, hidden: state.hidden, stay: state.stay, favBar: state.favBar, fav: state.fav, last: state.last })); } catch { /* ignore */ } };
   const loadDrawings = symbol => { try { return JSON.parse(localStorage.getItem(`cc-draw-${symbol}`) || '[]'); } catch { return []; } };
   const saveDrawings = (symbol, list) => { try { localStorage.setItem(`cc-draw-${symbol}`, JSON.stringify(list)); } catch { /* ignore */ } };
 
@@ -391,18 +411,20 @@
       <div class="cc-body" dir="ltr">
         <div class="cc-side" role="toolbar" aria-orientation="vertical" aria-label="أدوات الرسم والمؤشرات">
           ${side('data-cursor', ICONS.cursor, 'المؤشر (بدون أداة رسم)', !state.tool)}
-          ${TOOLS.map(([id, t]) => side(`data-tool="${id}"`, ICONS[id], t, state.tool === id)).join('')}
+          ${TOOL_GROUPS.map(g => { const last = state.last[g.id] ?? g.tools[0], name = TOOLS.find(([id]) => id === last)?.[1] ?? ''; return `<div class="cc-grp" data-group="${g.id}"${g.tools.includes(state.tool) ? ' data-active' : ''}>${side(`data-tool="${last}" data-grp-main="${g.id}"`, ICONS[last], name, state.tool === last)}<button type="button" class="cc-grp-arrow" data-menu="grp:${g.id}" aria-haspopup="true" aria-expanded="false" aria-label="${g.label}" data-tip="${g.label}">${ICON_CHEVRON}</button></div>`; }).join('')}
           <hr>
           ${side('data-menu="magnet" aria-haspopup="true" aria-expanded="false"', ICONS.magnet, 'المغناطيس', state.magnet !== 'off')}
-          ${side('data-menu="ind" aria-haspopup="true" aria-expanded="false"', ICONS.ind, 'المؤشرات الفنية')}
-          ${side('data-fibset aria-expanded="false"', ICONS.gear, 'إعدادات فيبوناتشي')}
-          <hr>
-          ${side('data-undo', ICONS.undo, 'تراجع (Ctrl+Z)')}
-          ${side('data-redo', ICONS.redo, 'إعادة (Ctrl+Shift+Z)')}
+          ${side('data-stay', ICONS.stay, 'البقاء في وضع الرسم (تبقى الأداة مفعّلة بعد كل رسم)', state.stay)}
           ${side('data-lock', state.locked ? ICONS.lock : ICONS.unlock, LOCK_TIP(state.locked), state.locked)}
           ${side('data-hide', state.hidden ? ICONS.eyeOff : ICONS.eye, HIDE_TIP(state.hidden), state.hidden)}
           <hr>
           ${side('data-menu="trash" aria-haspopup="true" aria-expanded="false"', ICONS.trash, 'حذف الرسوم')}
+          <hr>
+          ${side('data-menu="ind" aria-haspopup="true" aria-expanded="false"', ICONS.ind, 'المؤشرات الفنية')}
+          ${side('data-fibset aria-expanded="false"', ICONS.gear, 'إعدادات فيبوناتشي')}
+          ${side('data-undo', ICONS.undo, 'تراجع (Ctrl+Z)')}
+          ${side('data-redo', ICONS.redo, 'إعادة (Ctrl+Shift+Z)')}
+          ${side('data-favbar', ICONS.starBtn, 'شريط الأدوات المفضلة', state.favBar)}
         </div>
         <div class="cc-main" dir="rtl">
           <div class="cc-legend" aria-live="polite"></div>
@@ -415,6 +437,7 @@
         </div>
         <div class="cc-flyout" dir="rtl" role="menu" hidden></div>
         <div class="cc-tip" dir="rtl" role="tooltip" hidden></div>
+        <div class="cc-favbar" dir="ltr" role="toolbar" aria-label="الأدوات المفضلة" hidden></div>
       </div>
       <div class="cc-bottom" role="group" aria-label="مدة العرض">${RANGES.map(([id, t]) => chip('crange', id, t, id === state.range)).join('')}<span class="cc-clock" dir="ltr" aria-label="توقيت السعودية"></span></div>
       <p class="cc-hint" hidden></p>
@@ -423,6 +446,7 @@
     const box = panel.querySelector('.cc-chart'), legend = panel.querySelector('.cc-legend'), changeEl = panel.querySelector('.cc-change'), hint = panel.querySelector('.cc-hint'), fibPanel = panel.querySelector('.cc-fib-settings');
     const searchBtn = panel.querySelector('[data-search]'), searchPop = panel.querySelector('.cc-search-pop'), searchInput = searchPop.querySelector('input'), searchList = searchPop.querySelector('ul');
     const body = panel.querySelector('.cc-body'), sideBar = panel.querySelector('.cc-side'), flyout = panel.querySelector('.cc-flyout'), tip = panel.querySelector('.cc-tip');
+    renderFavBar();
     // ساعة بتوقيت السعودية في الشريط السفلي كما في TradingView (UTC+3)
     const clock = panel.querySelector('.cc-clock');
     if (clock) {
@@ -969,7 +993,7 @@
       const strip = p => ({ time: p.time, price: p.price });
       const d = { type: state.tool, a: strip(pending), b: strip(point) };
       commit(() => drawings.push(d));
-      setTool(null);
+      setTool(state.stay ? state.tool : null); // «البقاء في وضع الرسم»
     }
     // الرسم بنقرة واحدة: يُثبَّت الرسم في مكان النقرة، والنص يفتح نافذته فورًا ليُكتب
     function placeAt(point) {
@@ -980,7 +1004,7 @@
       else if (type === 'vline') d = { type, a: { time: point.time, price: point.price } };
       else d = { type, a: { time: point.time, price: point.price }, text: '' };
       drawings.push(d);
-      setTool(null);
+      setTool(state.stay ? type : null);
       if (type === 'text') { openDrawDialog(drawings.length - 1, before); return; }
       record(before); saveDrawings(symbol, drawings); paintDrawings();
     }
@@ -1344,7 +1368,12 @@
       if (SHORTCUT_MOD(event) && !event.altKey && event.code === 'KeyZ') { event.preventDefault(); if (event.shiftKey) redo(); else undo(); return; }
       if (SHORTCUT_MOD(event) && !event.altKey && event.code === 'KeyY') { event.preventDefault(); redo(); return; }
       // Alt/⌥ + R كما في TradingView (الحرف بالموضع حتى يعمل مع لوحة المفاتيح العربية و⌥ في ماك)
-      if (event.altKey && !event.ctrlKey && !event.metaKey && event.code === 'KeyR') { event.preventDefault(); resetView(); }
+      if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.code === 'KeyR') { event.preventDefault(); resetView(); return; }
+      // اختصارات أدوات الرسم (Alt/⌥ + T وH وJ وV وF، وAlt + Shift + R للمستطيل)
+      if (event.altKey && !event.ctrlKey && !event.metaKey && chart) {
+        const hit = Object.entries(SHORTCUTS).find(([, k]) => k[0] === event.code && !!k[2] === event.shiftKey);
+        if (hit) { event.preventDefault(); setTool(state.tool === hit[0] ? null : hit[0]); return; }
+      }
       if ((event.key === 'Delete' || event.key === 'Backspace') && selected >= 0 && !state.tool) { event.preventDefault(); deleteSelected(); }
     });
 
@@ -1382,6 +1411,18 @@
     }
 
     /* ---------- الشريط الجانبي: قوائم المغناطيس والمؤشرات، والتلميحات، والقفل والإخفاء ---------- */
+    // قائمة مجموعة أدوات: أقسام بعناوين، وفي كل صف أيقونة الأداة واسمها واختصارها ونجمة المفضلة
+    function groupMenu(id) {
+      const group = TOOL_GROUPS.find(g => g.id === id);
+      const row = tool => `<div class="cc-row" role="none"><button type="button" role="menuitem" data-tool="${tool}" aria-pressed="${state.tool === tool}"><span class="cc-ri">${ICONS[tool]}</span><span class="cc-rn">${esc(FLY_NAME[tool] ?? TOOLS.find(([t]) => t === tool)?.[1])}</span><kbd dir="ltr">${shortcutLabel(tool)}</kbd></button><button type="button" class="cc-star" data-fav="${tool}" aria-pressed="${state.fav.includes(tool)}" aria-label="إضافة إلى المفضلة" title="إضافة إلى المفضلة أو إزالتها">${ICON_STAR}</button></div>`;
+      return group.sections.map(([title, tools], i) => `${i ? '<hr>' : ''}<b class="cc-fl-title">${esc(title)}</b>${tools.map(row).join('')}`).join('');
+    }
+    // شريط الأدوات المفضلة العائم فوق الشارت (يُفتح من النجمة أسفل الشريط الجانبي)
+    function renderFavBar() {
+      const bar = panel.querySelector('.cc-favbar'); if (!bar) return;
+      bar.innerHTML = state.fav.map(tool => `<button type="button" data-tool="${tool}" aria-pressed="${state.tool === tool}" aria-label="${esc(TOOLS.find(([t]) => t === tool)?.[1])}" title="${esc(TOOLS.find(([t]) => t === tool)?.[1])}">${ICONS[tool]}</button>`).join('');
+      bar.hidden = !state.favBar || !state.fav.length;
+    }
     function closeFlyout() {
       flyout.hidden = true; flyout.dataset.kind = '';
       sideBar.querySelectorAll('[data-menu]').forEach(x => x.setAttribute('aria-expanded', 'false'));
@@ -1389,13 +1430,14 @@
     function openFlyout(kind, button) {
       if (!flyout.hidden && flyout.dataset.kind === kind) { closeFlyout(); return; }
       const row = (attr, id, on, inner) => `<button type="button" role="menuitemcheckbox" data-${attr}="${id}" aria-pressed="${on}">${inner}</button>`;
-      flyout.innerHTML = kind === 'trash' ? trashMenu() : kind === 'magnet'
+      flyout.innerHTML = kind.startsWith('grp:') ? groupMenu(kind.slice(4)) : kind === 'trash' ? trashMenu() : kind === 'magnet'
         ? `<b>المغناطيس</b>${MAGNETS.map(([id, t]) => row('magnet', id, state.magnet === id, `<span>${t}<small>${id === 'weak' ? 'يلصق النقطة بأقرب سعر في الشمعة حين يقترب المؤشر منه' : id === 'strong' ? 'يلصق النقطة دائمًا بأقرب سعر (افتتاح، أعلى، أدنى، إغلاق)' : 'النقطة حيث المؤشر تمامًا'}</small></span>`)).join('')}`
         : `<b>المؤشرات الفنية</b>${INDICATORS.map(x => { const p = Object.values(indCfg[x.id].plots)[0]; return row('ind', x.id, state.ind.has(x.id), `<i style="background:${p.color || p.colors?.[0] || colors?.muted || '#9da7b2'}"></i><span>${esc(indTitle(x.id))}</span>`); }).join('')}`;
       flyout.dataset.kind = kind; flyout.hidden = false; tip.hidden = true;
       sideBar.querySelectorAll('[data-menu]').forEach(x => x.setAttribute('aria-expanded', String(x === button)));
       // بجانب الزر، ولا تتجاوز أسفل منطقة الشارت
-      const top = button.getBoundingClientRect().top - body.getBoundingClientRect().top;
+      const top = (button.closest('.cc-grp') || button).getBoundingClientRect().top - body.getBoundingClientRect().top;
+      flyout.style.maxHeight = `${body.clientHeight}px`;
       flyout.style.top = `${Math.max(0, Math.min(top, body.clientHeight - flyout.offsetHeight))}px`;
     }
     document.addEventListener('pointerdown', event => {
@@ -1475,11 +1517,20 @@
     function setTool(tool) {
       state.tool = tool; pending = null; preview = null; hover = null;
       if (tool && selected >= 0) select(-1);
+      // زر المجموعة يعرض آخر أداة استُخدمت منها ويُشغّلها بنقرة
+      const group = tool && groupOf(tool);
+      if (group && state.last[group.id] !== tool) { state.last[group.id] = tool; saveSettings(); }
+      for (const g of TOOL_GROUPS) {
+        const main = sideBar.querySelector(`[data-grp-main="${g.id}"]`), last = state.last[g.id] ?? g.tools[0], name = TOOLS.find(([id]) => id === last)?.[1] ?? '';
+        if (main) { main.dataset.tool = last; main.innerHTML = ICONS[last]; main.setAttribute('aria-label', name); main.dataset.tip = name; }
+        sideBar.querySelector(`[data-group="${g.id}"]`)?.toggleAttribute('data-active', g.tools.includes(tool));
+      }
       // أثناء الرسم لا يتحرك الشارت بالسحب ولا يتكبّر، حتى لا يتعارض مع تحديد النقاط
       chart?.applyOptions({ handleScroll: !tool, handleScale: !tool });
       overlay.redraw();
       panel.querySelectorAll('[data-tool]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.tool === tool)));
       panel.querySelector('[data-cursor]')?.setAttribute('aria-pressed', String(!tool));
+      renderFavBar();
       if (tool && state.hidden) setHidden(false); // الرسم الجديد يحتاج أن تكون الرسوم ظاهرة
       box.classList.toggle('cc-drawing', !!tool);
       applyCrosshair();
@@ -1487,11 +1538,19 @@
     }
 
     panel.addEventListener('click', event => {
-      const b = event.target.closest('[data-home],[data-adj],[data-divmarks],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-tdel],[data-undo],[data-redo],[data-fibset],[data-magnet],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search]'); if (!b) return;
+      const b = event.target.closest('[data-home],[data-adj],[data-divmarks],[data-type],[data-interval],[data-crange],[data-ind],[data-tool],[data-tdel],[data-undo],[data-redo],[data-fibset],[data-magnet],[data-reset],[data-full],[data-cursor],[data-menu],[data-lock],[data-hide],[data-search],[data-fav],[data-stay],[data-favbar]'); if (!b) return;
       if (b.hasAttribute('data-search')) { openSearch(searchPop.hidden); return; }
       if (b.hasAttribute('data-home')) { show(home.symbol); return; }
       if (!chart) return;
       if (b.dataset.menu) { openFlyout(b.dataset.menu, b); return; }
+      if (b.dataset.fav) {
+        const id = b.dataset.fav;
+        state.fav = state.fav.includes(id) ? state.fav.filter(x => x !== id) : [...state.fav, id];
+        panel.querySelectorAll(`[data-fav="${id}"]`).forEach(x => x.setAttribute('aria-pressed', String(state.fav.includes(id))));
+        saveSettings(); renderFavBar(); return;
+      }
+      if (b.hasAttribute('data-stay')) { state.stay = !state.stay; b.setAttribute('aria-pressed', String(state.stay)); saveSettings(); return; }
+      if (b.hasAttribute('data-favbar')) { state.favBar = !state.favBar; b.setAttribute('aria-pressed', String(state.favBar)); saveSettings(); renderFavBar(); return; }
       if (b.dataset.tdel) { deleteAction(b.dataset.tdel); return; }
       if (b.hasAttribute('data-cursor')) { setTool(null); return; }
       if (b.hasAttribute('data-lock')) { setLocked(!state.locked); return; }
@@ -1503,7 +1562,7 @@
       if (b.hasAttribute('data-redo')) { redo(); return; }
       if (b.dataset.magnet) { state.magnet = b.dataset.magnet; panel.querySelectorAll('[data-magnet]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.magnet === state.magnet))); sideBar.querySelector('[data-menu="magnet"]')?.setAttribute('aria-pressed', String(state.magnet !== 'off')); saveSettings(); applyCrosshair(); closeFlyout(); return; }
       let keep = true;
-      if (b.dataset.tool) { setTool(state.tool === b.dataset.tool ? null : b.dataset.tool); return; }
+      if (b.dataset.tool) { closeFlyout(); setTool(state.tool === b.dataset.tool ? null : b.dataset.tool); return; }
       if (b.dataset.adj) { state.adj = !state.adj; b.setAttribute('aria-pressed', String(state.adj)); }
       if (b.dataset.divmarks) { state.divMarks = !state.divMarks; b.setAttribute('aria-pressed', String(state.divMarks)); }
       if (b.dataset.type) state.type = b.dataset.type;

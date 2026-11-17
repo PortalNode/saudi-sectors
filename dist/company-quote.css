@@ -336,3 +336,43 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cq-chart-panel .cc-side button{height:34px}
 .cq-chart-panel .cc-side hr{margin:4px 0}
 .ta-page .cc-chart{--cc-base:max(690px,calc(100vh - 280px))}
+
+/* شريط الأدوات الجانبي كما في TradingView: مجموعات بزر لآخر أداة وسهم صغير يفتح قائمة جانبية بأقسام وأسماء واختصارات ونجوم */
+.cc-grp{position:relative;flex:none;display:flex;justify-content:center;width:100%}
+.cc-side .cc-grp-arrow{position:absolute;right:0;top:50%;transform:translateY(-50%);width:13px;height:26px;border-radius:5px 0 0 5px;background:var(--pf-line);color:var(--pf-muted);opacity:0;transition:opacity .12s}
+.cq-chart-panel .cc-side .cc-grp-arrow{width:13px;height:26px}
+.cc-side .cc-grp-arrow::after{content:none}
+.cc-side .cc-grp-arrow svg{width:8px;height:12px}
+.cc-grp:hover .cc-grp-arrow,.cc-grp:focus-within .cc-grp-arrow,.cc-grp[data-active] .cc-grp-arrow,.cc-side .cc-grp-arrow[aria-expanded="true"]{opacity:1}
+.cc-side .cc-grp-arrow:hover{background:var(--pf-gold-soft);color:var(--pf-gold)}
+@media(hover:none){.cc-side .cc-grp-arrow{opacity:.6}}
+.cc-side [data-favbar]{margin-top:auto;flex:none;background:var(--pf-ink);color:var(--pf-bg)}
+.cc-side [data-favbar]:hover{background:var(--pf-ink);opacity:.85}
+.cc-side [data-favbar][aria-pressed="true"]{background:var(--pf-gold);color:var(--pf-bg)}
+.cc-flyout[data-kind^="grp:"]{width:300px;padding:6px 0;overflow-y:auto;border-radius:10px}
+.cc-flyout .cc-fl-title{padding:8px 16px 4px;font-size:11px;font-weight:600;color:var(--pf-muted)}
+.cc-flyout[data-kind^="grp:"] hr{margin:6px 0;border:0;border-top:1px solid var(--pf-line)}
+.cc-flyout .cc-row{display:flex;align-items:center}
+.cc-flyout .cc-row button{background:transparent;color:inherit}
+.cc-flyout .cc-row>button:first-child{flex:1;min-width:0;gap:12px;height:38px;padding:0 16px;border-radius:0;font-size:13.5px;font-weight:600}
+.cc-flyout .cc-row button::after{content:none}
+.cc-flyout .cc-ri{display:grid;place-items:center;flex:none;width:28px;height:28px}
+.cc-flyout .cc-ri svg{width:28px;height:28px}
+.cc-flyout .cc-rn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-flyout .cc-row kbd{flex:none;font:inherit;font-size:12px;font-weight:600;letter-spacing:.4px;color:var(--pf-muted)}
+.cc-flyout .cc-row>button[aria-pressed="true"]:first-child{color:var(--pf-gold)}
+.cc-flyout .cc-star{flex:none;display:grid;place-items:center;width:40px;height:38px;padding:0;margin:0;opacity:0;color:inherit}
+.cc-flyout .cc-star svg{fill:none}
+.cc-flyout .cc-star[aria-pressed="true"]{opacity:1}
+.cc-flyout .cc-star[aria-pressed="true"] svg{fill:currentColor}
+.cc-flyout .cc-row:hover,.cc-flyout .cc-row:focus-within{background:var(--pf-ink);color:var(--pf-bg)}
+.cc-flyout .cc-row:hover>button:first-child,.cc-flyout .cc-row:focus-within>button:first-child{color:var(--pf-bg)}
+.cc-flyout .cc-row:hover kbd{color:inherit;opacity:.65}
+.cc-flyout .cc-row:hover .cc-star,.cc-flyout .cc-row:focus-within .cc-star{opacity:1}
+.cc-flyout .cc-row .cc-star:hover svg{fill:currentColor}
+.cc-favbar{position:absolute;top:8px;left:50%;z-index:25;transform:translateX(-50%);display:flex;gap:2px;padding:4px;border:1px solid var(--pf-line);border-radius:10px;background:var(--pf-bg);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.cc-favbar[hidden]{display:none}
+.cc-favbar button{display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--pf-ink);cursor:pointer}
+.cc-favbar button:hover{background:var(--pf-line)}
+.cc-favbar button[aria-pressed="true"]{background:var(--pf-gold-soft);color:var(--pf-gold)}
+.cc-favbar svg{width:26px;height:26px}
