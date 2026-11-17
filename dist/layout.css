@@ -157,6 +157,7 @@ details.bank-notes[open]>summary{margin-bottom:8px}
 .co-logo{flex:none;display:inline-grid;place-items:center;border-radius:50%;object-fit:cover;vertical-align:middle;box-shadow:0 0 0 1px var(--line)}
 .co-logo-letter{background:var(--head);color:var(--muted);font-weight:700;line-height:1}
 .co-logo-lg{width:44px;height:44px;font-size:19px}
+.co-logo-md{width:32px;height:32px}
 .co-logo-sm{width:22px;height:22px;font-size:11px;margin-inline-end:8px}
 .co-logo-xs{width:18px;height:18px;font-size:10px;box-shadow:none}
 .bank-heading h2.has-co-logo{display:flex;align-items:center;gap:12px}
@@ -164,3 +165,13 @@ details.bank-notes[open]>summary{margin-bottom:8px}
 td.company-name.has-co-logo{white-space:nowrap}
 td.company-name.has-co-logo .company-results-link{display:inline-block;vertical-align:middle;max-width:calc(100% - 30px);overflow:hidden;text-overflow:ellipsis}
 @media(max-width:700px){.co-logo-lg{width:36px;height:36px;font-size:16px}.bank-heading h2.has-co-logo{gap:9px}}
+
+/* TASI logo above the market index label. On the four-column layout it sits in the space above the
+   group (centred on the group's content box, as the label is) instead of inside it, so the index figures stay on the same row as the other groups' figures;
+   when the groups wrap (two columns, one column) it goes back in the flow. */
+.market-group-logo{display:block;margin:0 auto 6px}
+@media(min-width:981px){
+  .market-group-index{position:relative}
+  .market-group-index .market-group-logo{position:absolute;bottom:100%;inset-inline:0 14px;margin:0 auto 6px}
+  .market-summary h2{margin-bottom:30px}
+}

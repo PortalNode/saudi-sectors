@@ -208,7 +208,8 @@ function paintMarketSummary(){
     const title=item.label.startsWith('الشركات')||item.label==='دون تغيير'?`محسوب من بيانات أسهم الجدول · ${providerLabel(data.priceSource?.provider)} · ${snapshotLabel()}`:`المصدر: ${itemSource} · ${item.percent?'تاريخ بيانات الأداء':'تاريخ المؤشر'}: ${item.percent?m.performanceDate||'غير متاح':date||'غير متاح'}${item.estimated?' · تقدير من أحجام الأسهم المتأخرة ويُستبدل بالقيمة الرسمية عند الإغلاق':''}`;
     return `<div class="market-card" title="${escapeHtml(title)}"><span>${item.label}</span><strong class="${cls}">${display}${estimatedMark}</strong></div>`;
   });
-  const group=(label,body,kind)=>`<div class="market-group market-group-${kind}"><span class="market-group-label">${label}</span><div class="market-group-cards">${body}</div></div>`;
+  const indexLogo='<img class="co-logo co-logo-md market-group-logo" src="logos/TASI.svg" alt="" width="32" height="32" decoding="async" onerror="this.remove()">';
+  const group=(label,body,kind)=>`<div class="market-group market-group-${kind}">${kind==='index'?indexLogo:''}<span class="market-group-label">${label}</span><div class="market-group-cards">${body}</div></div>`;
   const breadthBar=`<div class="breadth-bar" aria-hidden="true"><i class="breadth-up" style="flex:${breadth.up}"></i><i class="breadth-flat" style="flex:${breadth.flat}"></i><i class="breadth-down" style="flex:${breadth.down}"></i></div>`;
   $('market-stats').innerHTML=group('المؤشر العام',cards[0]+cards[1],'index')+group('اتساع السوق',breadthBar+cards[2]+cards[4]+cards[3],'breadth')+group('القيمة المتداولة (ريال)',cards[5],'turnover')+group('أداء المؤشر',cards.slice(6).join(''),'performance');
   const checked=checkedLabel(m.updatedAt);
