@@ -11,8 +11,9 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { loadStocks, loadMarket, OHLC_DIR, DIST } from './backtest/data.mjs';
 import { readCandles } from './ohlc-files.mjs';
-import { sma } from '../dist/scanner/indicators.mjs';
-import { KEY_IDS, KEY_LABELS, MIN_SCORE, DIVIDEND_MIN, computeKeys, swingLevels, financialKey, tasiKey, loadFinancials } from './quality-keys.mjs';
+import { sma, atr as atrSeries } from '../dist/scanner/indicators.mjs';
+import { nearestZones } from './sr-levels.mjs';
+import { KEY_IDS, KEY_LABELS, MIN_SCORE, DIVIDEND_MIN, computeKeys, financialKey, tasiKey, loadFinancials } from './quality-keys.mjs';
 
 const OUT = new URL('../dist/scanner/signals.json', import.meta.url);
 const WARMUP = 250; // جلسات لازمة قبل الحكم (متوسط 200 مع هامش)
@@ -62,14 +63,14 @@ for (const s of stocks) {
 
   const c = s.c[i];
   const sma50 = sma(s.c, 50)[i], sma200 = sma(s.c, 200)[i];
-  const { support, resistance } = swingLevels(s.h, s.l, s.c, i);
+  const { support, resistance, atr } = nearestZones(s.h, s.l, s.c, i, undefined, atrSeries(s.h, s.l, s.c, 14));
   const avgVol20Prev = sma(s.v, 20)[i - 1], volRatio = avgVol20Prev > 0 ? s.v[i] / avgVol20Prev : null;
 
-  const k = computeKeys({ close: s.c, i, support, resistance, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield });
+  const k = computeKeys({ close: s.c, i, support, resistance, atr, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield });
   outStocks[s.symbol] = {
     name: s.name, sector: s.sector, price: r(c), tradedValue: r(c * s.v[i], 0), avgVal20: r(avgVal20, 0), volRatio: r(volRatio),
     score: k.score, bits: k.bits, trend: k.trend, dividendYield: r(o.dividendYield), dividendOk: k.dividendOk,
-    support: r(support), resistance: r(resistance), sma50: r(sma50), sma200: r(sma200),
+    support: r(support?.center), resistance: r(resistance?.center), supportZone: support ? [r(support.low), r(support.high), support.touches] : null, resistanceZone: resistance ? [r(resistance.low), r(resistance.high), resistance.touches] : null, atr: r(atr), sma50: r(sma50), sma200: r(sma200),
     keys: Object.fromEntries(KEY_IDS.map(id => [id, [k.keys[id].ok, k.keys[id].detail]])),
   };
 }

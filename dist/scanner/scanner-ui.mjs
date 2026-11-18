@@ -1,7 +1,7 @@
 // واجهة «مفاتيح جودة السهم» وقائمة المراقبة. تقرأ dist/scanner/signals.json (يبنيه scripts/build-scanner.mjs بعد كل
 // تحديث أسعار) ولا تحسب أي مؤشر بنفسها. كل المنطق القابل للاختبار في scanner-logic.mjs.
 import { KEY_IDS, DEFAULT_FILTERS, filterStocks, sortStocks, watchDiff, loadWatch, saveWatch, toggleWatch,
-  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119d';
+  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119e';
 
 const FILTER_KEY = 'saudi-sectors-scanner-filters-v2';
 const base = file => new URL(file, import.meta.url);
@@ -25,7 +25,7 @@ function banner() {
   if (!m.valid) return `<div class="sc-banner sc-bad" role="alert"><strong>تعذر التحقق من البيانات، فلا تُعرض أي نتائج.</strong> ${esc(m.reasonInvalid || '')}</div>`;
   const excluded = Object.entries(m.excluded || {}).map(([k, v]) => `${REASON[k] || k}: ${v.length}`).join(' · ');
   const tasiOff = m.tasi && m.tasi.trend !== 'up';
-  return `<div class="sc-banner" role="note"><strong>استراتيجية «مفاتيح جودة السهم».</strong> لكل سهم ستة مفاتيح: اتجاه السهم، التحليل المالي (صافي ربح آخر 4 أرباع موجب)، اتجاه TASI، مستويات الأسعار (أقرب لدعم منه لمقاومة)، الإغلاق فوق المتوسط 55، وMACD فوق خط الإشارة. المفتاح إما <b>1+</b> أو <b>0</b>، ويظهر السهم إذا حقق <b>${m.minScore} مفاتيح أو أكثر</b> من 6. استراتيجية وصفية لا تتنبأ وليست توصية استثمارية.</div>
+  return `<div class="sc-banner" role="note"><strong>استراتيجية «مفاتيح جودة السهم».</strong> لكل سهم ستة مفاتيح: اتجاه السهم، التحليل المالي (صافي ربح آخر 4 أرباع موجب)، اتجاه TASI، مستويات الأسعار (عند منطقة دعم وأقرب إليها من المقاومة)، الإغلاق فوق المتوسط 55، وMACD فوق خط الإشارة. المفتاح إما <b>1+</b> أو <b>0</b>، ويظهر السهم إذا حقق <b>${m.minScore} مفاتيح أو أكثر</b> من 6. استراتيجية وصفية لا تتنبأ وليست توصية استثمارية.</div>
   ${tasiOff ? `<div class="sc-banner sc-warn-banner" role="note">مفتاح السوق (TASI) <b>0</b> الآن: ${esc(m.tasi.detail)}. لذلك لا يمكن لأي سهم تجاوز 5 من 6 حتى يعود المؤشر للاتجاه الصاعد.</div>` : ''}
   <div class="sc-meta"><span>آخر إغلاق رسمي: <bdi class="num">${esc(m.dataDate)}</bdi></span><span>الأسهم المفحوصة: <bdi class="num">${m.scanned}</bdi> من <bdi class="num">${m.universe}</bdi></span><span>6 من 6: <bdi class="num">${m.counts.six}</bdi> · 5 من 6: <bdi class="num">${m.counts.five}</bdi></span><span>اتجاه TASI: ${esc(TREND_LABEL[m.tasi?.trend] || '—')}</span>${excluded ? `<span>مستبعد: ${esc(excluded)}</span>` : ''}</div>`;
 }
@@ -78,10 +78,12 @@ function renderResult() {
 /* ---------- بطاقة التفاصيل ---------- */
 function levelsFor(s) {
   const out = [];
-  if (s.support) out.push({ price: s.support, title: 'أقرب دعم', color: '#22c55e' });
-  if (s.resistance) out.push({ price: s.resistance, title: 'أقرب مقاومة', color: '#f05252' });
+  // منطقة الدعم/المقاومة تُرسم بحافتيها (لا بخط واحد)، وعدد اللمسات في عنوان الحافة العليا للدعم والسفلى للمقاومة
+  const zone = (z, name, color, titleEdge) => { if (!z) return; out.push({ price: z[1], title: titleEdge === 'high' ? `${name} (${z[2]} لمسات)` : `${name} · حافة`, color }, { price: z[0], title: titleEdge === 'low' ? `${name} (${z[2]} لمسات)` : `${name} · حافة`, color }); };
+  zone(s.supportZone, 'دعم', '#22c55e', 'high'); zone(s.resistanceZone, 'مقاومة', '#f05252', 'low');
   return out;
 }
+const zoneHtml = (z, none) => z ? `<bdi class="num" dir="ltr">${fmtPrice(z[0])} – ${fmtPrice(z[1])}</bdi> <small class="sc-dim">${z[2]} لمسات</small>` : none;
 function cardHtml(s) {
   const watched = !!watch[s.symbol];
   const rows = KEY_IDS.map(id => { const [ok, detail] = s.keys[id]; return `<li class="${ok ? 'ok' : 'no'}"><span aria-hidden="true">${ok ? '1+' : '0'}</span> <b>${esc(label(id))}</b>${detail ? `<small class="sc-dim">${esc(detail)}</small>` : ''}</li>`; }).join('');
@@ -92,10 +94,10 @@ function cardHtml(s) {
     <p class="sc-why"><span class="sc-score s${s.score}"><bdi class="num" dir="ltr">${s.score}/6</bdi></span> ${esc(verdict)}</p>
     <div class="sc-grid">
       <section class="sc-block sc-wide"><h4>المفاتيح الستة</h4><ul class="sc-conds sc-keylist">${rows}</ul></section>
-      <section class="sc-block"><h4>دعم ومقاومة</h4><dl class="sc-dl"><dt>أقرب دعم</dt><dd><bdi class="num">${fmtPrice(s.support)}</bdi></dd><dt>أقرب مقاومة</dt><dd>${s.resistance ? `<bdi class="num">${fmtPrice(s.resistance)}</bdi>` : 'لا توجد (عند قمة الفترة)'}</dd><dt>متوسط 50 / 200</dt><dd><bdi class="num">${fmtPrice(s.sma50)} / ${fmtPrice(s.sma200)}</bdi></dd></dl></section>
+      <section class="sc-block"><h4>مناطق الدعم والمقاومة</h4><dl class="sc-dl"><dt>أقرب منطقة دعم</dt><dd>${zoneHtml(s.supportZone, 'لا توجد منطقة دعم مؤكدة')}</dd><dt>أقرب منطقة مقاومة</dt><dd>${zoneHtml(s.resistanceZone, 'لا توجد (عند قمة الفترة)')}</dd><dt>متوسط 50 / 200</dt><dd><bdi class="num">${fmtPrice(s.sma50)} / ${fmtPrice(s.sma200)}</bdi></dd></dl></section>
       <section class="sc-block"><h4>توزيعات الأرباح</h4><p>${s.dividendYield == null ? 'لا تتوفر نسبة توزيعات لهذا السهم.' : `عائد التوزيعات <bdi class="num">${fmtNum(s.dividendYield, 2)}%</bdi>${s.dividendOk ? ' — أعلى من 2.5% (يفضّلها المنهج، ولا تدخل في عدّ المفاتيح).' : ' — أقل من 2.5%.'}`}</p></section>
     </div>
-    <p class="sc-foot">يُعرض الشارت أدناه بخطي الدعم والمقاومة. البيانات حتى <bdi class="num">${esc(data.meta.dataDate)}</bdi>، وهذه ليست توصية استثمارية.</p></article>`;
+    <p class="sc-foot">يُعرض الشارت أدناه بمنطقتي الدعم والمقاومة (حافتا كل منطقة). البيانات حتى <bdi class="num">${esc(data.meta.dataDate)}</bdi>، وهذه ليست توصية استثمارية.</p></article>`;
 }
 function openCard(symbol, { switchTab = true } = {}) {
   const s = stockOf(symbol);

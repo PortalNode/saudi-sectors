@@ -28,7 +28,7 @@ export function tasiKey(tasiClose) {
   return { ...key(trend === 'up', trend === 'up' ? 'مؤشر السوق في اتجاه صاعد' : trend === 'down' ? 'مؤشر السوق في اتجاه هابط' : 'مؤشر السوق عرضي / غير واضح'), trend };
 }
 
-// دعم ومقاومة من قمم وقيعان الحركة السعرية (لا من المتوسطات): قاع/قمة محورية = أدنى/أعلى سعر بين k شموع قبلها وk بعدها،
+// [قديمة، تبقى كمرجع في scripts/backtest/sr-eval.mjs؛ الماسح يستعمل sr-levels.mjs] دعم ومقاومة من قمم وقيعان الحركة السعرية (لا من المتوسطات): قاع/قمة محورية = أدنى/أعلى سعر بين k شموع قبلها وk بعدها،
 // ومعها أدنى/أعلى سعر للجلسات السابقة (20 و60، و120 و252 للقمم) دون جلسة اليوم، فالإغلاق عند قمة جديدة لا مقاومة فوقه. الدعم = أعلى قاع تحت السعر، والمقاومة = أدنى قمة فوقه.
 export function swingLevels(high, low, close, i, { k = 4, lookback = 252 } = {}) {
   const price = close[i], from = Math.max(0, i - lookback), lows = [], highs = [];
@@ -44,13 +44,17 @@ export function swingLevels(high, low, close, i, { k = 4, lookback = 252 } = {})
   return { support: below.length ? Math.max(...below) : null, resistance: above.length ? Math.min(...above) : null };
 }
 
-// 1+ إذا كان السعر أقرب إلى أقرب دعم منه إلى أقرب مقاومة، أو لا مقاومة فوقه (اخترق قمته). 0 إذا أقرب للمقاومة.
-export function levelsKey(price, support, resistance) {
-  if (!fin(price)) return key(false, 'لا سعر');
-  if (!fin(resistance)) return key(true,'لا توجد مقاومة فوق السعر (عند قمة الفترة)');
-  if (!fin(support)) return key(false, `لا يوجد دعم تحت السعر · المقاومة ${f2(resistance)}`);
-  const toS = price - support, toR = resistance - price;
-  return key(toS < toR, `دعم ${f2(support)} (يبعد ${f2(100 * toS / price, 1)}%) · مقاومة ${f2(resistance)} (تبعد ${f2(100 * toR / price, 1)}%)`);
+// منطقة دعم/مقاومة كما تخرج من sr-levels.mjs: { low, high, center, touches }. المسافة بوحدة ATR من حافة المنطقة (صفر داخلها).
+const zoneText = (z, label) => `${label} ${f2(z.low)}–${f2(z.high)} (${z.touches} لمسات)`;
+export const AT_SUPPORT_ATR = 1.0; // «عند الدعم»: داخل المنطقة أو فوق حافتها العليا بأقل من 1×ATR
+// 1+ إذا كان السهم عند منطقة دعم (داخلها أو ضمن 1×ATR فوقها) وأقرب إليها من أقرب منطقة مقاومة. 0 إذا كان أقرب للمقاومة
+// أو بعيداً عن أي دعم أو لا دعم تحته. لا مقاومة فوقه (قمة جديدة) تعني أن المسافة إليها لا نهائية فيُحكم بالقرب من الدعم وحده.
+export function levelsKey(price, support, resistance, atr) {
+  if (!fin(price) || !(atr > 0)) return key(false, 'لا بيانات كافية لتحديد المستويات');
+  if (!support) return key(false, resistance ? `لا توجد منطقة دعم مؤكدة تحت السعر · ${zoneText(resistance, 'مقاومة')}` : 'لا توجد مناطق دعم أو مقاومة مؤكدة');
+  const dS = Math.max(0, price - support.high) / atr, dR = resistance ? Math.max(0, resistance.low - price) / atr : Infinity;
+  const detail = `${zoneText(support, 'دعم')} يبعد ${f2(dS, 1)}×ATR${resistance ? ` · ${zoneText(resistance, 'مقاومة')} تبعد ${f2(dR, 1)}×ATR` : ' · لا مقاومة فوق السعر'}`;
+  return key(dS <= AT_SUPPORT_ATR && dS < dR, detail);
 }
 
 export function sma55Key(close, i) {
@@ -99,12 +103,12 @@ export function loadFinancials(distUrl) {
 
 /* ---------- التجميع ---------- */
 // الأسهم 5/6 وما فوق تظهر. input: { close[], i, support, resistance, financial, tasi (نتيجة tasiKey), dividendYield }
-export function computeKeys({ close, i, support, resistance, financial, tasi, dividendYield }) {
+export function computeKeys({ close, i, support, resistance, atr, financial, tasi, dividendYield }) {
   const { trend, sma50, sma200 } = trendAt(close, i);
   const keys = {
     trend: key(trend === 'up', trend === 'up' ? 'الإغلاق فوق متوسط 50 وهو فوق متوسط 200 وصاعد' : trend === 'down' ? 'اتجاه هابط (الإغلاق تحت متوسط 50 وهو تحت 200)' : trend === 'side' ? 'اتجاه عرضي / غير واضح' : 'تاريخ أقصر من 200 جلسة'),
     fin: financial, tasi: { ok: tasi.ok, detail: tasi.detail },
-    levels: levelsKey(close[i], support, resistance), sma55: sma55Key(close, i), macd: macdKey(close, i),
+    levels: levelsKey(close[i], support, resistance, atr), sma55: sma55Key(close, i), macd: macdKey(close, i),
   };
   const bits = KEY_IDS.map(id => keys[id].ok);
   return {

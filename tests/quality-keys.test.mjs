@@ -20,12 +20,18 @@ test('TASI key follows the same trend definition and fails closed without candle
   assert.equal(tasiKey(null).ok, 0);
 });
 
-test('levels key: nearer to support is 1, nearer to resistance is 0, no resistance above is 1, no support below is 0', () => {
-  assert.equal(levelsKey(100, 98, 110).ok, 1);
-  assert.equal(levelsKey(100, 90, 102).ok, 0);
-  assert.equal(levelsKey(100, 95, null).ok, 1);
-  assert.equal(levelsKey(100, null, 110).ok, 0);
-  assert.equal(levelsKey(null, 90, 110).ok, 0);
+const Z = (low, high, touches = 3) => ({ low, high, center: (low + high) / 2, touches });
+test('levels key: at a support zone and nearer to it than to resistance is 1; near resistance, far from support or no support is 0', () => {
+  assert.equal(levelsKey(100, Z(97, 99), Z(108, 110), 2).ok, 1);   // 0.5 ATR above support, resistance 4 ATR away
+  assert.equal(levelsKey(100, Z(95, 97), Z(103, 105), 2).ok, 0);   // support 1.5 ATR away (beyond 1 ATR) and resistance 1.5 ATR away
+  assert.equal(levelsKey(100, Z(90, 92), Z(110, 112), 2).ok, 0);   // 4 ATR above support: not "at" support
+  assert.equal(levelsKey(100, Z(97, 99), Z(101, 103), 2).ok, 0);   // resistance 0.5 ATR away
+  assert.equal(levelsKey(100, Z(99, 101), Z(108, 110), 2).ok, 1);  // price inside the support zone
+  assert.equal(levelsKey(100, Z(97, 99), null, 2).ok, 1);          // new high: no resistance above, still at support
+  assert.equal(levelsKey(100, null, Z(108, 110), 2).ok, 0);
+  assert.equal(levelsKey(100, null, null, 2).ok, 0);
+  assert.equal(levelsKey(null, Z(97, 99), null, 2).ok, 0);
+  assert.equal(levelsKey(100, Z(97, 99), null, 0).ok, 0);
 });
 
 test('55-day average key: above is 1, below is 0, short history is 0', () => {
@@ -57,13 +63,13 @@ test('financial key: last four consecutive quarters decide; loss is 0; gaps and 
 test('computeKeys: six keys, score is their sum, dividend badge is separate from the score', () => {
   const close = rising(260);
   const tasi = tasiKey(rising(260));
-  const all = computeKeys({ close, i: 259, support: 355, resistance: 380, financial: financialKey({ quarters: { '2025Q4': { netProfit: 5 }, '2026Q1': { netProfit: 5 }, '2026Q2': { netProfit: 5 }, '2026Q3': { netProfit: 5 } } }), tasi, dividendYield: 3 });
+  const all = computeKeys({ close, i: 259, support: Z(353, 357), resistance: Z(380, 384), atr: 5, financial: financialKey({ quarters: { '2025Q4': { netProfit: 5 }, '2026Q1': { netProfit: 5 }, '2026Q2': { netProfit: 5 }, '2026Q3': { netProfit: 5 } } }), tasi, dividendYield: 3 });
   assert.deepEqual(Object.keys(all.keys), KEY_IDS);
   // a straight rising line has MACD line above its signal only while accelerating; assert the sum rather than every bit
   assert.equal(all.score, all.bits.split('').reduce((a, b) => a + +b, 0));
   assert.equal(all.keys.trend.ok, 1); assert.equal(all.keys.fin.ok, 1); assert.equal(all.keys.tasi.ok, 1); assert.equal(all.keys.sma55.ok, 1);
   assert.equal(all.dividendOk, true);
-  const low = computeKeys({ close, i: 259, support: 355, resistance: 380, financial: financialKey(undefined), tasi: tasiKey(falling(260)), dividendYield: 2.5 });
+  const low = computeKeys({ close, i: 259, support: Z(353, 357), resistance: Z(380, 384), atr: 5, financial: financialKey(undefined), tasi: tasiKey(falling(260)), dividendYield: 2.5 });
   assert.equal(low.keys.fin.ok, 0); assert.equal(low.keys.tasi.ok, 0); assert.equal(low.dividendOk, false); // 2.5 is not "above" 2.5
   assert.ok(low.score <= all.score - 2);
 });
