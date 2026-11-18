@@ -1,7 +1,7 @@
 // واجهة «مفاتيح جودة السهم» وقائمة المراقبة. تقرأ dist/scanner/signals.json (يبنيه scripts/build-scanner.mjs بعد كل
 // تحديث أسعار) ولا تحسب أي مؤشر بنفسها. كل المنطق القابل للاختبار في scanner-logic.mjs.
 import { KEY_IDS, DEFAULT_FILTERS, filterStocks, sortStocks, watchDiff, loadWatch, saveWatch, toggleWatch,
-  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119b';
+  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119c';
 
 const FILTER_KEY = 'saudi-sectors-scanner-filters-v2';
 const base = file => new URL(file, import.meta.url);
@@ -71,7 +71,7 @@ function renderResult() {
   out.innerHTML = list.length
     ? `<p class="sc-count-line"><bdi class="num">${list.length}</bdi> سهماً. <b>1+</b> = المفتاح متحقق، <b>0</b> = غير متحقق. اضغط على أي سهم لرؤية سبب كل مفتاح والشارت.</p>
        <div class="table-wrap sc-wrap"><table class="sc-table"><thead><tr>${head.map((h, i) => `<th${i === 0 ? ' class="sc-sticky"' : ''}>${esc(h)}</th>`).join('')}</tr></thead><tbody>${tableRows(list)}</tbody></table></div>`
-    : '<div class="sc-empty"><strong>لا توجد أسهم تحقق هذا العدد من المفاتيح الآن.</strong><p>هذا طبيعي حين يكون اتجاه السوق غير صاعد. يمكنك خفض العدد إلى «4 فأكثر» للاستكشاف.</p></div>';
+    : `<div class="sc-empty"><strong>لا توجد أسهم تحقق ${filters.minScore} مفاتيح فأكثر الآن.</strong><p>هذا متوقع حين يكون اتجاه السوق (TASI) غير صاعد، فمفتاح السوق صفر لكل الأسهم ويصبح المطلوب تحقق المفاتيح الخمسة الباقية كلها.</p>${filters.minScore > 4 ? '<p><button type="button" class="sc-btn" data-lower-score>اعرض الأسهم ذات 4 مفاتيح (للاستكشاف)</button></p>' : ''}</div>`;
 }
 
 /* ---------- بطاقة التفاصيل ---------- */
@@ -178,6 +178,7 @@ export async function init(api) {
     if (!(t instanceof Element)) return;
     const w = t.closest('[data-watch]'); if (w) { e.stopPropagation(); toggle(w.dataset.watch); return; }
     if (t.closest('[data-reset]')) { filters = { ...DEFAULT_FILTERS }; sortKey = 'score'; writeFilters(); renderScanner(); return; }
+    if (t.closest('[data-lower-score]')) { filters.minScore = 4; writeFilters(); renderScanner(); return; }
     if (t.closest('[data-card-close]')) { closeCard(); return; }
     const wo = t.closest('[data-open-watch]'); if (wo) { openCard(wo.dataset.openWatch); return; }
     if (t.closest('[data-import-favs]')) {

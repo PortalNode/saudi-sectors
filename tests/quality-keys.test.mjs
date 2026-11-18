@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { trendAt, tasiKey, levelsKey, sma55Key, macdKey, financialKey, computeKeys, KEY_IDS } from '../scripts/quality-keys.mjs';
+import { swingLevels, trendAt, tasiKey, levelsKey, sma55Key, macdKey, financialKey, computeKeys, KEY_IDS } from '../scripts/quality-keys.mjs';
 
 const rising = n => Array.from({ length: n }, (_, i) => 100 + i);
 const falling = n => Array.from({ length: n }, (_, i) => 500 - i);
@@ -66,4 +66,22 @@ test('computeKeys: six keys, score is their sum, dividend badge is separate from
   const low = computeKeys({ close, i: 259, support: 355, resistance: 380, financial: financialKey(undefined), tasi: tasiKey(falling(260)), dividendYield: 2.5 });
   assert.equal(low.keys.fin.ok, 0); assert.equal(low.keys.tasi.ok, 0); assert.equal(low.dividendOk, false); // 2.5 is not "above" 2.5
   assert.ok(low.score <= all.score - 2);
+});
+
+test('swing levels come from price structure, not moving averages', () => {
+  // range 90..110 with a clear swing low at 95 (bar 12) and swing high at 108 (bar 24); price at 105 near the top
+  const n = 40, high = [], low = [], close = [];
+  for (let k = 0; k < n; k++) {
+    const base = 100 + 8 * Math.sin(k / 3.8); // oscillation
+    close.push(base); high.push(base + 1); low.push(base - 1);
+  }
+  const i = n - 1, { support, resistance } = swingLevels(high, low, close, i);
+  assert.ok(support < close[i] && resistance > close[i]);
+  assert.ok(resistance <= Math.max(...high.slice(-20)) + 1e-9); // never above the 20-day high when one lies above price
+  // price at a new high: no resistance above it
+  const up = Array.from({ length: 60 }, (_, k) => 100 + k);
+  assert.equal(swingLevels(up.map(x => x + 1), up.map(x => x - 1), up, 59).resistance, null);
+  // price at a new low: no support below it
+  const down = Array.from({ length: 60 }, (_, k) => 200 - k);
+  assert.equal(swingLevels(down.map(x => x + 1), down.map(x => x - 1), down, 59).support, null);
 });

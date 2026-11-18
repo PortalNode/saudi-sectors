@@ -28,6 +28,22 @@ export function tasiKey(tasiClose) {
   return { ...key(trend === 'up', trend === 'up' ? 'مؤشر السوق في اتجاه صاعد' : trend === 'down' ? 'مؤشر السوق في اتجاه هابط' : 'مؤشر السوق عرضي / غير واضح'), trend };
 }
 
+// دعم ومقاومة من قمم وقيعان الحركة السعرية (لا من المتوسطات): قاع/قمة محورية = أدنى/أعلى سعر بين k شموع قبلها وk بعدها،
+// ومعها أدنى/أعلى سعر للجلسات السابقة (20 و60، و120 و252 للقمم) دون جلسة اليوم، فالإغلاق عند قمة جديدة لا مقاومة فوقه. الدعم = أعلى قاع تحت السعر، والمقاومة = أدنى قمة فوقه.
+export function swingLevels(high, low, close, i, { k = 4, lookback = 252 } = {}) {
+  const price = close[i], from = Math.max(0, i - lookback), lows = [], highs = [];
+  for (let j = Math.max(k, from); j <= i - k; j++) {
+    let isLow = true, isHigh = true;
+    for (let m = j - k; m <= j + k; m++) { if (low[m] < low[j]) isLow = false; if (high[m] > high[j]) isHigh = false; }
+    if (isLow) lows.push(low[j]);
+    if (isHigh) highs.push(high[j]);
+  }
+  for (const n of [20, 60]) lows.push(Math.min(...low.slice(Math.max(0, i - n), i)));
+  for (const n of [20, 60, 120, 252]) highs.push(Math.max(...high.slice(Math.max(0, i - n), i)));
+  const below = lows.filter(x => x < price), above = highs.filter(x => x > price);
+  return { support: below.length ? Math.max(...below) : null, resistance: above.length ? Math.min(...above) : null };
+}
+
 // 1+ إذا كان السعر أقرب إلى أقرب دعم منه إلى أقرب مقاومة، أو لا مقاومة فوقه (اخترق قمته). 0 إذا أقرب للمقاومة.
 export function levelsKey(price, support, resistance) {
   if (!fin(price)) return key(false, 'لا سعر');
