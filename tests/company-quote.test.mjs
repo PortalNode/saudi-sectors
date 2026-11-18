@@ -273,3 +273,17 @@ test('drawing tools match TradingView: more tools, per-drawing style, floating b
   assert.match(chart, /data-menu="trash"/);
   assert.match(chart, /function deleteAction\(t\)/);
 });
+
+test('parallel channel tool, the ⋯ menu of the floating bar, and keyboard cloning match TradingView', () => {
+  const chart = read('company-chart.js');
+  assert.match(chart, /\['channel', 'قناة متوازية'\]/, 'the parallel channel tool');
+  assert.match(chart, /function finishChannel\(point\)/, 'a third click sets the channel width');
+  assert.match(chart, /part: 'offA'/, 'the parallel line has its own handles');
+  for (const part of ['data-ftb="more"', 'الترتيب المرئي', 'الوضوح على الفواصل الزمنية', 'نسخة مكررة', 'data-mact="copy"', 'data-mact="hide"']) assert.ok(chart.includes(part), part);
+  for (const fn of ['function reorder(kind)', 'function cloneSelected()', 'function copySelected()', 'function pasteClip()']) assert.ok(chart.includes(fn), fn);
+  assert.match(chart, /event\.code === 'KeyC' && selected >= 0/, 'Ctrl/⌘ + C copies the selected drawing');
+  assert.match(chart, /event\.code === 'KeyV' && drawClip/, 'Ctrl/⌘ + V pastes it');
+  assert.match(chart, /cloning = \(IS_MAC \? event\.metaKey : event\.ctrlKey\)/, 'Ctrl/⌘ + drag clones a drawing');
+  assert.match(chart, /hideOn\?\.includes\(state\.interval\)/, 'drawings can be hidden on chosen intervals');
+  for (const icon of ['more', 'layers', 'clone', 'hideEye']) assert.match(chart, new RegExp(`\\n    ${icon}: icon\\(`), `icon ${icon}`);
+});

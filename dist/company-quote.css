@@ -388,3 +388,25 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cq-chart-panel .cc-side hr{width:34px;margin:5px 0;border-top:1px solid var(--pf-line)}
 .cq-chart-panel .cc-side [data-menu]:not(.cc-grp-arrow)::after{right:4px;bottom:4px;border-width:2.5px;opacity:.5}
 .cq-chart-panel .cc-side .cc-grp-arrow{right:0;width:12px;height:24px;border-radius:5px 0 0 5px}
+
+/* قائمة «⋯» في الشريط العائم كما في TradingView: أيقونة يمينًا، والاسم، ثم السهم أو الاختصار في الطرف المقابل */
+.cc-ftb button[data-ftb="more"]{width:36px}
+.cc-ftb button[data-ftb="more"][aria-expanded="true"]{background:var(--pf-line)}
+.cc-more{position:absolute;z-index:7;width:236px;padding:6px 0;background:var(--pf-bg);border:1px solid var(--pf-line);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.4);font-size:13.5px;direction:rtl}
+.cc-more[hidden]{display:none}
+.cc-more hr{margin:6px 0;border:0;border-top:1px solid var(--pf-line)}
+.cc-mi{display:flex;align-items:center;gap:10px;width:100%;height:40px;padding:0 14px;border:0;background:transparent;color:var(--pf-ink);font:inherit;font-weight:600;text-align:start;cursor:pointer}
+.cc-mi:hover:not([disabled]),.cc-mi-wrap:hover>.cc-mi,.cc-mi-wrap[data-open]>.cc-mi{background:var(--pf-line)}
+.cc-mi[disabled]{opacity:.4;cursor:default}
+.cc-mi-i{display:grid;place-items:center;flex:none;width:28px;height:28px}
+.cc-mi-i svg{width:28px;height:28px}
+.cc-mi-t{flex:1;min-width:0;white-space:nowrap}
+.cc-mi kbd{flex:none;font:inherit;font-size:12px;font-weight:600;letter-spacing:.3px;color:var(--pf-muted)}
+.cc-mi-arrow{display:grid;place-items:center;flex:none;width:14px;color:var(--pf-muted)}
+.cc-mi-wrap{position:relative}
+.cc-msub{display:none;position:absolute;top:-7px;right:100%;width:210px;padding:6px 0;background:var(--pf-bg);border:1px solid var(--pf-line);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.cc-mi-wrap:hover>.cc-msub,.cc-mi-wrap[data-open]>.cc-msub{display:block}
+.cc-more[data-flip="1"] .cc-msub{right:auto;left:100%}
+.cc-chk{display:grid;place-items:center;width:18px;height:18px;border:1.5px solid var(--pf-muted);border-radius:4px;font-style:normal}
+.cc-mi[aria-pressed="true"] .cc-chk{border-color:var(--pf-gold);background:var(--pf-gold)}
+.cc-mi[aria-pressed="true"] .cc-chk::after{content:"✓";color:var(--pf-bg);font-size:12px;font-weight:800;line-height:1}

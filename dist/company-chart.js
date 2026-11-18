@@ -91,22 +91,25 @@
     return { sma20: `متوسط متحرك بسيط ${i.length}`, sma50: `متوسط متحرك بسيط ${i.length}`, sma200: `متوسط متحرك بسيط ${i.length}`, ema20: `متوسط متحرك أسي ${i.length}`,
       bb: `نطاقات بولنجر (${i.length}، ${i.mult})`, vol: 'حجم التداول', rsi: `مؤشر القوة النسبية (${i.length})`, macd: `الماكد (${i.fast}، ${i.slow}، ${i.signal})` }[id];
   };
-  const TOOLS = [['vline', 'خط عمودي'], ['hline', 'خط أفقي'], ['hray', 'شعاع أفقي'], ['trend', 'خط اتجاه'], ['ray', 'شعاع'], ['ext', 'خط ممتد'], ['arrow', 'سهم'], ['rect', 'مستطيل'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر'], ['text', 'نص']];
+  const TOOLS = [['vline', 'خط عمودي'], ['hline', 'خط أفقي'], ['hray', 'شعاع أفقي'], ['trend', 'خط اتجاه'], ['ray', 'شعاع'], ['ext', 'خط ممتد'], ['channel', 'قناة متوازية'], ['arrow', 'سهم'], ['rect', 'مستطيل'], ['fib', 'فيبوناتشي'], ['range', 'نطاق السعر'], ['text', 'نص']];
   // شريط الأدوات الجانبي كما في TradingView: مجموعات، لكل منها قائمة جانبية بأقسام وأسماء واختصارات ونجمة للمفضلة.
   // تُعرض هنا الأدوات الموجودة في الشارت فقط؛ زر المجموعة يُشغّل آخر أداة استُخدمت منها، وسهمه الصغير يفتح قائمتها
   const TOOL_GROUPS = [
-    { id: 'lines', label: 'أدوات الخطوط', sections: [['الخطوط', ['trend', 'ray', 'ext', 'hline', 'hray', 'vline']]] },
+    { id: 'lines', label: 'أدوات الخطوط', sections: [['الخطوط', ['trend', 'ray', 'ext', 'hline', 'hray', 'vline']], ['القنوات', ['channel']]] },
     { id: 'fib', label: 'أدوات غان وفيبوناتشي', sections: [['فيبوناتشي', ['fib']]] },
     { id: 'measure', label: 'أدوات التنبؤ والقياس', sections: [['المقاييس', ['range']]] },
     { id: 'shapes', label: 'الأسهم والأشكال', sections: [['أسهم', ['arrow']], ['أشكال', ['rect']]] },
     { id: 'text', label: 'نص وملاحظات', sections: [['نص وملاحظات', ['text']]] }
   ].map(g => ({ ...g, tools: g.sections.flatMap(([, tools]) => tools) }));
   const groupOf = tool => TOOL_GROUPS.find(g => g.tools.includes(tool));
-  const FLY_NAME = { fib: 'تصحيح فيبوناتشي' };
+  const FLY_NAME = { fib: 'تصحيح فيبوناتشي', channel: 'قناة متوازية' };
   const DEFAULT_FAV = ['trend', 'hray', 'fib', 'range', 'rect'];
   // الاختصارات كما في TradingView: Alt/⌥ + حرف (بموضع المفتاح حتى تعمل مع لوحة المفاتيح العربية)، و Shift للمستطيل
   const IS_MAC = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform || globalThis.navigator?.userAgent || '');
   const SHORTCUTS = { trend: ['KeyT', 'T'], hline: ['KeyH', 'H'], hray: ['KeyJ', 'J'], vline: ['KeyV', 'V'], fib: ['KeyF', 'F'], rect: ['KeyR', 'R', true] };
+  // نسخ الرسوم كما في TradingView: Ctrl/⌘ + C ثم Ctrl/⌘ + V، وسحب الرسم مع الضغط على Ctrl/⌘ ينسخه؛ والحافظة مشتركة بين الأسهم
+  let drawClip = null;
+  const COPY_KEY = key => IS_MAC ? `${key} + ⌘` : `Ctrl + ${key}`;
   const shortcutLabel = id => { const k = SHORTCUTS[id]; return !k ? '' : IS_MAC ? `${k[1]}${k[2] ? ' ⇧' : ''} ⌥` : `Alt + ${k[2] ? 'Shift + ' : ''}${k[1]}`; };
   // الألوان والسماكات الافتراضية كما في TradingView: الأزرق #2962FF، والخطوط الأفقية والعمودية رفيعة، وخط الاتجاه والسهم والشعاع أعرض
   const TV_BLUE = '#2962ff';
@@ -117,6 +120,8 @@
     trend: { color: TV_BLUE, width: 2, line: 'solid', extL: false, extR: false },
     ray: { color: TV_BLUE, width: 2, line: 'solid', extL: false, extR: true },
     ext: { color: TV_BLUE, width: 2, line: 'solid', extL: true, extR: true },
+    // القناة المتوازية كما في TradingView: خطان متوازيان بينهما تعبئة خفيفة وخط أوسط منقط
+    channel: { color: TV_BLUE, width: 2, line: 'solid', extL: false, extR: false, fill: true, mid: true },
     arrow: { color: TV_BLUE, width: 2, line: 'solid' },
     rect: { color: TV_BLUE, width: 1, line: 'solid', fill: false },
     text: { size: 14 }
@@ -125,7 +130,7 @@
   const TEXT_SIZES = [10, 12, 14, 16, 20, 24, 32];
   // أدوات تُوضع بنقرة واحدة (لا بنقطتين)
   const SINGLE_CLICK_TOOLS = ['hline', 'hray', 'vline', 'text'];
-  const DRAW_TITLE = { vline: 'خط عمودي', hline: 'خط أفقي', hray: 'شعاع أفقي', trend: 'خط اتجاه', ray: 'شعاع', ext: 'خط ممتد', arrow: 'سهم', rect: 'مستطيل', fib: 'فيبوناتشي', range: 'نطاق السعر', text: 'نص' };
+  const DRAW_TITLE = { vline: 'خط عمودي', hline: 'خط أفقي', hray: 'شعاع أفقي', trend: 'خط اتجاه', ray: 'شعاع', ext: 'خط ممتد', channel: 'قناة متوازية', arrow: 'سهم', rect: 'مستطيل', fib: 'فيبوناتشي', range: 'نطاق السعر', text: 'نص' };
   // نمط الخط على الشاشة: المنقط والمتقطع يتناسبان مع السماكة
   const dashFor = (line, width) => { const u = Math.max(1, width || 1); return line === 'dotted' ? [u, 3 * u] : line === 'dashed' ? [6 * u, 4 * u] : []; };
   // المغناطيس كما في TradingView: يلصق نقطة الرسم بأقرب سعر من الشمعة (افتتاح، أعلى، أدنى، إغلاق)؛
@@ -194,6 +199,7 @@
     trend: icon('<path d="M9.8 18.2l8.4-8.4"/><circle cx="8" cy="20" r="2"/><circle cx="20" cy="8" r="2"/>'),
     ray: icon('<path d="M9.3 18.7L23.5 4.5"/><circle cx="7.5" cy="20.5" r="2"/>'),
     ext: icon('<path d="M4 24l5.2-5.2M12.8 15.2l2.4-2.4M18.8 9.2L24 4"/><circle cx="11" cy="17" r="2"/><circle cx="17" cy="11" r="2"/>'),
+    channel: icon('<path d="M8.8 20.1L19.2 14.9M8.8 11.1L19.2 5.9"/><circle cx="7" cy="21" r="2"/><circle cx="21" cy="14" r="2"/><circle cx="7" cy="12" r="2"/><circle cx="21" cy="5" r="2"/>'),
     arrow: icon('<path d="M6 22L22 6M13 6h9v9"/>'),
     rect: icon('<rect x="5.5" y="8.5" width="17" height="11"/>'),
     fib: icon('<path d="M4 7h15.5M4 14h20M8.5 21H24"/><circle cx="22" cy="7" r="2"/><circle cx="6" cy="21" r="2"/>'),
@@ -210,6 +216,10 @@
     unlock: icon('<rect x="7" y="13" width="14" height="10" rx="2"/><path d="M10 13V9.5a4 4 0 0 1 7.6-1.7"/><circle cx="14" cy="17.2" r="1.2"/><path d="M14 18.4v2"/>'),
     eye: icon('<path d="M3.5 12.5C6 8.8 9.7 6.5 14 6.5s8 2.3 10.5 6C22 16.2 18.3 18.5 14 18.5s-8-2.3-10.5-6z"/><circle cx="14" cy="12.5" r="3"/><path d="M24 18l-4.2 4.5"/><path d="M19.6 22.4c-2 0-2.6 1.7-3.4 2.6 2.2.4 4.4-.2 4.6-2.2"/>'),
     eyeOff: icon('<path d="M3.5 12.5C6 8.8 9.7 6.5 14 6.5s8 2.3 10.5 6C22 16.2 18.3 18.5 14 18.5s-8-2.3-10.5-6z"/><circle cx="14" cy="12.5" r="3"/><path d="M24 18l-4.2 4.5"/><path d="M19.6 22.4c-2 0-2.6 1.7-3.4 2.6 2.2.4 4.4-.2 4.6-2.2"/><path d="M5 20.5L22 4.5"/>'),
+    more: icon('<circle cx="5" cy="14" r="2.5"/><circle cx="14" cy="14" r="2.5"/><circle cx="23" cy="14" r="2.5"/>'),
+    layers: icon('<path d="M14 4.5l10 5.5-10 5.5L4 10z"/><path d="M4 14.5l10 5.5 10-5.5"/><path d="M4 19l10 5.5L24 19"/>'),
+    clone: icon('<rect x="9.5" y="9.5" width="14" height="14" rx="2.5"/><path d="M18.5 9.5V6.5a2 2 0 0 0-2-2h-9a3 3 0 0 0-3 3v9a2 2 0 0 0 2 2h3"/>'),
+    hideEye: icon('<path d="M3.5 14C6 10 9.7 7.5 14 7.5s8 2.5 10.5 6.5C22 18 18.3 20.5 14 20.5S6 18 3.5 14z"/><circle cx="14" cy="14" r="3.2"/><path d="M5.5 23.5l17-19"/>'),
     trash: icon('<path d="M5.5 8.5h17M11 8.5V5.5h6v3M7.5 8.5l1.3 15h10.4l1.3-15M12 12.5v7M16 12.5v7"/>')
   };
 
@@ -388,7 +398,7 @@
     home ??= { symbol: String(file.symbol), file };
     const raw = bars(file), symbol = file.symbol, estimated = new Set(file.est || []), dividends = (file.div || []).filter(([d]) => d > raw[0]?.time && d <= raw.at(-1)?.time);
     let daily = state.adj ? adjustDividends(raw, dividends) : raw;
-    let drawings = loadDrawings(symbol), pending = null;
+    let drawings = loadDrawings(symbol), pending = null, pending2 = null; // pending2: القناة المتوازية بعد نقطتيها، تنتظر النقرة الثالثة
     panel.innerHTML = `
       <div class="cc-toolbar">
         <div class="cc-search">
@@ -431,7 +441,7 @@
           <div class="cc-legend" aria-live="polite"></div>
           <div class="cc-head" dir="ltr"><img class="cc-head-logo" src="logos/${esc(symbol)}.svg" alt="" width="24" height="24" onerror="this.remove()"><b class="cc-head-sym">${esc(symbol)}</b><span class="cc-head-int">${INTERVALS.find(([id]) => id === state.interval)?.[1] ?? ''}</span></div>
           <div class="cc-stage">
-            <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div><div class="cc-ftb" role="toolbar" aria-label="خيارات الرسم المحدد" hidden><input type="color" data-ftb="color" aria-label="لون الرسم" title="لون الرسم"><select data-ftb="width" aria-label="السماكة" title="السماكة">${[1, 2, 3, 4].map(w => `<option value="${w}">${w}px</option>`).join('')}</select><select data-ftb="line" aria-label="نمط الخط" title="نمط الخط">${LINE_OPTIONS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select><span class="cc-ftb-sep"></span><button type="button" data-ftb="lock" aria-pressed="false" aria-label="قفل الرسم" title="قفل الرسم">${ICONS.unlock}</button><button type="button" data-ftb="hide" aria-label="إخفاء الرسم" title="إخفاء الرسم">${ICONS.eye}</button><button type="button" data-ftb="settings" aria-label="إعدادات الرسم" title="إعدادات الرسم">${ICONS.gear}</button><button type="button" data-ftb="delete" aria-label="حذف الرسم" title="حذف الرسم (Delete)">${ICONS.trash}</button></div>
+            <div class="cc-chart" dir="ltr"><p class="cq-empty">جار تحميل الشارت…</p></div><div class="cc-ftb" role="toolbar" aria-label="خيارات الرسم المحدد" hidden><button type="button" data-ftb="more" aria-haspopup="true" aria-expanded="false" aria-label="المزيد" title="المزيد">${ICONS.more}</button><span class="cc-ftb-sep"></span><input type="color" data-ftb="color" aria-label="لون الرسم" title="لون الرسم"><select data-ftb="width" aria-label="السماكة" title="السماكة">${[1, 2, 3, 4].map(w => `<option value="${w}">${w}px</option>`).join('')}</select><select data-ftb="line" aria-label="نمط الخط" title="نمط الخط">${LINE_OPTIONS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select><span class="cc-ftb-sep"></span><button type="button" data-ftb="lock" aria-pressed="false" aria-label="قفل الرسم" title="قفل الرسم">${ICONS.unlock}</button><button type="button" data-ftb="hide" aria-label="إخفاء الرسم" title="إخفاء الرسم">${ICONS.eye}</button><button type="button" data-ftb="settings" aria-label="إعدادات الرسم" title="إعدادات الرسم">${ICONS.gear}</button><button type="button" data-ftb="delete" aria-label="حذف الرسم" title="حذف الرسم (Delete)">${ICONS.trash}</button></div><div class="cc-more" dir="rtl" role="menu" aria-label="المزيد" hidden></div>
             <div class="cc-ilegend" dir="ltr"></div>
             <div class="cc-float"><button type="button" data-reset title="إعادة تعيين عرض الرسم البياني (${RESET_KEY})" aria-label="إعادة تعيين عرض الرسم البياني">${ICON_RESET}</button></div>
           </div>
@@ -691,6 +701,11 @@
     // نمط كل رسم: الافتراضي لنوعه، مع ما خصّصه المستخدم له
     const styleOf = d => ({ ...(DRAW_DEFAULT[d.type] || {}), ...(d.style || {}) });
     // لون الرسم؛ نطاق السعر أزرق للصعود وأحمر للهبوط إن لم يُخصَّص، وفيبوناتشي لونه من إعداداتها
+    // الرسم يظهر ما لم يُخفَ، أو أُخفي على فاصل الشمعة الحالي (يومي/أسبوعي/شهري) من قائمة «الوضوح على الفواصل الزمنية»
+    const shown = d => !d.hidden && !d.hideOn?.includes(state.interval);
+    // القناة المتوازية: الخط الثاني يوازي الأول ويبعد عنه بفرق سعر ثابت off عند الطرفين
+    const chanPts = (d, A, B) => { const off = d.off ?? 0, y1 = main.priceToCoordinate(d.a.price + off), y2 = main.priceToCoordinate(d.b.price + off); return y1 == null || y2 == null ? null : [{ x: A.x, y: y1 }, { x: B.x, y: y2 }]; };
+    const chanOffsetAt = (a, b, point) => { const la = logicalOf(a.time), lb = logicalOf(b.time), t = lb === la ? 0 : (point.logical - la) / (lb - la); return point.price - (a.price + (b.price - a.price) * t); };
     const colorOf = d => styleOf(d).color ?? (d.type === 'range' ? (d.b.price >= d.a.price ? TV_BLUE : '#f23645') : colors.ink);
     const textFont = s => `${s.size ?? 14}px ${getComputedStyle(document.body).fontFamily}`;
     const measureCtx = document.createElement('canvas').getContext('2d');
@@ -705,7 +720,7 @@
       for (const d of drawn) d.remove();
       drawn = [];
       if (!state.hidden) for (const d of drawings) {
-        if (d.hidden || (d.type !== 'hline' && d.type !== 'hray')) continue;
+        if (!shown(d) || (d.type !== 'hline' && d.type !== 'hray')) continue;
         const s = styleOf(d), isH = d.type === 'hline';
         const line = main.createPriceLine({ price: isH ? d.price : d.a.price, color: colorOf(d), lineWidth: Math.round(s.width) || 1, lineStyle: LWC.LineStyle[{ dotted: 'Dotted', dashed: 'Dashed' }[s.line] || 'Solid'], lineVisible: isH, axisLabelVisible: true, title: '' });
         drawn.push({ remove: () => main.removePriceLine(line) });
@@ -753,6 +768,14 @@
         }
         const A = xy(d.a), B = d.b ? xy(d.b) : null;
         if (!A || !B) return;
+        if (d.type === 'channel') {
+          const pts = chanPts(d, A, B); if (!pts) return;
+          const [P, Q] = ends(A, B, !!s.extL, !!s.extR), [P2, Q2] = ends(pts[0], pts[1], !!s.extL, !!s.extR);
+          if (s.fill !== false) { ctx.beginPath(); ctx.moveTo(P.x, P.y); ctx.lineTo(Q.x, Q.y); ctx.lineTo(Q2.x, Q2.y); ctx.lineTo(P2.x, P2.y); ctx.closePath(); ctx.fillStyle = color + '1a'; ctx.fill(); }
+          segment(P, Q, color, s.width, dash); segment(P2, Q2, color, s.width, dash);
+          if (s.mid !== false) segment({ x: (P.x + P2.x) / 2, y: (P.y + P2.y) / 2 }, { x: (Q.x + Q2.x) / 2, y: (Q.y + Q2.y) / 2 }, color, 1, [6, 4]);
+          return;
+        }
         if (d.type === 'trend' || d.type === 'ray' || d.type === 'ext') { const [P, Q] = ends(A, B, !!s.extL, !!s.extR); segment(P, Q, color, s.width, dash); return; }
         if (d.type === 'arrow') { segment(A, B, color, s.width, dash); headAt(A, B, color, s.width); return; }
         if (d.type === 'rect') {
@@ -810,11 +833,11 @@
           return;
         }
         const A = xy(d.a), B = d.b ? xy(d.b) : null;
-        if (A && B) { handle(A, colors.gold); handle(B, colors.gold); }
+        if (A && B) { handle(A, colors.gold); handle(B, colors.gold); if (d.type === 'channel') chanPts(d, A, B)?.forEach(pt => handle(pt, colors.gold)); }
       };
-      if (!state.hidden) for (const d of drawings) if (!d.hidden) drawOne(d);
+      if (!state.hidden) for (const d of drawings) if (shown(d)) drawOne(d);
       if (preview) drawOne(preview);
-      if (selected >= 0 && drawings[selected] && !drawings[selected].hidden) drawSelection(drawings[selected]);
+      if (selected >= 0 && drawings[selected] && shown(drawings[selected])) drawSelection(drawings[selected]);
       // نقطة المغناطيس قبل الضغطة الأولى وأثناء الرسم: دائرة حيث ستقع النقطة فعلًا
       if (hover && (state.tool || drag)) { const h = xy(hover); if (h) handle(h, hover.snapped ? colors.gold : colors.muted); }
     }
@@ -992,9 +1015,19 @@
     function finish(point) {
       if (point.logical === pending.logical) return; // النقطتان على الشمعة نفسها: انتظر نقطة أخرى
       const strip = p => ({ time: p.time, price: p.price });
+      if (state.tool === 'channel') { // القناة: نقطتان للخط الأول ثم نقرة ثالثة تحدد بُعد الخط الموازي
+        pending2 = { a: strip(pending), b: strip(point) }; pending = null;
+        preview = { type: 'channel', a: pending2.a, b: pending2.b, off: 0 };
+        overlay.redraw(); return;
+      }
       const d = { type: state.tool, a: strip(pending), b: strip(point) };
       commit(() => drawings.push(d));
       setTool(state.stay ? state.tool : null); // «البقاء في وضع الرسم»
+    }
+    function finishChannel(point) {
+      const d = { type: 'channel', a: pending2.a, b: pending2.b, off: chanOffsetAt(pending2.a, pending2.b, point) };
+      commit(() => drawings.push(d));
+      setTool(state.stay ? 'channel' : null);
     }
     // الرسم بنقرة واحدة: يُثبَّت الرسم في مكان النقرة، والنص يفتح نافذته فورًا ليُكتب
     function placeAt(point) {
@@ -1015,6 +1048,7 @@
       event.preventDefault();
       press = { x: event.clientX, y: event.clientY, point };
       if (SINGLE_CLICK_TOOLS.includes(state.tool)) return;
+      if (pending2) { finishChannel(point); press = null; return; }
       if (pending) { finish(point); press = null; return; }
       pending = point; preview = { type: state.tool, a: point, b: point };
       try { box.setPointerCapture(event.pointerId); } catch { /* not capturable */ }
@@ -1025,6 +1059,7 @@
       const point = pointFrom(event);
       hover = point;
       if (point && pending && preview) preview.b = point;
+      if (point && pending2 && preview) preview.off = chanOffsetAt(pending2.a, pending2.b, point);
       overlay.redraw();
     });
     box.addEventListener('pointerleave', () => { if (hover) { hover = null; overlay.redraw(); } if (!drag) box.style.cursor = ''; });
@@ -1041,7 +1076,7 @@
       if (state.hidden || state.locked) return null; // الرسوم المخفية أو المقفلة كلها لا تُحدَّد ولا تُسحب
       for (let i = drawings.length - 1; i >= 0; i--) {
         const d = drawings[i];
-        if (d.hidden) continue;
+        if (!shown(d)) continue;
         if (d.type === 'hline') { const py = main.priceToCoordinate(d.price); if (py != null && Math.abs(py - y) <= 5) return { index: i, part: 'body' }; continue; }
         if (d.type === 'vline') { const px = chart.timeScale().logicalToCoordinate(logicalOf(d.a.time)); if (px != null && Math.abs(px - x) <= 5) return { index: i, part: 'body' }; continue; }
         if (d.type === 'hray') {
@@ -1060,6 +1095,15 @@
         if (!A || !B) continue;
         if (Math.hypot(A.x - x, A.y - y) <= 9) return { index: i, part: 'a' };
         if (Math.hypot(B.x - x, B.y - y) <= 9) return { index: i, part: 'b' };
+        if (d.type === 'channel') {
+          const pts = chanPts(d, A, B); if (!pts) continue;
+          if (Math.hypot(pts[0].x - x, pts[0].y - y) <= 9) return { index: i, part: 'offA' };
+          if (Math.hypot(pts[1].x - x, pts[1].y - y) <= 9) return { index: i, part: 'offB' };
+          const s = styleOf(d), [P, Q] = ends(A, B, !!s.extL, !!s.extR), [P2, Q2] = ends(pts[0], pts[1], !!s.extL, !!s.extR);
+          const mid = [{ x: (P.x + P2.x) / 2, y: (P.y + P2.y) / 2 }, { x: (Q.x + Q2.x) / 2, y: (Q.y + Q2.y) / 2 }];
+          if (distanceToSegment(x, y, P, Q) <= 6 || distanceToSegment(x, y, P2, Q2) <= 6 || (s.mid !== false && distanceToSegment(x, y, mid[0], mid[1]) <= 6)) return { index: i, part: 'body' };
+          continue;
+        }
         const inBox = (x1, x2, y1, y2) => x >= x1 - 4 && x <= x2 + 4 && y >= y1 - 4 && y <= y2 + 4;
         if (['trend', 'ray', 'ext', 'arrow'].includes(d.type)) {
           const s = styleOf(d), [P, Q] = d.type === 'arrow' ? [A, B] : ends(A, B, !!s.extL, !!s.extR);
@@ -1085,6 +1129,7 @@
       return null;
     }
     function select(index) {
+      closeMore();
       selected = index;
       if (index >= 0 && selInd) selectInd(null);
       overlay.redraw();
@@ -1104,9 +1149,12 @@
       const hit = y <= chart.panes()[0].getHeight() ? hitTest(x, y) : null;
       if (!hit) { if (selected >= 0) select(-1); return; }
       event.preventDefault(); event.stopPropagation();
-      const d = drawings[hit.index];
+      let d = drawings[hit.index];
       chart.applyOptions({ handleScroll: false, handleScale: false });
-      drag = { ...hit, logical: chart.timeScale().coordinateToLogical(x), price: main.coordinateToPrice(y), orig: structuredClone(d), before: snap(), locked: !!d.locked, moved: false };
+      // Ctrl (⌘ في ماك) مع السحب ينسخ الرسم: تبقى الأصلية مكانها وتتحرك النسخة، كما في TradingView
+      const before = snap(), source = hit.index, cloning = (IS_MAC ? event.metaKey : event.ctrlKey) && !d.locked;
+      if (cloning) { d = structuredClone(d); drawings.push(d); hit.index = drawings.length - 1; }
+      drag = { ...hit, logical: chart.timeScale().coordinateToLogical(x), price: main.coordinateToPrice(y), orig: structuredClone(d), before, locked: !!d.locked, moved: false, cloned: cloning, source };
       try { box.setPointerCapture(event.pointerId); } catch { /* not capturable */ }
       select(hit.index);
       applyCrosshair();
@@ -1140,6 +1188,10 @@
           if (drag.orig.a) d.a = shift(drag.orig.a);
           if (drag.orig.b) d.b = shift(drag.orig.b);
         }
+      } else if (drag.part === 'offA' || drag.part === 'offB') {
+        // مقبض الخط الموازي في القناة: يغيّر بُعده عن الخط الأول فقط
+        const point = pointFrom(event);
+        if (point) { d.off = point.price - (drag.part === 'offA' ? d.a : d.b).price; hover = point; }
       } else {
         // طرف الرسم يتبع المؤشر، ويلتصق بالمغناطيس إن كان مفعّلًا
         const point = pointFrom(event);
@@ -1151,6 +1203,7 @@
     box.addEventListener('pointerup', () => {
       if (!drag) return;
       if (drag.moved) { record(drag.before); saveDrawings(symbol, drawings); }
+      else if (drag.cloned) { drawings.splice(drag.index, 1); select(drag.source); } // نقرة بلا سحب: لا نسخة
       drag = null; hover = null;
       chart.applyOptions({ handleScroll: true, handleScale: true });
       applyCrosshair();
@@ -1209,7 +1262,8 @@
     ftb.addEventListener('click', event => {
       const b = event.target.closest('[data-ftb]'); if (!b) return;
       const t = b.dataset.ftb;
-      if (t === 'lock') patchSelected(d => { d.locked = !d.locked; });
+      if (t === 'more') toggleMore();
+      else if (t === 'lock') patchSelected(d => { d.locked = !d.locked; });
       else if (t === 'hide') { patchSelected(d => { d.hidden = true; }); select(-1); }
       else if (t === 'settings') { if (selected >= 0) openDrawDialog(selected); }
       else if (t === 'delete') deleteSelected();
@@ -1234,7 +1288,7 @@
     // موضع الشريط: فوق منتصف الرسم، أو تحته إن لم يتسع الأعلى
     function selectedAnchor() {
       const d = drawings[selected];
-      if (!d || d.hidden || !chart || !main) return null;
+      if (!d || !shown(d) || !chart || !main) return null;
       const ts = chart.timeScale();
       if (d.type === 'hline') { const y = main.priceToCoordinate(d.price); return y == null ? null : { x: ts.width() / 2, y }; }
       if (d.type === 'vline') { const x = ts.logicalToCoordinate(logicalOf(d.a.time)); return x == null ? null : { x, y: 40 }; }
@@ -1254,7 +1308,110 @@
       const left = Math.max(4, Math.min(ox + a.x - bw / 2, base.width - bw - 4));
       ftb.style.left = `${Math.round(left)}px`;
       ftb.style.top = `${Math.round(top)}px`;
+      positionMore();
     }
+
+    /* ---------- قائمة «⋯» في الشريط العائم كما في TradingView: الترتيب المرئي، الوضوح على الفواصل، نسخة مكررة، نسخ، إخفاء ---------- */
+    const more = panel.querySelector('.cc-more');
+    let hintTimer = 0;
+    function note(text) { hint.textContent = text; hint.hidden = false; clearTimeout(hintTimer); hintTimer = setTimeout(() => { hint.hidden = true; }, 2600); }
+    // نقل الرسم أو نسخه: بالأعمدة (الشموع) وفرق السعر
+    function shiftDrawing(d, dl, dp) {
+      if (d.type === 'hline') d.price = Math.round((d.price + dp) * 100) / 100;
+      else for (const k of ['a', 'b']) if (d[k]) d[k] = { time: timeAt(Math.max(0, logicalOf(d[k].time) + dl)), price: d.type === 'vline' ? d[k].price : d[k].price + dp };
+      return d;
+    }
+    // إزاحة النسخة الافتراضية: أربع شموع إلى اليمين و28px إلى الأسفل
+    const nudge = () => { const h = paneH(), p1 = main.coordinateToPrice(h / 2), p2 = main.coordinateToPrice(h / 2 + 28); return p1 != null && p2 != null ? p2 - p1 : 0; };
+    function addCopy(source, dl, dp) {
+      const before = snap(), d = structuredClone(source);
+      delete d.locked; delete d.hidden;
+      shiftDrawing(d, dl, dp);
+      drawings.push(d);
+      record(before); saveDrawings(symbol, drawings);
+      select(drawings.length - 1); paintDrawings();
+    }
+    function cloneSelected() { const d = drawings[selected]; if (d) addCopy(d, 4, nudge()); }
+    function copySelected() { const d = drawings[selected]; if (!d) return; drawClip = structuredClone(d); note(`تم نسخ الرسم، الصقه بالضغط على ${IS_MAC ? '⌘V' : 'Ctrl+V'}`); }
+    // اللصق عند المؤشر إن كان فوق الشارت، وإلا بإزاحة عن الأصل
+    let lastPos = null;
+    box.addEventListener('pointermove', event => { lastPos = { clientX: event.clientX, clientY: event.clientY }; });
+    box.addEventListener('pointerleave', () => { lastPos = null; });
+    function pasteClip() {
+      if (!drawClip || !chart || !main) return;
+      const at = lastPos && pointFrom(lastPos), src = drawClip, a = src.a;
+      let dl = 4, dp = nudge();
+      if (at) { dl = a ? at.logical - logicalOf(a.time) : 0; dp = src.type === 'hline' ? at.price - src.price : a ? at.price - a.price : 0; }
+      addCopy(src, dl, dp);
+    }
+    // الترتيب المرئي: آخر الرسوم في المصفوفة يُرسم فوق ما قبله
+    function reorder(kind) {
+      const i = selected; if (i < 0 || !drawings[i]) return;
+      const before = snap(), [d] = drawings.splice(i, 1);
+      const j = kind === 'front' ? drawings.length : kind === 'back' ? 0 : kind === 'forward' ? Math.min(i + 1, drawings.length) : Math.max(i - 1, 0);
+      drawings.splice(j, 0, d);
+      if (j !== i) { record(before); saveDrawings(symbol, drawings); }
+      selected = j; paintDrawings();
+    }
+    const VIS_LABELS = { d: 'الأيام', w: 'الأسابيع', m: 'الأشهر' };
+    function moreItems() {
+      const d = drawings[selected]; if (!d) return '';
+      const last = selected === drawings.length - 1, first = selected === 0;
+      const item = (attrs, label, { icon = '', end = '', pressed = null, disabled = false } = {}) => `<button type="button" role="${pressed == null ? 'menuitem' : 'menuitemcheckbox'}" class="cc-mi" ${attrs}${pressed == null ? '' : ` aria-pressed="${pressed}"`}${disabled ? ' disabled' : ''}><span class="cc-mi-i">${icon}</span><span class="cc-mi-t">${label}</span>${end}</button>`;
+      const sub = (id, icon, label, inner) => `<div class="cc-mi-wrap"><button type="button" role="menuitem" class="cc-mi" data-msub="${id}" aria-haspopup="true" aria-expanded="false"><span class="cc-mi-i">${icon}</span><span class="cc-mi-t">${label}</span><span class="cc-mi-arrow">${ICON_CHEVRON}</span></button><div class="cc-msub" role="menu">${inner}</div></div>`;
+      const kb = text => `<kbd dir="ltr">${text}</kbd>`;
+      return sub('order', ICONS.layers, 'الترتيب المرئي', item('data-mact="order:front"', 'إحضار إلى المقدمة', { disabled: last }) + item('data-mact="order:forward"', 'تقديم خطوة', { disabled: last }) + item('data-mact="order:backward"', 'تأخير خطوة', { disabled: first }) + item('data-mact="order:back"', 'إرسال إلى الخلف', { disabled: first }))
+        + sub('vis', '', 'الوضوح على الفواصل الزمنية', INTERVALS.map(([k]) => item(`data-mact="vis:${k}"`, VIS_LABELS[k], { icon: '<i class="cc-chk"></i>', pressed: !d.hideOn?.includes(k) })).join(''))
+        + '<hr>'
+        + item('data-mact="clone"', 'نسخة مكررة', { icon: ICONS.clone, end: kb(`Drag + ${IS_MAC ? '⌘' : 'Ctrl'}`) })
+        + item('data-mact="copy"', 'نسخ', { end: kb(COPY_KEY('C')) })
+        + '<hr>'
+        + item('data-mact="hide"', 'إخفاء', { icon: ICONS.hideEye });
+    }
+    function positionMore() {
+      if (more.hidden) return;
+      if (ftb.hidden) { closeMore(); return; }
+      const base = stage.getBoundingClientRect(), f = ftb.getBoundingClientRect();
+      const left = Math.max(4, Math.min(f.left - base.left, base.width - more.offsetWidth - 4));
+      let top = f.bottom - base.top + 6;
+      if (top + more.offsetHeight > base.height - 4 && f.top - base.top - more.offsetHeight - 6 >= 0) top = f.top - base.top - more.offsetHeight - 6;
+      more.style.left = `${Math.round(left)}px`; more.style.top = `${Math.round(top)}px`;
+      // القوائم الفرعية تفتح إلى يسار القائمة، وإلى يمينها إن لم يتسع اليسار
+      more.dataset.flip = left < 224 ? '1' : '';
+    }
+    function closeMore() {
+      if (!more || more.hidden) return;
+      more.hidden = true; more.innerHTML = '';
+      ftbInput('more')?.setAttribute('aria-expanded', 'false');
+    }
+    function toggleMore() {
+      if (!more.hidden) { closeMore(); return; }
+      if (selected < 0 || !drawings[selected]) return;
+      more.innerHTML = moreItems(); more.hidden = false;
+      ftbInput('more').setAttribute('aria-expanded', 'true');
+      positionMore();
+    }
+    more.addEventListener('click', event => {
+      const sub = event.target.closest('[data-msub]');
+      if (sub) { const wrap = sub.parentElement, open = !wrap.hasAttribute('data-open'); more.querySelectorAll('.cc-mi-wrap[data-open]').forEach(w => w.removeAttribute('data-open')); if (open) wrap.setAttribute('data-open', ''); return; }
+      const b = event.target.closest('[data-mact]'); if (!b || b.disabled) return;
+      const [act, arg] = b.dataset.mact.split(':');
+      if (act === 'vis') {
+        patchSelected(d => { const off = new Set(d.hideOn || []); if (off.has(arg)) off.delete(arg); else off.add(arg); d.hideOn = [...off]; if (!d.hideOn.length) delete d.hideOn; });
+        const on = !drawings[selected]?.hideOn?.includes(arg);
+        b.setAttribute('aria-pressed', String(on));
+        if (drawings[selected] && !shown(drawings[selected])) select(-1); // أُخفي على الفاصل الحالي
+        return;
+      }
+      if (act === 'order') reorder(arg);
+      else if (act === 'clone') cloneSelected();
+      else if (act === 'copy') copySelected();
+      else if (act === 'hide') { patchSelected(d => { d.hidden = true; }); select(-1); }
+      closeMore();
+    });
+    document.addEventListener('pointerdown', event => {
+      if (!more.hidden && more.isConnected && !more.contains(event.target) && !event.target.closest?.('[data-ftb="more"]')) closeMore();
+    });
 
     /* ---------- حذف الرسوم: من القائمة المنسدلة لسلة المهملات، أو من الشريط العائم ---------- */
     function deleteAction(t) {
@@ -1291,12 +1448,14 @@
         else if (t === 'text') content = `<label class="cc-dlg-row"><span>النص</span><input type="text" data-dd="text" value="${esc(d.text || '')}" maxlength="300"></label>${drawColorRow(colorOf(d))}<label class="cc-dlg-row"><span>حجم الخط</span><select data-dd="size">${TEXT_SIZES.map(v => `<option value="${v}"${s.size === v ? ' selected' : ''}>${v}px</option>`).join('')}</select></label>`;
         else if (t === 'range') content = drawColorRow(colorOf(d)) + `<p class="cc-dlg-note">يظهر الصعود بالأزرق والهبوط بالأحمر ما لم تختر لونًا.</p>`;
         else content = drawColorRow(colorOf(d)) + widthRow + lineRow
-          + (t === 'trend' || t === 'ext' ? check('extL', s.extL, 'تمديد إلى اليسار') + check('extR', s.extR, 'تمديد إلى اليمين') : '')
+          + (t === 'trend' || t === 'ext' || t === 'channel' ? check('extL', s.extL, 'تمديد إلى اليسار') + check('extR', s.extR, 'تمديد إلى اليمين') : '')
+          + (t === 'channel' ? check('fill', s.fill !== false, 'تعبئة الخلفية') + check('mid', s.mid !== false, 'الخط الأوسط') : '')
           + (t === 'rect' ? check('fill', s.fill, 'تعبئة داخلية') : '');
       } else {
-        const rows = t === 'hline' ? [['السعر', 'price']] : t === 'vline' ? [['التاريخ', 'a']] : (t === 'hray' || t === 'text') ? [['النقطة', 'a']] : [['النقطة الأولى', 'a'], ['النقطة الثانية', 'b']];
+        const rows = t === 'hline' ? [['السعر', 'price']] : t === 'vline' ? [['التاريخ', 'a']] : (t === 'hray' || t === 'text') ? [['النقطة', 'a']] : t === 'channel' ? [['النقطة الأولى', 'a'], ['النقطة الثانية', 'b'], ['سعر الخط الموازي', 'chan']] : [['النقطة الأولى', 'a'], ['النقطة الثانية', 'b']];
         content = rows.map(([label, key]) => key === 'price'
           ? `<label class="cc-dlg-row"><span>${label}</span><input type="number" step="0.01" min="0" data-dcp="price" value="${d.price}" dir="ltr"></label>`
+          : key === 'chan' ? `<label class="cc-dlg-row"><span>${label}</span><input type="number" step="0.01" min="0" data-dcp="chan" value="${Math.round((d.a.price + (d.off ?? 0)) * 100) / 100}" dir="ltr"></label>`
           : `<div class="cc-dlg-row"><span>${label}</span><span class="cc-dd-pt">${t === 'vline' ? '' : `<input type="number" step="0.01" min="0" data-dcp="${key}" value="${d[key].price}" dir="ltr">`}<bdi dir="ltr">${dot(d[key].time)}</bdi></span></div>`).join('')
           + `<p class="cc-dlg-note">يمكن تعديل السعر مباشرة، والتاريخ يتغير بسحب الرسم في الشارت.</p>`;
       }
@@ -1338,7 +1497,7 @@
       if (cp) {
         const v = Number(t.value);
         if (t.value === '' || !Number.isFinite(v) || v <= 0) return;
-        if (cp === 'price') d.price = v; else d[cp].price = v;
+        if (cp === 'price') d.price = v; else if (cp === 'chan') d.off = v - d.a.price; else d[cp].price = v;
       } else if (key === 'text') d.text = t.value;
       else if (key) d.style = { ...(d.style || {}), [key]: t.type === 'checkbox' ? t.checked : (key === 'width' || key === 'size') ? Number(t.value) : t.value };
       else return;
@@ -1363,11 +1522,17 @@
     document.addEventListener('keydown', event => {
       if (!box.isConnected || !dlg.hidden || !ddlg.hidden || /^(INPUT|SELECT|TEXTAREA)$/.test(event.target?.tagName)) return;
       if (event.key === 'Escape' && !flyout.hidden) { closeFlyout(); return; }
+      if (event.key === 'Escape' && !more.hidden) { closeMore(); return; }
       if (event.key === 'Escape') { if (state.tool) setTool(null); else if (selected >= 0) select(-1); else if (selInd) selectInd(null); else if (isFull()) setFull(false); }
       if ((event.key === 'Delete' || event.key === 'Backspace') && selInd && selected < 0 && !state.tool) { event.preventDefault(); removeInd(selInd); return; }
       // التراجع والإعادة كما في TradingView: Ctrl+Z وCtrl+Shift+Z وCtrl+Y (وكذلك ⌘ على ماك)
       if (SHORTCUT_MOD(event) && !event.altKey && event.code === 'KeyZ') { event.preventDefault(); if (event.shiftKey) redo(); else undo(); return; }
       if (SHORTCUT_MOD(event) && !event.altKey && event.code === 'KeyY') { event.preventDefault(); redo(); return; }
+      // نسخ ولصق الرسم: Ctrl/⌘ + C على الرسم المحدد، ثم Ctrl/⌘ + V (عند المؤشر)
+      if (SHORTCUT_MOD(event) && !event.altKey && !event.shiftKey && !state.tool) {
+        if (event.code === 'KeyC' && selected >= 0) { event.preventDefault(); copySelected(); return; }
+        if (event.code === 'KeyV' && drawClip && chart) { event.preventDefault(); pasteClip(); return; }
+      }
       // Alt/⌥ + R كما في TradingView (الحرف بالموضع حتى يعمل مع لوحة المفاتيح العربية و⌥ في ماك)
       if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.code === 'KeyR') { event.preventDefault(); resetView(); return; }
       // حرف F وحده يبدّل ملء الشاشة (بموضع المفتاح حتى يعمل مع لوحة المفاتيح العربية)، وAlt + F يبقى لفيبوناتشي
@@ -1518,7 +1683,7 @@
     });
 
     function setTool(tool) {
-      state.tool = tool; pending = null; preview = null; hover = null;
+      state.tool = tool; pending = null; pending2 = null; preview = null; hover = null;
       if (tool && selected >= 0) select(-1);
       // زر المجموعة يعرض آخر أداة استُخدمت منها ويُشغّلها بنقرة
       const group = tool && groupOf(tool);
