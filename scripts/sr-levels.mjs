@@ -2,11 +2,12 @@
 // وتُدمج بتسامح مبني على ATR، وتُرتَّب بعدد اللمسات وقوة الارتداد عندها وحداثتها. المصادر العامة للمنهج: تجميع المحاور بتسامح ATR،
 // اشتراط لمستين فأكثر، وزن الحداثة، جودة الارتداد، وانقلاب الدور (المقاومة المكسورة تصبح دعماً) — راجع docs/support-resistance.md.
 //
-// دالة نقية: الشمعة i تعتمد على الشموع 0..i فقط (لا نظر للمستقبل)، فيصح اختبارها تاريخياً.
+// النافذة: آخر سنتين فقط (المستويات الأقدم قد تضلّل). دالة نقية: الشمعة i تعتمد على الشموع 0..i فقط (لا نظر للمستقبل)، فيصح اختبارها تاريخياً.
 import { atr as atrSeries } from '../dist/scanner/indicators.mjs';
 
 export const SR_DEFAULTS = {
-  lookback: 500,        // جلسات (نحو سنتين)
+  lookback: 500,        // جلسات (نحو سنتين) إذا لم تُمرَّر التواريخ؛ ومع التواريخ تُقصّ النافذة بسنتين تقويميتين بالضبط
+  years: 2,             // عمر أقدم محور مقبول: آخر سنتين فقط، فالمستويات الأقدم قد تضلّل
   k: 5,                 // محور مؤكَّد: أعلى/أدنى سعر بين 5 شموع قبله و5 بعده
   reactionAtr: 1.5,     // لا يُعدّ المحور إلا إذا ارتد السعر عنه 1.5×ATR خلال reactionBars جلسة
   reactionBars: 15,
@@ -17,7 +18,7 @@ export const SR_DEFAULTS = {
 
 // المحاور المؤكدة وما ارتدّ عنها. كل عنصر: { j, price, type: 'high'|'low', reaction (بوحدة ATR) }
 export function pivots(high, low, atr, i, p = SR_DEFAULTS) {
-  const out = [], from = Math.max(p.k, i - p.lookback);
+  const out = [], from = Math.max(p.k, p.fromIndex ?? i - p.lookback);
   for (let j = from; j <= i - p.k; j++) {
     const a = atr[j]; if (!(a > 0)) continue;
     let isLow = true, isHigh = true;
@@ -53,9 +54,16 @@ export function zonesAt(high, low, close, i, atr, p = SR_DEFAULTS) {
 }
 
 // أقرب منطقة دعم تحت السعر وأقرب منطقة مقاومة فوقه. السعر داخل المنطقة: دعم إن أغلق فوق مركزها، وإلا مقاومة.
-export function nearestZones(high, low, close, i, p = SR_DEFAULTS, atrArr = null) {
+// أول شمعة ضمن آخر `years` سنة تقويمية قبل تاريخ الشمعة i (التواريخ بصيغة YYYY-MM-DD تُقارن نصياً)
+export function windowStart(dates, i, years = SR_DEFAULTS.years) {
+  const cut = `${+dates[i].slice(0, 4) - years}${dates[i].slice(4)}`;
+  let j = i; while (j > 0 && dates[j - 1] >= cut) j--;
+  return j;
+}
+
+export function nearestZones(high, low, close, i, p = SR_DEFAULTS, atrArr = null, dates = null) {
   const atr = atrArr || atrSeries(high, low, close, 14), price = close[i];
-  const zs = zonesAt(high, low, close, i, atr, p);
+  const zs = zonesAt(high, low, close, i, atr, dates ? { ...p, fromIndex: windowStart(dates, i, p.years) } : p);
   const supports = zs.filter(z => z.center <= price && !(price < z.high && price < z.center));
   const resistances = zs.filter(z => z.center > price);
   const support = supports.length ? supports.reduce((m, z) => z.center > m.center ? z : m) : null;

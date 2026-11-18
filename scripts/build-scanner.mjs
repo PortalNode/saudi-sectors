@@ -63,7 +63,7 @@ for (const s of stocks) {
 
   const c = s.c[i];
   const sma50 = sma(s.c, 50)[i], sma200 = sma(s.c, 200)[i];
-  const { support, resistance, atr } = nearestZones(s.h, s.l, s.c, i, undefined, atrSeries(s.h, s.l, s.c, 14));
+  const { support, resistance, atr } = nearestZones(s.h, s.l, s.c, i, undefined, atrSeries(s.h, s.l, s.c, 14), s.d);
   const avgVol20Prev = sma(s.v, 20)[i - 1], volRatio = avgVol20Prev > 0 ? s.v[i] / avgVol20Prev : null;
 
   const k = computeKeys({ close: s.c, i, support, resistance, atr, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield });

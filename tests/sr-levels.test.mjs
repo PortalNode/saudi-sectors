@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { atr as atrSeries } from '../dist/scanner/indicators.mjs';
-import { pivots, zonesAt, nearestZones, SR_DEFAULTS } from '../scripts/sr-levels.mjs';
+import { pivots, zonesAt, nearestZones, windowStart, SR_DEFAULTS } from '../scripts/sr-levels.mjs';
 
 // سلسلة تتأرجح بين 100 و110 مرات عدة (قاع 100 وقمة 110 تتكرر)، تنتهي قرب 103
 function ranging(cycles = 5, ending = 103) {
@@ -50,4 +50,23 @@ test('a flat series has no zones, and a new high has no resistance above it', ()
   assert.equal(nearestZones(h, l, f, 79).support, null);
   const { h: rh, l: rl, c: rc } = ranging(5, 120);
   assert.equal(nearestZones(rh, rl, rc, rc.length - 1).resistance, null);
+});
+
+test('only the last two calendar years count: older pivots are ignored when dates are given', () => {
+  // قمة وقاع قويان قبل 3 سنوات ثم سوق هادئ بلا محاور: مع التواريخ لا مناطق، وبدونها تظهر
+  const n = 900, c = [], d = [];
+  const start = Date.UTC(2023, 0, 1);
+  for (let k = 0; k < n; k++) {
+    d.push(new Date(start + k * 86400000 * 1.2).toISOString().slice(0, 10));
+    const swing = k < 120 ? 8 * Math.sin(k / 3.8) : 0; // التأرجح في أول 120 شمعة فقط
+    c.push(100 + swing);
+  }
+  const h = c.map(x => x + 0.5), l = c.map(x => x - 0.5), i = n - 1;
+  const atr = atrSeries(h, l, c, 14);
+  const withDates = nearestZones(h, l, c, i, { ...SR_DEFAULTS, lookback: 5000 }, atr, d);
+  assert.equal(withDates.zones.length, 0);
+  const noDates = nearestZones(h, l, c, i, { ...SR_DEFAULTS, lookback: 5000 }, atr);
+  assert.ok(noDates.zones.length > 0);
+  assert.equal(windowStart(d, i, 2) > 0, true);
+  assert.ok(d[windowStart(d, i, 2)] >= `${+d[i].slice(0, 4) - 2}${d[i].slice(4)}`);
 });

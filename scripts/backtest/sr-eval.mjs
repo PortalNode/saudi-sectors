@@ -33,7 +33,7 @@ for (const s of LIMIT ? stocks.slice(0, LIMIT) : stocks) {
     if (s.d[i] < '2015-01-01') continue;
     const a = atr[i]; if (!(a > 0) || s.v[i] <= 0 || s.est[i]) continue;
     const win = s.d[i] < '2022-01-01' ? 'dev' : 'hold', c = s.c[i];
-    const nz = nearestZones(s.h, s.l, s.c, i, undefined, atr), old = swingLevels(s.h, s.l, s.c, i);
+    const nz = nearestZones(s.h, s.l, s.c, i, undefined, atr, s.d), old = swingLevels(s.h, s.l, s.c, i);
     const cands = {
       new: { support: nz.support?.center, resistance: nz.resistance?.center },
       old: { support: old.support, resistance: old.resistance },
