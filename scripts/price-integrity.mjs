@@ -64,7 +64,7 @@ export function parseOfficialDaily(html, now = new Date()) {
     const tradedValue = tradedIndex >= 0 ? strictNumber(row[tradedIndex]) : null;
     quotes.set(symbol, { close, day, marketCap: cap / 1e6, date, source: 'Saudi Exchange',
       status: 'official_close', suspended: /\*/.test(row[companyIndex]) && volume === 0,
-      timestamp: null, currency: 'SAR', tradedValue: tradedValue != null && tradedValue > 0 ? tradedValue : null });
+      timestamp: null, currency: 'SAR', volume, tradedValue: tradedValue != null && tradedValue > 0 ? tradedValue : null });
   }
   if (!quotes.size) throw new Error('Official report contains no usable company prices');
   const get = name => strictNumber(rows.find(row => row.length === 2 && key(row[0]) === name)?.[1]);
@@ -148,7 +148,7 @@ export function applyQuote(stock, quote, performance, checkedAt) {
   if (!quote) {
     stock.priceStatus = 'unavailable';
     stock.price = stock.day = stock.marketCap = stock.pe = stock.pb = null;
-    stock.tradedValue = null;
+    stock.tradedValue = stock.volume = null;
     stock.priceDate = stock.priceTimestamp = null;
     delete stock.priceSource;
   } else {
@@ -162,6 +162,10 @@ export function applyQuote(stock, quote, performance, checkedAt) {
     stock.marketCapSource = quote.marketCap == null ? null : quote.source;
     stock.tradedValue = quote.tradedValue == null ? null : round(quote.tradedValue);
     stock.tradedValueSource = quote.tradedValue == null ? null : quote.source;
+    // Shares traded in the session: the official figure, else the same-session delayed volume.
+    const sameSession = performance?.date === quote.date ? performance?.volume : null;
+    const volume = Number.isFinite(quote.volume) ? quote.volume : Number.isFinite(sameSession) ? sameSession : null;
+    stock.volume = volume == null ? null : Math.round(volume);
     if (quote.source === 'Saudi Exchange' && quote.marketCap > 0) {
       stock.shares = Math.round(quote.marketCap * 1e6 / quote.close);
       stock.sharesDate = quote.date;

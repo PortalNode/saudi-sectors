@@ -119,7 +119,7 @@ function cachedOfficial(stock) {
       stock.lastOfficialClose?.price !== stock.price || !(stock.price > 0) || !Number.isFinite(stock.day)) return null;
   return { close: stock.price, day: stock.day, marketCap: stock.marketCap, date: stock.priceDate,
     status: 'official_close', source: 'Saudi Exchange', timestamp: null, suspended: stock.suspended || false,
-    tradedValue: stock.tradedValue ?? null };
+    volume: stock.volume ?? null, tradedValue: stock.tradedValue ?? null };
 }
 const selected = new Map(stocks.map(stock => {
   const tvQuote = delayed.get(stock.symbol);

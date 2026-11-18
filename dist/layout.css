@@ -175,3 +175,33 @@ td.company-name.has-co-logo .company-results-link{display:inline-block;vertical-
   .market-group-index .market-group-logo{position:absolute;bottom:100%;inset-inline:0 14px;margin:0 auto 6px}
   .market-summary h2{margin-bottom:30px}
 }
+
+/* ---------- حركة السوق: أعلى 10 شركات (الألوان من المتغيرات والأصناف الموجودة) ---------- */
+.market-movers{margin:0 0 14px;padding:10px 14px 12px;background:var(--panel);border:1px solid var(--line)}
+.market-movers h2{margin:0 0 8px;font-size:14px;color:#f59e0b;text-align:center}
+:root[data-theme="light"] .market-movers h2{color:var(--teal)}
+.movers-note{margin-inline-start:8px;font-size:11px;font-weight:400;color:var(--muted)}
+.mover-tabs,.mover-more{display:none}
+.mover-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.mover-card{min-width:0;padding:0 14px;border-inline-start:1px solid var(--line)}
+.mover-card:first-child{border-inline-start:0;padding-inline-start:0}
+.mover-card:last-child{padding-inline-end:0}
+.mover-title{margin:0 0 4px;font-size:12px;font-weight:700;color:var(--muted)}
+.mover-list{list-style:none;margin:0;padding:0}
+.mover-row{display:grid;grid-template-columns:34px minmax(0,1fr) 42px 72px;align-items:center;gap:6px;padding:4px 2px;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;font-size:11.5px}
+.mover-list li:last-child .mover-row{border-bottom:0}
+a.mover-row:hover{background:var(--hover)}
+a.mover-row:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.mover-symbol{font-weight:600;color:var(--ink)}
+.mover-name{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--ink)}
+.mover-price{font-size:11.5px;color:var(--muted);text-align:end}
+.mover-value{font-size:11.5px;font-weight:700;text-align:end;white-space:nowrap}
+.mover-value[dir="rtl"]{direction:rtl}
+.mover-value sup{font-size:8px;margin-inline-start:2px;opacity:.7}
+.mover-empty{margin:6px 0 0;font-size:11px;color:var(--muted)}
+@media(max-width:1180px){
+  .mover-grid{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:10px}
+  .mover-card:nth-child(odd){border-inline-start:0;padding-inline-start:0}
+  .mover-card:nth-child(even){padding-inline-end:0}
+  .mover-card:nth-child(n+3){border-top:1px solid var(--line);padding-top:8px}
+}

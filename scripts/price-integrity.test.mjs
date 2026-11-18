@@ -115,3 +115,17 @@ test('Price-dependent values refreshed together; unavailable rows do not carry o
   for (const field of ['price', 'day', 'marketCap', 'pe', 'pb', 'year1', 'priceDate']) assert.equal(stock[field], null);
   assert.equal(stock.priceStatus, 'unavailable');
 });
+test('Share volume is kept: official figure first, else same-session delayed volume, never a stale one', () => {
+  const parsed = parseOfficialDaily(report(), now).quotes.get('1120');
+  assert.equal(parsed.volume, 100);
+  const stock = {};
+  applyQuote(stock, parsed, normalizeTradingView(row, now), now.toISOString());
+  assert.equal(stock.volume, 100);
+  const delayed = { ...normalizeTradingView(row, now), volume: 2500000.4 };
+  applyQuote(stock, normalizeTradingView(row, now), delayed, now.toISOString());
+  assert.equal(stock.volume, 2500000);
+  applyQuote(stock, normalizeTradingView(row, now), { ...delayed, date: '2026-11-03' }, now.toISOString());
+  assert.equal(stock.volume, null);
+  applyQuote(stock, null, null, now.toISOString());
+  assert.equal(stock.volume, null);
+});

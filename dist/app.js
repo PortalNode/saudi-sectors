@@ -472,7 +472,7 @@ function acceptsLiveDate(snapshot, observedDate){
 }
 async function getTradingViewLiveQuotes(symbols, accept=date=>date===liveDate()){
   const unique=[...new Set(symbols.filter(Boolean))], result=new Map();
-  const columns=['close','change','currency','time','update_mode','market_cap_basic','Value.Traded','change_abs'];
+  const columns=['close','change','currency','time','update_mode','market_cap_basic','Value.Traded','change_abs','volume'];
   for(let i=0;i<unique.length;i+=300){
     const tickers=unique.slice(i,i+300).map(symbol=>`TADAWUL:${symbol}`);
     try{
@@ -485,13 +485,13 @@ async function getTradingViewLiveQuotes(symbols, accept=date=>date===liveDate())
       const payload=await response.json();
       for(const row of payload.data||[]){
         const symbol=String(row.s||'').replace(/^TADAWUL:/,'');
-        const [price,day,currency,barTime,updateMode,marketCap,tradedValue,pointChange]=row.d||[];
+        const [price,day,currency,barTime,updateMode,marketCap,tradedValue,pointChange,volume]=row.d||[];
         const observedDate=barTime!=null && barTime!=='' && Number.isFinite(Number(barTime))
           ? new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(Number(barTime)*1000)) : null;
         if(!unique.includes(symbol) || !(Number(price)>0) || !Number.isFinite(Number(day)) ||
            (currency && currency!=='SAR') || !accept(observedDate)) continue;
         result.set(symbol,{price:Number(price),day:Number(day),marketCap:Number(marketCap),
-          updateMode: String(updateMode||'delayed'), tradedValue:Number(tradedValue), date:observedDate,
+          updateMode: String(updateMode||'delayed'), tradedValue:Number(tradedValue), volume:volume==null||volume===''?NaN:Number(volume), date:observedDate,
           pointChange:pointChange==null||pointChange===''||!Number.isFinite(Number(pointChange))?null:Number(pointChange)});
       }
     }catch(error){ /* انتقل إلى Yahoo إذا لم يتوفر TradingView */ }
@@ -516,6 +516,7 @@ async function applyTradingViewLivePrices(snapshot){
     stock.day=quote.day;
     if(Number.isFinite(quote.marketCap) && quote.marketCap>0) stock.marketCap=quote.marketCap/1e6;
     if(Number.isFinite(quote.tradedValue) && quote.tradedValue>=0){ stock.tradedValue=quote.tradedValue; turnover+=quote.tradedValue; turnoverStocks++; }
+    if(Number.isFinite(quote.volume) && quote.volume>=0) stock.volume=Math.round(quote.volume);
     stock.priceDate=date;
     stock.priceCheckedAt=checkedAt;
     stock.priceTimestamp=null;
@@ -613,7 +614,7 @@ async function refreshPrices(){
       catch(error){ if(isMarketHours()) priceRefreshError='تعذر تحديث السعر المباشر؛ احتُفظ بلقطة المصدر المنشورة.'; }
     }
     if(initial)$('empty').querySelector('h3').textContent='لا توجد نتائج مطابقة';
-    paintSnapshot();paintMarketSummary();applyFinancials();
+    paintSnapshot();paintMarketSummary();globalThis.MarketMovers?.paint(data);applyFinancials();
     if(initial&&financialMap)refreshFinancials();
     return true;
   }catch(error){

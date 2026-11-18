@@ -266,3 +266,21 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .cq-mini-ohlc{font-size:11px}
   .cq-range button{padding:9px 12px}
 }
+
+/* حركة السوق: على الجوال تبويبات لقائمة واحدة تُظهر 3 صفوف فقط (والباقي بزر «عرض كل العشر») كي لا تطول الشاشة الأولى */
+@media (max-width:560px){
+  .market-movers{margin:8px 0;padding:8px 10px}
+  .market-movers h2{display:none}
+  .mover-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:4px;border:1px solid var(--soft-line)}
+  .mover-tab{min-height:36px;padding:6px 2px;border:0;border-radius:0;background:transparent;color:var(--muted);font:700 11px var(--font)}
+  .mover-tab[aria-selected="true"]{background:#f59e0b;color:var(--on-accent)}
+  .mover-tab:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  .mover-grid{display:block}
+  .mover-card,.mover-card:nth-child(n){display:none;padding:0;border:0}
+  .mover-card.is-active{display:block}
+  .mover-title{display:none}
+  .mover-row{padding:7px 2px;grid-template-columns:34px minmax(0,1fr) 42px 74px}
+  .mover-list li:nth-child(n+4){display:none}
+  .market-movers-body.is-expanded .mover-list li:nth-child(n+4){display:block}
+  .mover-more{display:block;width:100%;min-height:34px;margin-top:2px;border:0;border-radius:0;background:transparent;color:var(--teal);font:700 11px var(--font)}
+}
