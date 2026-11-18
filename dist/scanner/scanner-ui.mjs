@@ -1,7 +1,7 @@
 // واجهة «مفاتيح جودة السهم» وقائمة المراقبة. تقرأ dist/scanner/signals.json (يبنيه scripts/build-scanner.mjs بعد كل
 // تحديث أسعار) ولا تحسب أي مؤشر بنفسها. كل المنطق القابل للاختبار في scanner-logic.mjs.
 import { KEY_IDS, DEFAULT_FILTERS, filterStocks, sortStocks, watchDiff, loadWatch, saveWatch, toggleWatch,
-  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119c';
+  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119d';
 
 const FILTER_KEY = 'saudi-sectors-scanner-filters-v2';
 const base = file => new URL(file, import.meta.url);
@@ -38,6 +38,7 @@ function filterBar() {
     <label>عدد المفاتيح<select name="minScore">${opt(5, '5 من 6 فأكثر', f.minScore)}${opt(6, '6 من 6 فقط', f.minScore)}${opt(4, '4 فأكثر (للاستكشاف)', f.minScore)}</select></label>
     <label>القطاع<select name="sector">${opt('all', 'الكل', f.sector)}${sectors.map(s => opt(s, s, f.sector)).join('')}</select></label>
     <label>أدنى متوسط قيمة تداول (20 يوماً)<select name="minValue">${opt(1e6, 'مليون ريال', f.minValue)}${opt(5e6, '5 ملايين', f.minValue)}${opt(10e6, '10 ملايين', f.minValue)}${opt(25e6, '25 مليوناً', f.minValue)}</select></label>
+    <label>الشركات الخاسرة<select name="excludeLoss">${opt('0', 'عرض الكل', f.excludeLoss ? 1 : 0)}${opt('1', 'استثناء الخاسرة', f.excludeLoss ? 1 : 0)}</select></label>
     <label>ترتيب حسب<select name="sort">${[['score', 'عدد المفاتيح ثم السيولة'], ['liquidity', 'السيولة'], ['volume', 'الحجم مقابل المتوسط'], ['dividend', 'عائد التوزيعات'], ['name', 'الاسم']].map(([k, v]) => opt(k, v, sortKey)).join('')}</select></label>
     <label class="sc-search">بحث<input type="search" name="query" value="${esc(f.query)}" placeholder="رمز أو اسم أو قطاع"></label>
     <button type="button" class="sc-reset" data-reset>إعادة الضبط</button>
@@ -167,6 +168,7 @@ export async function init(api) {
   scanner.addEventListener('change', e => {
     const el = e.target; if (!(el instanceof HTMLSelectElement) && !(el instanceof HTMLInputElement)) return;
     if (el.name === 'sort') sortKey = el.value;
+    else if (el.name === 'excludeLoss') filters.excludeLoss = el.value === '1';
     else if (['minValue', 'minScore'].includes(el.name)) filters[el.name] = +el.value;
     else filters[el.name] = el.value;
     writeFilters(); renderResult();

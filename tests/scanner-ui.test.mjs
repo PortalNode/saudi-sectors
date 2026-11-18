@@ -4,9 +4,9 @@ import { readFileSync } from 'node:fs';
 import { filterStocks, sortStocks, watchDiff, toggleWatch, loadWatch, saveWatch, DEFAULT_FILTERS, fmtValue, escapeHtml, KEY_IDS } from '../dist/scanner/scanner-logic.mjs';
 
 const stocks = {
-  A: { name: 'أ', sector: 'البنوك', score: 6, bits: '111111', avgVal20: 50e6, volRatio: 2, dividendYield: 4 },
-  B: { name: 'ب', sector: 'التجزئة', score: 5, bits: '101111', avgVal20: 2e6, volRatio: 0.5, dividendYield: null },
-  C: { name: 'ج', sector: 'البنوك', score: 4, bits: '101101', avgVal20: 9e6, volRatio: 1.2, dividendYield: 1 },
+  A: { keys: { fin: [1] }, name: 'أ', sector: 'البنوك', score: 6, bits: '111111', avgVal20: 50e6, volRatio: 2, dividendYield: 4 },
+  B: { keys: { fin: [0] }, name: 'ب', sector: 'التجزئة', score: 5, bits: '101111', avgVal20: 2e6, volRatio: 0.5, dividendYield: null },
+  C: { keys: { fin: [1] }, name: 'ج', sector: 'البنوك', score: 4, bits: '101101', avgVal20: 9e6, volRatio: 1.2, dividendYield: 1 },
 };
 
 test('default filter keeps only 5 or 6 keys; the minimum is adjustable', () => {
@@ -17,6 +17,8 @@ test('default filter keeps only 5 or 6 keys; the minimum is adjustable', () => {
   assert.deepEqual(f({ minScore: 4, sector: 'البنوك' }), ['A', 'C']);
   assert.deepEqual(f({ minScore: 4, minValue: 5e6 }), ['A', 'C']);
   assert.deepEqual(f({ query: 'تجزئة' }), ['B']);
+  assert.deepEqual(f({ excludeLoss: true }), ['A']); // B خاسرة
+  assert.deepEqual(f({ minScore: 4, excludeLoss: true }), ['A', 'C']);
   assert.deepEqual(f({ query: 'zzz' }), []);
 });
 

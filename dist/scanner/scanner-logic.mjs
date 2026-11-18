@@ -1,7 +1,7 @@
 // منطق صفحة «مفاتيح جودة السهم» (فلترة وترتيب ومقارنة المراقبة وتنسيق الأرقام). بلا DOM، فيُحمَّل من الصفحة ومن الاختبارات.
 
 export const KEY_IDS = ['trend', 'fin', 'tasi', 'levels', 'sma55', 'macd'];
-export const DEFAULT_FILTERS = { minScore: 5, sector: 'all', minValue: 1e6, query: '' };
+export const DEFAULT_FILTERS = { minScore: 5, sector: 'all', minValue: 1e6, excludeLoss: false, query: '' };
 
 // يحوّل خريطة الأسهم إلى قائمة { symbol, ...stock } بعد الفلترة
 export function filterStocks(stocks, f = DEFAULT_FILTERS) {
@@ -10,6 +10,7 @@ export function filterStocks(stocks, f = DEFAULT_FILTERS) {
     if (s.score < f.minScore) return false;
     if (f.sector !== 'all' && s.sector !== f.sector) return false;
     if (s.avgVal20 < f.minValue) return false;
+    if (f.excludeLoss && s.keys?.fin?.[0] !== 1) return false; // مفتاح التحليل المالي 0 = صافي ربح آخر 4 أرباع سالب أو لا بيانات
     if (q && !`${s.symbol} ${s.name} ${s.sector}`.toLowerCase().includes(q)) return false;
     return true;
   });
