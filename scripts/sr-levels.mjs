@@ -24,10 +24,16 @@ export function pivots(high, low, atr, i, p = SR_DEFAULTS) {
     let isLow = true, isHigh = true;
     for (let m = j - p.k; m <= j + p.k; m++) { if (low[m] < low[j]) isLow = false; if (high[m] > high[j]) isHigh = false; if (!isLow && !isHigh) break; }
     const end = Math.min(i, j + p.reactionBars);
-    if (isHigh) { let lo = Infinity; for (let m = j + 1; m <= end; m++) lo = Math.min(lo, low[m]); const rx = (high[j] - lo) / a; if (rx >= p.reactionAtr) out.push({ j, price: high[j], type: 'high', reaction: rx }); }
-    if (isLow) { let hi = -Infinity; for (let m = j + 1; m <= end; m++) hi = Math.max(hi, high[m]); const rx = (hi - low[j]) / a; if (rx >= p.reactionAtr) out.push({ j, price: low[j], type: 'low', reaction: rx }); }
+    if (isHigh) { let lo = Infinity; for (let m = j + 1; m <= end; m++) lo = Math.min(lo, low[m]); const rx = (high[j] - lo) / a; if (rx >= p.reactionAtr) add({ j, price: high[j], type: 'high', reaction: rx }); }
+    if (isLow) { let hi = -Infinity; for (let m = j + 1; m <= end; m++) hi = Math.max(hi, high[m]); const rx = (hi - low[j]) / a; if (rx >= p.reactionAtr) add({ j, price: low[j], type: 'low', reaction: rx }); }
   }
   return out;
+  // قمتان (أو قاعان) متساويتان في شمعتين متجاورتين هما محور واحد لا لمستان: يُبقى الأقصى منهما
+  function add(v) {
+    const prev = out.findLast(x => x.type === v.type);
+    if (prev && v.j - prev.j <= p.k) { if (v.type === 'high' ? v.price > prev.price : v.price < prev.price) Object.assign(prev, v); return; }
+    out.push(v);
+  }
 }
 
 // تجميع المحاور (قمم وقيعان معاً، فتنقلب الأدوار طبيعياً) في مناطق بعرض لا يتجاوز zoneAtr × ATR.

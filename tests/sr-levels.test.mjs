@@ -70,3 +70,11 @@ test('only the last two calendar years count: older pivots are ignored when date
   assert.equal(windowStart(d, i, 2) > 0, true);
   assert.ok(d[windowStart(d, i, 2)] >= `${+d[i].slice(0, 4) - 2}${d[i].slice(4)}`);
 });
+
+test('a flat top over adjacent bars is one pivot, so one touch', () => {
+  // قمة مسطحة (شمعتان بنفس الارتفاع) ثم هبوط حاد: محور واحد فقط
+  const c = [...Array.from({ length: 20 }, (_, k) => 100 + k * 0.5), 110, 110, ...Array.from({ length: 20 }, (_, k) => 109 - k * 1.5)];
+  const h = c.map(x => x + 0.5), l = c.map(x => x - 0.5), atr = atrSeries(h, l, c, 14);
+  const tops = pivots(h, l, atr, c.length - 1).filter(v => v.type === 'high');
+  assert.equal(tops.length, 1);
+});
