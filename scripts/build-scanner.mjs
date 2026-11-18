@@ -70,7 +70,7 @@ for (const s of stocks) {
   outStocks[s.symbol] = {
     name: s.name, sector: s.sector, price: r(c), tradedValue: r(c * s.v[i], 0), avgVal20: r(avgVal20, 0), volRatio: r(volRatio),
     score: k.score, bits: k.bits, trend: k.trend, dividendYield: r(o.dividendYield), dividendOk: k.dividendOk,
-    support: r(support?.center), resistance: r(resistance?.center), supportZone: support ? [r(support.low), r(support.high), support.touches] : null, resistanceZone: resistance ? [r(resistance.low), r(resistance.high), resistance.touches] : null, atr: r(atr), sma50: r(sma50), sma200: r(sma200),
+    support: r(support?.center), resistance: r(resistance?.center), supportZone: support ? [r(support.low), r(support.high), support.touches, s.d[support.first]] : null, resistanceZone: resistance ? [r(resistance.low), r(resistance.high), resistance.touches, s.d[resistance.first]] : null, atr: r(atr), sma50: r(sma50), sma200: r(sma200),
     keys: Object.fromEntries(KEY_IDS.map(id => [id, [k.keys[id].ok, k.keys[id].detail]])),
   };
 }

@@ -1,7 +1,7 @@
 // واجهة «مفاتيح جودة السهم» وقائمة المراقبة. تقرأ dist/scanner/signals.json (يبنيه scripts/build-scanner.mjs بعد كل
 // تحديث أسعار) ولا تحسب أي مؤشر بنفسها. كل المنطق القابل للاختبار في scanner-logic.mjs.
 import { KEY_IDS, DEFAULT_FILTERS, filterStocks, sortStocks, watchDiff, loadWatch, saveWatch, toggleWatch,
-  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119e';
+  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119f';
 
 const FILTER_KEY = 'saudi-sectors-scanner-filters-v2';
 const base = file => new URL(file, import.meta.url);
@@ -78,12 +78,12 @@ function renderResult() {
 /* ---------- بطاقة التفاصيل ---------- */
 function levelsFor(s) {
   const out = [];
-  // منطقة الدعم/المقاومة تُرسم بحافتيها (لا بخط واحد)، وعدد اللمسات في عنوان الحافة العليا للدعم والسفلى للمقاومة
-  const zone = (z, name, color, titleEdge) => { if (!z) return; out.push({ price: z[1], title: titleEdge === 'high' ? `${name} (${z[2]} لمسات)` : `${name} · حافة`, color }, { price: z[0], title: titleEdge === 'low' ? `${name} (${z[2]} لمسات)` : `${name} · حافة`, color }); };
-  zone(s.supportZone, 'دعم', '#22c55e', 'high'); zone(s.resistanceZone, 'مقاومة', '#f05252', 'low');
+  // منطقة الدعم/المقاومة تُرسم نطاقاً مظللاً واحداً من أول لمسة حتى اليمين بعنوان واحد (لا خطّين وعنوانين)
+  const zone = (z, side, name, color) => { if (z) out.push({ color, zone: { low: z[0], high: z[1], since: z[3], side, title: `${name} · ${z[2]} لمسات` } }); };
+  zone(s.supportZone, 'support', 'دعم', '#22c55e'); zone(s.resistanceZone, 'resistance', 'مقاومة', '#f05252');
   return out;
 }
-const zoneHtml = (z, none) => z ? `<bdi class="num" dir="ltr">${fmtPrice(z[0])} – ${fmtPrice(z[1])}</bdi> <small class="sc-dim">${z[2]} لمسات</small>` : none;
+const zoneHtml = (z, none) => z ? `<bdi class="num" dir="ltr">${fmtPrice(z[0])} – ${fmtPrice(z[1])}</bdi> <small class="sc-dim">${z[2]} لمسات · منذ ${esc(z[3] || '—')}</small>` : none;
 function cardHtml(s) {
   const watched = !!watch[s.symbol];
   const rows = KEY_IDS.map(id => { const [ok, detail] = s.keys[id]; return `<li class="${ok ? 'ok' : 'no'}"><span aria-hidden="true">${ok ? '1+' : '0'}</span> <b>${esc(label(id))}</b>${detail ? `<small class="sc-dim">${esc(detail)}</small>` : ''}</li>`; }).join('');

@@ -403,7 +403,7 @@
 
   // home: سهم الصفحة. اختيار سهم آخر من البحث يغيّر الشارت وحده دون إعادة تحميل الصفحة، كما في TradingView
   // away: اسم السهم المعروض وصفحة قطاعه حين يختلف عن سهم الصفحة
-  // levels: [{price, title, color}] — خطوط سعر مرجعية (دخول/وقف/أهداف) من الماسح؛ لا تُحفظ ولا تُعدَّل كرسومات المستخدم
+  // levels: [{price, title, color}] أو [{zone: {low, high, since, side, title}, color}] للمناطق — خطوط سعر مرجعية (دخول/وقف/أهداف) من الماسح؛ لا تُحفظ ولا تُعدَّل كرسومات المستخدم
   function mount(panel, file, { home = null, away = {}, keepFull = false, levels = [] } = {}) {
     current?.destroy({ keepFull });
     home ??= { symbol: String(file.symbol), file };
@@ -737,10 +737,10 @@
         drawn.push({ remove: () => main.removePriceLine(line) });
       }
       // المحور يتسع للمستويات المرجعية (وإلا خرجت الأهداف خارج النطاق المرئي)
-      const lvPrices = levels.map(lv => lv.price).filter(p => p > 0);
+      const lvPrices = levels.flatMap(lv => lv.zone ? [lv.zone.low, lv.zone.high] : [lv.price]).filter(p => p > 0);
       if (lvPrices.length) main.applyOptions({ autoscaleInfoProvider: base => { const r = base(); if (!r) return r; return { ...r, priceRange: { minValue: Math.min(r.priceRange.minValue, ...lvPrices), maxValue: Math.max(r.priceRange.maxValue, ...lvPrices) } }; } });
       for (const lv of levels) {
-        if (!(lv.price > 0)) continue;
+        if (lv.zone || !(lv.price > 0)) continue; // مناطق الدعم/المقاومة تُرسم نطاقاً مظللاً على اللوحة (drawShapes)، لا خطّين
         const line = main.createPriceLine({ price: lv.price, color: lv.color || colors.gold, lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, lineVisible: true, axisLabelVisible: true, title: lv.title || '' });
         drawn.push({ remove: () => main.removePriceLine(line) });
       }
@@ -846,6 +846,19 @@
         const A = xy(d.a), B = d.b ? xy(d.b) : null;
         if (A && B) { handle(A, colors.gold); handle(B, colors.gold); if (d.type === 'channel') chanPts(d, A, B)?.forEach(pt => handle(pt, colors.gold)); }
       };
+      // مناطق دعم/مقاومة مرجعية من الماسح: نطاق مظلل من أول لمسة حتى يمين الشارت مع عنوان واحد، فلا تتكدس الخطوط والعناوين
+      for (const lv of levels) {
+        const z = lv.zone; if (!z) continue;
+        const y1 = main.priceToCoordinate(z.high), y2 = main.priceToCoordinate(z.low); if (y1 == null || y2 == null) continue;
+        const sx = z.since ? ts.logicalToCoordinate(logicalOf(z.since)) : 0, x0 = Math.min(W, Math.max(0, sx ?? 0));
+        const mid = (y1 + y2) / 2, h = Math.max(7, Math.abs(y2 - y1)), top = mid - h / 2, color = lv.color || colors.gold;
+        const rgb = /^#([0-9a-f]{6})$/i.exec(color), tint = a => rgb ? `rgba(${parseInt(rgb[1].slice(0, 2), 16)},${parseInt(rgb[1].slice(2, 4), 16)},${parseInt(rgb[1].slice(4), 16)},${a})` : color;
+        ctx.fillStyle = tint(0.16); ctx.fillRect(x0, top, W - x0, h);
+        ctx.fillStyle = tint(0.7); ctx.fillRect(x0, top, W - x0, 1); ctx.fillRect(x0, top + h - 1, W - x0, 1);
+        ctx.font = font12; ctx.textAlign = 'right'; ctx.textBaseline = z.side === 'resistance' ? 'bottom' : 'top';
+        const label = z.title || '', ty = z.side === 'resistance' ? top - 3 : top + h + 3;
+        ctx.lineWidth = 3; ctx.strokeStyle = colors.bg || '#11161d'; ctx.strokeText(label, W - 8, ty); ctx.fillStyle = color; ctx.fillText(label, W - 8, ty);
+      }
       if (!state.hidden) for (const d of drawings) if (shown(d)) drawOne(d);
       if (preview) drawOne(preview);
       if (selected >= 0 && drawings[selected] && shown(drawings[selected])) drawSelection(drawings[selected]);

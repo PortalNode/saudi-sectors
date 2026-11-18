@@ -48,7 +48,7 @@ export function zonesAt(high, low, close, i, atr, p = SR_DEFAULTS) {
     let w = 0, wp = 0;
     for (const x of z.items) { const wt = 0.5 ** ((i - x.j) / p.halfLife) * Math.min(x.reaction, 6); w += wt; wp += wt * x.price; }
     const lo = Math.min(...prices), hi = Math.max(...prices), pad = Math.max(0, 0.25 * a - (hi - lo) / 2);
-    out.push({ low: lo - pad, high: hi + pad, center: wp / w, touches: z.items.length, score: w, last: Math.max(...z.items.map(x => x.j)), highs: z.items.filter(x => x.type === 'high').length, lows: z.items.filter(x => x.type === 'low').length });
+    out.push({ low: lo - pad, high: hi + pad, center: wp / w, touches: z.items.length, score: w, first: Math.min(...z.items.map(x => x.j)), last: Math.max(...z.items.map(x => x.j)), highs: z.items.filter(x => x.type === 'high').length, lows: z.items.filter(x => x.type === 'low').length });
   }
   return out;
 }
