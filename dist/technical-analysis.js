@@ -16,7 +16,15 @@
     if (status) status.textContent = message;
   }
 
-  const ready = fetch('data.json').then(r => r.json()).then(data => {
+  // data.json قد يعطي خطأ خادم مؤقتاً لحظة نشر الموقع: تُعاد المحاولة مرتين قبل إظهار الفشل
+  const fetchData = async () => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try { const r = await fetch('data.json'); if (r.ok) return await r.json(); } catch { /* retry */ }
+      if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 700 * (attempt + 1)));
+    }
+    throw new Error('data.json unavailable');
+  };
+  const ready = fetchData().then(data => {
     stocks = new Map(data.sectors.flatMap(sector => sector.stocks).map(stock => [String(stock.symbol), stock]));
     return stocks;
   }).catch(error => {
@@ -36,7 +44,7 @@
     document.title = `${stock.name} · التحليل الفني | السوق السعودي`;
     if (!window.CompanyChart) { fail('تعذر تحميل مكتبة الشارت.'); return false; }
     const file = await window.CompanyChart.load(symbol);
-    if (!file) { fail(`لا تتوفر شموع للسهم ${symbol} بعد.`); return false; }
+    if (!file) { fail(`تعذر تحميل شموع السهم ${symbol}. جرّب إعادة تحميل الصفحة بعد قليل.`); return false; }
     document.getElementById('ta-status')?.remove();
     window.CompanyChart.mount(panel, file, { home: { symbol, file, name: stock.name }, levels });
     mounted = symbol;

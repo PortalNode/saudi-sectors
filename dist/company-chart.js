@@ -380,7 +380,18 @@
     for (const key of ['d', 'o', 'h', 'l', 'c', 'v']) full[key] = [...keep.map(i => history[key][i]), ...recent[key]];
     return full;
   }
-  const getJson = url => fetch(url, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
+  // خطأ الخادم المؤقت (5xx، يحدث لحظة نشر الموقع) أو انقطاع الشبكة يُعاد مرتين قبل الاستسلام؛ 404 يعني لا ملف فيُرجَع null فوراً
+  const getJson = async url => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const r = await fetch(url, { cache: 'no-cache' });
+        if (r.ok) return await r.json();
+        if (r.status < 500) return null;
+      } catch { /* network error: retry */ }
+      if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 700 * (attempt + 1)));
+    }
+    return null;
+  };
   const candleFiles = new Map();
   const loadCandleFile = sym => {
     if (!candleFiles.has(sym)) candleFiles.set(sym, getJson(`ohlc/${encodeURIComponent(sym)}.json`)
