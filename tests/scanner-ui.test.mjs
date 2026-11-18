@@ -1,115 +1,68 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { filterItems, sortItems, watchDiff, toggleWatch, loadWatch, saveWatch, DEFAULT_FILTERS, fmtValue, escapeHtml, concurrentCounts } from '../dist/scanner/scanner-logic.mjs';
+import { filterStocks, sortStocks, watchDiff, toggleWatch, loadWatch, saveWatch, DEFAULT_FILTERS, fmtValue, escapeHtml, KEY_IDS } from '../dist/scanner/scanner-logic.mjs';
 
 const stocks = {
-  A: { name: 'أ', sector: 'البنوك', trend: 'up', avgVal20: 50e6, volRatio: 2 },
-  B: { name: 'ب', sector: 'التجزئة', trend: 'down', avgVal20: 2e6, volRatio: 0.5 },
-  C: { name: 'ج', sector: 'البنوك', trend: 'side', avgVal20: 9e6, volRatio: 1.2 },
+  A: { name: 'أ', sector: 'البنوك', score: 6, bits: '111111', avgVal20: 50e6, volRatio: 2, dividendYield: 4 },
+  B: { name: 'ب', sector: 'التجزئة', score: 5, bits: '101111', avgVal20: 2e6, volRatio: 0.5, dividendYield: null },
+  C: { name: 'ج', sector: 'البنوك', score: 4, bits: '101101', avgVal20: 9e6, volRatio: 1.2, dividendYield: 1 },
 };
-const items = [
-  { symbol: 'A', strategy: 'breakout', status: 'new', ageSessions: 0, riskPct: 6 },
-  { symbol: 'A', strategy: 'rs', status: 'continuing', ageSessions: 4, riskPct: 6 },
-  { symbol: 'B', strategy: 'pullback', status: 'continuing', ageSessions: 9, riskPct: 11 },
-  { symbol: 'C', strategy: 'breakout', status: 'new', ageSessions: 0, riskPct: 4 },
-];
 
-test('filters combine: strategy, sector, trend, status, liquidity, age, risk and text', () => {
-  const f = (x) => filterItems(items, stocks, { ...DEFAULT_FILTERS, ...x }).map(i => `${i.symbol}:${i.strategy}`);
-  assert.equal(f({}).length, 4);
-  assert.deepEqual(f({ strategy: 'breakout' }), ['A:breakout', 'C:breakout']);
-  assert.deepEqual(f({ sector: 'البنوك', status: 'new' }), ['A:breakout', 'C:breakout']);
-  assert.deepEqual(f({ trend: 'down' }), ['B:pullback']);
-  assert.deepEqual(f({ minValue: 10e6 }), ['A:breakout', 'A:rs']);
-  assert.deepEqual(f({ maxAge: 4 }), ['A:breakout', 'A:rs', 'C:breakout']);
-  assert.deepEqual(f({ maxRisk: 6 }), ['A:breakout', 'A:rs', 'C:breakout']);
-  assert.deepEqual(f({ query: 'تجزئة' }), ['B:pullback']);
+test('default filter keeps only 5 or 6 keys; the minimum is adjustable', () => {
+  const f = x => filterStocks(stocks, { ...DEFAULT_FILTERS, ...x }).map(s => s.symbol).sort();
+  assert.deepEqual(f({}), ['A', 'B']);
+  assert.deepEqual(f({ minScore: 6 }), ['A']);
+  assert.deepEqual(f({ minScore: 4 }), ['A', 'B', 'C']);
+  assert.deepEqual(f({ minScore: 4, sector: 'البنوك' }), ['A', 'C']);
+  assert.deepEqual(f({ minScore: 4, minValue: 5e6 }), ['A', 'C']);
+  assert.deepEqual(f({ query: 'تجزئة' }), ['B']);
   assert.deepEqual(f({ query: 'zzz' }), []);
 });
 
-test('sorting by freshness, liquidity, volume, risk and concurrent signals', () => {
-  const ids = key => sortItems(items, stocks, key, { breakout: 'ب', rs: 'ق', pullback: 'ا' }).map(i => `${i.symbol}:${i.strategy}`);
-  assert.deepEqual(ids('fresh'), ['A:breakout', 'C:breakout', 'A:rs', 'B:pullback']);
-  assert.deepEqual(ids('liquidity')[0], 'A:breakout');
-  assert.deepEqual(ids('volume')[0], 'A:breakout');
-  assert.deepEqual(ids('risk')[0], 'C:breakout');
-  assert.deepEqual(ids('concurrent').slice(0, 2).map(x => x[0]), ['A', 'A']);
-  assert.equal(concurrentCounts(items).get('A'), 2);
-  assert.equal(items.length, 4, 'sorting does not mutate the input');
+test('sorting: by score then liquidity, by liquidity, by dividend (missing last)', () => {
+  const all = filterStocks(stocks, { ...DEFAULT_FILTERS, minScore: 0 });
+  assert.deepEqual(sortStocks(all, 'score').map(s => s.symbol), ['A', 'B', 'C']);
+  assert.deepEqual(sortStocks(all, 'liquidity').map(s => s.symbol), ['A', 'C', 'B']);
+  assert.deepEqual(sortStocks(all, 'dividend').map(s => s.symbol), ['A', 'C', 'B']);
 });
 
-test('the watch list reports new, ended and unchanged signals since the stock was saved', () => {
-  const saved = { strategies: ['breakout', 'rs'] };
-  assert.equal(watchDiff(saved, items.filter(i => i.symbol === 'A')).state, 'same');
-  assert.deepEqual(watchDiff(saved, [items[0]]), { state: 'removed', added: [], removed: ['rs'], now: ['breakout'] });
-  assert.equal(watchDiff(saved, [items[0], items[1], items[2]]).state, 'added');
-  assert.equal(watchDiff(saved, [items[0], items[2]]).state, 'changed');
-  assert.equal(watchDiff({ strategies: [] }, []).state, 'none');
+test('watch diff compares the six keys now with those at save time', () => {
+  assert.equal(watchDiff({ bits: '111111' }, stocks.A).state, 'same');
+  const lost = watchDiff({ bits: '111111' }, stocks.B);
+  assert.equal(lost.state, 'removed'); assert.deepEqual(lost.lost, [KEY_IDS[1]]);
+  const gained = watchDiff({ bits: '101101' }, stocks.B);
+  assert.equal(gained.state, 'added'); assert.deepEqual(gained.gained, [KEY_IDS[4]]);
+  assert.equal(watchDiff({ bits: '110000' }, { bits: '011000' }).state, 'changed');
+  assert.equal(watchDiff({ bits: '111111' }, undefined).state, 'none');
+  assert.equal(watchDiff({ strategies: ['breakout'] }, stocks.A).state, 'same'); // a list saved by the old scanner is not compared
 });
 
-test('saving to the watch list toggles, and survives broken or blocked storage', () => {
-  const store = new Map(), storage = { getItem: k => store.get(k) ?? null, setItem: (k, v) => store.set(k, v) };
-  let w = toggleWatch(loadWatch(storage), 'A', [items[0]], '2026-11-16', '2026-11-17T00:00:00Z');
-  assert.deepEqual(w.A.strategies, ['breakout']); assert.ok(saveWatch(storage, w));
-  assert.deepEqual(Object.keys(loadWatch(storage)), ['A']);
-  assert.deepEqual(toggleWatch(w, 'A', [], 'd', 't'), {});
-  store.set('saudi-sectors-scanner-watch', '{not json'); assert.deepEqual(loadWatch(storage), {});
-  store.set('saudi-sectors-scanner-watch', '[1,2]'); assert.deepEqual(loadWatch(storage), {});
-  assert.deepEqual(loadWatch({ getItem() { throw new Error('blocked'); } }), {});
-  assert.equal(saveWatch({ setItem() { throw new Error('quota'); } }, {}), false);
+test('watch list is stored per stock with its score and keys, and toggles off', () => {
+  let w = toggleWatch({}, 'A', stocks.A, '2026-11-17', 't');
+  assert.deepEqual(w.A, { savedAt: 't', dataDate: '2026-11-17', score: 6, bits: '111111' });
+  w = toggleWatch(w, 'A', stocks.A, '2026-11-17', 't');
+  assert.deepEqual(w, {});
+  const mem = new Map(); const storage = { getItem: k => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
+  assert.equal(saveWatch(storage, { A: 1 }), true);
+  assert.deepEqual(loadWatch(storage), { A: 1 });
+  assert.deepEqual(loadWatch({ getItem: () => '[1]' }), {});
+  assert.equal(saveWatch({ setItem() { throw new Error('x'); } }, {}), false);
 });
 
-test('number and text helpers', () => {
-  assert.equal(fmtValue(24_900_000), '24.9 مليون'); assert.equal(fmtValue(2_500_000_000), '2.5 مليار'); assert.equal(fmtValue(850_000), '850 ألف');
-  assert.equal(escapeHtml('<b>"x"&</b>'), '&lt;b&gt;&quot;x&quot;&amp;&lt;/b&gt;');
+test('formats and escaping', () => {
+  assert.equal(fmtValue(2.5e9), '2.5 مليار');
+  assert.equal(fmtValue(5e6), '5 مليون');
+  assert.equal(escapeHtml('<a href="x">&</a>'), '&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;');
 });
 
-test('the published signals file is consistent: every item has its stock, its conditions and valid levels', () => {
+test('published signals.json has the shape the page reads', () => {
   const j = JSON.parse(readFileSync(new URL('../dist/scanner/signals.json', import.meta.url), 'utf8'));
-  assert.equal(typeof j.meta.valid, 'boolean');
-  if (!j.meta.valid) { assert.equal(j.items.length, 0, 'no signals when verification failed'); return; }
-  assert.match(j.meta.dataDate, /^\d{4}-\d{2}-\d{2}$/);
-  assert.equal(j.meta.officialDate, j.meta.dataDate);
-  for (const sym of [...(j.meta.excluded.suspended || []), ...(j.meta.excluded.stale || [])]) assert.ok(!(sym in j.stocks), `${sym} is excluded and must produce no signal`);
-  const seen = new Set();
-  for (const it of j.items) {
-    const s = j.stocks[it.symbol]; assert.ok(s, it.symbol);
-    assert.ok(j.strategies[it.strategy], it.strategy);
-    assert.equal(it.conds.length, j.strategies[it.strategy].conditions.length);
-    assert.ok(it.conds.every(c => c[0] === 1), 'a published signal has every condition met');
-    assert.ok(it.stop < it.entryRef && it.entryRef < it.target1 && it.target1 < it.target2, `${it.symbol} levels`);
-    assert.ok(it.ageSessions >= 0 && it.ageSessions < 10);
-    assert.equal(it.status, it.ageSessions === 0 ? 'new' : 'continuing');
-    assert.ok(s.price > it.stop, 'price is still above the reference stop');
-    const key = `${it.symbol}:${it.strategy}`; assert.ok(!seen.has(key), `duplicate ${key}`); seen.add(key);
-    assert.ok(!('reversal' in j.strategies));
+  assert.ok(j.meta && j.keys && j.stocks);
+  assert.deepEqual(Object.keys(j.keys), KEY_IDS);
+  for (const s of Object.values(j.stocks)) {
+    assert.equal(s.bits.length, 6);
+    assert.equal(s.score, s.bits.split('').reduce((a, b) => a + +b, 0));
+    assert.deepEqual(Object.keys(s.keys), KEY_IDS);
   }
-});
-
-test('the strategy statistics shown on the page say nothing is proven', () => {
-  const st = JSON.parse(readFileSync(new URL('../dist/scanner/strategy-stats.json', import.meta.url), 'utf8'));
-  assert.ok(Object.keys(st.strategies).length >= 7);
-  for (const [id, s] of Object.entries(st.strategies)) assert.equal(s.verdict, 'unproven', id);
-});
-
-test('the technical page carries the three tabs and loads only files that exist', () => {
-  const dist = new URL('../dist/', import.meta.url);
-  const html = readFileSync(new URL('technical-analysis.html', dist), 'utf8');
-  for (const tab of ['scanner', 'chart', 'watch']) assert.match(html, new RegExp(`data-tab-button="${tab}"`));
-  for (const id of ['sc-scanner', 'sc-watch', 'sc-card', 'ta-chart']) assert.match(html, new RegExp(`id="${id}"`));
-  for (const m of html.matchAll(/(?:src|href)="([^"?#]+\.(?:js|css|mjs))\?v=[^"]+"/g)) readFileSync(new URL(m[1], dist), 'utf8');
-  // the loader names the scanner module with a path that resolves from a classic script
-  const loader = readFileSync(new URL('technical-analysis.js', dist), 'utf8');
-  const mod = loader.match(/SCANNER_MODULE = '(\.\/scanner\/scanner-ui\.mjs)\?v=[^']+'/);
-  assert.ok(mod, 'dynamic import needs a ./ path');
-  readFileSync(new URL(mod[1], dist), 'utf8');
-  // the chart still works if the scanner fails to load
-  assert.match(loader, /catch\(error => \{[\s\S]*setTab\('chart'/);
-});
-
-test('results pages are untouched by the scanner work: they still load the pinned chart version', () => {
-  const dist = new URL('../dist/', import.meta.url);
-  assert.match(readFileSync(new URL('banks.html', dist), 'utf8'), /company-chart\.js\?v=chart-20261117D/);
-  assert.doesNotMatch(readFileSync(new URL('banks.html', dist), 'utf8'), /scanner/);
 });

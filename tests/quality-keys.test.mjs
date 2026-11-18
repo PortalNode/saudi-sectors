@@ -1,0 +1,69 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { trendAt, tasiKey, levelsKey, sma55Key, macdKey, financialKey, computeKeys, KEY_IDS } from '../scripts/quality-keys.mjs';
+
+const rising = n => Array.from({ length: n }, (_, i) => 100 + i);
+const falling = n => Array.from({ length: n }, (_, i) => 500 - i);
+const flat = n => Array.from({ length: n }, () => 100);
+
+test('trend: steady rise is up, steady fall is down, flat is side, short history is na', () => {
+  assert.equal(trendAt(rising(260), 259).trend, 'up');
+  assert.equal(trendAt(falling(260), 259).trend, 'down');
+  assert.equal(trendAt(flat(260), 259).trend, 'side');
+  assert.equal(trendAt(rising(100), 99).trend, 'na');
+});
+
+test('TASI key follows the same trend definition and fails closed without candles', () => {
+  assert.equal(tasiKey(rising(260)).ok, 1);
+  assert.equal(tasiKey(falling(260)).ok, 0);
+  assert.equal(tasiKey(rising(100)).ok, 0);
+  assert.equal(tasiKey(null).ok, 0);
+});
+
+test('levels key: nearer to support is 1, nearer to resistance is 0, no resistance above is 1, no support below is 0', () => {
+  assert.equal(levelsKey(100, 98, 110).ok, 1);
+  assert.equal(levelsKey(100, 90, 102).ok, 0);
+  assert.equal(levelsKey(100, 95, null).ok, 1);
+  assert.equal(levelsKey(100, null, 110).ok, 0);
+  assert.equal(levelsKey(null, 90, 110).ok, 0);
+});
+
+test('55-day average key: above is 1, below is 0, short history is 0', () => {
+  assert.equal(sma55Key(rising(80), 79).ok, 1);
+  assert.equal(sma55Key(falling(80), 79).ok, 0);
+  assert.equal(sma55Key(rising(30), 29).ok, 0);
+});
+
+test('MACD key: line above signal is 1, below is 0, short history is 0', () => {
+  const up = [...flat(40), ...Array.from({ length: 10 }, (_, i) => 100 + (i + 1) * 3)];
+  const down = [...flat(40), ...Array.from({ length: 10 }, (_, i) => 100 - (i + 1) * 3)];
+  assert.equal(macdKey(up, up.length - 1).ok, 1);
+  assert.equal(macdKey(down, down.length - 1).ok, 0);
+  assert.equal(macdKey(rising(20), 19).ok, 0);
+});
+
+test('financial key: last four consecutive quarters decide; loss is 0; gaps and missing data fall back, never guess', () => {
+  const q = (...v) => Object.fromEntries(v.map((x, k) => [`${2025 + Math.floor((k + 3) / 4)}Q${(k + 3) % 4 + 1}`, { netProfit: x }]));
+  assert.equal(financialKey({ quarters: q(10, 20, 30, 40) }).ok, 1);
+  assert.equal(financialKey({ quarters: q(-50, -20, 5, 10) }).ok, 0); // sum -55
+  assert.equal(financialKey({ quarters: q(-50, 20, 30, 40) }).ok, 1); // sum 40: one weak quarter alone is not a loss
+  // a gap (missing quarter) means no valid trailing year, so the annual figure is used
+  const gap = { quarters: { '2025Q1': { netProfit: 10 }, '2025Q2': { netProfit: 10 }, '2025Q4': { netProfit: 10 }, '2026Q1': { netProfit: 10 } }, years: [{ year: 2025, netProfit: -5 }] };
+  const g = financialKey(gap); assert.equal(g.ok, 0); assert.equal(g.basis, 'fy');
+  assert.equal(financialKey({ quarters: {}, years: [{ year: 2024, netProfit: 3 }, { year: 2025, netProfit: 7 }] }).ok, 1);
+  const none = financialKey(undefined); assert.equal(none.ok, 0); assert.equal(none.basis, 'none');
+});
+
+test('computeKeys: six keys, score is their sum, dividend badge is separate from the score', () => {
+  const close = rising(260);
+  const tasi = tasiKey(rising(260));
+  const all = computeKeys({ close, i: 259, support: 355, resistance: 380, financial: financialKey({ quarters: { '2025Q4': { netProfit: 5 }, '2026Q1': { netProfit: 5 }, '2026Q2': { netProfit: 5 }, '2026Q3': { netProfit: 5 } } }), tasi, dividendYield: 3 });
+  assert.deepEqual(Object.keys(all.keys), KEY_IDS);
+  // a straight rising line has MACD line above its signal only while accelerating; assert the sum rather than every bit
+  assert.equal(all.score, all.bits.split('').reduce((a, b) => a + +b, 0));
+  assert.equal(all.keys.trend.ok, 1); assert.equal(all.keys.fin.ok, 1); assert.equal(all.keys.tasi.ok, 1); assert.equal(all.keys.sma55.ok, 1);
+  assert.equal(all.dividendOk, true);
+  const low = computeKeys({ close, i: 259, support: 355, resistance: 380, financial: financialKey(undefined), tasi: tasiKey(falling(260)), dividendYield: 2.5 });
+  assert.equal(low.keys.fin.ok, 0); assert.equal(low.keys.tasi.ok, 0); assert.equal(low.dividendOk, false); // 2.5 is not "above" 2.5
+  assert.ok(low.score <= all.score - 2);
+});

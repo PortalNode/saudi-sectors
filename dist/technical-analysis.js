@@ -1,11 +1,11 @@
-// صفحة «التحليل الفني»: ماسح السوق وقائمة المراقبة وشارت السهم (company-chart.js) في صفحة واحدة.
+// صفحة «التحليل الفني»: «مفاتيح جودة السهم» وقائمة المراقبة وشارت السهم (company-chart.js) في صفحة واحدة.
 // السهم من ?symbol= في الرابط (أو TASI لمؤشر السوق)، وإن لم يوجد أو لم يكن في القائمة يُعرض أرامكو (2222).
 // الصفحة تُفتح على الماسح، وعلى الشارت إن جاء الرابط بـ ?symbol= أو #chart.
 // اختيار سهم آخر يتم من زر البحث داخل الشارت نفسه، كما كان في صفحات النتائج.
 (() => {
   const DEFAULT_SYMBOL = '2222';
   const INDEX = { symbol: 'TASI', name: 'مؤشر السوق السعودي' }; // شموعه في ohlc/TASI.json وشعاره في logos/TASI.svg
-  const SCANNER_MODULE = './scanner/scanner-ui.mjs?v=sc-20261118a';
+  const SCANNER_MODULE = './scanner/scanner-ui.mjs?v=sc-20261119b';
   const TABS = ['chart', 'scanner', 'watch'];
   const status = document.getElementById('ta-status');
   const panel = document.getElementById('ta-chart');

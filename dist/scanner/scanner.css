@@ -27,7 +27,7 @@
 .ta-page .sc-count-line{margin:0 0 8px;font-size:11.5px;color:var(--pf-muted);line-height:1.8}
 
 .ta-page .sc-wrap{border:1px solid var(--pf-line);overflow:auto;max-height:70vh}
-.ta-page .sc-table{table-layout:auto;min-width:1320px;width:100%}
+.ta-page .sc-table{table-layout:auto;min-width:1180px;width:100%}
 .ta-page .sc-table th,.ta-page .sc-table td{padding:7px 10px;font-size:11.5px;vertical-align:middle}
 .ta-page .sc-table thead th{position:sticky;top:0;z-index:3;white-space:nowrap}
 .ta-page .sc-table tbody tr[data-open]{cursor:pointer}
@@ -84,6 +84,23 @@
 .ta-page .sc-change.removed{color:var(--cq-down,#f05252)}
 .ta-page .sc-change.same,.ta-page .sc-change.none{color:var(--pf-muted)}
 .ta-page .sc-watch-table small{display:block;font-size:10px;color:var(--pf-muted);line-height:1.6}
+
+/* مفاتيح جودة السهم: شارات 1+ / 0 والمجموع */
+.ta-page .sc-keycell{text-align:center}
+.ta-page .sc-table thead th{text-align:center}
+.ta-page .sc-table thead th.sc-sticky{text-align:start}
+.ta-page .sc-key{display:inline-block;min-width:30px;padding:1px 6px;font-size:11px;font-weight:800;line-height:18px;text-align:center;border:1px solid var(--pf-line)}
+.ta-page .sc-key.on{color:#fff;background:var(--cq-up,#22c55e);border-color:var(--cq-up,#22c55e)}
+.ta-page .sc-key.off{color:#fff;background:var(--cq-down,#f05252);border-color:var(--cq-down,#f05252)}
+.ta-page .sc-score{display:inline-block;padding:1px 9px;font-size:12px;font-weight:800;border:1px solid var(--pf-line);color:var(--pf-ink);white-space:nowrap}
+.ta-page .sc-score.s6{color:var(--pf-gold);border-color:var(--pf-gold);background:var(--pf-gold-soft)}
+.ta-page .sc-score.s5{color:var(--pf-gold);border-color:var(--pf-gold)}
+.ta-page .sc-warn-banner{border-inline-start-color:var(--cq-down,#f05252)}
+.ta-page .sc-keylist li{padding:4px 0;border-bottom:1px solid var(--pf-line)}
+.ta-page .sc-keylist li:last-child{border-bottom:0}
+.ta-page .sc-keylist li>span{display:inline-block;min-width:26px;font-size:11px;font-weight:800}
+.ta-page .sc-keylist small{display:block;margin-inline-start:30px;font-size:11px;line-height:1.7}
+.ta-page .sc-watch-table tbody tr[data-open-watch]{cursor:pointer}
 
 @media (max-width:760px){
   .ta-page .sc-filters{grid-template-columns:repeat(2,1fr)}

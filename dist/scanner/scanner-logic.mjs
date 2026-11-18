@@ -1,61 +1,50 @@
-// Pure logic of the scanner page (filtering, sorting, watch-list comparison, number formats). No DOM, so the
-// same file is loaded by the page and by tests/scanner-ui.test.mjs.
+// منطق صفحة «مفاتيح جودة السهم» (فلترة وترتيب ومقارنة المراقبة وتنسيق الأرقام). بلا DOM، فيُحمَّل من الصفحة ومن الاختبارات.
 
-export const DEFAULT_FILTERS = { strategy: 'all', sector: 'all', trend: 'all', minValue: 1e6, status: 'all', maxAge: 10, maxRisk: null, query: '' };
+export const KEY_IDS = ['trend', 'fin', 'tasi', 'levels', 'sma55', 'macd'];
+export const DEFAULT_FILTERS = { minScore: 5, sector: 'all', minValue: 1e6, query: '' };
 
-export function filterItems(items, stocks, f = DEFAULT_FILTERS) {
+// يحوّل خريطة الأسهم إلى قائمة { symbol, ...stock } بعد الفلترة
+export function filterStocks(stocks, f = DEFAULT_FILTERS) {
   const q = (f.query || '').trim().toLowerCase();
-  return items.filter(it => {
-    const s = stocks[it.symbol];
-    if (!s) return false;
-    if (f.strategy !== 'all' && it.strategy !== f.strategy) return false;
+  return Object.entries(stocks).map(([symbol, s]) => ({ symbol, ...s })).filter(s => {
+    if (s.score < f.minScore) return false;
     if (f.sector !== 'all' && s.sector !== f.sector) return false;
-    if (f.trend !== 'all' && s.trend !== f.trend) return false;
-    if (f.status !== 'all' && it.status !== f.status) return false;
     if (s.avgVal20 < f.minValue) return false;
-    if (it.ageSessions > f.maxAge) return false;
-    if (f.maxRisk != null && it.riskPct > f.maxRisk) return false;
-    if (q && !(`${it.symbol} ${s.name} ${s.sector}`.toLowerCase().includes(q))) return false;
+    if (q && !`${s.symbol} ${s.name} ${s.sector}`.toLowerCase().includes(q)) return false;
     return true;
   });
 }
 
-// How many different strategies fire on the same stock (shown as "concurrent signals"; it is not a score).
-export function concurrentCounts(items) {
-  const m = new Map();
-  for (const it of items) m.set(it.symbol, (m.get(it.symbol) || 0) + 1);
-  return m;
-}
-
 export const SORTS = {
-  fresh: (a, b, st) => a.ageSessions - b.ageSessions || st[b.symbol].avgVal20 - st[a.symbol].avgVal20,
-  liquidity: (a, b, st) => st[b.symbol].avgVal20 - st[a.symbol].avgVal20,
-  volume: (a, b, st) => (st[b.symbol].volRatio ?? -1) - (st[a.symbol].volRatio ?? -1),
-  risk: (a, b) => a.riskPct - b.riskPct,
-  strategy: (a, b, st, names) => (names[a.strategy] || '').localeCompare(names[b.strategy] || '', 'ar') || st[b.symbol].avgVal20 - st[a.symbol].avgVal20,
-  concurrent: (a, b, st, names, counts) => (counts.get(b.symbol) || 0) - (counts.get(a.symbol) || 0) || st[b.symbol].avgVal20 - st[a.symbol].avgVal20,
+  score: (a, b) => b.score - a.score || b.avgVal20 - a.avgVal20,
+  liquidity: (a, b) => b.avgVal20 - a.avgVal20,
+  volume: (a, b) => (b.volRatio ?? -1) - (a.volRatio ?? -1) || b.score - a.score,
+  dividend: (a, b) => (b.dividendYield ?? -1) - (a.dividendYield ?? -1) || b.score - a.score,
+  name: (a, b) => a.name.localeCompare(b.name, 'ar'),
 };
-export function sortItems(items, stocks, key = 'fresh', names = {}) {
-  const counts = concurrentCounts(items), fn = SORTS[key] || SORTS.fresh;
-  return [...items].sort((a, b) => fn(a, b, stocks, names, counts));
-}
+export const sortStocks = (list, key = 'score') => [...list].sort(SORTS[key] || SORTS.score);
 
-// Compare what was firing when the stock was saved with what fires now.
-export function watchDiff(saved, nowItems) {
-  const before = new Set(saved?.strategies || []), now = new Set(nowItems.map(i => i.strategy));
-  const added = [...now].filter(x => !before.has(x)), removed = [...before].filter(x => !now.has(x));
-  const state = added.length && removed.length ? 'changed' : added.length ? 'added' : removed.length ? 'removed' : now.size ? 'same' : 'none';
-  return { state, added, removed, now: [...now] };
+// يقارن مفاتيح السهم وقت الحفظ بمفاتيحه الآن (bits: سلسلة من ستة أرقام 0/1 بترتيب KEY_IDS)
+export function watchDiff(saved, now) {
+  if (!now) return { state: 'none', gained: [], lost: [] };
+  if (!saved?.bits || saved.bits.length !== KEY_IDS.length) return { state: 'same', gained: [], lost: [] };
+  const gained = [], lost = [];
+  KEY_IDS.forEach((id, k) => {
+    if (saved.bits[k] === '0' && now.bits[k] === '1') gained.push(id);
+    if (saved.bits[k] === '1' && now.bits[k] === '0') lost.push(id);
+  });
+  const state = gained.length && lost.length ? 'changed' : gained.length ? 'added' : lost.length ? 'removed' : 'same';
+  return { state, gained, lost };
 }
 
 export function loadWatch(storage) {
   try { const v = JSON.parse(storage.getItem('saudi-sectors-scanner-watch') || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch { return {}; }
 }
 export function saveWatch(storage, watch) { try { storage.setItem('saudi-sectors-scanner-watch', JSON.stringify(watch)); return true; } catch { return false; } }
-export function toggleWatch(watch, symbol, nowItems, dataDate, savedAt) {
+export function toggleWatch(watch, symbol, now, dataDate, savedAt) {
   const next = { ...watch };
   if (next[symbol]) delete next[symbol];
-  else next[symbol] = { savedAt, dataDate, strategies: nowItems.map(i => i.strategy) };
+  else next[symbol] = { savedAt, dataDate, score: now?.score ?? null, bits: now?.bits ?? null };
   return next;
 }
 
@@ -70,5 +59,4 @@ export function fmtValue(x) {
 }
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const TREND_LABEL = { up: 'صاعد', side: 'عرضي / غير واضح', down: 'هابط', na: '—' };
-export const STATUS_LABEL = { new: 'جديدة', continuing: 'مستمرة' };
-export const WATCH_LABEL = { added: 'إشارة جديدة منذ الحفظ', removed: 'انتهت إشارة منذ الحفظ', changed: 'تغيّرت الإشارات منذ الحفظ', same: 'لم تتغير الإشارات', none: 'لا توجد إشارة' };
+export const WATCH_LABEL = { added: 'تحسّنت مفاتيح منذ الحفظ', removed: 'تراجعت مفاتيح منذ الحفظ', changed: 'تغيّرت المفاتيح منذ الحفظ', same: 'لم تتغير المفاتيح', none: 'خارج نطاق الفحص' };
