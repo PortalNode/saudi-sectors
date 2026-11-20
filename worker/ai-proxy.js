@@ -3,6 +3,7 @@
 // - يأخذ ملف الشركة المختصر من الموقع نفسه، فلا يستطيع أحد إرسال نصوص ضخمة على حسابك.
 // - يحدد عدد الأسئلة لكل زائر في اليوم وسقفًا يوميًا للموقع كله، ويحصر النماذج في قائمة رخيصة.
 
+// احتياطي فقط: الدور الكامل يأتي من ملف الشركة (pack.system).
 const SYSTEM = 'أنت محلل مالي للسوق السعودي. أجب بالعربية باختصار ووضوح بعناوين قصيرة ونقاط. اعتمد فقط على بيانات الشركة المرفقة واذكر الأرقام وتواريخها. لا تقدم توصية شراء أو بيع مباشرة. إذا لم تكفِ البيانات للإجابة فقل ذلك صراحة.';
 const DEFAULT_MODELS = 'deepseek/deepseek-v4.1-flash,google/gemini-2.5-flash,google/gemini-3.8-flash';
 
@@ -79,8 +80,8 @@ export default {
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: 'system', content: `${SYSTEM}\n\nبيانات الشركة:\n${pack.text}` }, ...history, { role: 'user', content: question }],
-        max_tokens: Number(env.MAX_TOKENS || 2000),
+        messages: [{ role: 'system', content: `${pack.system || SYSTEM}\n\nبيانات الشركة:\n${pack.text}` }, ...history, { role: 'user', content: question }],
+        max_tokens: Number(env.MAX_TOKENS || 2500),
         temperature: 0.3,
         stream: true,
         usage: { include: true },

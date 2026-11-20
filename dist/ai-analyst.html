@@ -67,6 +67,7 @@
     .msg.bot .up{color:var(--green)}.msg.bot .down{color:var(--red)}
     .msg-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--muted)}
     .msg-meta .demo{color:var(--teal);font-weight:700}
+    .msg.bot .ai-local{margin:0 0 10px;padding:6px 10px;border:1px dashed var(--teal);color:var(--muted);font-size:12px}
     .typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
     @keyframes blink{50%{opacity:.25}}
 
@@ -201,16 +202,17 @@
 <script src="ai-config.js?v=ai-20261120"></script>
 <script type="module">
 const QUICK = [
-  ["تحليل شامل","حلل الشركة تحليلًا شاملًا: الربحية، النمو، التقييم، والمخاطر، ثم خلاصة في سطرين."],
-  ["هل التقييم مرتفع؟","هل تقييم السهم الحالي مرتفع أم منخفض مقارنة بأرباحه ونموه وبمتوسط قطاعه؟"],
-  ["اتجاه الأرباح الربعية","ما اتجاه الأرباح في آخر الأرباع؟ هل هناك تحسن أو تراجع واضح وما أسبابه المحتملة؟"],
-  ["نقاط القوة والضعف","اذكر أبرز 3 نقاط قوة و3 نقاط ضعف للشركة من أرقامها."],
-  ["مقارنة بالقطاع","قارن الشركة بمتوسط قطاعها في المكرر والعائد والأداء السنوي."],
+  ["تحليل شامل","قدّم تحليلًا ماليًا وفنيًا شاملًا للشركة بالترتيب المعتاد، واختم بنظرتك العامة وأسبابها."],
+  ["التحليل الفني","حلل السهم فنيًا: الاتجاه، المتوسطات، الزخم (RSI وMACD وADX)، الدعوم والمقاومات، السيولة، والأداء مقابل تاسي. ما المستويات التي تؤكد الصعود أو تكسر الصورة؟"],
+  ["هل التقييم مرتفع؟","هل تقييم السهم الحالي مرتفع أم منخفض مقارنة بأرباحه ونموه وبوسيط قطاعه وأكبر منافسيه؟"],
+  ["اتجاه الأرباح الربعية","ما اتجاه الأرباح والهوامش في آخر الأرباع مقارنة بالربع السابق ونفس الربع من العام الماضي؟ وما الأسباب المحتملة من الإعلانات؟"],
+  ["التوزيعات","حلل توزيعات الشركة: انتظامها ونموها وعائدها مقارنة بالقطاع، وهل الأرباح تغطيها؟"],
+  ["نقاط القوة والضعف","اذكر أبرز نقاط القوة والضعف والمخاطر من الجانبين المالي والفني."],
+  ["مقارنة بالمنافسين","قارن الشركة بأكبر منافسيها في القطاع من حيث الحجم والمكرر والعائد والأداء، وأين تتميز أو تتأخر؟"],
 ];
 const ENDPOINT = String(window.AI_ENDPOINT || "").trim();
 const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
-const SYSTEM = "أنت محلل مالي للسوق السعودي. أجب بالعربية باختصار ووضوح بعناوين قصيرة ونقاط. اعتمد فقط على بيانات الشركة المرفقة واذكر الأرقام وتواريخها. لا تقدم توصية شراء أو بيع مباشرة. إذا لم تكفِ البيانات للإجابة فقل ذلك صراحة.";
-const SYSTEM_TOKENS = 90, OUT_TOKENS = 600;
+const OUT_TOKENS = 1200, MAX_TOKENS = 2500;
 const $ = id => document.getElementById(id);
 const norm = s => String(s||"").trim().toLowerCase().replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ـ/g,"");
 const fmt = (v,d=2) => v==null||v===""||isNaN(v) ? "—" : Number(v).toLocaleString("en-US",{maximumFractionDigits:d});
@@ -288,7 +290,7 @@ function updateMeter(){
   const opt = modelEl.selectedOptions[0];
   $("m-model").textContent = opt.textContent.split(" — ")[0];
   if (!current) { $("m-tokens").textContent = "0"; $("m-save").textContent = ""; $("m-cost").textContent = "$0"; return; }
-  const inT = SYSTEM_TOKENS + current.tokens + 60 + history.reduce((n,m)=>n+tok(m.content),0);
+  const inT = current.tokens + 60 + history.reduce((n,m)=>n+tok(m.content),0);
   $("m-tokens").textContent = `≈ ${fmt(inT,0)}`;
   $("m-save").textContent = `بدل ≈ ${fmt(current.rawTokens,0)} للبيانات الخام`;
   const cost = inT/1e6*+opt.dataset.in + OUT_TOKENS/1e6*+opt.dataset.out;
@@ -332,8 +334,8 @@ async function ask(question, label){
         ? await fetch(OPENROUTER, { method: "POST",
             headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Saudi Sectors" },
             // بدون معامل reasoning: طلبه يشغّل «التفكير» في بعض النماذج فيستهلك حد التوكنات ولا يبقى للإجابة شيء.
-            body: JSON.stringify({ model, max_tokens: 2000, temperature: 0.3, stream: true, usage: { include: true },
-              messages: [{ role: "system", content: `${SYSTEM}\n\nبيانات الشركة:\n${current.text}` }, ...history.slice(-6), { role: "user", content: question }] }) })
+            body: JSON.stringify({ model, max_tokens: MAX_TOKENS, temperature: 0.3, stream: true, usage: { include: true },
+              messages: [{ role: "system", content: `${current.system}\n\nبيانات الشركة:\n${current.text}` }, ...history.slice(-6), { role: "user", content: question }] }) })
         : await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ symbol: current.symbol, question, history: history.slice(-6), model }) });
       remaining = key ? null : r.headers.get("X-Remaining");
@@ -372,17 +374,28 @@ async function ask(question, label){
       offline = true; answer = "";
     }
   }
-  if (offline) { await new Promise(r=>setTimeout(r,400)); answer = numbersReading(); bot.innerHTML = (failure ? `<p class="down">${esc(failure)}</p>` : "") + md(answer); }
+  // عند فشل الاتصال تظهر رسالة الخطأ فقط، والقراءة الآلية تظهر فقط حين لا يكون المحلل مفعّلًا أصلًا.
+  if (failure) bot.innerHTML = `<p class="down">${esc(failure)}</p>`;
+  else if (offline) { await new Promise(r=>setTimeout(r,300)); answer = numbersReading(); bot.innerHTML = `<p class="ai-local">قراءة آلية محسوبة من الأرقام، وليست من الذكاء الاصطناعي. ضع مفتاح OpenRouter في الإعدادات لتحصل على تحليل المحلل.</p>` + md(answer); }
   if (!failure && !offline) { history.push({role:"user",content:question},{role:"assistant",content:answer}); history = history.slice(-6); }
   const inT = usage?.prompt_tokens, outT = usage?.completion_tokens;
-  const meta = offline
-    ? `<span class="demo">قراءة آلية من الأرقام${key || ENDPOINT ? "" : " — ضع مفتاح OpenRouter في الإعدادات لتفعيل المحلل"}</span>`
+  const meta = failure ? `<span>لم يُحتسب هذا السؤال</span>` : offline
+    ? `<span class="demo">قراءة آلية — ليست من الذكاء الاصطناعي</span>`
     : `<span>${esc(model)}</span>${inT!=null?`<span>دخل <span class="n">${fmt(inT,0)}</span> توكن · خرج <span class="n">${fmt(outT,0)}</span></span>`:""}${remaining!=null?`<span>تبقّى لك اليوم <span class="n">${remaining}</span> سؤال</span>`:""}`;
   bot.insertAdjacentHTML("beforeend", `<div class="msg-meta">${meta}<span><span class="n">${((performance.now()-t0)/1000).toFixed(1)}</span> ث</span></div>`);
   chat.scrollTop = chat.scrollHeight; busy = false; setEnabled(true); updateMeter();
 }
 
-/* ---------- قراءة آلية من الأرقام (حين لا تتوفر خدمة الذكاء الاصطناعي) ---------- */
+/* ---------- قراءة آلية من الأرقام (حين لا يكون الذكاء الاصطناعي مفعّلًا) ---------- */
+function techReading(t, price){
+  if (!t) return [];
+  const trend = { up: "صاعد", side: "عرضي", down: "هابط" }[t.trend] || "غير محدد";
+  const lines = [`- الاتجاه حسب ماسح الموقع: ${trend}.`];
+  if (t.sma50 && t.sma200) lines.push(`- السعر ${price >= t.sma50 ? "فوق" : "تحت"} متوسط 50 (${fmt(t.sma50)}) و${price >= t.sma200 ? "فوق" : "تحت"} متوسط 200 (${fmt(t.sma200)}).`);
+  if (t.rsi != null) lines.push(`- RSI عند ${fmt(t.rsi,1)}${t.rsi >= 70 ? "، منطقة تشبع شرائي" : t.rsi <= 30 ? "، منطقة تشبع بيعي" : ""}، وهستوجرام MACD ${t.macdHist > 0 ? "موجب" : "سالب"}.`);
+  if (t.support || t.resistance) lines.push(`- ${t.support ? `دعم ${fmt(t.support[0])}–${fmt(t.support[1])}` : "لا دعم مؤكد"} · ${t.resistance ? `مقاومة ${fmt(t.resistance[0])}–${fmt(t.resistance[1])}` : "لا مقاومة مؤكدة أعلاه"}.`);
+  return [`## الصورة الفنية`, lines.join("\n")];
+}
 function numbersReading(){
   const { st, facts } = current, ys = facts.years || [];
   const last = ys.at(-1) || {}, prev = ys.at(-2) || {}, first = ys[0] || {};
@@ -405,6 +418,7 @@ function numbersReading(){
      ql && qg!=null ? `- آخر ربع (${ql[0]}): صافي الربح ${fmt(ql[1],0)} مليون، ${qg} عن نفس الربع من العام الماضي.` : ""].filter(Boolean).join("\n"),
     `## التقييم`,
     `- المكرر ${peTxt}.\n- مضاعف القيمة الدفترية ${fmt(st.pb,2)}${isFinite(mid) ? `، والسهم ${st.price > mid ? "في النصف الأعلى" : "في النصف الأدنى"} من نطاقه السنوي (${fmt(st.week52Low)}–${fmt(st.week52High)})` : ""}.`,
+    ...techReading(facts.tech, st.price),
     `## ما يجب متابعته`,
     `- اتجاه الأرباح في الإعلان الربعي القادم.\n- أداء السهم منذ بداية السنة ${sg(st.ytd)} مقابل سنة كاملة ${sg(st.year1)}.`,
   ].join("\n\n");
