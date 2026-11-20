@@ -58,13 +58,16 @@ function sectorMedian(stocks, key) {
 
 // دور النموذج: يُكتب داخل كل ملف حتى تستخدم الصفحة والخادم الوسيط النص نفسه.
 export const SYSTEM_PROMPT = `أنت محلل مالي وفني محترف متخصص في السوق السعودي (تداول)، تكتب لمستثمر فرد بالعربية.
-لديك ملف بيانات كامل عن الشركة: النشاط، السعر والمكررات، مقارنة بوسيط القطاع وأكبر المنافسين، النتائج السنوية والربعية، التوزيعات، آخر الإعلانات، والتحليل الفني (المتوسطات، الزخم، التذبذب، الدعوم والمقاومات، الأداء مقابل مؤشر تاسي، الإغلاقات الأسبوعية وآخر الجلسات).
+تصلك البيانات بحسب نطاق السؤال: جدول السوق كاملًا (كل الشركات مجمعة حسب القطاع مع مؤشر تاسي)، أو جدول قطاع كامل، أو ملف شركة كامل (النشاط، المكررات، المنافسون، النتائج السنوية والربعية، التوزيعات، الإعلانات، والتحليل الفني). وقد تصلك ملفات إضافية لشركات ذكرها السائل.
 
 قواعد العمل:
-- اعتمد فقط على البيانات المرفقة. اذكر الأرقام وتواريخها، ولا تخترع رقمًا أو خبرًا. إذا نقصت معلومة فقل ذلك.
+- اعتمد فقط على البيانات المرفقة. اذكر الأرقام وتواريخها، ولا تخترع رقمًا أو خبرًا. إذا نقصت معلومة أو كان السؤال خارج البيانات فقل ذلك، واقترح النطاق الأنسب (السوق أو القطاع أو الشركة).
 - اجمع بين التحليل الأساسي والفني، ووضّح هل يتفقان أم يتعارضان ولماذا.
-- احسب ما تحتاجه من الأرقام المتاحة (نمو، هوامش، مقارنة ربع بربع وسنة بسنة، المسافة عن الدعم والمقاومة).
-- التحليل الشامل يكون بهذه العناوين القصيرة: الخلاصة، الأداء المالي، التقييم مقارنة بالقطاع والمنافسين، التوزيعات، التحليل الفني (الاتجاه، المتوسطات، الزخم، الدعوم والمقاومات، السيولة)، المخاطر، السيناريوهات (إيجابي وسلبي مع مستويات السعر التي تؤكد كلًا منهما)، ما يجب مراقبته.
+- احسب ما تحتاجه من الأرقام المتاحة (نمو، هوامش، مقارنات، متوسطات، المسافة عن الدعم والمقاومة).
+- أسئلة الترتيب والبحث في السوق أو القطاع (الأرخص، الأعلى عائدًا، الأسرع نموًا، الأقوى فنيًا...): اذكر المعيار الذي رتّبت به، وأعطِ قائمة مرقمة أو جدولًا قصيرًا (عادة أفضل 5 إلى 10) مع الأرقام والقطاع، ثم تعليقًا قصيرًا على أبرزها وما يجب الحذر منه.
+- «الأرخص» تعني التقييم (المكرر ومضاعف القيمة الدفترية) لا سعر السهم، ما لم يقصد السائل سعر السهم صراحة. استبعد من ترتيب المكرر الشركات الخاسرة أو بلا مكرر، واذكر أن المكرر المنخفض جدًا قد يكون بسبب أرباح غير متكررة أو تراجع متوقع.
+- عند تحليل قطاع: الصورة العامة (التقييم، الأداء، النمو، الاتجاه الفني)، ثم الأفضل والأضعف وأسباب ذلك، ثم الفرص والمخاطر.
+- التحليل الشامل لشركة يكون بهذه العناوين القصيرة: الخلاصة، الأداء المالي، التقييم مقارنة بالقطاع والمنافسين، التوزيعات، التحليل الفني (الاتجاه، المتوسطات، الزخم، الدعوم والمقاومات، السيولة)، المخاطر، السيناريوهات (إيجابي وسلبي مع مستويات السعر التي تؤكد كلًا منهما)، ما يجب مراقبته.
 - السؤال المحدد تجيب عنه مباشرة أولًا، ثم تضيف باختصار ما يلزم من الزاوية الأخرى.
 - اكتب بنقاط قصيرة واضحة وبلا مقدمات. الأرقام المالية بالمليون ريال ما لم يُذكر غير ذلك.
 - يمكنك إعطاء نظرة (إيجابية أو محايدة أو سلبية) مع أسبابها، لكن لا تعطِ أمرًا مباشرًا بالشراء أو البيع.`;
@@ -106,7 +109,7 @@ export function technicalSection(ohlc, { signal, tasi, tasiTrend } = {}) {
   for (let i = Math.max(0, n - 10); i < n; i++) L.push([d[i], fmt(o[i]), fmt(h[i]), fmt(l[i]), fmt(c[i]), fmt(v[i], 0)].join(' | '));
   return {
     lines: L,
-    facts: { sma50: s50, sma200: s200, rsi: r, macdHist: m?.hist ?? null, support: sz?.slice(0, 2) || null, resistance: rz?.slice(0, 2) || null, trend: signal?.trend || null },
+    facts: { sma50: s50, sma200: s200, rsi: r, macdHist: m?.hist ?? null, support: sz?.slice(0, 2) || null, resistance: rz?.slice(0, 2) || null, trend: signal?.trend || null, score: signal?.score ?? null, price },
   };
 }
 const TREND = { up: 'صاعد', side: 'عرضي / غير واضح', down: 'هابط' };
@@ -167,7 +170,7 @@ export function buildPack({ stock: st, sector, profile, annual, quarterly, annou
   const text = lines.join('\n');
   const rawTokens = estimateTokens(JSON.stringify({ stock: st, profile, annual, quarterly, announcements, ohlc, signal }));
   return {
-    symbol: st.symbol, name: st.name, sector: sector.name, asOf: st.priceDate || null,
+    scope: 'company', symbol: st.symbol, name: st.name, sector: sector.name, asOf: st.priceDate || null,
     system: SYSTEM_PROMPT, text, tokens: estimateTokens(SYSTEM_PROMPT + text), rawTokens, sources,
     // أرقام صغيرة للقراءة الآلية حين لا يكون الذكاء الاصطناعي مفعّلًا.
     facts: {
@@ -176,6 +179,63 @@ export function buildPack({ stock: st, sector, profile, annual, quarterly, annou
       quarters: quarters.map(([q, v]) => [q, num(v?.netProfit)]),
     },
   };
+}
+
+/* ---------- ملفات القطاع والسوق: صف مختصر لكل شركة ---------- */
+const TREND_SHORT = { up: 'صاعد', side: 'عرضي', down: 'هابط' };
+const growth = (x, y) => (num(x) == null || num(y) == null ? '—' : y > 0 && x < 0 ? 'تحوّل لخسارة' : y < 0 && x > 0 ? 'تحوّل لربح' : y < 0 && x < 0 ? (x > y ? 'خسارة أقل' : 'خسارة أكبر') : y === 0 ? '—' : sgn((x / y - 1) * 100));
+
+/** أرقام صف الشركة في جداول القطاع والسوق، من ملف الشركة نفسه. */
+export function companySummary(st, pack) {
+  const f = pack?.facts || {}, ys = f.years || [], y1 = ys.at(-1) || {}, y0 = ys.at(-2) || {};
+  const qs = f.quarters || [], q1 = qs.at(-1), q0 = qs.length >= 5 ? qs.at(-5) : null, t = f.tech || {};
+  return {
+    year: y1.year ?? '—', revenue: y1.revenue, netProfit: y1.netProfit, netMargin: y1.netMargin,
+    profitGrowth: growth(y1.netProfit, y0.netProfit), revenueGrowth: growth(y1.revenue, y0.revenue),
+    lastQ: q1?.[0] ?? '—', lastQProfit: q1?.[1], lastQYoY: q1 && q0 ? growth(q1[1], q0[1]) : '—',
+    trend: TREND_SHORT[t.trend] || '—', rsi: t.rsi, vs200: t.sma200 && t.price ? (t.price / t.sma200 - 1) * 100 : null,
+    score: t.score, support: t.support, resistance: t.resistance,
+  };
+}
+
+function sectorHeader(sector, marketCapTotal) {
+  const st = sector.stocks, cap = st.reduce((a, s) => a + (num(s.marketCap) || 0), 0);
+  return `${sector.name}: عدد الشركات ${st.length} · القيمة السوقية ${fmt(cap / 1000, 1)} مليار ريال${marketCapTotal ? ` (${fmt((cap / marketCapTotal) * 100, 2)}% من السوق)` : ''} · وسيط المكرر ${fmt(sectorMedian(st, 'pe'), 1)} · وسيط مضاعف الدفترية ${fmt(sectorMedian(st, 'pb'), 2)} · وسيط العائد ${fmt(sectorMedian(st, 'dividendYield'))}% · وسيط الأداء منذ بداية السنة ${fmt(sectorMedian(st, 'ytd'))}% · وسيط أداء سنة ${fmt(sectorMedian(st, 'year1'))}%`;
+}
+
+export function buildSectorPack(sector, slug, rows, { asOf, tasiLine } = {}) {
+  const L = [`جدول قطاع ${sector.name} كاملًا (الأسعار حتى ${asOf || '—'}). الأرقام المالية بالمليون ريال، والنسب المئوية للأداء.`, sectorHeader(sector)];
+  if (tasiLine) L.push(tasiLine);
+  L.push('', 'الرمز | الشركة | السعر | القيمة السوقية | المكرر | مضاعف الدفترية | العائد% | يومي% | منذ بداية السنة% | سنة% | السنة المالية | الإيرادات | نمو الإيرادات | صافي الربح | نمو الربح | الهامش الصافي | آخر ربع | ربح آخر ربع | تغيره عن نفس الربع | الاتجاه | RSI | مقابل متوسط 200 | تقييم الماسح من 6 | الدعم | المقاومة');
+  for (const { st, sum } of [...rows].sort((a, b) => (b.st.marketCap || 0) - (a.st.marketCap || 0))) {
+    L.push([st.symbol, st.name, fmt(st.price), fmt(st.marketCap, 0), fmt(st.pe, 1), fmt(st.pb, 2), fmt(st.dividendYield), fmt(st.day), fmt(st.ytd), fmt(st.year1),
+      sum.year, fmt(sum.revenue, 0), sum.revenueGrowth, fmt(sum.netProfit, 0), sum.profitGrowth, num(sum.netMargin) == null ? '—' : pct(sum.netMargin),
+      sum.lastQ, fmt(sum.lastQProfit, 0), sum.lastQYoY, sum.trend, fmt(sum.rsi, 0), sgn(sum.vs200), sum.score ?? '—',
+      sum.support ? `${fmt(sum.support[0])}–${fmt(sum.support[1])}` : '—', sum.resistance ? `${fmt(sum.resistance[0])}–${fmt(sum.resistance[1])}` : '—'].join(' | ') + (st.suspended ? ' | موقوف' : ''));
+  }
+  const text = L.join('\n');
+  return { scope: 'sector', id: slug, name: sector.name, asOf, system: SYSTEM_PROMPT, text, tokens: estimateTokens(SYSTEM_PROMPT + text),
+    rawTokens: rows.reduce((n, r) => n + (r.pack?.rawTokens || 0), 0), sources: [['جدول القطاع', `${rows.length} شركة`], ['النتائج والتحليل الفني', 'لكل شركة']] };
+}
+
+export function buildMarketPack(market, groups, { tasiLine, tasiTech } = {}) {
+  const total = market.sectors.reduce((a, s) => a + s.stocks.reduce((b, x) => b + (num(x.marketCap) || 0), 0), 0);
+  const all = groups.flatMap(g => g.rows.length ? g.rows : []);
+  const L = [`جدول السوق السعودي كاملًا (الأسعار حتى ${market.asOf || '—'}، ${all.length} شركة في ${groups.length} قطاعًا). القيمة السوقية وصافي الربح بالمليون ريال، والأداء بالنسبة المئوية.`];
+  if (tasiLine) L.push(tasiLine);
+  L.push(`القيمة السوقية للسوق ${fmt(total / 1e6, 2)} تريليون ريال · وسيط المكرر ${fmt(sectorMedian(all.map(r => r.st), 'pe'), 1)} · وسيط العائد ${fmt(sectorMedian(all.map(r => r.st), 'dividendYield'))}%`);
+  L.push('', 'الأعمدة: الرمز | الشركة | السعر | القيمة السوقية | المكرر | مضاعف الدفترية | العائد% | يومي% | منذ بداية السنة% | سنة% | صافي ربح آخر سنة (السنة) | نمو الربح | تغير ربح آخر ربع عن نفس الربع | الاتجاه | RSI | مقابل متوسط 200 | تقييم الماسح من 6');
+  for (const { sector, rows } of groups) {
+    L.push('', `## ${sectorHeader(sector, total)}`);
+    for (const { st, sum } of [...rows].sort((a, b) => (b.st.marketCap || 0) - (a.st.marketCap || 0))) {
+      L.push([st.symbol, st.name, fmt(st.price), fmt(st.marketCap, 0), fmt(st.pe, 1), fmt(st.pb, 2), fmt(st.dividendYield), fmt(st.day), fmt(st.ytd), fmt(st.year1),
+        `${fmt(sum.netProfit, 0)} (${sum.year})`, sum.profitGrowth, sum.lastQYoY, sum.trend, fmt(sum.rsi, 0), sgn(sum.vs200), sum.score ?? '—'].join(' | ') + (st.suspended ? ' | موقوف' : ''));
+    }
+  }
+  if (tasiTech) L.push('', 'مؤشر تاسي فنيًا:', ...tasiTech.lines.filter(l => !/^\d{4}-\d\d-\d\d \|/.test(l) && !l.startsWith('آخر 10 جلسات')).map(l => l.replace(/ \| مقابل تاسي:[^|]*/, '')));
+  const text = L.join('\n');
+  return { scope: 'market', id: 'market', name: 'السوق كامل', asOf: market.asOf, sectors: groups.map(g => [g.slug, g.sector.name, g.rows.length]), system: SYSTEM_PROMPT, text, tokens: estimateTokens(SYSTEM_PROMPT + text),
+    rawTokens: all.reduce((n, r) => n + (r.pack?.rawTokens || 0), 0), sources: [['كل الشركات', `${all.length} شركة`], ['القطاعات', `${groups.length}`], ['مؤشر تاسي', market.asOf || '']] };
 }
 
 function main() {
@@ -194,13 +254,16 @@ function main() {
   mkdirSync(out, { recursive: true });
 
   let count = 0, tokens = 0;
-  const missing = [];
+  const missing = [], groups = [];
+  const ms = market.marketSummary || {};
+  const tasiLine = `مؤشر تاسي: ${fmt(ms.value)} نقطة (${fmt(ms.day)}% اليوم) · منذ بداية السنة ${fmt(ms.ytd)}% · 3 أشهر ${fmt(ms.month3)}% · 6 أشهر ${fmt(ms.month6)}% · سنة ${fmt(ms.year1)}% · قيمة التداول ${fmt((ms.turnover || 0) / 1e9, 2)} مليار ريال${tasiTrend ? ` · ${tasiTrend}` : ''}`;
   for (const sector of market.sectors) {
     const slug = SECTOR_SLUGS[sector.name];
     if (!slug) { missing.push(sector.name); continue; }
     const find = doc => (doc?.companies || doc?.banks || []);
     const annualDoc = find(readJSON(`${slug}-financials.json`));
     const quarterlyDoc = find(readJSON(`${slug}-quarterly-financials.json`));
+    const rows = [];
     for (const stock of sector.stocks) {
       const sym = String(stock.symbol);
       const pack = buildPack({
@@ -212,8 +275,14 @@ function main() {
       });
       writeFileSync(new URL(`${sym}.json`, out), JSON.stringify(pack));
       count++; tokens += pack.tokens;
+      rows.push({ st: stock, pack, sum: companySummary(stock, pack) });
     }
+    groups.push({ sector, slug, rows });
+    writeFileSync(new URL(`sector-${slug}.json`, out), JSON.stringify(buildSectorPack(sector, slug, rows, { asOf: market.asOf, tasiLine })));
   }
+  const marketPack = buildMarketPack(market, groups, { tasiLine, tasiTech: technicalSection(tasi) });
+  writeFileSync(new URL('market.json', out), JSON.stringify(marketPack));
+  console.log(`Market pack ≈ ${marketPack.tokens} tokens; ${groups.length} sector packs.`);
   if (missing.length) console.warn(`::warning::No financial files mapped for sectors: ${missing.join('، ')}`);
   console.log(`Wrote ${count} AI company packs (avg ≈ ${Math.round(tokens / Math.max(count, 1))} tokens each).`);
 }

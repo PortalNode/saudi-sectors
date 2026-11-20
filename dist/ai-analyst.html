@@ -47,6 +47,13 @@
     .ai-company .ai-sector{color:var(--muted);font-size:12px}
     .ai-company .ai-price{margin-inline-start:auto;font-size:15px;font-weight:700;color:var(--ink)}
 
+    .ai-scope{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
+    .ai-scope-label{font-size:12px;font-weight:700;color:var(--muted);margin-inline-end:4px}
+    .ai-scope button{min-height:32px;padding:5px 14px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--muted);font-size:12.5px;font-weight:700}
+    .ai-scope button:hover{color:var(--ink);border-color:var(--teal)}
+    .ai-scope button[aria-pressed="true"]{background:#f59e0b;border-color:#e19109;color:var(--on-accent)}
+    select.ai-search{appearance:auto;font-family:inherit;font-weight:700}
+    .msg.user .ai-attached{display:block;margin-top:4px;font-size:11px;color:var(--muted)}
     .ai-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
     .ai-chip{min-height:30px;padding:5px 11px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--muted);font-size:12px;font-weight:700}
     .ai-chip:hover{color:var(--ink);border-color:var(--teal)}
@@ -136,7 +143,7 @@
   <div class="ai-title">
     <div>
       <h2>المحلل الذكي</h2>
-      <p>اختر شركة ثم اسأل. يقرأ المحلل بيانات الموقع نفسها (الأسعار، النتائج السنوية والربعية، الإعلانات) ولا يبحث في الإنترنت.</p>
+      <p>اسأل عن السوق كاملًا، أو قطاع، أو شركة، أو أي سؤال في بالك. يقرأ المحلل بيانات الموقع نفسها (الأسعار، النتائج، الإعلانات، التحليل الفني) ولا يبحث في الإنترنت.</p>
     </div>
     <button type="button" class="ai-ghost" id="clear-chat">محادثة جديدة</button>
   </div>
@@ -144,7 +151,17 @@
   <div class="ai-grid">
     <!-- ===== المحادثة ===== -->
     <section class="ai-card" aria-label="المحادثة">
-      <div class="ai-pick">
+      <div class="ai-scope" role="group" aria-label="نطاق السؤال">
+        <span class="ai-scope-label">اسأل عن</span>
+        <button type="button" data-scope="market" aria-pressed="true">السوق كامل</button>
+        <button type="button" data-scope="sector" aria-pressed="false">قطاع</button>
+        <button type="button" data-scope="company" aria-pressed="false">شركة</button>
+      </div>
+      <div class="ai-pick" id="pick-sector" hidden>
+        <label for="sector-select">القطاع</label>
+        <select id="sector-select" class="ai-search"></select>
+      </div>
+      <div class="ai-pick" id="pick-company" hidden>
         <label for="company-search">الشركة</label>
         <input id="company-search" class="ai-search" type="search" autocomplete="off" placeholder="اكتب اسم الشركة أو رمزها، مثل أرامكو أو 1120" role="combobox" aria-expanded="false" aria-controls="sugg">
         <ul id="sugg" class="ai-sugg" role="listbox" hidden></ul>
@@ -153,10 +170,10 @@
       <div id="company-bar" class="ai-company" hidden></div>
       <div class="ai-chips" id="quick" role="group" aria-label="أسئلة سريعة"></div>
       <div class="ai-chat" id="chat" aria-live="polite">
-        <div class="ai-empty"><b>ابدأ باختيار شركة</b>بعدها اضغط سؤالًا جاهزًا أو اكتب سؤالك. كل سؤال يرسل طلبًا واحدًا فقط مع ملف بيانات صغير خاص بالشركة.</div>
+        <div class="ai-empty"><b>جارٍ تجهيز بيانات السوق…</b></div>
       </div>
       <form class="ai-compose" id="compose">
-        <textarea id="q" rows="1" maxlength="500" placeholder="اسأل عن الشركة المختارة…" disabled></textarea>
+        <textarea id="q" rows="1" maxlength="500" placeholder="اكتب أي سؤال… مثل: وش أرخص شركة؟ أو قارن الراجحي بالأهلي" disabled></textarea>
         <button class="ai-send" id="send" disabled>إرسال</button>
       </form>
       <p class="ai-disclaimer">التحليل آلي لأغراض تعليمية وليس توصية بالشراء أو البيع.</p>
@@ -207,7 +224,25 @@
 
 <script src="ai-config.js?v=ai-20261120"></script>
 <script type="module">
-const QUICK = [
+const QUICK = {
+  market: [
+    ["أرخص الشركات","ما أرخص 10 شركات في السوق تقييمًا (أقل مكرر موجب ومضاعف دفترية معقول) مع أرباح غير متراجعة؟ رتّبها مع القطاع والسبب وما يجب الحذر منه."],
+    ["أعلى توزيعات","ما أعلى 10 شركات عائدًا للتوزيع في السوق؟ وهل أرباحها ونموها يدعمان استمرار التوزيع؟"],
+    ["الأقوى فنيًا","ما أقوى 10 أسهم فنيًا الآن (اتجاه صاعد، فوق متوسط 200، تقييم ماسح عالٍ، RSI غير متشبع)؟ اذكر القطاع والأرقام."],
+    ["نمو بسعر معقول","ابحث عن شركات نمت أرباحها بقوة في آخر سنة وآخر ربع ومكررها أقل من وسيط قطاعها. رتّب أفضل 10."],
+    ["أفضل القطاعات","رتّب القطاعات من الأفضل إلى الأضعف في التقييم والأداء والاتجاه، وما القطاعات الواعدة الآن ولماذا؟"],
+    ["حالة السوق","ما حالة السوق العامة الآن؟ حلل مؤشر تاسي فنيًا، وقارن أداء القطاعات، واذكر المستويات المهمة للمؤشر."],
+    ["الأكثر تراجعًا","ما أكثر 10 شركات تراجعًا خلال سنة؟ وهل بينها فرص بتقييم مغرٍ وأرباح متماسكة أم أن التراجع مبرر؟"],
+  ],
+  sector: [
+    ["تحليل القطاع","حلل القطاع تحليلًا شاملًا: التقييم، النمو، الأداء مقابل السوق، الاتجاه الفني، ثم الفرص والمخاطر."],
+    ["أفضل شركة","ما أفضل شركة في القطاع من حيث الجمع بين النمو والتقييم والوضع الفني؟ وما الأضعف ولماذا؟"],
+    ["الأرخص في القطاع","رتّب شركات القطاع من الأرخص إلى الأغلى تقييمًا (المكرر ومضاعف الدفترية) مع ربط ذلك بنمو أرباحها."],
+    ["نمو الأرباح","رتّب شركات القطاع حسب نمو الأرباح في آخر سنة وآخر ربع، ومن يتحسن ومن يتراجع؟"],
+    ["أعلى توزيعات","ما أعلى شركات القطاع عائدًا للتوزيع؟ وهل الأرباح تدعم التوزيع؟"],
+    ["الأقوى فنيًا","ما أقوى شركات القطاع فنيًا وأضعفها؟ اذكر الاتجاه والمتوسطات والدعوم والمقاومات."],
+  ],
+  company: [
   ["تحليل شامل","قدّم تحليلًا ماليًا وفنيًا شاملًا للشركة بالترتيب المعتاد، واختم بنظرتك العامة وأسبابها."],
   ["التحليل الفني","حلل السهم فنيًا: الاتجاه، المتوسطات، الزخم (RSI وMACD وADX)، الدعوم والمقاومات، السيولة، والأداء مقابل تاسي. ما المستويات التي تؤكد الصعود أو تكسر الصورة؟"],
   ["هل التقييم مرتفع؟","هل تقييم السهم الحالي مرتفع أم منخفض مقارنة بأرباحه ونموه وبوسيط قطاعه وأكبر منافسيه؟"],
@@ -215,7 +250,8 @@ const QUICK = [
   ["التوزيعات","حلل توزيعات الشركة: انتظامها ونموها وعائدها مقارنة بالقطاع، وهل الأرباح تغطيها؟"],
   ["نقاط القوة والضعف","اذكر أبرز نقاط القوة والضعف والمخاطر من الجانبين المالي والفني."],
   ["مقارنة بالمنافسين","قارن الشركة بأكبر منافسيها في القطاع من حيث الحجم والمكرر والعائد والأداء، وأين تتميز أو تتأخر؟"],
-];
+  ],
+};
 const ENDPOINT = String(window.AI_ENDPOINT || "").trim();
 const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
 // حد الإجابة كبير لأن النماذج القوية «تفكّر» أولًا، وتفكيرها يُحسب من الحد نفسه.
@@ -321,23 +357,87 @@ input.addEventListener("keydown", e => {
 sugg.addEventListener("mousedown", e => { const li = e.target.closest("li"); if (li) { e.preventDefault(); choose(list[+li.dataset.i]); } });
 document.addEventListener("click", e => { if (!e.target.closest(".ai-pick")) sugg.hidden = true; });
 
-/* ---------- ملف الشركة الجاهز (يبنيه scripts/build-ai-packs.mjs) ---------- */
-async function choose(st){
-  sugg.hidden = true; input.value = `${st.name} (${st.symbol})`;
-  const bar = $("company-bar"); bar.hidden = false;
-  bar.innerHTML = `<span class="symbol-badge">${st.symbol}</span><strong>${esc(st.name)}</strong><span class="ai-sector">${esc(st.sector)}</span><span class="ai-price"><span class="n">${fmt(st.price)}</span> ريال <span class="n ${st.day>0?"up":st.day<0?"down":"flat"}">${st.day>0?"+":""}${fmt(st.day)}%</span></span>`;
-  const pack = await fetch(`ai/${st.symbol}.json`).then(r=>r.ok?r.json():null).catch(()=>null);
+/* ---------- نطاق السؤال: السوق كامل، أو قطاع، أو شركة (ملفات جاهزة يبنيها scripts/build-ai-packs.mjs) ---------- */
+let scope = "market", marketPack = null;
+const getPack = path => fetch(path).then(r=>r.ok?r.json():null).catch(()=>null);
+const SCOPE_LABEL = { market: "جدول السوق كاملًا", sector: "جدول القطاع", company: "ملف الشركة" };
+function setScopeUI(next){
+  scope = next;
+  document.querySelectorAll(".ai-scope button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.scope === next)));
+  $("pick-sector").hidden = next !== "sector"; $("pick-company").hidden = next !== "company";
+  const qs = QUICK[next];
+  $("quick").innerHTML = qs.map(([l],i)=>`<button type="button" class="ai-chip" data-i="${i}" disabled>${l}</button>`).join("");
+}
+async function showPack(pack, { bar, url, ready, st = null }){
   history = [];
-  if (!pack) { current = null; setEnabled(false); updateMeter(); resetChat(`<b>لا يتوفر ملف بيانات لهذه الشركة</b>جرّب شركة أخرى أو عد لاحقًا.`); return; }
+  if (!pack) { current = null; setEnabled(false); updateMeter(); resetChat(`<b>لا يتوفر ملف بيانات هنا</b>جرّب اختيارًا آخر أو عد لاحقًا.`); return; }
   current = { ...pack, st };
-  try { window.history.replaceState(null, "", `?s=${st.symbol}`); } catch {}
+  try { window.history.replaceState(null, "", url); } catch {}
+  const b = $("company-bar"); b.hidden = false; b.innerHTML = bar;
   $("raw").textContent = pack.text;
-  $("pack-co").textContent = st.name;
+  $("pack-co").textContent = pack.name || st?.name || "";
   $("sources").innerHTML = pack.sources.map(([a,b])=>`<li><span>${esc(a)}</span><small>${esc(b)}</small></li>`).join("");
   setEnabled(true); updateMeter();
-  resetChat(`<b>${esc(st.name)} جاهزة</b>اختر سؤالًا جاهزًا أو اكتب سؤالك.`);
+  resetChat(ready);
 }
-function setEnabled(on){ $("q").disabled = !on; $("send").disabled = !on || busy; [...$("quick").children].forEach(b=>b.disabled=!on||busy); }
+const chg = v => `<span class="n ${v>0?"up":v<0?"down":"flat"}">${v>0?"+":""}${fmt(v)}%</span>`;
+async function openMarket(){
+  setScopeUI("market");
+  marketPack ??= await getPack("ai/market.json");
+  const m = market.marketSummary || {};
+  await showPack(marketPack, { url: location.pathname,
+    bar: `<strong>السوق السعودي</strong><span class="ai-sector">${all.length} شركة · ${market.sectors.length} قطاعًا · حتى ${esc(market.asOf || "")}</span><span class="ai-price">تاسي <span class="n">${fmt(m.value)}</span> ${chg(m.day)}</span>`,
+    ready: `<b>السوق كاملًا جاهز</b>اسأل عن أي شيء في السوق: الأرخص، الأعلى توزيعًا، الأقوى فنيًا، القطاعات… أو اكتب سؤالك. إذا ذكرت شركة باسمها أرفقتُ ملفها تلقائيًا.` });
+}
+async function openSector(slug){
+  setScopeUI("sector");
+  marketPack ??= await getPack("ai/market.json");
+  const sel = $("sector-select");
+  if (!sel.options.length && marketPack?.sectors) sel.innerHTML = marketPack.sectors.map(([id,name,n]) => `<option value="${id}">${esc(name)} (${n})</option>`).join("");
+  slug = slug || sel.value; if (!slug) return;
+  sel.value = slug;
+  const pack = await getPack(`ai/sector-${slug}.json`);
+  const sec = market.sectors.find(x => x.name === pack?.name), stocks = sec?.stocks || [];
+  const med = k => { const v = stocks.map(x=>x[k]).filter(x=>typeof x==="number"&&x>0).sort((a,b)=>a-b); return v.length ? v[v.length>>1] : null; };
+  await showPack(pack, { url: `?sector=${slug}`,
+    bar: `<strong>${esc(pack?.name || "")}</strong><span class="ai-sector">عدد الشركات ${stocks.length} · وسيط المكرر ${fmt(med("pe"),1)} · وسيط العائد ${fmt(med("dividendYield"))}%</span>`,
+    ready: `<b>قطاع ${esc(pack?.name || "")} جاهز</b>اختر سؤالًا جاهزًا أو اكتب سؤالك عن القطاع.` });
+}
+async function choose(st){
+  setScopeUI("company");
+  sugg.hidden = true; input.value = `${st.name} (${st.symbol})`;
+  const pack = await getPack(`ai/${st.symbol}.json`);
+  await showPack(pack, { st, url: `?s=${st.symbol}`,
+    bar: `<span class="symbol-badge">${st.symbol}</span><strong>${esc(st.name)}</strong><span class="ai-sector">${esc(st.sector)}</span><span class="ai-price"><span class="n">${fmt(st.price)}</span> ريال ${chg(st.day)}</span>`,
+    ready: `<b>${esc(st.name)} جاهزة</b>اختر سؤالًا جاهزًا أو اكتب سؤالك.` });
+}
+document.querySelector(".ai-scope").onclick = e => {
+  const b = e.target.closest("button[data-scope]"); if (!b || busy) return;
+  if (b.dataset.scope === "market") openMarket();
+  else if (b.dataset.scope === "sector") openSector();
+  else { setScopeUI("company"); current = null; setEnabled(false); $("company-bar").hidden = true; updateMeter(); resetChat(`<b>اختر شركة</b>اكتب اسمها أو رمزها في خانة البحث.`); input.focus(); }
+};
+$("sector-select").onchange = e => openSector(e.target.value);
+
+/* ---------- الشركات المذكورة في السؤال: يُرفق ملفها تلقائيًا (حتى 3، والبحث محلي بلا توكنات) ---------- */
+const clean = t => norm(t).replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+const firstWord = new Map();
+for (const s of all) { const w = clean(s.name).split(" ")[0]; firstWord.set(w, (firstWord.get(w) || 0) + 1); }
+const GENERIC = new Set(["شركه","مجموعه","البنك","بنك","مصرف","الشركه","اسمنت","ريت","صندوق","الوطنيه","العربيه","السعوديه","المتحده","الخليج","الشرق","المملكه"]);
+export function mentionedStocks(question, exclude){
+  const words = clean(question).split(" ").filter(Boolean);
+  const hay = [` ${words.join(" ")} `, ` ${words.map(w => w.replace(/^(و|ب|ل|ف|ك)(?=\S{3,})/, "")).join(" ")} `];
+  const found = [];
+  for (const s of all) {
+    if (s.symbol === exclude) continue;
+    const name = clean(s.name), w = name.split(" ")[0];
+    const keys = [s.symbol, name];
+    if (name.includes(" ") && w.length >= 4 && firstWord.get(w) === 1 && !GENERIC.has(w)) keys.push(w);
+    if (keys.some(k => k.length >= 3 && hay.some(h => h.includes(` ${k} `)))) found.push(s);
+  }
+  return found.sort((a, b) => b.name.length - a.name.length).slice(0, 3);
+}
+function setEnabled(on){ $("q").disabled = !on; $("send").disabled = !on || busy; [...$("quick").children].forEach(b=>b.disabled=!on||busy); document.querySelectorAll(".ai-scope button").forEach(b=>b.disabled=busy); }
 
 /* ---------- العداد: حجم البيانات والأسئلة المجانية المتبقية ---------- */
 function updateMeter(){
@@ -355,9 +455,8 @@ function updateMeter(){
 
 /* ---------- المحادثة ---------- */
 function resetChat(html){ chat.innerHTML = `<div class="ai-empty">${html}</div>`; }
-$("clear-chat").onclick = () => { history = []; updateMeter(); resetChat(current ? `<b>محادثة جديدة</b>عن ${esc(current.st.name)}.` : `<b>ابدأ باختيار شركة</b>`); };
-$("quick").innerHTML = QUICK.map(([l],i)=>`<button type="button" class="ai-chip" data-i="${i}" disabled>${l}</button>`).join("");
-$("quick").onclick = e => { const b = e.target.closest("button"); if (b && !b.disabled) ask(QUICK[+b.dataset.i][1], QUICK[+b.dataset.i][0]); };
+$("clear-chat").onclick = () => { history = []; updateMeter(); resetChat(current ? `<b>محادثة جديدة</b>عن ${esc(current.name || current.st?.name || "")}.` : `<b>اختر نطاق السؤال</b>`); };
+$("quick").onclick = e => { const b = e.target.closest("button"); if (b && !b.disabled) { const [l, q] = QUICK[scope][+b.dataset.i]; ask(q, l); } };
 $("compose").onsubmit = e => { e.preventDefault(); const v = $("q").value.trim(); if (v && !busy) { $("q").value = ""; ask(v); } };
 $("q").addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey){ e.preventDefault(); $("compose").requestSubmit(); } });
 
@@ -378,7 +477,11 @@ async function ask(question, label){
   if (!current || busy) return;
   busy = true; setEnabled(true);
   chat.querySelector(".ai-empty")?.remove();
-  chat.insertAdjacentHTML("beforeend", `<div class="msg user">${esc(label||question)}</div>`);
+  // شركات ذكرها السائل بالاسم أو الرمز: يُرفق ملف كل منها مع السؤال.
+  const named = label ? [] : mentionedStocks(question, current.st?.symbol);
+  const extras = (await Promise.all(named.map(s => getPack(`ai/${s.symbol}.json`)))).filter(Boolean);
+  const extraText = extras.map(p => `\n\n--- ملف شركة ذكرها السائل: ${p.name} (${p.symbol}) ---\n${p.text}`).join("");
+  chat.insertAdjacentHTML("beforeend", `<div class="msg user">${esc(label||question)}${extras.length ? `<small class="ai-attached">أُرفقت بيانات: ${extras.map(p=>esc(p.name)).join("، ")}</small>` : ""}</div>`);
   const bot = document.createElement("div"); bot.className = "msg bot"; bot.innerHTML = `<span class="typing"><i></i><i></i><i></i></span>`;
   chat.append(bot); chat.scrollTop = chat.scrollHeight;
   const t0 = performance.now(), model = modelEl.value;
@@ -389,11 +492,10 @@ async function ask(question, label){
       const r = key
         ? await fetch(OPENROUTER, { method: "POST",
             headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Saudi Sectors" },
-            // بدون معامل reasoning: طلبه يشغّل «التفكير» في بعض النماذج فيستهلك حد التوكنات ولا يبقى للإجابة شيء.
             body: JSON.stringify({ model, max_tokens: MAX_TOKENS, temperature: 0.3, stream: true, usage: { include: true }, reasoning: { effort: "medium" },
-              messages: [{ role: "system", content: `${current.system}\n\nبيانات الشركة:\n${current.text}` }, ...history.slice(-6), { role: "user", content: question }] }) })
+              messages: [{ role: "system", content: `${current.system}\n\nالبيانات المرفقة (${SCOPE_LABEL[current.scope] || "ملف الشركة"}):\n${current.text}${extraText}` }, ...history.slice(-6), { role: "user", content: question }] }) })
         : await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ symbol: current.symbol, question, history: history.slice(-6), model }) });
+            body: JSON.stringify({ scope: current.scope, id: current.scope === "company" ? current.symbol : current.id, extra: extras.map(p => p.symbol), question, history: history.slice(-6), model }) });
       remaining = key ? null : r.headers.get("X-Remaining");
       if (!r.ok) {
         const err = await r.json().catch(()=>({}));
@@ -436,6 +538,7 @@ async function ask(question, label){
   }
   // عند فشل الاتصال تظهر رسالة الخطأ فقط، والقراءة الآلية تظهر فقط حين لا يكون المحلل مفعّلًا أصلًا.
   if (failure) bot.innerHTML = `<p class="down">${esc(failure)}</p>`;
+  else if (offline && current.scope !== "company") bot.innerHTML = `<p class="ai-local">ضع مفتاح OpenRouter في الإعدادات ليجيبك المحلل عن السوق والقطاعات. القراءة الآلية بدون مفتاح متاحة لملف الشركة فقط.</p>`;
   else if (offline) { await new Promise(r=>setTimeout(r,300)); answer = numbersReading(); bot.innerHTML = `<p class="ai-local">قراءة آلية محسوبة من الأرقام، وليست من الذكاء الاصطناعي. ضع مفتاح OpenRouter في الإعدادات لتحصل على تحليل المحلل.</p>` + md(answer); }
   if (!failure && !offline) { history.push({role:"user",content:question},{role:"assistant",content:answer}); history = history.slice(-6); }
   const inT = usage?.prompt_tokens, outT = usage?.completion_tokens;
@@ -496,10 +599,12 @@ function numbersReading(){
   ].join("\n\n");
 }
 
-/* ---------- فتح الصفحة على شركة: ai-analyst.html?s=1120 ---------- */
-const pre = new URLSearchParams(location.search).get("s");
-const preStock = pre && all.find(s => s.symbol === pre);
+/* ---------- فتح الصفحة: ?s=1120 لشركة، ?sector=banks لقطاع، وبدونهما السوق كامل ---------- */
+const params = new URLSearchParams(location.search);
+const preStock = params.get("s") && all.find(s => s.symbol === params.get("s"));
 if (preStock) choose(preStock);
+else if (params.get("sector")) openSector(params.get("sector"));
+else openMarket();
 updateMeter();
 </script>
 <script src="layout.js?v=logos-20261116" defer></script>

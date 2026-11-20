@@ -3,7 +3,7 @@
 // - يأخذ ملف الشركة المختصر من الموقع نفسه، فلا يستطيع أحد إرسال نصوص ضخمة على حسابك.
 // - يحدد عدد الأسئلة لكل زائر في اليوم وسقفًا يوميًا للموقع كله، ويحصر النماذج في المجانية.
 
-// احتياطي فقط: الدور الكامل يأتي من ملف الشركة (pack.system).
+// احتياطي فقط: الدور الكامل يأتي من الملف نفسه (pack.system).
 const SYSTEM = 'أنت محلل مالي للسوق السعودي. أجب بالعربية باختصار ووضوح بعناوين قصيرة ونقاط. اعتمد فقط على بيانات الشركة المرفقة واذكر الأرقام وتواريخها. لا تقدم توصية شراء أو بيع مباشرة. إذا لم تكفِ البيانات للإجابة فقل ذلك صراحة.';
 // نماذج مجانية فقط (:free)، فلا يُخصم أي مبلغ من الرصيد.
 const DEFAULT_MODELS = 'nvidia/nemotron-3-ultra-550b-a55b:free,baidu/ernie-5.5-flash-preview:free,dots-studio/dots-3-note-preview:free,inclusionai/ling-3.2-flash:free,nvidia/nemotron-3.5-super-vl:free,google/gemma-4-31b-it:free';
@@ -51,9 +51,13 @@ export default {
 
     let body;
     try { body = await request.json(); } catch { return json({ error: 'طلب غير صالح.' }, 400, cors); }
-    const symbol = String(body.symbol || '');
+    // النطاق: السوق كامل، أو قطاع (slug)، أو شركة (رمز من 4 أرقام). body.symbol للتوافق مع النسخة الأولى.
+    const scope = ['market', 'sector', 'company'].includes(body.scope) ? body.scope : 'company';
+    const id = String(body.id ?? body.symbol ?? '');
     const question = String(body.question || '').trim();
-    if (!/^\d{4}$/.test(symbol)) return json({ error: 'رمز الشركة غير صالح.' }, 400, cors);
+    if (scope === 'company' && !/^\d{4}$/.test(id)) return json({ error: 'رمز الشركة غير صالح.' }, 400, cors);
+    if (scope === 'sector' && !/^[a-z-]{2,40}$/.test(id)) return json({ error: 'القطاع غير صالح.' }, 400, cors);
+    const extra = (Array.isArray(body.extra) ? body.extra : []).map(String).filter(x => /^\d{4}$/.test(x) && x !== id).slice(0, 3);
     if (!question || question.length > 500) return json({ error: 'السؤال فارغ أو أطول من 500 حرف.' }, 400, cors);
     const models = (env.MODELS || DEFAULT_MODELS).split(',').map(s => s.trim());
     const model = models.includes(body.model) ? body.model : models[0];
@@ -63,9 +67,12 @@ export default {
       .map(m => ({ role: m.role, content: m.content.slice(0, 2500) }));
 
     const site = (env.SITE_URL || 'https://portalnode.github.io/saudi-sectors/').replace(/\/?$/, '/');
-    const packRes = await fetch(`${site}ai/${symbol}.json`, { cf: { cacheTtl: 600, cacheEverything: true } });
-    if (!packRes.ok) return json({ error: 'لا توجد بيانات لهذه الشركة.' }, 404, cors);
-    const pack = await packRes.json();
+    const load = async name => { const r = await fetch(`${site}ai/${name}.json`, { cf: { cacheTtl: 600, cacheEverything: true } }); return r.ok ? r.json() : null; };
+    const pack = await load(scope === 'market' ? 'market' : scope === 'sector' ? `sector-${id}` : id);
+    if (!pack) return json({ error: 'لا توجد بيانات لهذا الاختيار.' }, 404, cors);
+    const extras = (await Promise.all(extra.map(load))).filter(Boolean);
+    const LABEL = { market: 'جدول السوق كاملًا', sector: 'جدول القطاع', company: 'ملف الشركة' };
+    const data = `${pack.text}${extras.map(p => `\n\n--- ملف شركة ذكرها السائل: ${p.name} (${p.symbol}) ---\n${p.text}`).join('')}`;
 
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     const quota = await takeQuota(env, ip);
@@ -81,7 +88,7 @@ export default {
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: 'system', content: `${pack.system || SYSTEM}\n\nبيانات الشركة:\n${pack.text}` }, ...history, { role: 'user', content: question }],
+        messages: [{ role: 'system', content: `${pack.system || SYSTEM}\n\nالبيانات المرفقة (${LABEL[scope]}):\n${data}` }, ...history, { role: 'user', content: question }],
         max_tokens: Number(env.MAX_TOKENS || 16000),
         reasoning: { effort: 'medium' },
         temperature: 0.3,

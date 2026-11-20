@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { buildPack, technicalSection, SECTOR_SLUGS, SYSTEM_PROMPT } from '../scripts/build-ai-packs.mjs';
+import { buildPack, technicalSection, buildSectorPack, buildMarketPack, companySummary, SECTOR_SLUGS, SYSTEM_PROMPT } from '../scripts/build-ai-packs.mjs';
 
 const dist = new URL('../dist/', import.meta.url);
 const read = name => readFileSync(new URL(name, dist), 'utf8');
@@ -81,4 +81,41 @@ test('the analyst page keeps the key out of the site files and is in every top b
     const nav = read(name).match(/<nav class="site-nav"[^>]*>(.*?)<\/nav>/)?.[1];
     if (nav) assert.match(nav, /<a href="ai-analyst\.html"[^>]*>المحلل الذكي<\/a>/, name);
   }
+});
+
+test('sector and market packs list every company in one short row', () => {
+  const stocks = [
+    { symbol: '3010', name: 'أ', price: 10, marketCap: 500, pe: 10, pb: 1, dividendYield: 5, ytd: 1, year1: 2 },
+    { symbol: '3020', name: 'ب', price: 20, marketCap: 1500, pe: 20, pb: 2, dividendYield: 3, ytd: -1, year1: -2, suspended: true },
+  ];
+  const sector = { name: 'الاسمنت', stocks };
+  const facts = { years: [{ year: 2024, revenue: 100, netProfit: 10 }, { year: 2025, revenue: 120, netProfit: -5 }], quarters: [['2025Q3', 2], ['2025Q4', 2], ['2026Q1', 2], ['2026Q2', 2], ['2026Q3', 3]], tech: { trend: 'up', rsi: 61.4, sma200: 8, price: 10, score: 4 } };
+  const rows = stocks.map(st => ({ st, pack: { facts, rawTokens: 1000 }, sum: companySummary(st, { facts }) }));
+  assert.equal(rows[0].sum.profitGrowth, 'تحوّل لخسارة');
+  assert.equal(rows[0].sum.lastQYoY, '+50.0%');
+  const sec = buildSectorPack(sector, 'cement', rows, { asOf: '2026-11-19' });
+  assert.equal(sec.scope, 'sector');
+  assert.equal(sec.system, SYSTEM_PROMPT);
+  assert.match(sec.text, /الاسمنت: عدد الشركات 2 · القيمة السوقية 2 مليار ريال · وسيط المكرر 15/);
+  const lines = sec.text.split('\n').filter(l => /^30[12]0 \|/.test(l));
+  assert.deepEqual(lines.map(l => l.slice(0, 4)), ['3020', '3010'], 'largest company first');
+  assert.match(lines[0], /\| موقوف$/);
+  assert.match(lines[1], /\| 2025 \| 120 \| \+20\.0% \| -5 \| تحوّل لخسارة \|/);
+  const mkt = buildMarketPack({ asOf: '2026-11-19', sectors: [sector] }, [{ sector, slug: 'cement', rows }], { tasiLine: 'مؤشر تاسي: 10,000' });
+  assert.equal(mkt.scope, 'market');
+  assert.deepEqual(mkt.sectors, [['cement', 'الاسمنت', 2]]);
+  assert.match(mkt.text, /## الاسمنت: عدد الشركات 2 .*\(100% من السوق\)/);
+  assert.match(mkt.text, /3010 \| أ \| 10 \| 500 \| 10 \| 1 \| 5 \| — \| 1 \| 2 \| -5 \(2025\) \| تحوّل لخسارة \| \+50\.0% \| صاعد \| 61 \| \+25\.0% \| 4/);
+  assert.match(SYSTEM_PROMPT, /«الأرخص» تعني التقييم/);
+});
+
+test('the analyst page asks about the market, a sector or a company, and attaches named companies', () => {
+  const page = read('ai-analyst.html');
+  for (const scope of ['market', 'sector', 'company']) assert.match(page, new RegExp(`data-scope="${scope}"`));
+  assert.match(page, /getPack\("ai\/market\.json"\)/);
+  assert.match(page, /getPack\(`ai\/sector-\$\{slug\}\.json`\)/);
+  assert.match(page, /function mentionedStocks\(/);
+  assert.match(page, /\.slice\(0, 3\)/, 'at most three attached companies');
+  const proxy = readFileSync(new URL('../worker/ai-proxy.js', import.meta.url), 'utf8');
+  assert.match(proxy, /scope === 'market' \? 'market' : scope === 'sector' \? `sector-\$\{id\}`/);
 });
