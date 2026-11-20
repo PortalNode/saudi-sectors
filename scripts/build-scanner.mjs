@@ -75,10 +75,10 @@ for (const s of stocks) {
   const c = s.c[i];
   const sma50 = sma(C, 50)[i], sma200 = sma(C, 200)[i];
   const atrArr = atrSeries(H, L, C, 14), pre = precompute(C);
-  const { support, resistance, atr } = nearestZones(H, L, C, i, sr, atrArr, s.d);
+  const { support, resistance, fresh, inside, atr } = nearestZones(H, L, C, i, sr, atrArr, s.d), ctx = { fresh, inside };
   const avgVol20Prev = sma(s.v, 20)[i - 1], volRatio = avgVol20Prev > 0 ? s.v[i] / avgVol20Prev : null;
 
-  const k = computeKeys({ close: C, i, support, resistance, atr, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield, pre });
+  const k = computeKeys({ close: C, i, support, resistance, atr, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield, pre, ctx });
 
   // مجموع المفاتيح في كل جلسة من آخر HISTORY جلسة بما كان معلوماً وقتها (مناطق الدعم من شموع حتى ذلك اليوم، TASI بتاريخه، والأرباع
   // المتاحة وقتها بقاعدة تأخير تقريبية). الجلسة الأخيرة هي نتيجة اليوم نفسها فلا تختلف عمّا يُعرض.
@@ -87,13 +87,14 @@ for (const s of stocks) {
     dates.push(s.d[j]);
     if (j === i) { scores.push(k.score); continue; }
     const z = nearestZones(H, L, C, j, sr, atrArr, s.d);
-    scores.push(computeKeys({ close: C, i: j, support: z.support, resistance: z.resistance, atr: z.atr, financial: financialKeyAsOf(financials.get(s.symbol), s.d[j]), tasi: tasiOn(s.d[j]), dividendYield: null, pre }).score);
+    scores.push(computeKeys({ close: C, i: j, support: z.support, resistance: z.resistance, ctx: { fresh: z.fresh, inside: z.inside }, atr: z.atr, financial: financialKeyAsOf(financials.get(s.symbol), s.d[j]), tasi: tasiOn(s.d[j]), dividendYield: null, pre }).score);
   }
   const since = Object.fromEntries(THRESHOLDS.map(th => [th, runStart(scores, dates, th)]).filter(([, v]) => v));
   outStocks[s.symbol] = {
     name: s.name, sector: s.sector, price: r(c), tradedValue: r(c * s.v[i], 0), avgVal20: r(avgVal20, 0), volRatio: r(volRatio),
     score: k.score, bits: k.bits, trend: k.trend, dividendYield: r(o.dividendYield), dividendOk: k.dividendOk,
-    levelPos: levelPosition(c, support, resistance, atr), since, hist: scores.slice(-30).join(''),
+    levelPos: levelPosition(c, support, resistance, atr, ctx), since, hist: scores.slice(-30).join(''),
+    otherZone: fresh || inside ? [r((fresh || inside).low), r((fresh || inside).high), (fresh || inside).touches, s.d[(fresh || inside).first], fresh ? 'fresh' : 'inside'] : null,
     support: r(support?.center), resistance: r(resistance?.center), supportZone: support ? [r(support.low), r(support.high), support.touches, s.d[support.first]] : null, resistanceZone: resistance ? [r(resistance.low), r(resistance.high), resistance.touches, s.d[resistance.first]] : null, atr: r(atr), sma50: r(sma50), sma200: r(sma200),
     keys: Object.fromEntries(KEY_IDS.map(id => [id, [k.keys[id].ok, k.keys[id].detail]])),
   };

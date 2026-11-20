@@ -80,7 +80,25 @@ export function mergeZones(zones, a, p = SR_DEFAULTS) {
   return out;
 }
 
-// أقرب منطقة دعم تحت السعر وأقرب منطقة مقاومة فوقه. السعر داخل المنطقة: دعم إن أغلق فوق مركزها، وإلا مقاومة.
+// علاقة السعر الحالي بمنطقة، وهي ما يحدد دورها (دعم أم مقاومة) لا موضعها من مركزها:
+//  above: أغلق فوقها وابتعد عنها ≥ 1×ATR ثم عاد (أو بقي فوقها 5 جلسات فأكثر): المنطقة تحته، دعم (انقلاب دور إن كانت قمماً)
+//  fresh: أغلق فوقها قبل جلسات قليلة ولم يبتعد بعد: اختراق حديث، لا دعم مؤكد ولا مقاومة
+//  below: أغلق تحتها: المنطقة فوقه، مقاومة
+//  inside-from-above / inside-from-below: داخلها، والدور بجهة وصوله إليها (آخر إغلاق خارجها): من فوق = يختبر دعماً، من تحت = يختبر مقاومة
+//  inside-flat: داخلها ولا إغلاق خارجها خلال المدة: لا اتجاه اقتراب، غير محسوم
+export function zoneRelation(close, i, z, a, lookback = 120) {
+  const lo = Math.max(0, i - lookback), p = close[i];
+  if (p > z.high) {
+    let j = i, top = p; while (j >= lo && close[j] > z.high) { if (close[j] > top) top = close[j]; j--; }
+    return (top - z.high) / a >= 1 || j < lo || i - j >= 5 ? 'above' : 'fresh';
+  }
+  if (p < z.low) return 'below';
+  for (let j = i - 1; j >= lo; j--) { if (close[j] > z.high) return 'inside-from-above'; if (close[j] < z.low) return 'inside-from-below'; }
+  return 'inside-flat';
+}
+
+// أقرب منطقة دعم وأقرب منطقة مقاومة بحسب علاقة السعر بكل منطقة (zoneRelation). fresh: منطقة اخترقها السعر حديثاً، inside: منطقة داخلها
+// السعر بلا اتجاه اقتراب. كلتاهما ليست دعماً ولا مقاومة.
 // أول شمعة ضمن آخر `years` سنة تقويمية قبل تاريخ الشمعة i (التواريخ بصيغة YYYY-MM-DD تُقارن نصياً)
 export function windowStart(dates, i, years = SR_DEFAULTS.years) {
   const cut = `${+dates[i].slice(0, 4) - years}${dates[i].slice(4)}`;
@@ -89,11 +107,13 @@ export function windowStart(dates, i, years = SR_DEFAULTS.years) {
 }
 
 export function nearestZones(high, low, close, i, p = SR_DEFAULTS, atrArr = null, dates = null) {
-  const atr = atrArr || atrSeries(high, low, close, 14), price = close[i];
+  const atr = atrArr || atrSeries(high, low, close, 14), a = atr[i];
   const zs = zonesAt(high, low, close, i, atr, dates ? { ...p, fromIndex: windowStart(dates, i, p.years) } : p);
-  const supports = zs.filter(z => z.center <= price && !(price < z.high && price < z.center));
-  const resistances = zs.filter(z => z.center > price);
-  const support = supports.length ? supports.reduce((m, z) => z.center > m.center ? z : m) : null;
-  const resistance = resistances.length ? resistances.reduce((m, z) => z.center < m.center ? z : m) : null;
-  return { support, resistance, atr: atr[i], zones: zs };
+  const rel = zs.map(z => ({ z, r: a > 0 ? zoneRelation(close, i, z, a) : 'inside-flat' }));
+  const sup = rel.filter(x => x.r === 'above' || x.r === 'inside-from-above').map(x => x.z);
+  const res = rel.filter(x => x.r === 'below' || x.r === 'inside-from-below').map(x => x.z);
+  const near = (list, pick) => list.length ? list.reduce(pick) : null;
+  const fresh = near(rel.filter(x => x.r === 'fresh').map(x => x.z), (m, z) => z.high > m.high ? z : m);
+  const inside = near(rel.filter(x => x.r === 'inside-flat').map(x => x.z), (m, z) => z.center > m.center ? z : m);
+  return { support: near(sup, (m, z) => z.center > m.center ? z : m), resistance: near(res, (m, z) => z.center < m.center ? z : m), fresh, inside, atr: a, zones: zs };
 }

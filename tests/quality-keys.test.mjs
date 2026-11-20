@@ -147,3 +147,12 @@ test('at support means testing the zone (within 0.5 ATR above it): a stock that 
   assert.equal(levelPosition(120, { low: 96, high: 100, center: 98, touches: 3, highs: 1, lows: 2 }, null, 2), 'open');
   assert.equal(levelPosition(120, { low: 96, high: 100, center: 98, touches: 3, highs: 1, lows: 2 }, Z(140, 142), 2), 'between');
 });
+
+test('inside an unresolved zone, or just after breaking one, the levels key is 0 with the reason', () => {
+  const zone = { low: 98, high: 104, center: 101, touches: 5 };
+  assert.equal(levelPosition(101, null, null, 2, { inside: zone }), 'inside');
+  assert.equal(levelsKey(101, null, null, 2, { inside: zone }).ok, 0);
+  assert.equal(levelPosition(105, null, Z(120, 125), 2, { fresh: zone }), 'breakout');
+  assert.equal(levelsKey(105, Z(90, 92), Z(120, 125), 2, { fresh: zone }).ok, 0);
+  assert.equal(levelPosition(105, null, Z(106, 108), 2, { fresh: zone }), 'resistance');
+});

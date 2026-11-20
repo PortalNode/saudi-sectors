@@ -58,10 +58,14 @@ export const BREAKOUT_ATR = 3.0; // اختراق «حديث»: السعر فوق
 //  squeezed: قريب من دعم لكن المقاومة قريبة أيضاً فلا مجال (مفتاح 0) ·
 //  breakout: فوق منطقة كانت مقاومة وكُسرت، لم يعد إليها بعد (اختراق، ليس اختباراً للدعم) ·
 //  open: فوق دعم بعيداً عنه ولا مقاومة أعلاه · between: بين مستويين بعيداً عنهما · none: لا مستويات مؤكدة
-export function levelPosition(price, support, resistance, atr) {
-  if (!fin(price) || !(atr > 0) || (!support && !resistance)) return 'none';
+// ctx: { fresh, inside } من nearestZones. fresh = منطقة اخترقها السعر قبل جلسات قليلة ولم يبتعد (لا دعم مؤكد بعد)؛
+// inside = منطقة داخلها السعر بلا اتجاه اقتراب واضح (غير محسوم): في الحالتين المفتاح 0.
+export function levelPosition(price, support, resistance, atr, ctx = {}) {
+  if (!fin(price) || !(atr > 0) || (!support && !resistance && !ctx.fresh && !ctx.inside)) return 'none';
+  if (ctx.inside) return 'inside';
   const dS = support ? Math.max(0, price - support.high) / atr : Infinity, dR = resistance ? Math.max(0, resistance.low - price) / atr : Infinity;
   const nearS = dS <= AT_SUPPORT_ATR, nearR = dR <= NEAR_RESISTANCE_ATR;
+  if (ctx.fresh) return nearR ? 'resistance' : 'breakout';
   if (nearS && dR >= MIN_ROOM_ATR) return 'support';
   if (nearS) return 'squeezed';
   if (nearR) return 'resistance';
@@ -72,13 +76,15 @@ export function levelPosition(price, support, resistance, atr) {
 
 // 1+ فقط إذا كان السهم يختبر منطقة دعم (داخلها أو ضمن 0.5×ATR فوقها) ويفصله عن أقرب مقاومة 2×ATR فأكثر (أو لا مقاومة فوقه: قمة جديدة).
 // أي سهم عند مقاومة، أو بين دعم ومقاومة متقاربين، أو مخترق لمنطقة ومبتعد عنها = 0، فلا يظهر سهم «عند دعم» وهو ملاصق لمقاومة أو مبتعد عن الدعم.
-export function levelsKey(price, support, resistance, atr) {
+export function levelsKey(price, support, resistance, atr, ctx = {}) {
   if (!fin(price) || !(atr > 0)) return key(false, 'لا بيانات كافية لتحديد المستويات');
+  if (ctx.inside) return key(false, `${zoneText(ctx.inside, 'السعر داخل منطقة')} دون اتجاه اقتراب واضح فلا يُحسم دعم أم مقاومة`);
+  if (ctx.fresh) return key(false, `${zoneText(ctx.fresh, 'اخترق السعر منطقة')} حديثاً ولم يبتعد عنها ولم يعد لاختبارها، فلا دعم مؤكد بعد`);
   if (!support) return key(false, resistance ? `لا توجد منطقة دعم مؤكدة تحت السعر · ${zoneText(resistance, 'مقاومة')}` : 'لا توجد مناطق دعم أو مقاومة مؤكدة');
   const dS = Math.max(0, price - support.high) / atr, dR = resistance ? Math.max(0, resistance.low - price) / atr : Infinity;
   const detail = `${zoneText(support, 'دعم')} يبعد ${f2(dS, 1)}×ATR${resistance ? ` · ${zoneText(resistance, 'مقاومة')} تبعد ${f2(dR, 1)}×ATR` : ' · لا مقاومة فوق السعر'}`;
-  const pos = levelPosition(price, support, resistance, atr);
-  const why = { support: '', resistance: ' — السعر عند مقاومة', squeezed: ' — المقاومة قريبة (أقل من 2×ATR) فلا مجال كافٍ', breakout: ' — اختراق: السعر فوق مقاومة مكسورة ولم يعد لاختبارها', open: ' — بعيد عن الدعم', between: ' — بعيد عن الدعم' }[pos] ?? '';
+  const pos = levelPosition(price, support, resistance, atr, ctx);
+  const why = { support: '', resistance: ' — السعر عند مقاومة', squeezed: ' — المقاومة قريبة (أقل من 2×ATR) فلا مجال كافٍ', breakout: ' — اختراق: السعر فوق مقاومة مكسورة ولم يعد لاختبارها', inside: '', open: ' — بعيد عن الدعم', between: ' — بعيد عن الدعم' }[pos] ?? '';
   return key(pos === 'support', detail + why);
 }
 
@@ -143,12 +149,12 @@ export function loadFinancials(distUrl) {
 
 /* ---------- التجميع ---------- */
 // الأسهم 5/6 وما فوق تظهر. input: { close[], i, support, resistance, financial, tasi (نتيجة tasiKey), dividendYield }
-export function computeKeys({ close, i, support, resistance, atr, financial, tasi, dividendYield, pre }) {
+export function computeKeys({ close, i, support, resistance, atr, financial, tasi, dividendYield, pre, ctx }) {
   const { trend, sma50, sma200 } = trendAt(close, i, pre);
   const keys = {
     trend: key(trend === 'up', trend === 'up' ? 'الإغلاق فوق متوسط 50 وهو فوق متوسط 200 وصاعد' : trend === 'down' ? 'اتجاه هابط (الإغلاق تحت متوسط 50 وهو تحت 200)' : trend === 'side' ? 'اتجاه عرضي / غير واضح' : 'تاريخ أقصر من 200 جلسة'),
     fin: financial, tasi: { ok: tasi.ok, detail: tasi.detail },
-    levels: levelsKey(close[i], support, resistance, atr), sma55: sma55Key(close, i, pre), macd: macdKey(close, i, pre),
+    levels: levelsKey(close[i], support, resistance, atr, ctx), sma55: sma55Key(close, i, pre), macd: macdKey(close, i, pre),
   };
   const bits = KEY_IDS.map(id => keys[id].ok);
   return {

@@ -1,7 +1,7 @@
 // واجهة «مفاتيح جودة السهم» وقائمة المراقبة. تقرأ dist/scanner/signals.json (يبنيه scripts/build-scanner.mjs بعد كل
 // تحديث أسعار) ولا تحسب أي مؤشر بنفسها. كل المنطق القابل للاختبار في scanner-logic.mjs.
 import { KEY_IDS, DEFAULT_FILTERS, filterStocks, sortStocks, watchDiff, loadWatch, saveWatch, toggleWatch,
-  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL, LEVEL_POS_LABEL, AGE_OPTIONS, AGE_LABEL, sinceFor, sessionsText, ageClass } from './scanner-logic.mjs?v=sc-20261120b';
+  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL, LEVEL_POS_LABEL, AGE_OPTIONS, AGE_LABEL, sinceFor, sessionsText, ageClass } from './scanner-logic.mjs?v=sc-20261120c';
 
 const FILTER_KEY = 'saudi-sectors-scanner-filters-v3';
 const base = file => new URL(file, import.meta.url);
@@ -25,7 +25,7 @@ function banner() {
   if (!m.valid) return `<div class="sc-banner sc-bad" role="alert"><strong>تعذر التحقق من البيانات، فلا تُعرض أي نتائج.</strong> ${esc(m.reasonInvalid || '')}</div>`;
   const excluded = Object.entries(m.excluded || {}).map(([k, v]) => `${REASON[k] || k}: ${v.length}`).join(' · ');
   const tasiOff = m.tasi && m.tasi.trend !== 'up';
-  return `<div class="sc-banner" role="note"><strong>استراتيجية «مفاتيح جودة السهم».</strong> لكل سهم ستة مفاتيح: اتجاه السهم، التحليل المالي (صافي ربح آخر 4 أرباع موجب)، اتجاه TASI، مستويات الأسعار (يختبر منطقة دعم فعلاً: داخلها أو أعلى منها بأقل من نصف ATR، ويفصله عن أقرب مقاومة 2×ATR على الأقل؛ أما السهم عند مقاومة، أو بين دعم ومقاومة متقاربين، أو الذي اخترق منطقة وابتعد عنها فصفر)، الإغلاق فوق المتوسط 55، وMACD فوق خط الإشارة. المفتاح إما <b>1+</b> أو <b>0</b>، ويظهر السهم إذا حقق <b>${m.minScore} مفاتيح أو أكثر</b> من 6. استراتيجية وصفية لا تتنبأ وليست توصية استثمارية. عمود «ظهرت الإشارة» يبيّن متى بدأت الفترة المتصلة الحالية التي حقق فيها السهم العدد المحدد من المفاتيح (المفتاح المالي فيه تقريبي: يُفترض نشر نتائج الربع بعد 45 يوماً من نهايته). كل الحسابات على الأسعار المعدّلة للتوزيعات النقدية كما يعرضها الشارت بزر ADJ، فتعرف إن كانت الإشارة جديدة أم قديمة.</div>
+  return `<div class="sc-banner" role="note"><strong>استراتيجية «مفاتيح جودة السهم».</strong> لكل سهم ستة مفاتيح: اتجاه السهم، التحليل المالي (صافي ربح آخر 4 أرباع موجب)، اتجاه TASI، مستويات الأسعار (يختبر منطقة دعم فعلاً: وصل إليها من فوق (داخلها أو أعلى منها بأقل من نصف ATR) بعد ابتعاده عنها، لا صاعداً إليها من تحتها، ويفصله عن أقرب مقاومة 2×ATR على الأقل؛ أما السهم عند مقاومة، أو بين دعم ومقاومة متقاربين، أو الذي اخترق منطقة وابتعد عنها فصفر)، الإغلاق فوق المتوسط 55، وMACD فوق خط الإشارة. المفتاح إما <b>1+</b> أو <b>0</b>، ويظهر السهم إذا حقق <b>${m.minScore} مفاتيح أو أكثر</b> من 6. استراتيجية وصفية لا تتنبأ وليست توصية استثمارية. عمود «ظهرت الإشارة» يبيّن متى بدأت الفترة المتصلة الحالية التي حقق فيها السهم العدد المحدد من المفاتيح (المفتاح المالي فيه تقريبي: يُفترض نشر نتائج الربع بعد 45 يوماً من نهايته). كل الحسابات على الأسعار المعدّلة للتوزيعات النقدية كما يعرضها الشارت بزر ADJ، فتعرف إن كانت الإشارة جديدة أم قديمة.</div>
   ${tasiOff ? `<div class="sc-banner sc-warn-banner" role="note">مفتاح السوق (TASI) <b>0</b> الآن: ${esc(m.tasi.detail)}. لذلك لا يمكن لأي سهم تجاوز 5 من 6 حتى يعود المؤشر للاتجاه الصاعد.</div>` : ''}
   <div class="sc-meta"><span>آخر إغلاق رسمي: <bdi class="num">${esc(m.dataDate)}</bdi></span><span>الأسهم المفحوصة: <bdi class="num">${m.scanned}</bdi> من <bdi class="num">${m.universe}</bdi></span><span>6 من 6: <bdi class="num">${m.counts.six}</bdi> · 5 من 6: <bdi class="num">${m.counts.five}</bdi></span><span>اتجاه TASI: ${esc(TREND_LABEL[m.tasi?.trend] || '—')}</span>${excluded ? `<span>مستبعد: ${esc(excluded)}</span>` : ''}</div>`;
 }
@@ -93,6 +93,8 @@ function levelsFor(s) {
   // منطقة الدعم/المقاومة تُرسم نطاقاً مظللاً واحداً من أول لمسة حتى اليمين بعنوان واحد (لا خطّين وعنوانين)
   const zone = (z, side, name, color) => { if (z) out.push({ color, zone: { low: z[0], high: z[1], since: z[3], side, title: `${name} · ${z[2]} لمسات` } }); };
   zone(s.supportZone, 'support', 'دعم', '#22c55e'); zone(s.resistanceZone, 'resistance', 'مقاومة', '#f05252');
+  // منطقة ليست دعماً ولا مقاومة الآن (اخترقها السعر حديثاً أو هو داخلها بلا اتجاه اقتراب): تُرسم بلون الموقع المحايد
+  if (s.otherZone) { const o = s.otherZone; out.push({ zone: { low: o[0], high: o[1], since: o[3], side: 'support', title: `${o[4] === 'fresh' ? 'منطقة مخترقة حديثاً' : 'منطقة غير محسومة'} · ${o[2]} لمسات` } }); }
   return out;
 }
 const zoneHtml = (z, none) => z ? `<bdi class="num" dir="ltr">${fmtPrice(z[0])} – ${fmtPrice(z[1])}</bdi> <small class="sc-dim">${z[2]} لمسات · منذ ${esc(z[3] || '—')}</small>` : none;
@@ -108,7 +110,7 @@ function cardHtml(s) {
     <p class="sc-why"><span class="sc-score s${s.score}"><bdi class="num" dir="ltr">${s.score}/6</bdi></span> ${esc(verdict)}${sinceNote}</p>
     <div class="sc-grid">
       <section class="sc-block sc-wide"><h4>المفاتيح الستة</h4><ul class="sc-conds sc-keylist">${rows}</ul></section>
-      <section class="sc-block"><h4>مناطق الدعم والمقاومة</h4><dl class="sc-dl"><dt>موقع السعر</dt><dd>${esc(LEVEL_POS_LABEL[s.levelPos] || '—')}</dd><dt>أقرب منطقة دعم</dt><dd>${zoneHtml(s.supportZone, 'لا توجد منطقة دعم مؤكدة')}</dd><dt>أقرب منطقة مقاومة</dt><dd>${zoneHtml(s.resistanceZone, 'لا توجد (عند قمة الفترة)')}</dd><dt>متوسط 50 / 200</dt><dd><bdi class="num">${fmtPrice(s.sma50)} / ${fmtPrice(s.sma200)}</bdi></dd></dl></section>
+      <section class="sc-block"><h4>مناطق الدعم والمقاومة</h4><dl class="sc-dl"><dt>موقع السعر</dt><dd>${esc(LEVEL_POS_LABEL[s.levelPos] || '—')}</dd>${s.otherZone ? `<dt>${s.otherZone[4] === 'fresh' ? 'منطقة مخترقة حديثاً' : 'منطقة غير محسومة (السعر داخلها)'}</dt><dd>${zoneHtml(s.otherZone, '')}</dd>` : ''}<dt>أقرب منطقة دعم</dt><dd>${zoneHtml(s.supportZone, 'لا توجد منطقة دعم مؤكدة')}</dd><dt>أقرب منطقة مقاومة</dt><dd>${zoneHtml(s.resistanceZone, 'لا توجد (عند قمة الفترة)')}</dd><dt>متوسط 50 / 200</dt><dd><bdi class="num">${fmtPrice(s.sma50)} / ${fmtPrice(s.sma200)}</bdi></dd></dl></section>
       <section class="sc-block"><h4>توزيعات الأرباح</h4><p>${s.dividendYield == null ? 'لا تتوفر نسبة توزيعات لهذا السهم.' : `عائد التوزيعات <bdi class="num">${fmtNum(s.dividendYield, 2)}%</bdi>${s.dividendOk ? ' — أعلى من 2.5% (يفضّلها المنهج، ولا تدخل في عدّ المفاتيح).' : ' — أقل من 2.5%.'}`}</p></section>
     </div>
     <p class="sc-foot">يُعرض الشارت أدناه بمنطقتي الدعم والمقاومة (حافتا كل منطقة). البيانات حتى <bdi class="num">${esc(data.meta.dataDate)}</bdi>، وهذه ليست توصية استثمارية.</p></article>`;

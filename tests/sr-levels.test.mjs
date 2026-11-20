@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { atr as atrSeries } from '../dist/scanner/indicators.mjs';
-import { pivots, zonesAt, nearestZones, windowStart, mergeZones, SR_DEFAULTS } from '../scripts/sr-levels.mjs';
+import { pivots, zonesAt, nearestZones, windowStart, mergeZones, zoneRelation, SR_DEFAULTS } from '../scripts/sr-levels.mjs';
 
 // سلسلة تتأرجح بين 100 و110 مرات عدة (قاع 100 وقمة 110 تتكرر)، تنتهي قرب 103
 function ranging(cycles = 5, ending = 103) {
@@ -108,4 +108,40 @@ test('a pivot touching an estimated (made-up) bar is not accepted; real ones are
   const filtered = pivots(h, l, atr, last, { ...SR_DEFAULTS, bad });
   assert.ok(!filtered.some(v => v.j === target.j), 'pivot next to an estimated bar must be rejected');
   assert.ok(filtered.length >= clean.length - 6 && filtered.length < clean.length, 'only the pivots near that bar are lost');
+});
+
+// نمط مرافق (2083): قاع عند ~100 يُكسر نزولاً إلى 70، ثم يصعد السعر إلى المنطقة من تحت. المنطقة هناك مقاومة لا دعم.
+function brokenFloor(ending) {
+  const c = [];
+  for (let k = 0; k < 4; k++) { for (let s = 0; s <= 10; s++) c.push(100 + s * 1.2); for (let s = 9; s >= 0; s--) c.push(100 + s * 1.2); } // قاع 100 وقمة 112 تتكرر
+  for (let s = 1; s <= 30; s++) c.push(100 - s);               // كسر ونزول إلى 70
+  for (let s = 0; s <= 30; s++) c.push(70 + s);                // صعود من تحت
+  c.push(...ending);
+  return { h: c.map(x => x + 0.5), l: c.map(x => x - 0.5), c };
+}
+
+test('zone relation: the role comes from where the price came from, not from its position against the zone centre', () => {
+  const z = { low: 98, high: 104, center: 101 }, a = 2;
+  const rel = (series, i = series.length - 1) => zoneRelation(series, i, z, a);
+  assert.equal(rel([90, 92, 95, 99, 102]), 'inside-from-below');          // climbing into the zone: testing resistance even above the centre
+  assert.equal(rel([112, 110, 108, 105, 102]), 'inside-from-above');      // falling into it: testing support
+  assert.equal(rel([100, 101, 102, 101, 102]), 'inside-flat');            // never left it
+  assert.equal(rel([95, 99, 103, 105]), 'fresh');                          // just closed above, not departed yet
+  assert.equal(rel([95, 99, 103, 106, 109]), 'above');                     // departed by >= 1 ATR
+  assert.equal(rel([95, 105, 105.5, 105.2, 105.4, 105.1]), 'above');        // held above for 5+ sessions
+  assert.equal(rel([112, 105, 100, 95, 92]), 'below');
+});
+
+test('a broken floor that price climbs back into is resistance, not support (the 2083 case)', () => {
+  const { h, l, c } = brokenFloor([96, 98, 99.5]);                          // inside the old floor zone (99.1-99.9), coming from below
+  const i = c.length - 1, atr = atrSeries(h, l, c, 14), r = nearestZones(h, l, c, i, SR_DEFAULTS, atr);
+  assert.ok(r.zones.some(z => c[i] >= z.low && c[i] <= z.high), 'price sits inside a zone');
+  assert.ok(!r.support || r.support.high < c[i] - 5, 'the zone it is inside must not be support');
+  assert.ok(r.resistance && c[i] >= r.resistance.low && c[i] <= r.resistance.high, 'that zone is the resistance (dR = 0)');
+});
+
+test('a pullback into a zone from above is support; the same zone approached from below is resistance', () => {
+  const up = brokenFloor([103, 110, 118, 120, 116, 111, 107, 104]);        // rose through the zone, went away, came back
+  const r = nearestZones(up.h, up.l, up.c, up.c.length - 1);
+  assert.ok(r.support && r.support.high < up.c.at(-1) && r.support.center > 95, 'pullback from above: the old floor zone is support');
 });
