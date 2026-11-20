@@ -31,6 +31,53 @@
   // النص يأتي أسطرًا «البند : القيمة»؛ نعرضه فقرات
   const bodyHtml = text => (text || '').split(/\n{2,}/).map(p => p.trim()).filter(Boolean).map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join('');
 
+  // تنظيم فحوى الإعلان (announcement-format.mjs)؛ إن تعذّر تحميله يُعرض النص الخام كما كان
+  let fmt = null;
+  const fmtReady = import('./announcement-format.mjs?v=ann-format-20261120b').then(m => { fmt = m; }).catch(() => null);
+  const parsedCache = new Map();
+  const parsed = item => { if (!parsedCache.has(item.id)) parsedCache.set(item.id, fmt.parseBody(item.body)); return parsedCache.get(item.id); };
+
+  const dateHtml = d => `<span class="ca-d">${esc(label(d.greg))}</span><small>${esc(d.hijri.split('-').join('/'))} هـ</small>`;
+  const valueHtml = f => f.date ? dateHtml(f.date) : f.attached ? '<span class="ca-muted">مرفق مع الإعلان في تداول</span>' : esc(f.value).replace(/\n/g, '<br>');
+  const pct = v => `${v > 0 ? '▲' : v < 0 ? '▼' : ''} ${Math.abs(v).toFixed(2)}%`;
+  const tone = v => v > 0 ? 'up' : v < 0 ? 'down' : 'flat';
+
+  function tileHtml(t) {
+    const sub = t.date ? `<small>${esc(t.date.hijri.split('-').join('/'))} هـ</small>`
+      : t.change != null ? `<small class="ca-chg ${tone(t.change)}">${pct(t.change)} عن ${t.versus}</small>` : '';
+    const value = t.date ? esc(label(t.date.greg)) : esc(t.value);
+    return `<div class="ca-tile" ${t.rowLabel ? `title="${esc(t.rowLabel)}"` : ''}><span class="ca-tl">${esc(t.label)}</span><b class="ca-tv">${value}</b>${sub}</div>`;
+  }
+  function tableHtml(t) {
+    const changeCols = new Set(t.heads.map((h, i) => /%/.test(h) ? i : -1).filter(i => i >= 0));
+    const cell = (v, i) => {
+      if (!changeCols.has(i) || v === '-') return `<td class="ca-n">${esc(v)}</td>`;
+      const n = Number(v.replace(/,/g, ''));
+      return `<td class="ca-n ${tone(n)}">${Number.isFinite(n) ? pct(n) : esc(v)}</td>`;
+    };
+    return `<div class="ca-tablewrap" tabindex="0"><table class="ca-table"><caption>${esc(t.title)}</caption>
+      <thead><tr><th>البند</th>${t.heads.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+      <tbody>${t.rows.map(r => `<tr><th scope="row">${esc(r.label)}</th>${r.values.map(cell).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }
+  function noteHtml(n) {
+    const long = n.key.length > 60;
+    return `<div class="ca-note"><h4 class="${long ? 'ca-long' : ''}">${esc(n.key)}</h4>
+      ${n.paras.map(p => `<p>${esc(p)}</p>`).join('')}${n.items.length ? `<ul>${n.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}</div>`;
+  }
+  function formattedBody(item) {
+    const p = parsed(item), tiles = fmt.keyPoints(p, item.title);
+    // ما ظهر في «أبرز النقاط» لا يتكرر في شبكة الحقول
+    const shownKeys = new Set(tiles.map(t => t.src).filter(Boolean));
+    const fields = p.fields.filter(f => !shownKeys.has(f.key));
+    const notes = p.notes.map(noteHtml).join('');
+    return `${tiles.length ? `<div class="ca-keys"><h4>أبرز النقاط</h4><div class="ca-tiles">${tiles.map(tileHtml).join('')}</div></div>` : ''}
+      ${p.lead.map(t => `<p class="ca-lead">${esc(t)}</p>`).join('')}
+      ${p.tables.map(tableHtml).join('')}${p.tables.length ? '<p class="ca-unit">المبالغ كما وردت في إعلان الشركة، والنسب مقارنة بالفترة المذكورة في رأس كل عمود.</p>' : ''}
+      ${fields.length ? `<dl class="ca-fields">${fields.map(f => `<div><dt>${esc(f.key)}</dt><dd>${valueHtml(f)}</dd></div>`).join('')}</dl>` : ''}
+      ${p.notes.length > 3 ? `<details class="ca-notes"><summary>التفاصيل والأسباب (${p.notes.length})</summary>${notes}</details>` : notes}
+      <details class="ca-raw"><summary>النص الأصلي كما نُشر</summary><div class="ca-rawtext">${bodyHtml(item.body)}</div></details>`;
+  }
+
   let shown = null, filter = 'all', visible = PAGE, data = null;
   const cache = new Map();
 
@@ -52,7 +99,7 @@
           ${isNew(item.t) ? '<span class="ca-new">جديد</span>' : ''}
           <span class="ca-title">${esc(item.title)}</span>
         </summary>
-        <div class="ca-body">${bodyHtml(item.body) || '<p class="ca-none">لا يتوفر نص لهذا الإعلان؛ راجع المصدر.</p>'}
+        <div class="ca-body">${!item.body ? '<p class="ca-none">لا يتوفر نص لهذا الإعلان؛ راجع المصدر.</p>' : fmt ? formattedBody(item) : bodyHtml(item.body)}
           <a class="ca-link" href="${esc(item.url)}" target="_blank" rel="noopener">المصدر في تداول السعودية ↗</a>
         </div>
       </details>`;
@@ -80,7 +127,7 @@
     if (box && symbol === shown) { if (box.previousElementSibling !== anchor) anchor.after(box); return; }
     shown = symbol;
     filter = 'all'; visible = PAGE;
-    const loaded = await load(symbol);
+    const [loaded] = await Promise.all([load(symbol), fmtReady]);
     if (shown !== symbol) return;
     box = document.getElementById('company-announcements');
     if (!loaded?.items?.length) {
