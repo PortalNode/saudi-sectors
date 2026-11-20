@@ -1,0 +1,48 @@
+{
+  "updatedAt": "2026-11-20T00:31:00Z",
+  "source": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements?locale=ar",
+  "companies": {
+    "4142": {
+      "symbol": "4142",
+      "name": "كابلات الرياض",
+      "totalCount": 3,
+      "announcements": [
+        {
+          "id": "98844",
+          "symbol": "4142",
+          "title": "كابلات الرياض",
+          "description": "إعلان شركة مجموعة كابلات الرياض عن تنظيمها مكالمة أرباح مع المستثمرين والمحللين الماليين لمناقشة النتائج المالية للربع الثالث من العام المالي 2026م",
+          "date": "01/11/2026 08:04:07",
+          "hijriDate": "1448/05/21",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98844&anCat=1&cs=4142&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98801",
+          "symbol": "4142",
+          "title": "كابلات الرياض",
+          "description": "اعلان شركة مجموعة كابلات الرياض عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "29/10/2026 08:04:02",
+          "hijriDate": "1448/05/18",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98801&anCat=1&cs=4142&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98138",
+          "symbol": "4142",
+          "title": "كابلات الرياض",
+          "description": "إعلان شركة مجموعة كابلات الرياض عن قرار مجلس الإدارة بتوزيع أرباح نقدية على المساهمين عن النصف الأول من عام ٢٠٢٦م",
+          "date": "15/09/2026 08:13:40",
+          "hijriDate": "1448/04/04",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98138&anCat=1&cs=4142&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    }
+  },
+  "period": {
+    "months": 3,
+    "from": "08/20/2026",
+    "to": "11/20/2026"
+  }
+}

@@ -58,3 +58,16 @@
   .cp-fact:nth-child(2){border-left:0}
   .cp-fact.gap{grid-column:1/-1;border-top:1px solid var(--pf-line);border-left:0}
 }
+
+/* أخبار الشركة من لقطة تداول السعودية */
+.company-news{margin-top:18px;border:1px solid var(--pf-line);border-radius:4px;background:var(--pf-bg);overflow:hidden}
+.company-news-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 16px 10px;border-bottom:1px solid var(--pf-line)}
+.company-news-head h3{margin:0;color:var(--pf-gold);font-size:14px}.company-news-count{margin:3px 0 0;color:var(--pf-muted);font-size:10.5px}
+.company-news-source{color:var(--pf-muted);font-size:10.5px;white-space:nowrap}.company-news-source b{color:#27b884;font-weight:700}
+.company-news-note{padding:8px 16px;background:var(--pf-bg2);color:var(--pf-muted);font-size:10.5px;border-bottom:1px solid var(--pf-line)}
+.company-news-list{list-style:none;margin:0;padding:0 16px}.company-news-item{border-bottom:1px solid var(--pf-line)}
+.company-news-item:last-child{border-bottom:0}.company-news-link{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:11px 0;color:var(--pf-ink);text-decoration:none;font-size:12px}
+.company-news-link:hover .company-news-text{color:var(--pf-gold)}.company-news-text{min-width:0}.company-news-date{color:var(--pf-muted);font-size:10.5px;white-space:nowrap;direction:ltr}
+.company-news-foot{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:10px 16px;border-top:1px solid var(--pf-line);color:var(--pf-muted);font-size:10.5px}
+.company-news-foot a,.company-news-more{color:#5e9bd6;text-decoration:none}.company-news-more{border:0;background:transparent;font:inherit;cursor:pointer;padding:0}.company-news-more:hover,.company-news-foot a:hover{text-decoration:underline}
+@media(max-width:700px){.company-news-head{display:block}.company-news-source{display:block;margin-top:5px}.company-news-link{display:block}.company-news-date{display:block;margin-top:4px}.company-news-foot{display:block}.company-news-foot>*{display:block;margin-top:5px}}

@@ -1,0 +1,90 @@
+name: Update company announcements
+
+on:
+  schedule:
+    - cron: '30 5 * * *'
+  workflow_dispatch:
+    inputs:
+      symbols:
+        description: 'Comma-separated symbols; empty = all companies'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: company-news-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install curl-impersonate
+        run: |
+          curl -sSL -o /tmp/ci.tgz https://github.com/lwthiker/curl-impersonate/releases/download/v0.6.1/curl-impersonate-v0.6.1.x86_64-linux-gnu.tar.gz
+          sudo mkdir -p /opt/curl-impersonate
+          sudo tar xzf /tmp/ci.tgz -C /opt/curl-impersonate
+          /opt/curl-impersonate/curl_chrome116 --version
+
+      - name: Select today's company batch
+        run: |
+          day=$(date -u +%j)
+          echo "NEWS_BATCH_INDEX=$((10#$day % 14))" >> "$GITHUB_ENV"
+
+      - name: Update official Saudi Exchange announcements
+        env:
+          CURL_IMPERSONATE_BIN: /opt/curl-impersonate/curl_chrome116
+          SYMBOLS: ${{ github.event.inputs.symbols || '' }}
+          NEWS_MONTHS: '3'
+          NEWS_BATCH_SIZE: '20'
+        run: node scripts/update-company-news.mjs
+
+      - name: Commit refreshed announcements
+        id: commit
+        run: |
+          git config user.name "news-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/company-news.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "Update company announcements $(date -u +%F)"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload website files
+        if: steps.commit.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
