@@ -280,7 +280,8 @@
   const weekStart = iso => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() - d.getUTCDay()); return d.toISOString().slice(0, 10); };
   // تعديل التوزيعات النقدية كما في TradingView (ADJ): كل سعر قبل تاريخ الاستحقاق يُضرب في
   // (1 − التوزيع ÷ إغلاق الجلسة السابقة له). الحجم لا يتغير.
-  function adjustDividends(daily, dividends = []) {
+  // معامل التعديل لكل شمعة (1 = بلا تعديل). يستعمله التعديل نفسه ورسم مناطق الماسح حين يُطفأ ADJ.
+  function dividendFactors(daily, dividends = []) {
     const factor = new Array(daily.length).fill(1);
     for (const [date, amount] of dividends) {
       const i = daily.findIndex(b => b.time >= date);
@@ -288,6 +289,10 @@
       const f = 1 - amount / daily[i - 1].close;
       for (let j = 0; j < i; j++) factor[j] *= f;
     }
+    return factor;
+  }
+  function adjustDividends(daily, dividends = []) {
+    const factor = dividendFactors(daily, dividends);
     return daily.map((b, i) => factor[i] === 1 ? b : { ...b, open: b.open * factor[i], high: b.high * factor[i], low: b.low * factor[i], close: b.close * factor[i] });
   }
   function group(daily, interval) {
@@ -853,8 +858,18 @@
         const sx = z.since ? ts.logicalToCoordinate(logicalOf(z.since)) : 0, x0 = Math.min(W, Math.max(0, sx ?? 0));
         const mid = (y1 + y2) / 2, h = Math.max(7, Math.abs(y2 - y1)), top = mid - h / 2, color = lv.color || colors.gold;
         const rgb = /^#([0-9a-f]{6})$/i.exec(color), tint = a => rgb ? `rgba(${parseInt(rgb[1].slice(0, 2), 16)},${parseInt(rgb[1].slice(2, 4), 16)},${parseInt(rgb[1].slice(4), 16)},${a})` : color;
-        ctx.fillStyle = tint(0.16); ctx.fillRect(x0, top, W - x0, h);
-        ctx.fillStyle = tint(0.7); ctx.fillRect(x0, top, W - x0, 1); ctx.fillRect(x0, top + h - 1, W - x0, 1);
+        // مناطق الماسح محسوبة على الأسعار المعدّلة للتوزيعات (ADJ). حين يُطفأ ADJ تُرسم المنطقة درجات: في كل فترة بين استحقاقين
+        // تُقسم حدودها على معامل التعديل فتبقى فوق الشموع نفسها التي بُنيت منها، لا عائمة بعيداً عنها.
+        const paint = (xa, xb, yh, yl) => { const hh = Math.max(7, Math.abs(yl - yh)), tp = (yh + yl) / 2 - hh / 2; ctx.fillStyle = tint(0.16); ctx.fillRect(xa, tp, xb - xa, hh); ctx.fillStyle = tint(0.7); ctx.fillRect(xa, tp, xb - xa, 1); ctx.fillRect(xa, tp + hh - 1, xb - xa, 1); };
+        if (!state.adj && dividends.length) {
+          const f = dividendFactors(raw, dividends), from = Math.max(0, raw.findIndex(b => b.time >= (z.since || raw[0].time)));
+          const cuts = [from]; for (let k = from + 1; k < raw.length; k++) if (f[k] !== f[k - 1]) cuts.push(k);
+          cuts.forEach((k, n) => {
+            const xa = n === 0 ? x0 : ts.logicalToCoordinate(logicalOf(raw[k].time)), xb = n + 1 < cuts.length ? ts.logicalToCoordinate(logicalOf(raw[cuts[n + 1]].time)) : W;
+            const ya = main.priceToCoordinate(z.high / f[k]), yb = main.priceToCoordinate(z.low / f[k]);
+            if (xa != null && xb != null && ya != null && yb != null) paint(Math.min(W, Math.max(0, xa)), Math.min(W, Math.max(0, xb)), ya, yb);
+          });
+        } else paint(x0, W, y1, y2);
         ctx.font = font12; ctx.textAlign = 'right'; ctx.textBaseline = z.side === 'resistance' ? 'bottom' : 'top';
         const label = z.title || '', ty = z.side === 'resistance' ? top - 3 : top + h + 3;
         ctx.lineWidth = 3; ctx.strokeStyle = colors.bg || '#11161d'; ctx.strokeText(label, W - 8, ty); ctx.fillStyle = color; ctx.fillText(label, W - 8, ty);
@@ -1781,5 +1796,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, load: loadCandleFile, indexEntry: INDEX_ENTRY, calc: { joinCandles, adjustDividends, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, IND_DEFAULT, mergeInd, indParams, srcOf, histColorIndex, crosshairDate, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
+  window.CompanyChart = { mount, load: loadCandleFile, indexEntry: INDEX_ENTRY, calc: { joinCandles, adjustDividends, dividendFactors, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, IND_DEFAULT, mergeInd, indParams, srcOf, histColorIndex, crosshairDate, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
 })();

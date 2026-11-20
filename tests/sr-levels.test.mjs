@@ -96,3 +96,16 @@ test('zones from zonesAt are never adjacent: either a real gap separates them or
   const atr = atrSeries(h, l, c, 14), i = c.length - 1, zs = zonesAt(h, l, c, i, atr).sort((x, y) => x.low - y.low);
   for (let k = 1; k < zs.length; k++) assert.ok(zs[k].low - zs[k - 1].high > SR_DEFAULTS.mergeGapAtr * atr[i] - 1e-9 || zs[k].high - zs[k - 1].low > SR_DEFAULTS.mergeMaxAtr * atr[i]);
 });
+
+test('a pivot touching an estimated (made-up) bar is not accepted; real ones are', () => {
+  const { h, l, c } = ranging(4);
+  const atr = atrSeries(h, l, c, 14), last = c.length - 1;
+  const clean = pivots(h, l, atr, last);
+  assert.ok(clean.length > 0);
+  const bad = c.map(() => false);
+  const target = clean[Math.floor(clean.length / 2)];
+  bad[target.j + 2] = true; // an estimated bar two sessions after the pivot (inside its confirmation window)
+  const filtered = pivots(h, l, atr, last, { ...SR_DEFAULTS, bad });
+  assert.ok(!filtered.some(v => v.j === target.j), 'pivot next to an estimated bar must be rejected');
+  assert.ok(filtered.length >= clean.length - 6 && filtered.length < clean.length, 'only the pivots near that bar are lost');
+});

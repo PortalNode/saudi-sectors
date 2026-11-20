@@ -95,7 +95,7 @@ test('published signals: a stock marked at support has real room to resistance, 
   const j = JSON.parse(readFileSync(new URL('../dist/scanner/signals.json', import.meta.url), 'utf8'));
   if (!j.meta.valid) return;
   for (const [sym, s] of Object.entries(j.stocks)) {
-    assert.ok(['support', 'resistance', 'squeezed', 'between', 'none'].includes(s.levelPos), sym);
+    assert.ok(['support', 'resistance', 'squeezed', 'breakout', 'open', 'between', 'none'].includes(s.levelPos), sym);
     assert.equal(s.keys.levels[0] === 1, s.levelPos === 'support', `${sym}: levels key and position disagree`);
     if (s.keys.levels[0] === 1 && s.resistanceZone) assert.ok((s.resistanceZone[0] - s.price) / s.atr >= 2 - 1e-6, `${sym}: at support with resistance within 2 ATR`);
     for (const th of [4, 5, 6]) {

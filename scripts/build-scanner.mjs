@@ -12,7 +12,8 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { loadStocks, loadMarket, OHLC_DIR, DIST } from './backtest/data.mjs';
 import { readCandles } from './ohlc-files.mjs';
 import { sma, atr as atrSeries } from '../dist/scanner/indicators.mjs';
-import { nearestZones } from './sr-levels.mjs';
+import { nearestZones, SR_DEFAULTS } from './sr-levels.mjs';
+import { adjustCandles } from './adjust-dividends.mjs';
 import { KEY_IDS, KEY_LABELS, MIN_SCORE, DIVIDEND_MIN, computeKeys, financialKey, financialKeyAsOf, tasiKey, levelPosition, precompute, runStart, loadFinancials } from './quality-keys.mjs';
 
 const OUT = new URL('../dist/scanner/signals.json', import.meta.url);
@@ -67,13 +68,17 @@ for (const s of stocks) {
   if (!(avgVal20 >= 1e6)) { skip('illiquid', s.symbol); continue; }
   meta.scanned += 1;
 
+  // كل المفاتيح والمناطق على السلسلة المعدّلة للتوزيعات النقدية (كما يعرضها الشارت افتراضياً)، فتنطبق المناطق على الشموع المعروضة.
+  // السعر المعروض في الجدول هو الإغلاق الرسمي (آخر شمعة لا يمسّها التعديل). الشموع المقدَّرة أو المُعلَّمة لا تُبنى عليها محاور.
+  const adj = adjustCandles(s, s.div), H = adj.h, L = adj.l, C = adj.c;
+  const sr = { ...SR_DEFAULTS, bad: s.d.map((_, k) => s.est[k] || s.flag[k]) };
   const c = s.c[i];
-  const sma50 = sma(s.c, 50)[i], sma200 = sma(s.c, 200)[i];
-  const atrArr = atrSeries(s.h, s.l, s.c, 14), pre = precompute(s.c);
-  const { support, resistance, atr } = nearestZones(s.h, s.l, s.c, i, undefined, atrArr, s.d);
+  const sma50 = sma(C, 50)[i], sma200 = sma(C, 200)[i];
+  const atrArr = atrSeries(H, L, C, 14), pre = precompute(C);
+  const { support, resistance, atr } = nearestZones(H, L, C, i, sr, atrArr, s.d);
   const avgVol20Prev = sma(s.v, 20)[i - 1], volRatio = avgVol20Prev > 0 ? s.v[i] / avgVol20Prev : null;
 
-  const k = computeKeys({ close: s.c, i, support, resistance, atr, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield, pre });
+  const k = computeKeys({ close: C, i, support, resistance, atr, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield, pre });
 
   // مجموع المفاتيح في كل جلسة من آخر HISTORY جلسة بما كان معلوماً وقتها (مناطق الدعم من شموع حتى ذلك اليوم، TASI بتاريخه، والأرباع
   // المتاحة وقتها بقاعدة تأخير تقريبية). الجلسة الأخيرة هي نتيجة اليوم نفسها فلا تختلف عمّا يُعرض.
@@ -81,8 +86,8 @@ for (const s of stocks) {
   for (let j = Math.max(WARMUP, i - HISTORY + 1); j <= i; j++) {
     dates.push(s.d[j]);
     if (j === i) { scores.push(k.score); continue; }
-    const z = nearestZones(s.h, s.l, s.c, j, undefined, atrArr, s.d);
-    scores.push(computeKeys({ close: s.c, i: j, support: z.support, resistance: z.resistance, atr: z.atr, financial: financialKeyAsOf(financials.get(s.symbol), s.d[j]), tasi: tasiOn(s.d[j]), dividendYield: null, pre }).score);
+    const z = nearestZones(H, L, C, j, sr, atrArr, s.d);
+    scores.push(computeKeys({ close: C, i: j, support: z.support, resistance: z.resistance, atr: z.atr, financial: financialKeyAsOf(financials.get(s.symbol), s.d[j]), tasi: tasiOn(s.d[j]), dividendYield: null, pre }).score);
   }
   const since = Object.fromEntries(THRESHOLDS.map(th => [th, runStart(scores, dates, th)]).filter(([, v]) => v));
   outStocks[s.symbol] = {

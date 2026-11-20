@@ -131,3 +131,19 @@ test('financial key as of a date uses only quarters published by then (no look-a
   assert.equal(financialKeyAsOf(fin, '2026-12-01').ok, 0);   // after they are: trailing four quarters are negative
   assert.equal(financialKeyAsOf(undefined, '2026-12-01').ok, 0);
 });
+
+test('at support means testing the zone (within 0.5 ATR above it): a stock that broke out and moved away is a breakout, not support', () => {
+  // Saudi Cable case: zone 183.6-190.6 made only of highs (resistance), price 197.4, ATR 7.13, nothing above
+  const broken = { low: 183.6, high: 190.6, center: 187, touches: 4, highs: 4, lows: 0 };
+  assert.equal(levelPosition(197.4, broken, null, 7.13), 'breakout');
+  assert.equal(levelsKey(197.4, broken, null, 7.13).ok, 0);
+  // the same zone but price back in it: now it is a retest of support
+  assert.equal(levelPosition(190, broken, null, 7.13), 'support');
+  assert.equal(levelsKey(190, broken, null, 7.13).ok, 1);
+  // 0.6 ATR above the zone is already too far; exactly 0.5 still counts
+  assert.equal(levelPosition(100 + 0.6 * 2, { low: 96, high: 100, center: 98, touches: 3 }, null, 2), 'open');
+  assert.equal(levelPosition(100 + 0.5 * 2, { low: 96, high: 100, center: 98, touches: 3 }, null, 2), 'support');
+  // a floor (has lows) far above with no resistance is "open", not a breakout; far from both with both present is "between"
+  assert.equal(levelPosition(120, { low: 96, high: 100, center: 98, touches: 3, highs: 1, lows: 2 }, null, 2), 'open');
+  assert.equal(levelPosition(120, { low: 96, high: 100, center: 98, touches: 3, highs: 1, lows: 2 }, Z(140, 142), 2), 'between');
+});

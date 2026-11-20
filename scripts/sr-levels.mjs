@@ -23,6 +23,8 @@ export function pivots(high, low, atr, i, p = SR_DEFAULTS) {
   const out = [], from = Math.max(p.k, p.fromIndex ?? i - p.lookback);
   for (let j = from; j <= i - p.k; j++) {
     const a = atr[j]; if (!(a > 0)) continue;
+    // شمعة مقدَّرة (أعلى/أدنى مصطنعان) أو مُعلَّمة بقفزة غير مفسَّرة قرب المحور تجعله غير موثوق: لا يُقبل محور يعتمد على أسعار مصطنعة
+    if (p.bad) { let dirty = false; for (let m = j - p.k; m <= j + p.k; m++) if (p.bad[m]) { dirty = true; break; } if (dirty) continue; }
     let isLow = true, isHigh = true;
     for (let m = j - p.k; m <= j + p.k; m++) { if (low[m] < low[j]) isLow = false; if (high[m] > high[j]) isHigh = false; if (!isLow && !isHigh) break; }
     const end = Math.min(i, j + p.reactionBars);

@@ -1,7 +1,7 @@
 // واجهة «مفاتيح جودة السهم» وقائمة المراقبة. تقرأ dist/scanner/signals.json (يبنيه scripts/build-scanner.mjs بعد كل
 // تحديث أسعار) ولا تحسب أي مؤشر بنفسها. كل المنطق القابل للاختبار في scanner-logic.mjs.
 import { KEY_IDS, DEFAULT_FILTERS, filterStocks, sortStocks, watchDiff, loadWatch, saveWatch, toggleWatch,
-  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL, LEVEL_POS_LABEL, AGE_OPTIONS, AGE_LABEL, sinceFor, sessionsText, ageClass } from './scanner-logic.mjs?v=sc-20261120a';
+  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL, LEVEL_POS_LABEL, AGE_OPTIONS, AGE_LABEL, sinceFor, sessionsText, ageClass } from './scanner-logic.mjs?v=sc-20261120b';
 
 const FILTER_KEY = 'saudi-sectors-scanner-filters-v3';
 const base = file => new URL(file, import.meta.url);
@@ -25,7 +25,7 @@ function banner() {
   if (!m.valid) return `<div class="sc-banner sc-bad" role="alert"><strong>تعذر التحقق من البيانات، فلا تُعرض أي نتائج.</strong> ${esc(m.reasonInvalid || '')}</div>`;
   const excluded = Object.entries(m.excluded || {}).map(([k, v]) => `${REASON[k] || k}: ${v.length}`).join(' · ');
   const tasiOff = m.tasi && m.tasi.trend !== 'up';
-  return `<div class="sc-banner" role="note"><strong>استراتيجية «مفاتيح جودة السهم».</strong> لكل سهم ستة مفاتيح: اتجاه السهم، التحليل المالي (صافي ربح آخر 4 أرباع موجب)، اتجاه TASI، مستويات الأسعار (عند منطقة دعم ويفصله عن أقرب مقاومة مجال لا يقل عن 2×ATR، أما السهم عند مقاومة أو بين دعم ومقاومة متقاربين فصفر)، الإغلاق فوق المتوسط 55، وMACD فوق خط الإشارة. المفتاح إما <b>1+</b> أو <b>0</b>، ويظهر السهم إذا حقق <b>${m.minScore} مفاتيح أو أكثر</b> من 6. استراتيجية وصفية لا تتنبأ وليست توصية استثمارية. عمود «ظهرت الإشارة» يبيّن متى بدأت الفترة المتصلة الحالية التي حقق فيها السهم العدد المحدد من المفاتيح (المفتاح المالي فيه تقريبي: يُفترض نشر نتائج الربع بعد 45 يوماً من نهايته)، فتعرف إن كانت الإشارة جديدة أم قديمة.</div>
+  return `<div class="sc-banner" role="note"><strong>استراتيجية «مفاتيح جودة السهم».</strong> لكل سهم ستة مفاتيح: اتجاه السهم، التحليل المالي (صافي ربح آخر 4 أرباع موجب)، اتجاه TASI، مستويات الأسعار (يختبر منطقة دعم فعلاً: داخلها أو أعلى منها بأقل من نصف ATR، ويفصله عن أقرب مقاومة 2×ATR على الأقل؛ أما السهم عند مقاومة، أو بين دعم ومقاومة متقاربين، أو الذي اخترق منطقة وابتعد عنها فصفر)، الإغلاق فوق المتوسط 55، وMACD فوق خط الإشارة. المفتاح إما <b>1+</b> أو <b>0</b>، ويظهر السهم إذا حقق <b>${m.minScore} مفاتيح أو أكثر</b> من 6. استراتيجية وصفية لا تتنبأ وليست توصية استثمارية. عمود «ظهرت الإشارة» يبيّن متى بدأت الفترة المتصلة الحالية التي حقق فيها السهم العدد المحدد من المفاتيح (المفتاح المالي فيه تقريبي: يُفترض نشر نتائج الربع بعد 45 يوماً من نهايته). كل الحسابات على الأسعار المعدّلة للتوزيعات النقدية كما يعرضها الشارت بزر ADJ، فتعرف إن كانت الإشارة جديدة أم قديمة.</div>
   ${tasiOff ? `<div class="sc-banner sc-warn-banner" role="note">مفتاح السوق (TASI) <b>0</b> الآن: ${esc(m.tasi.detail)}. لذلك لا يمكن لأي سهم تجاوز 5 من 6 حتى يعود المؤشر للاتجاه الصاعد.</div>` : ''}
   <div class="sc-meta"><span>آخر إغلاق رسمي: <bdi class="num">${esc(m.dataDate)}</bdi></span><span>الأسهم المفحوصة: <bdi class="num">${m.scanned}</bdi> من <bdi class="num">${m.universe}</bdi></span><span>6 من 6: <bdi class="num">${m.counts.six}</bdi> · 5 من 6: <bdi class="num">${m.counts.five}</bdi></span><span>اتجاه TASI: ${esc(TREND_LABEL[m.tasi?.trend] || '—')}</span>${excluded ? `<span>مستبعد: ${esc(excluded)}</span>` : ''}</div>`;
 }

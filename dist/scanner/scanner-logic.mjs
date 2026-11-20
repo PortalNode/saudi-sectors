@@ -75,6 +75,6 @@ export function fmtValue(x) {
   return `${en(0).format(x / 1e3)} ألف`;
 }
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const LEVEL_POS_LABEL = { support: 'عند دعم', resistance: 'عند مقاومة', squeezed: 'بين دعم ومقاومة متقاربين', between: 'بين المستويين', none: 'بلا مستويات مؤكدة' };
+export const LEVEL_POS_LABEL = { support: 'عند دعم', resistance: 'عند مقاومة', squeezed: 'بين دعم ومقاومة متقاربين', breakout: 'اختراق: فوق مقاومة مكسورة', open: 'فوق الدعم، لا مقاومة أعلاه', between: 'بين المستويين', none: 'بلا مستويات مؤكدة' };
 export const TREND_LABEL = { up: 'صاعد', side: 'عرضي / غير واضح', down: 'هابط', na: '—' };
 export const WATCH_LABEL = { added: 'تحسّنت مفاتيح منذ الحفظ', removed: 'تراجعت مفاتيح منذ الحفظ', changed: 'تغيّرت المفاتيح منذ الحفظ', same: 'لم تتغير المفاتيح', none: 'خارج نطاق الفحص' };

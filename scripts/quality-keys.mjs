@@ -48,12 +48,16 @@ export function swingLevels(high, low, close, i, { k = 4, lookback = 252 } = {})
 
 // منطقة دعم/مقاومة كما تخرج من sr-levels.mjs: { low, high, center, touches }. المسافة بوحدة ATR من حافة المنطقة (صفر داخلها).
 const zoneText = (z, label) => `${label} ${f2(z.low)}–${f2(z.high)} (${z.touches} لمسات)`;
-export const AT_SUPPORT_ATR = 1.0; // «عند الدعم»: داخل المنطقة أو فوق حافتها العليا بأقل من 1×ATR
+export const AT_SUPPORT_ATR = 0.5; // «عند الدعم»: داخل المنطقة أو فوق حافتها العليا بأقل من 0.5×ATR (السعر يختبر المنطقة فعلاً)
 export const NEAR_RESISTANCE_ATR = 1.0; // «عند المقاومة»: داخل المنطقة أو تحت حافتها السفلى بأقل من 1×ATR
 export const MIN_ROOM_ATR = 2.0; // أقل مسافة حرة إلى أقرب مقاومة ليُحسب السهم عند دعم (دون ذلك يضيق المجال بين المستويين)
+export const BREAKOUT_ATR = 3.0; // اختراق «حديث»: السعر فوق منطقة كانت مقاومة (قمم فقط) بما لا يزيد عن 3×ATR
 
-// موقع السعر بين المستويين. support: عند دعم وأمامه مجال إلى المقاومة (يتحقق به المفتاح) · resistance: عند مقاومة ·
-// squeezed: قريب من دعم لكن المقاومة قريبة أيضاً فلا مجال (مفتاح 0) · between: بينهما بعيداً عن الاثنين · none: لا مستويات مؤكدة
+// موقع السعر بين المستويين:
+//  support: يختبر دعماً وأمامه مجال إلى المقاومة (يتحقق به المفتاح) · resistance: عند مقاومة ·
+//  squeezed: قريب من دعم لكن المقاومة قريبة أيضاً فلا مجال (مفتاح 0) ·
+//  breakout: فوق منطقة كانت مقاومة وكُسرت، لم يعد إليها بعد (اختراق، ليس اختباراً للدعم) ·
+//  open: فوق دعم بعيداً عنه ولا مقاومة أعلاه · between: بين مستويين بعيداً عنهما · none: لا مستويات مؤكدة
 export function levelPosition(price, support, resistance, atr) {
   if (!fin(price) || !(atr > 0) || (!support && !resistance)) return 'none';
   const dS = support ? Math.max(0, price - support.high) / atr : Infinity, dR = resistance ? Math.max(0, resistance.low - price) / atr : Infinity;
@@ -61,18 +65,20 @@ export function levelPosition(price, support, resistance, atr) {
   if (nearS && dR >= MIN_ROOM_ATR) return 'support';
   if (nearS) return 'squeezed';
   if (nearR) return 'resistance';
+  if (support && support.lows === 0 && dS <= BREAKOUT_ATR) return 'breakout';
+  if (support && !resistance) return 'open';
   return 'between';
 }
 
-// 1+ فقط إذا كان السهم عند منطقة دعم (داخلها أو ضمن 1×ATR فوقها) ويفصله عن أقرب مقاومة 2×ATR فأكثر (أو لا مقاومة فوقه: قمة جديدة).
-// أي سهم عند مقاومة أو بين دعم ومقاومة متقاربين = 0، فلا يظهر سهم «عند دعم» وهو ملاصق لمقاومة.
+// 1+ فقط إذا كان السهم يختبر منطقة دعم (داخلها أو ضمن 0.5×ATR فوقها) ويفصله عن أقرب مقاومة 2×ATR فأكثر (أو لا مقاومة فوقه: قمة جديدة).
+// أي سهم عند مقاومة، أو بين دعم ومقاومة متقاربين، أو مخترق لمنطقة ومبتعد عنها = 0، فلا يظهر سهم «عند دعم» وهو ملاصق لمقاومة أو مبتعد عن الدعم.
 export function levelsKey(price, support, resistance, atr) {
   if (!fin(price) || !(atr > 0)) return key(false, 'لا بيانات كافية لتحديد المستويات');
   if (!support) return key(false, resistance ? `لا توجد منطقة دعم مؤكدة تحت السعر · ${zoneText(resistance, 'مقاومة')}` : 'لا توجد مناطق دعم أو مقاومة مؤكدة');
   const dS = Math.max(0, price - support.high) / atr, dR = resistance ? Math.max(0, resistance.low - price) / atr : Infinity;
   const detail = `${zoneText(support, 'دعم')} يبعد ${f2(dS, 1)}×ATR${resistance ? ` · ${zoneText(resistance, 'مقاومة')} تبعد ${f2(dR, 1)}×ATR` : ' · لا مقاومة فوق السعر'}`;
   const pos = levelPosition(price, support, resistance, atr);
-  const why = pos === 'support' ? '' : pos === 'resistance' ? ' — السعر عند مقاومة' : pos === 'squeezed' ? ' — المقاومة قريبة (أقل من 2×ATR) فلا مجال كافٍ' : ' — بعيد عن الدعم';
+  const why = { support: '', resistance: ' — السعر عند مقاومة', squeezed: ' — المقاومة قريبة (أقل من 2×ATR) فلا مجال كافٍ', breakout: ' — اختراق: السعر فوق مقاومة مكسورة ولم يعد لاختبارها', open: ' — بعيد عن الدعم', between: ' — بعيد عن الدعم' }[pos] ?? '';
   return key(pos === 'support', detail + why);
 }
 
