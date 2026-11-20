@@ -1,11 +1,12 @@
 // خادم وسيط لصفحة «المحلل الذكي» على Cloudflare Workers.
 // - يحفظ مفتاح OpenRouter سرًّا (لا يصل للمتصفح أبدًا).
 // - يأخذ ملف الشركة المختصر من الموقع نفسه، فلا يستطيع أحد إرسال نصوص ضخمة على حسابك.
-// - يحدد عدد الأسئلة لكل زائر في اليوم وسقفًا يوميًا للموقع كله، ويحصر النماذج في قائمة رخيصة.
+// - يحدد عدد الأسئلة لكل زائر في اليوم وسقفًا يوميًا للموقع كله، ويحصر النماذج في المجانية.
 
 // احتياطي فقط: الدور الكامل يأتي من ملف الشركة (pack.system).
 const SYSTEM = 'أنت محلل مالي للسوق السعودي. أجب بالعربية باختصار ووضوح بعناوين قصيرة ونقاط. اعتمد فقط على بيانات الشركة المرفقة واذكر الأرقام وتواريخها. لا تقدم توصية شراء أو بيع مباشرة. إذا لم تكفِ البيانات للإجابة فقل ذلك صراحة.';
-const DEFAULT_MODELS = 'deepseek/deepseek-v4.1-flash,google/gemini-3.8-flash,google/gemini-4-argon,deepseek/deepseek-v4-pro-0813';
+// نماذج مجانية فقط (:free)، فلا يُخصم أي مبلغ من الرصيد.
+const DEFAULT_MODELS = 'nvidia/nemotron-3-ultra-550b-a55b:free,baidu/ernie-5.5-flash-preview:free,dots-studio/dots-3-note-preview:free,inclusionai/ling-3.2-flash:free,nvidia/nemotron-3.5-super-vl:free,google/gemma-4-31b-it:free';
 
 const json = (body, status, cors, extra = {}) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors, ...extra } });

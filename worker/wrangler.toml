@@ -7,7 +7,7 @@ compatibility_date = "2026-11-01"
 ALLOWED_ORIGINS = "https://portalnode.github.io,http://localhost:8765"
 SITE_URL = "https://portalnode.github.io/saudi-sectors/"
 # أول نموذج هو الافتراضي. أي نموذج خارج القائمة يُستبدل بالأول.
-MODELS = "deepseek/deepseek-v4.1-flash,google/gemini-3.8-flash,google/gemini-4-argon,deepseek/deepseek-v4-pro-0813"
+MODELS = "nvidia/nemotron-3-ultra-550b-a55b:free,baidu/ernie-5.5-flash-preview:free,dots-studio/dots-3-note-preview:free,inclusionai/ling-3.2-flash:free,nvidia/nemotron-3.5-super-vl:free,google/gemma-4-31b-it:free"
 DAILY_LIMIT = "20"          # أسئلة لكل زائر في اليوم
 GLOBAL_DAILY_LIMIT = "1000" # أسئلة للموقع كله في اليوم
 MAX_TOKENS = "16000"        # أقصى طول للإجابة (يشمل تفكير النموذج)
