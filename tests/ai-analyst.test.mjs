@@ -42,9 +42,10 @@ test('a company pack is a short table with the key figures, not the raw files', 
   assert.ok(pack.tokens < pack.rawTokens);
 });
 
-test('the analyst page talks only to the proxy and is in every top bar', () => {
+test('the analyst page keeps the key out of the site files and is in every top bar', () => {
   const page = read('ai-analyst.html');
-  assert.doesNotMatch(page, /openrouter\.ai|sk-or-|type="password"/, 'no API key or direct OpenRouter call in the page');
+  assert.doesNotMatch(page, /sk-or-v1-[0-9a-f]{8}/, 'no API key written into the page');
+  assert.match(page, /store\.get\("ai-openrouter-key"\)/, 'the key lives only in the visitor\'s browser');
   assert.match(page, /ai-config\.js/);
   assert.match(page, /`ai\/\$\{[^}]+\}\.json`/);
   const worker = readFileSync(new URL('../worker/ai-proxy.js', import.meta.url), 'utf8');

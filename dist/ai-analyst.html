@@ -104,6 +104,10 @@
     .ai-settings label{display:grid;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted)}
     .ai-settings :is(input,select){min-height:34px;padding:6px 10px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--ink);font-family:inherit;font-size:12.5px}
     .ai-settings p{margin:0;font-size:11px;line-height:1.75;color:var(--muted)}
+    .ai-key{display:flex;gap:6px}
+    .ai-key input{flex:1;min-width:0;direction:ltr;text-align:left}
+    .ai-key button{min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:2px;background:var(--panel);color:var(--muted);font-size:11.5px;font-weight:700}
+    .ai-key button:hover{color:var(--ink);border-color:var(--muted)}
     .ai-mode{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink)}
     .ai-dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
     .ai-dot.live{background:var(--green)}
@@ -181,7 +185,13 @@
               <option value="google/gemini-3.8-flash" data-in="0.825" data-out="4.125">Gemini 3.8 Flash — أدق</option>
             </select>
           </label>
-          <p id="mode-note">المحلل غير مفعّل بعد، فتظهر قراءة آلية مبنية على الأرقام بدل إجابة الذكاء الاصطناعي.</p>
+          <label for="key">مفتاح OpenRouter</label>
+          <div class="ai-key">
+            <input id="key" type="password" placeholder="sk-or-v1-…" autocomplete="off" spellcheck="false">
+            <button type="button" id="key-show" aria-pressed="false">إظهار</button>
+            <button type="button" id="key-clear">حذف</button>
+          </div>
+          <p id="mode-note"></p>
         </div>
       </section>
     </aside>
@@ -198,6 +208,8 @@ const QUICK = [
   ["مقارنة بالقطاع","قارن الشركة بمتوسط قطاعها في المكرر والعائد والأداء السنوي."],
 ];
 const ENDPOINT = String(window.AI_ENDPOINT || "").trim();
+const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
+const SYSTEM = "أنت محلل مالي للسوق السعودي. أجب بالعربية باختصار ووضوح بعناوين قصيرة ونقاط. اعتمد فقط على بيانات الشركة المرفقة واذكر الأرقام وتواريخها. لا تقدم توصية شراء أو بيع مباشرة. إذا لم تكفِ البيانات للإجابة فقل ذلك صراحة.";
 const SYSTEM_TOKENS = 90, OUT_TOKENS = 600;
 const $ = id => document.getElementById(id);
 const norm = s => String(s||"").trim().toLowerCase().replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ـ/g,"");
@@ -211,7 +223,22 @@ let all = [], current = null, history = [], busy = false;
 const chat = $("chat"), input = $("company-search"), sugg = $("sugg"), modelEl = $("model");
 
 /* ---------- الحالة ---------- */
-if (ENDPOINT) { $("mode-dot").classList.add("live"); $("mode-text").textContent = "متصل"; $("mode-note").textContent = "الإجابات من نموذج الذكاء الاصطناعي المختار، مع حد يومي لعدد الأسئلة."; }
+/* المفتاح يُحفظ في هذا المتصفح فقط (localStorage) ولا يُكتب في ملفات الموقع. */
+const keyEl = $("key");
+keyEl.value = store.get("ai-openrouter-key") || "";
+const apiKey = () => keyEl.value.trim();
+function setMode(){
+  const mode = apiKey() ? "key" : ENDPOINT ? "proxy" : "off";
+  $("mode-dot").classList.toggle("live", mode !== "off");
+  $("mode-text").textContent = mode === "key" ? "متصل بمفتاحك" : mode === "proxy" ? "متصل" : "غير مفعّل";
+  $("mode-note").textContent = mode === "key" ? "المفتاح محفوظ في هذا المتصفح فقط، والطلبات تذهب مباشرة إلى OpenRouter."
+    : mode === "proxy" ? "الإجابات عبر خادم الموقع، مع حد يومي لعدد الأسئلة."
+    : "ضع مفتاح OpenRouter لتفعيل المحلل. بدونه تظهر قراءة آلية مبنية على الأرقام.";
+}
+keyEl.addEventListener("input", () => { store.set("ai-openrouter-key", apiKey()); setMode(); });
+$("key-show").onclick = e => { const show = keyEl.type === "password"; keyEl.type = show ? "text" : "password"; e.target.textContent = show ? "إخفاء" : "إظهار"; e.target.setAttribute("aria-pressed", String(show)); };
+$("key-clear").onclick = () => { keyEl.value = ""; try { localStorage.removeItem("ai-openrouter-key"); } catch {} setMode(); };
+setMode();
 const savedModel = store.get("ai-model");
 if (savedModel && [...modelEl.options].some(o=>o.value===savedModel)) modelEl.value = savedModel;
 modelEl.addEventListener("change", () => { store.set("ai-model", modelEl.value); updateMeter(); });
@@ -297,13 +324,24 @@ async function ask(question, label){
   const bot = document.createElement("div"); bot.className = "msg bot"; bot.innerHTML = `<span class="typing"><i></i><i></i><i></i></span>`;
   chat.append(bot); chat.scrollTop = chat.scrollHeight;
   const t0 = performance.now(), model = modelEl.value;
-  let answer = "", usage = null, remaining = null, offline = !ENDPOINT, failure = "";
+  const key = apiKey();
+  let answer = "", usage = null, remaining = null, offline = !key && !ENDPOINT, failure = "";
   if (!offline) {
     try {
-      const r = await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symbol: current.symbol, question, history: history.slice(-6), model }) });
-      remaining = r.headers.get("X-Remaining");
-      if (!r.ok) { failure = (await r.json().catch(()=>({}))).error || `خطأ ${r.status}`; throw new Error(failure); }
+      const r = key
+        ? await fetch(OPENROUTER, { method: "POST",
+            headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Saudi Sectors" },
+            body: JSON.stringify({ model, max_tokens: 900, temperature: 0.3, stream: true, usage: { include: true },
+              reasoning: { effort: "low", exclude: true },
+              messages: [{ role: "system", content: `${SYSTEM}\n\nبيانات الشركة:\n${current.text}` }, ...history.slice(-6), { role: "user", content: question }] }) })
+        : await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ symbol: current.symbol, question, history: history.slice(-6), model }) });
+      remaining = key ? null : r.headers.get("X-Remaining");
+      if (!r.ok) {
+        const err = await r.json().catch(()=>({}));
+        failure = r.status === 401 ? "مفتاح OpenRouter غير صحيح." : r.status === 402 ? "رصيد OpenRouter غير كافٍ." : (typeof err.error === "string" ? err.error : err.error?.message) || `خطأ ${r.status}`;
+        throw new Error(failure);
+      }
       const reader = r.body.getReader(), dec = new TextDecoder(); let buf = "";
       for (;;) {
         const { done, value } = await reader.read(); if (done) break;
@@ -322,7 +360,7 @@ async function ask(question, label){
   if (!failure && !offline) { history.push({role:"user",content:question},{role:"assistant",content:answer}); history = history.slice(-6); }
   const inT = usage?.prompt_tokens, outT = usage?.completion_tokens;
   const meta = offline
-    ? `<span class="demo">قراءة آلية من الأرقام${ENDPOINT ? "" : " — المحلل غير مفعّل بعد"}</span>`
+    ? `<span class="demo">قراءة آلية من الأرقام${key || ENDPOINT ? "" : " — ضع مفتاح OpenRouter في الإعدادات لتفعيل المحلل"}</span>`
     : `<span>${esc(model)}</span>${inT!=null?`<span>دخل <span class="n">${fmt(inT,0)}</span> توكن · خرج <span class="n">${fmt(outT,0)}</span></span>`:""}${remaining!=null?`<span>تبقّى لك اليوم <span class="n">${remaining}</span> سؤال</span>`:""}`;
   bot.insertAdjacentHTML("beforeend", `<div class="msg-meta">${meta}<span><span class="n">${((performance.now()-t0)/1000).toFixed(1)}</span> ث</span></div>`);
   chat.scrollTop = chat.scrollHeight; busy = false; setEnabled(true); updateMeter();
