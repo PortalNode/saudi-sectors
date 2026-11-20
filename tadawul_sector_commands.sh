@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # شغّل هذه الأوامر من مجلد المشروع الذي يحتوي dist/data.json
 # التثبيت مرة واحدة:
-python3 -m pip install openpyxl curl-cffi
+python3 -m pip install openpyxl playwright
+python3 -m playwright install chromium
 
 # اختبار أسماء القطاعات:
 python3 tadawul_announcements_excel.py --list-sectors

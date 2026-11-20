@@ -6,7 +6,7 @@
 مصدر قائمة القطاعات والشركات: dist/data.json في مشروع السوق السعودي.
 
 التثبيت:
-    python3 -m pip install openpyxl curl-cffi
+    python3 -m pip install openpyxl playwright
 
 أمثلة:
     python3 tadawul_announcements_excel.py --list-sectors
@@ -26,17 +26,16 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 try:
-    from curl_cffi import requests
-except ImportError:
-    print("المكتبة ناقصة. نفّذ: python3 -m pip install openpyxl curl-cffi", file=sys.stderr)
-    raise
-
-try:
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
     from openpyxl.utils import get_column_letter
 except ImportError:
-    print("المكتبة ناقصة. نفّذ: python3 -m pip install openpyxl curl-cffi", file=sys.stderr)
+    print("المكتبة ناقصة. نفّذ: python3 -m pip install openpyxl playwright", file=sys.stderr)
+    raise
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:
+    print("المكتبة ناقصة. نفّذ: python3 -m pip install playwright", file=sys.stderr)
     raise
 
 LANDING_URL = (
@@ -46,6 +45,8 @@ LANDING_URL = (
 PAGE_SIZE = 10
 MAX_PAGES = 12
 DEFAULT_DELAY = (3.0, 6.0)
+ENDPOINT_PATH = ("p0/IZ7_5A602H80O0HTC060SG6UT81DI1="
+                 "CZ6_5A602H80O0HTC060SG6UT81D26=NJgetAnnouncementListData=/")
 
 
 class TadawulBlocked(RuntimeError):
@@ -111,21 +112,29 @@ def load_sectors(data_file: Path) -> dict[str, list[dict[str, str]]]:
     return sectors
 
 
-def create_session() -> tuple[requests.Session, str]:
-    session = requests.Session(impersonate="chrome")
-    response = session.get(
-        LANDING_URL,
-        headers={"Accept-Language": "ar-SA,ar;q=0.9,en;q=0.8"},
-        timeout=45,
-    )
-    if response.status_code >= 400:
-        raise TadawulBlocked(f"صفحة تداول أعادت HTTP {response.status_code}")
-    match = re.search(r'<base[^>]+href=["\']([^"\']+)["\']', response.text, re.I)
-    if not match:
-        raise TadawulBlocked("لم أجد مسار بوابة تداول في الاستجابة؛ قد يكون هناك حظر مؤقت")
-    endpoint = urljoin(match.group(1), "p0/IZ7_5A602H80O0HTC060SG6UT81DI1="
-        "CZ6_5A602H80O0HTC060SG6UT81D26=NJgetAnnouncementListData=/")
-    return session, endpoint
+def create_browser(playwright):
+    profile = str(Path("browser_profile").absolute())
+    try:
+        context = playwright.chromium.launch_persistent_context(
+            profile, headless=False, locale="ar-SA", channel="chrome",
+            args=["--start-maximized"], viewport=None,
+        )
+    except Exception:
+        # إذا لم يجد Playwright نسخة Chrome المثبتة، يستخدم Chromium الخاص به.
+        context = playwright.chromium.launch_persistent_context(
+            profile, headless=False, locale="ar-SA", args=["--start-maximized"], viewport=None,
+        )
+    page = context.pages[0] if context.pages else context.new_page()
+    page.goto(LANDING_URL, wait_until="domcontentloaded", timeout=60000)
+    page.wait_for_timeout(3500)
+    body = page.inner_text("body").lower()
+    markers = ["verify you are human", "just a moment", "لست روبوت", "security check"]
+    if any(marker in body for marker in markers):
+        print("\n⚠ ظهرت نافذة تحقق من تداول. حل التحقق في Chrome ثم اضغط Enter هنا للمتابعة.")
+        input()
+    base = page.locator("base").first.get_attribute("href") if page.locator("base").count() else page.url
+    endpoint = urljoin(base, ENDPOINT_PATH)
+    return context, page, endpoint
 
 
 def normalise(item: dict) -> dict:
@@ -144,34 +153,36 @@ def normalise(item: dict) -> dict:
     }
 
 
-def fetch_company(session, endpoint: str, symbol: str, start: date, end: date, delay: tuple[float, float]) -> list[dict]:
+def fetch_company(page, endpoint: str, symbol: str, start: date, end: date, delay: tuple[float, float]) -> list[dict]:
     collected: list[dict] = []
     total = 0
-    for page in range(1, MAX_PAGES + 1):
+    for page_number in range(1, MAX_PAGES + 1):
         payload = {
             "locale": "ar", "annoucmentType": "1_-1", "symbol": symbol,
             "sectorDpId": "-1", "searchType": "1", "fromDate": tadawul_date(start),
             "toDate": tadawul_date(end), "datePeriod": "", "productType": "MAIN_MARKET",
-            "advisorsList": "-1", "textSearch": "", "pageNumberDb": str(page),
+            "advisorsList": "-1", "textSearch": "", "pageNumberDb": str(page_number),
             "pageSize": str(PAGE_SIZE),
         }
-        response = session.post(
-            endpoint,
-            data=payload,
-            headers={
-                "Accept": "application/json, text/plain, */*",
-                "Accept-Language": "ar-SA,ar;q=0.9,en;q=0.8",
-                "X-Requested-With": "XMLHttpRequest",
-                "Referer": LANDING_URL,
-            },
-            timeout=45,
-        )
-        text = response.text.lstrip()
-        if response.status_code in (403, 429) or not text.startswith("{"):
-            raise TadawulBlocked(f"حظر عند الشركة {symbol}: HTTP {response.status_code}")
+        result = page.evaluate("""
+            async ({endpoint, payload}) => {
+              const body = new URLSearchParams(payload).toString();
+              const response = await fetch(endpoint, {
+                method: 'POST', credentials: 'include',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                  'X-Requested-With': 'XMLHttpRequest'
+                }, body
+              });
+              return {status: response.status, text: await response.text()};
+            }
+        """, {"endpoint": endpoint, "payload": payload})
+        text = str(result.get("text", "")).lstrip()
+        if result.get("status") in (403, 429) or not text.startswith("{"):
+            raise TadawulBlocked(f"حظر عند الشركة {symbol}: HTTP {result.get('status')}")
         try:
-            data = response.json()
-        except ValueError as exc:
+            data = json.loads(text)
+        except json.JSONDecodeError as exc:
             raise TadawulBlocked(f"استجابة غير صالحة من تداول للشركة {symbol}") from exc
         items = data.get("announcementList") or []
         total = int(data.get("totalCount") or (items[0].get("totalCount", 0) if items else 0) or 0)
@@ -256,24 +267,17 @@ def write_workbook(sector: str, companies: list[dict], cache: dict, output_dir: 
     return output
 
 
-def run_sector(sector: str, companies: list[dict], args: argparse.Namespace) -> None:
+def run_sector(sector: str, companies: list[dict], args: argparse.Namespace, page, endpoint) -> None:
     start, end = date_range(args.months)
     output_dir = Path(args.output_dir)
     cache_file = cache_path(output_dir, sector)
     cache = load_cache(cache_file)
     print(f"\n===== {sector} | {len(companies)} شركة | آخر {args.months} أشهر =====")
     try:
-        session, endpoint = create_session()
-    except TadawulBlocked as exc:
-        print(f"⚠ تعذر فتح تداول: {exc}")
-        output = write_workbook(sector, companies, cache, output_dir, start, end)
-        print(f"تم حفظ الملف الحالي: {output}")
-        return
-    try:
         for index, company in enumerate(companies, 1):
             print(f"[{index}/{len(companies)}] {company['name']} ({company['symbol']}) ...", flush=True)
             try:
-                items = fetch_company(session, endpoint, company["symbol"], start, end, (args.delay_min, args.delay_max))
+                items = fetch_company(page, endpoint, company["symbol"], start, end, (args.delay_min, args.delay_max))
                 cache[company["symbol"]] = items
                 print(f"    ✓ {len(items)} إعلان")
                 save_cache(cache_file, cache)
@@ -309,10 +313,18 @@ def main() -> None:
     selected = list(sectors.items()) if args.all else [(args.sector, sectors.get(args.sector, []))]
     if not selected[0][1]:
         raise SystemExit(f"القطاع غير موجود أو لا يحتوي شركات. استخدم --list-sectors")
-    for sector, companies in selected:
-        run_sector(sector, companies, args)
-        if args.all:
-            time.sleep(random.uniform(10, 20))
+    with sync_playwright() as playwright:
+        try:
+            context, page, endpoint = create_browser(playwright)
+        except Exception as exc:
+            raise SystemExit(f"تعذر تشغيل Chrome أو فتح تداول: {exc}") from exc
+        try:
+            for sector, companies in selected:
+                run_sector(sector, companies, args, page, endpoint)
+                if args.all:
+                    time.sleep(random.uniform(10, 20))
+        finally:
+            context.close()
 
 
 if __name__ == "__main__":
