@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { atr as atrSeries } from '../dist/scanner/indicators.mjs';
-import { pivots, zonesAt, nearestZones, windowStart, SR_DEFAULTS } from '../scripts/sr-levels.mjs';
+import { pivots, zonesAt, nearestZones, windowStart, mergeZones, SR_DEFAULTS } from '../scripts/sr-levels.mjs';
 
 // سلسلة تتأرجح بين 100 و110 مرات عدة (قاع 100 وقمة 110 تتكرر)، تنتهي قرب 103
 function ranging(cycles = 5, ending = 103) {
@@ -77,4 +77,22 @@ test('a flat top over adjacent bars is one pivot, so one touch', () => {
   const h = c.map(x => x + 0.5), l = c.map(x => x - 0.5), atr = atrSeries(h, l, c, 14);
   const tops = pivots(h, l, atr, c.length - 1).filter(v => v.type === 'high');
   assert.equal(tops.length, 1);
+});
+
+test('adjacent zones are one band: a support right under a resistance merges, distant or too wide ones do not', () => {
+  const Zn = (low, high, touches, score) => ({ low, high, center: (low + high) / 2, touches, score, first: 1, last: 9, highs: 1, lows: 1 });
+  const a = 2; // ATR
+  const merged = mergeZones([Zn(98, 100, 3, 3), Zn(100.4, 102, 4, 4)], a); // gap 0.4 = 0.2 ATR
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].low, 98); assert.equal(merged[0].high, 102); assert.equal(merged[0].touches, 7);
+  assert.ok(merged[0].center > 100 && merged[0].center < 101.2);
+  assert.equal(mergeZones([Zn(98, 100, 3, 3), Zn(104, 106, 4, 4)], a).length, 2);  // gap 2 ATR: separate levels
+  assert.equal(mergeZones([Zn(90, 94, 3, 3), Zn(94.5, 99, 4, 4)], a).length, 2);   // merged width would exceed 2 ATR
+  assert.equal(mergeZones([Zn(100.5, 102, 4, 4), Zn(98, 100, 3, 3)], a).length, 1); // order-independent
+});
+
+test('zones from zonesAt are never adjacent: either a real gap separates them or merging would exceed the width cap', () => {
+  const { h, l, c } = ranging(6, 105);
+  const atr = atrSeries(h, l, c, 14), i = c.length - 1, zs = zonesAt(h, l, c, i, atr).sort((x, y) => x.low - y.low);
+  for (let k = 1; k < zs.length; k++) assert.ok(zs[k].low - zs[k - 1].high > SR_DEFAULTS.mergeGapAtr * atr[i] - 1e-9 || zs[k].high - zs[k - 1].low > SR_DEFAULTS.mergeMaxAtr * atr[i]);
 });

@@ -1,7 +1,20 @@
 // منطق صفحة «مفاتيح جودة السهم» (فلترة وترتيب ومقارنة المراقبة وتنسيق الأرقام). بلا DOM، فيُحمَّل من الصفحة ومن الاختبارات.
 
 export const KEY_IDS = ['trend', 'fin', 'tasi', 'levels', 'sma55', 'macd'];
-export const DEFAULT_FILTERS = { minScore: 5, sector: 'all', minValue: 1e6, excludeLoss: false, query: '' };
+export const DEFAULT_FILTERS = { minScore: 5, sector: 'all', minValue: 1e6, excludeLoss: false, query: '', age: 'all' };
+
+// بداية الفترة المتصلة الحالية التي حقق فيها السهم th مفاتيح فأكثر: { date, sessions, capped } أو null (يبنيها scripts/build-scanner.mjs)
+export const sinceFor = (s, th) => s?.since?.[th] ?? null;
+// عدد الجلسات بصيغة عربية سليمة: جلسة واحدة، جلستان، 3 جلسات، 11 جلسة
+export function sessionsText(n) {
+  if (n === 1) return 'جلسة واحدة';
+  if (n === 2) return 'جلستان';
+  return `${n} ${n >= 3 && n <= 10 ? 'جلسات' : 'جلسة'}`;
+}
+// عمر الإشارة: new حتى 3 جلسات، recent حتى 10، وإلا old
+export const ageClass = sessions => sessions <= 3 ? 'new' : sessions <= 10 ? 'recent' : 'old';
+export const AGE_LABEL = { new: 'جديدة', recent: 'حديثة', old: 'قديمة' };
+export const AGE_OPTIONS = [['all', 'كل الإشارات'], [1, 'ظهرت اليوم فقط'], [3, 'آخر 3 جلسات'], [5, 'آخر أسبوع (5 جلسات)'], [22, 'آخر شهر (22 جلسة)']];
 
 // يحوّل خريطة الأسهم إلى قائمة { symbol, ...stock } بعد الفلترة
 export function filterStocks(stocks, f = DEFAULT_FILTERS) {
@@ -10,6 +23,7 @@ export function filterStocks(stocks, f = DEFAULT_FILTERS) {
     if (s.score < f.minScore) return false;
     if (f.sector !== 'all' && s.sector !== f.sector) return false;
     if (s.avgVal20 < f.minValue) return false;
+    if (f.age !== 'all' && f.age != null) { const sc = sinceFor(s, f.minScore); if (!sc || sc.capped || sc.sessions > +f.age) return false; }
     if (f.excludeLoss && s.keys?.fin?.[0] !== 1) return false; // مفتاح التحليل المالي 0 = صافي ربح آخر 4 أرباع سالب أو لا بيانات
     if (q && !`${s.symbol} ${s.name} ${s.sector}`.toLowerCase().includes(q)) return false;
     return true;
@@ -23,7 +37,9 @@ export const SORTS = {
   dividend: (a, b) => (b.dividendYield ?? -1) - (a.dividendYield ?? -1) || b.score - a.score,
   name: (a, b) => a.name.localeCompare(b.name, 'ar'),
 };
-export const sortStocks = (list, key = 'score') => [...list].sort(SORTS[key] || SORTS.score);
+// الأحدث ظهوراً: الأقل جلسات في الإشارة أولاً (على عتبة المفاتيح المختارة)، ثم الأعلى مجموعاً
+const newest = th => (a, b) => (sinceFor(a, th)?.sessions ?? 1e9) - (sinceFor(b, th)?.sessions ?? 1e9) || b.score - a.score || b.avgVal20 - a.avgVal20;
+export const sortStocks = (list, key = 'score', minScore = 5) => [...list].sort(key === 'newest' ? newest(minScore) : SORTS[key] || SORTS.score);
 
 // يقارن مفاتيح السهم وقت الحفظ بمفاتيحه الآن (bits: سلسلة من ستة أرقام 0/1 بترتيب KEY_IDS)
 export function watchDiff(saved, now) {
@@ -59,5 +75,6 @@ export function fmtValue(x) {
   return `${en(0).format(x / 1e3)} ألف`;
 }
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+export const LEVEL_POS_LABEL = { support: 'عند دعم', resistance: 'عند مقاومة', squeezed: 'بين دعم ومقاومة متقاربين', between: 'بين المستويين', none: 'بلا مستويات مؤكدة' };
 export const TREND_LABEL = { up: 'صاعد', side: 'عرضي / غير واضح', down: 'هابط', na: '—' };
 export const WATCH_LABEL = { added: 'تحسّنت مفاتيح منذ الحفظ', removed: 'تراجعت مفاتيح منذ الحفظ', changed: 'تغيّرت المفاتيح منذ الحفظ', same: 'لم تتغير المفاتيح', none: 'خارج نطاق الفحص' };

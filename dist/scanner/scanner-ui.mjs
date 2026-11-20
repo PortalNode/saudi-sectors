@@ -1,9 +1,9 @@
 // واجهة «مفاتيح جودة السهم» وقائمة المراقبة. تقرأ dist/scanner/signals.json (يبنيه scripts/build-scanner.mjs بعد كل
 // تحديث أسعار) ولا تحسب أي مؤشر بنفسها. كل المنطق القابل للاختبار في scanner-logic.mjs.
 import { KEY_IDS, DEFAULT_FILTERS, filterStocks, sortStocks, watchDiff, loadWatch, saveWatch, toggleWatch,
-  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL } from './scanner-logic.mjs?v=sc-20261119f';
+  fmtPrice, fmtNum, fmtValue, escapeHtml as esc, TREND_LABEL, WATCH_LABEL, LEVEL_POS_LABEL, AGE_OPTIONS, AGE_LABEL, sinceFor, sessionsText, ageClass } from './scanner-logic.mjs?v=sc-20261120a';
 
-const FILTER_KEY = 'saudi-sectors-scanner-filters-v2';
+const FILTER_KEY = 'saudi-sectors-scanner-filters-v3';
 const base = file => new URL(file, import.meta.url);
 const getJson = async file => { const r = await fetch(base(file), { cache: 'no-cache' }); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); };
 const store = { get: () => { try { return localStorage; } catch { return { getItem: () => null, setItem() { throw new Error('blocked'); } }; } } };
@@ -25,7 +25,7 @@ function banner() {
   if (!m.valid) return `<div class="sc-banner sc-bad" role="alert"><strong>تعذر التحقق من البيانات، فلا تُعرض أي نتائج.</strong> ${esc(m.reasonInvalid || '')}</div>`;
   const excluded = Object.entries(m.excluded || {}).map(([k, v]) => `${REASON[k] || k}: ${v.length}`).join(' · ');
   const tasiOff = m.tasi && m.tasi.trend !== 'up';
-  return `<div class="sc-banner" role="note"><strong>استراتيجية «مفاتيح جودة السهم».</strong> لكل سهم ستة مفاتيح: اتجاه السهم، التحليل المالي (صافي ربح آخر 4 أرباع موجب)، اتجاه TASI، مستويات الأسعار (عند منطقة دعم وأقرب إليها من المقاومة)، الإغلاق فوق المتوسط 55، وMACD فوق خط الإشارة. المفتاح إما <b>1+</b> أو <b>0</b>، ويظهر السهم إذا حقق <b>${m.minScore} مفاتيح أو أكثر</b> من 6. استراتيجية وصفية لا تتنبأ وليست توصية استثمارية.</div>
+  return `<div class="sc-banner" role="note"><strong>استراتيجية «مفاتيح جودة السهم».</strong> لكل سهم ستة مفاتيح: اتجاه السهم، التحليل المالي (صافي ربح آخر 4 أرباع موجب)، اتجاه TASI، مستويات الأسعار (عند منطقة دعم ويفصله عن أقرب مقاومة مجال لا يقل عن 2×ATR، أما السهم عند مقاومة أو بين دعم ومقاومة متقاربين فصفر)، الإغلاق فوق المتوسط 55، وMACD فوق خط الإشارة. المفتاح إما <b>1+</b> أو <b>0</b>، ويظهر السهم إذا حقق <b>${m.minScore} مفاتيح أو أكثر</b> من 6. استراتيجية وصفية لا تتنبأ وليست توصية استثمارية. عمود «ظهرت الإشارة» يبيّن متى بدأت الفترة المتصلة الحالية التي حقق فيها السهم العدد المحدد من المفاتيح (المفتاح المالي فيه تقريبي: يُفترض نشر نتائج الربع بعد 45 يوماً من نهايته)، فتعرف إن كانت الإشارة جديدة أم قديمة.</div>
   ${tasiOff ? `<div class="sc-banner sc-warn-banner" role="note">مفتاح السوق (TASI) <b>0</b> الآن: ${esc(m.tasi.detail)}. لذلك لا يمكن لأي سهم تجاوز 5 من 6 حتى يعود المؤشر للاتجاه الصاعد.</div>` : ''}
   <div class="sc-meta"><span>آخر إغلاق رسمي: <bdi class="num">${esc(m.dataDate)}</bdi></span><span>الأسهم المفحوصة: <bdi class="num">${m.scanned}</bdi> من <bdi class="num">${m.universe}</bdi></span><span>6 من 6: <bdi class="num">${m.counts.six}</bdi> · 5 من 6: <bdi class="num">${m.counts.five}</bdi></span><span>اتجاه TASI: ${esc(TREND_LABEL[m.tasi?.trend] || '—')}</span>${excluded ? `<span>مستبعد: ${esc(excluded)}</span>` : ''}</div>`;
 }
@@ -36,15 +36,24 @@ function filterBar() {
   const f = filters;
   return `<form class="sc-filters" id="sc-filters" autocomplete="off" aria-label="فلاتر الماسح">
     <label>عدد المفاتيح<select name="minScore">${opt(5, '5 من 6 فأكثر', f.minScore)}${opt(6, '6 من 6 فقط', f.minScore)}${opt(4, '4 فأكثر (للاستكشاف)', f.minScore)}</select></label>
+    <label>عمر الإشارة<select name="age">${AGE_OPTIONS.map(([v, text]) => opt(v, text, f.age)).join('')}</select></label>
     <label>القطاع<select name="sector">${opt('all', 'الكل', f.sector)}${sectors.map(s => opt(s, s, f.sector)).join('')}</select></label>
     <label>أدنى متوسط قيمة تداول (20 يوماً)<select name="minValue">${opt(1e6, 'مليون ريال', f.minValue)}${opt(5e6, '5 ملايين', f.minValue)}${opt(10e6, '10 ملايين', f.minValue)}${opt(25e6, '25 مليوناً', f.minValue)}</select></label>
     <label>الشركات الخاسرة<select name="excludeLoss">${opt('0', 'عرض الكل', f.excludeLoss ? 1 : 0)}${opt('1', 'استثناء الخاسرة', f.excludeLoss ? 1 : 0)}</select></label>
-    <label>ترتيب حسب<select name="sort">${[['score', 'عدد المفاتيح ثم السيولة'], ['liquidity', 'السيولة'], ['volume', 'الحجم مقابل المتوسط'], ['dividend', 'عائد التوزيعات'], ['name', 'الاسم']].map(([k, v]) => opt(k, v, sortKey)).join('')}</select></label>
+    <label>ترتيب حسب<select name="sort">${[['score', 'عدد المفاتيح ثم السيولة'], ['newest', 'الأحدث ظهوراً'], ['liquidity', 'السيولة'], ['volume', 'الحجم مقابل المتوسط'], ['dividend', 'عائد التوزيعات'], ['name', 'الاسم']].map(([k, v]) => opt(k, v, sortKey)).join('')}</select></label>
     <label class="sc-search">بحث<input type="search" name="query" value="${esc(f.query)}" placeholder="رمز أو اسم أو قطاع"></label>
     <button type="button" class="sc-reset" data-reset>إعادة الضبط</button>
   </form>`;
 }
 
+// «ظهرت الإشارة»: تاريخ بداية الفترة الحالية على عتبة المفاتيح المختارة، وعمرها بالجلسات (جديدة / حديثة / قديمة)
+function sinceCell(s) {
+  const sc = sinceFor(s, filters.minScore);
+  if (!sc) return '<span class="sc-dim">—</span>';
+  const cls = sc.capped ? 'old' : ageClass(sc.sessions), n = data.meta.historySessions;
+  const text = sc.capped ? `أكثر من ${sessionsText(n || sc.sessions)}` : sc.sessions === 1 ? 'اليوم' : sessionsText(sc.sessions);
+  return `<span class="sc-age ${cls}">${esc(sc.capped ? 'قديمة' : AGE_LABEL[cls])}</span> <bdi class="num">${esc(sc.date)}</bdi><small class="sc-dim">${esc(sc.capped ? text : sc.sessions === 1 ? 'ظهرت اليوم' : `منذ ${text}`)}</small>`;
+}
 function tableRows(list) {
   return list.map(s => {
     const watched = !!watch[s.symbol];
@@ -53,7 +62,9 @@ function tableRows(list) {
       <td>${esc(s.sector)}</td>
       <td><bdi class="num price">${fmtPrice(s.price)}</bdi></td>
       <td><span class="sc-score s${s.score}"><bdi class="num" dir="ltr">${s.score}/6</bdi></span></td>
+      <td class="sc-since">${sinceCell(s)}</td>
       ${KEY_IDS.map(id => `<td class="sc-keycell">${mark(s.keys[id][0] === 1)}</td>`).join('')}
+      <td><span class="sc-pos ${esc(s.levelPos)}">${esc(LEVEL_POS_LABEL[s.levelPos] || '—')}</span></td>
       <td>${s.dividendYield == null ? '<span class="sc-dim">—</span>' : `<bdi class="num${s.dividendOk ? ' up' : ''}">${fmtNum(s.dividendYield, 2)}%</bdi>`}${s.dividendOk ? ' <span class="sc-tag" title="توزيعات أعلى من 2.5%">+2.5%</span>' : ''}</td>
       <td><bdi class="num">${fmtValue(s.tradedValue)}</bdi><small class="sc-dim">متوسط ${fmtValue(s.avgVal20)}</small></td>
       <td><button type="button" class="sc-open" data-open-btn>التفاصيل</button></td></tr>`;
@@ -67,11 +78,12 @@ function renderScanner() {
   renderResult();
 }
 function renderResult() {
-  const list = sortStocks(filterStocks(data.stocks, filters), sortKey), out = $('sc-result');
-  const head = ['السهم', 'القطاع', 'السعر', 'المجموع', ...KEY_IDS.map(label), 'توزيعات الأرباح', 'قيمة التداول', ''];
+  const list = sortStocks(filterStocks(data.stocks, filters), sortKey, filters.minScore), out = $('sc-result');
+  const head = ['السهم', 'القطاع', 'السعر', 'المجموع', 'ظهرت الإشارة', ...KEY_IDS.map(label), 'موقع السعر', 'توزيعات الأرباح', 'قيمة التداول', ''];
   out.innerHTML = list.length
     ? `<p class="sc-count-line"><bdi class="num">${list.length}</bdi> سهماً. <b>1+</b> = المفتاح متحقق، <b>0</b> = غير متحقق. اضغط على أي سهم لرؤية سبب كل مفتاح والشارت.</p>
        <div class="table-wrap sc-wrap"><table class="sc-table"><thead><tr>${head.map((h, i) => `<th${i === 0 ? ' class="sc-sticky"' : ''}>${esc(h)}</th>`).join('')}</tr></thead><tbody>${tableRows(list)}</tbody></table></div>`
+    : filters.age !== 'all' ? `<div class="sc-empty"><strong>لا توجد إشارات بهذا العمر.</strong><p>لا سهم ظهرت إشارته (${filters.minScore} مفاتيح فأكثر) ضمن المدة المختارة. جرّب «كل الإشارات».</p></div>`
     : `<div class="sc-empty"><strong>لا توجد أسهم تحقق ${filters.minScore} مفاتيح فأكثر الآن.</strong><p>هذا متوقع حين يكون اتجاه السوق (TASI) غير صاعد، فمفتاح السوق صفر لكل الأسهم ويصبح المطلوب تحقق المفاتيح الخمسة الباقية كلها.</p>${filters.minScore > 4 ? '<p><button type="button" class="sc-btn" data-lower-score>اعرض الأسهم ذات 4 مفاتيح (للاستكشاف)</button></p>' : ''}</div>`;
 }
 
@@ -87,14 +99,16 @@ const zoneHtml = (z, none) => z ? `<bdi class="num" dir="ltr">${fmtPrice(z[0])} 
 function cardHtml(s) {
   const watched = !!watch[s.symbol];
   const rows = KEY_IDS.map(id => { const [ok, detail] = s.keys[id]; return `<li class="${ok ? 'ok' : 'no'}"><span aria-hidden="true">${ok ? '1+' : '0'}</span> <b>${esc(label(id))}</b>${detail ? `<small class="sc-dim">${esc(detail)}</small>` : ''}</li>`; }).join('');
+  const sc = sinceFor(s, s.score >= filters.minScore ? filters.minScore : 4);
+  const sinceNote = sc ? ` ظهرت الإشارة ${sc.capped ? `قبل <bdi class="num">${esc(sc.date)}</bdi> (أكثر من ${sessionsText(data.meta.historySessions || sc.sessions)})` : sc.sessions === 1 ? 'اليوم (<bdi class="num">' + esc(sc.date) + '</bdi>)' : `منذ <bdi class="num">${esc(sc.date)}</bdi> (${esc(sessionsText(sc.sessions))})`}.` : '';
   const verdict = s.score === 6 ? 'حقق المفاتيح الستة كلها.' : s.score >= data.meta.minScore ? `حقق ${s.score} من 6 مفاتيح.` : `حقق ${s.score} من 6 فقط، أقل من الحد الأدنى (${data.meta.minScore}) للظهور في القائمة.`;
   return `<article class="sc-card" aria-label="تفاصيل ${esc(s.name)}">
     <header><div class="sc-card-title"><img class="sc-logo" src="logos/${esc(s.symbol)}.svg" alt="" onerror="this.remove()"><div><h3>${esc(s.name)} <bdi class="num">${esc(s.symbol)}</bdi></h3><p>${esc(s.sector)} · الإغلاق <bdi class="num">${fmtPrice(s.price)}</bdi> · اتجاه السهم: ${esc(TREND_LABEL[s.trend])}</p></div></div>
       <div class="sc-card-actions"><button type="button" class="sc-btn${watched ? ' on' : ''}" data-watch="${esc(s.symbol)}" aria-pressed="${watched}">${watched ? '★ في المراقبة' : '☆ أضف للمراقبة'}</button><button type="button" class="sc-btn" data-card-close>إغلاق</button></div></header>
-    <p class="sc-why"><span class="sc-score s${s.score}"><bdi class="num" dir="ltr">${s.score}/6</bdi></span> ${esc(verdict)}</p>
+    <p class="sc-why"><span class="sc-score s${s.score}"><bdi class="num" dir="ltr">${s.score}/6</bdi></span> ${esc(verdict)}${sinceNote}</p>
     <div class="sc-grid">
       <section class="sc-block sc-wide"><h4>المفاتيح الستة</h4><ul class="sc-conds sc-keylist">${rows}</ul></section>
-      <section class="sc-block"><h4>مناطق الدعم والمقاومة</h4><dl class="sc-dl"><dt>أقرب منطقة دعم</dt><dd>${zoneHtml(s.supportZone, 'لا توجد منطقة دعم مؤكدة')}</dd><dt>أقرب منطقة مقاومة</dt><dd>${zoneHtml(s.resistanceZone, 'لا توجد (عند قمة الفترة)')}</dd><dt>متوسط 50 / 200</dt><dd><bdi class="num">${fmtPrice(s.sma50)} / ${fmtPrice(s.sma200)}</bdi></dd></dl></section>
+      <section class="sc-block"><h4>مناطق الدعم والمقاومة</h4><dl class="sc-dl"><dt>موقع السعر</dt><dd>${esc(LEVEL_POS_LABEL[s.levelPos] || '—')}</dd><dt>أقرب منطقة دعم</dt><dd>${zoneHtml(s.supportZone, 'لا توجد منطقة دعم مؤكدة')}</dd><dt>أقرب منطقة مقاومة</dt><dd>${zoneHtml(s.resistanceZone, 'لا توجد (عند قمة الفترة)')}</dd><dt>متوسط 50 / 200</dt><dd><bdi class="num">${fmtPrice(s.sma50)} / ${fmtPrice(s.sma200)}</bdi></dd></dl></section>
       <section class="sc-block"><h4>توزيعات الأرباح</h4><p>${s.dividendYield == null ? 'لا تتوفر نسبة توزيعات لهذا السهم.' : `عائد التوزيعات <bdi class="num">${fmtNum(s.dividendYield, 2)}%</bdi>${s.dividendOk ? ' — أعلى من 2.5% (يفضّلها المنهج، ولا تدخل في عدّ المفاتيح).' : ' — أقل من 2.5%.'}`}</p></section>
     </div>
     <p class="sc-foot">يُعرض الشارت أدناه بمنطقتي الدعم والمقاومة (حافتا كل منطقة). البيانات حتى <bdi class="num">${esc(data.meta.dataDate)}</bdi>، وهذه ليست توصية استثمارية.</p></article>`;
@@ -172,6 +186,7 @@ export async function init(api) {
     if (el.name === 'sort') sortKey = el.value;
     else if (el.name === 'excludeLoss') filters.excludeLoss = el.value === '1';
     else if (['minValue', 'minScore'].includes(el.name)) filters[el.name] = +el.value;
+    else if (el.name === 'age') filters.age = el.value === 'all' ? 'all' : +el.value;
     else filters[el.name] = el.value;
     writeFilters(); renderResult();
   });

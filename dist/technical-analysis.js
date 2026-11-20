@@ -5,7 +5,7 @@
 (() => {
   const DEFAULT_SYMBOL = '2222';
   const INDEX = { symbol: 'TASI', name: 'مؤشر السوق السعودي' }; // شموعه في ohlc/TASI.json وشعاره في logos/TASI.svg
-  const SCANNER_MODULE = './scanner/scanner-ui.mjs?v=sc-20261119f';
+  const SCANNER_MODULE = './scanner/scanner-ui.mjs?v=sc-20261120a';
   const TABS = ['chart', 'scanner', 'watch'];
   const status = document.getElementById('ta-status');
   const panel = document.getElementById('ta-chart');

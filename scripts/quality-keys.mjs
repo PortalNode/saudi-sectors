@@ -13,8 +13,10 @@ const f2 = (x, d = 2) => fin(x) ? x.toFixed(d) : '—';
 const key = (ok, detail) => ({ ok: ok ? 1 : 0, detail });
 
 // صاعد: الإغلاق فوق متوسط 50 وهو فوق متوسط 200 ومتوسط 50 صاعد (20 جلسة). هابط: العكس. وإلا عرضي.
-export function trendAt(close, i) {
-  const s50 = sma(close, 50), s200 = sma(close, 200);
+// pre (اختياري): سلاسل محسوبة مسبقاً من precompute(close) لتفادي إعادة الحساب عند الفحص التاريخي لعشرات الشموع
+export const precompute = close => ({ s50: sma(close, 50), s200: sma(close, 200), s55: sma(close, 55), macd: macd(close) });
+export function trendAt(close, i, pre) {
+  const s50 = pre?.s50 || sma(close, 50), s200 = pre?.s200 || sma(close, 200);
   const a = s50[i], b = s200[i], p = i >= 20 ? s50[i - 20] : null;
   if (![a, b, p].every(fin) || !p) return { trend: 'na', sma50: a, sma200: b };
   const up = close[i] > a && a > b && a / p - 1 > 0, down = close[i] < a && a < b;
@@ -22,9 +24,9 @@ export function trendAt(close, i) {
 }
 
 // مفتاح السوق: اتجاه TASI الرسمي (شموع TASI.json) بنفس تعريف مفتاح السهم، قيمة واحدة لكل الأسهم.
-export function tasiKey(tasiClose) {
-  if (!tasiClose || tasiClose.length < 221) return { ...key(false, 'شموع TASI غير كافية'), trend: 'na' };
-  const { trend } = trendAt(tasiClose, tasiClose.length - 1);
+export function tasiKey(tasiClose, i = tasiClose ? tasiClose.length - 1 : -1, pre) {
+  if (!tasiClose || i < 220) return { ...key(false, 'شموع TASI غير كافية'), trend: 'na' };
+  const { trend } = trendAt(tasiClose, i, pre);
   return { ...key(trend === 'up', trend === 'up' ? 'مؤشر السوق في اتجاه صاعد' : trend === 'down' ? 'مؤشر السوق في اتجاه هابط' : 'مؤشر السوق عرضي / غير واضح'), trend };
 }
 
@@ -47,27 +49,59 @@ export function swingLevels(high, low, close, i, { k = 4, lookback = 252 } = {})
 // منطقة دعم/مقاومة كما تخرج من sr-levels.mjs: { low, high, center, touches }. المسافة بوحدة ATR من حافة المنطقة (صفر داخلها).
 const zoneText = (z, label) => `${label} ${f2(z.low)}–${f2(z.high)} (${z.touches} لمسات)`;
 export const AT_SUPPORT_ATR = 1.0; // «عند الدعم»: داخل المنطقة أو فوق حافتها العليا بأقل من 1×ATR
-// 1+ إذا كان السهم عند منطقة دعم (داخلها أو ضمن 1×ATR فوقها) وأقرب إليها من أقرب منطقة مقاومة. 0 إذا كان أقرب للمقاومة
-// أو بعيداً عن أي دعم أو لا دعم تحته. لا مقاومة فوقه (قمة جديدة) تعني أن المسافة إليها لا نهائية فيُحكم بالقرب من الدعم وحده.
+export const NEAR_RESISTANCE_ATR = 1.0; // «عند المقاومة»: داخل المنطقة أو تحت حافتها السفلى بأقل من 1×ATR
+export const MIN_ROOM_ATR = 2.0; // أقل مسافة حرة إلى أقرب مقاومة ليُحسب السهم عند دعم (دون ذلك يضيق المجال بين المستويين)
+
+// موقع السعر بين المستويين. support: عند دعم وأمامه مجال إلى المقاومة (يتحقق به المفتاح) · resistance: عند مقاومة ·
+// squeezed: قريب من دعم لكن المقاومة قريبة أيضاً فلا مجال (مفتاح 0) · between: بينهما بعيداً عن الاثنين · none: لا مستويات مؤكدة
+export function levelPosition(price, support, resistance, atr) {
+  if (!fin(price) || !(atr > 0) || (!support && !resistance)) return 'none';
+  const dS = support ? Math.max(0, price - support.high) / atr : Infinity, dR = resistance ? Math.max(0, resistance.low - price) / atr : Infinity;
+  const nearS = dS <= AT_SUPPORT_ATR, nearR = dR <= NEAR_RESISTANCE_ATR;
+  if (nearS && dR >= MIN_ROOM_ATR) return 'support';
+  if (nearS) return 'squeezed';
+  if (nearR) return 'resistance';
+  return 'between';
+}
+
+// 1+ فقط إذا كان السهم عند منطقة دعم (داخلها أو ضمن 1×ATR فوقها) ويفصله عن أقرب مقاومة 2×ATR فأكثر (أو لا مقاومة فوقه: قمة جديدة).
+// أي سهم عند مقاومة أو بين دعم ومقاومة متقاربين = 0، فلا يظهر سهم «عند دعم» وهو ملاصق لمقاومة.
 export function levelsKey(price, support, resistance, atr) {
   if (!fin(price) || !(atr > 0)) return key(false, 'لا بيانات كافية لتحديد المستويات');
   if (!support) return key(false, resistance ? `لا توجد منطقة دعم مؤكدة تحت السعر · ${zoneText(resistance, 'مقاومة')}` : 'لا توجد مناطق دعم أو مقاومة مؤكدة');
   const dS = Math.max(0, price - support.high) / atr, dR = resistance ? Math.max(0, resistance.low - price) / atr : Infinity;
   const detail = `${zoneText(support, 'دعم')} يبعد ${f2(dS, 1)}×ATR${resistance ? ` · ${zoneText(resistance, 'مقاومة')} تبعد ${f2(dR, 1)}×ATR` : ' · لا مقاومة فوق السعر'}`;
-  return key(dS <= AT_SUPPORT_ATR && dS < dR, detail);
+  const pos = levelPosition(price, support, resistance, atr);
+  const why = pos === 'support' ? '' : pos === 'resistance' ? ' — السعر عند مقاومة' : pos === 'squeezed' ? ' — المقاومة قريبة (أقل من 2×ATR) فلا مجال كافٍ' : ' — بعيد عن الدعم';
+  return key(pos === 'support', detail + why);
 }
 
-export function sma55Key(close, i) {
-  const m = sma(close, 55)[i];
+export function sma55Key(close, i, pre) {
+  const m = (pre?.s55 || sma(close, 55))[i];
   return fin(m) ? key(close[i] > m, `الإغلاق ${f2(close[i])} · متوسط 55: ${f2(m)}`) : key(false, 'تاريخ أقصر من 55 جلسة');
 }
 
-export function macdKey(close, i) {
-  const m = macd(close)[i];
+export function macdKey(close, i, pre) {
+  const m = (pre?.macd || macd(close))[i];
   return m && fin(m.signal) ? key(m.macd > m.signal, `MACD ${f2(m.macd, 3)} · الإشارة ${f2(m.signal, 3)}`) : key(false, 'بيانات MACD غير كافية');
 }
 
 /* ---------- التحليل المالي ---------- */
+// تاريخ إتاحة نتائج ربع للمستثمر تقريباً: نهاية الربع + 45 يوماً (الأرباع الأولى والثانية والثالثة) أو + 100 يوم (السنوي).
+// قاعدة تقريبية للفحص التاريخي فقط (لا نعرف يوم النشر الفعلي)، ومحافظة حتى لا نسبق الواقع.
+const QUARTER_END = ['03-31', '06-30', '09-30', '12-31'];
+export function quarterAvailable(k) {
+  const m = /^(\d{4})Q([1-4])$/.exec(k); if (!m) return null;
+  const d = new Date(`${m[1]}-${QUARTER_END[+m[2] - 1]}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + (m[2] === '4' ? 100 : 45));
+  return d.toISOString().slice(0, 10);
+}
+// المفتاح المالي كما كان يُرى في تاريخ معيّن: الأرباع المتاحة وقتها فقط (بلا نظر للمستقبل)
+export function financialKeyAsOf(fin_, date) {
+  if (!fin_) return financialKey(fin_);
+  const q = Object.fromEntries(Object.entries(fin_.quarters || {}).filter(([k]) => { const a = quarterAvailable(k); return a && a <= date; }));
+  return financialKey({ quarters: q, years: (fin_.years || []).filter(y => `${y.year + 1}-04-10` <= date) });
+}
+
 const qIndex = k => { const m = /^(\d{4})Q([1-4])$/.exec(k); return m ? +m[1] * 4 + +m[2] - 1 : null; };
 
 // نتيجة المفتاح لسهم من مجموع صافي ربح آخر 4 أرباع متتالية؛ وإن لم تتوفر فآخر سنة مالية؛ وإلا 0 مع السبب.
@@ -103,12 +137,12 @@ export function loadFinancials(distUrl) {
 
 /* ---------- التجميع ---------- */
 // الأسهم 5/6 وما فوق تظهر. input: { close[], i, support, resistance, financial, tasi (نتيجة tasiKey), dividendYield }
-export function computeKeys({ close, i, support, resistance, atr, financial, tasi, dividendYield }) {
-  const { trend, sma50, sma200 } = trendAt(close, i);
+export function computeKeys({ close, i, support, resistance, atr, financial, tasi, dividendYield, pre }) {
+  const { trend, sma50, sma200 } = trendAt(close, i, pre);
   const keys = {
     trend: key(trend === 'up', trend === 'up' ? 'الإغلاق فوق متوسط 50 وهو فوق متوسط 200 وصاعد' : trend === 'down' ? 'اتجاه هابط (الإغلاق تحت متوسط 50 وهو تحت 200)' : trend === 'side' ? 'اتجاه عرضي / غير واضح' : 'تاريخ أقصر من 200 جلسة'),
     fin: financial, tasi: { ok: tasi.ok, detail: tasi.detail },
-    levels: levelsKey(close[i], support, resistance, atr), sma55: sma55Key(close, i), macd: macdKey(close, i),
+    levels: levelsKey(close[i], support, resistance, atr), sma55: sma55Key(close, i, pre), macd: macdKey(close, i, pre),
   };
   const bits = KEY_IDS.map(id => keys[id].ok);
   return {
@@ -117,4 +151,14 @@ export function computeKeys({ close, i, support, resistance, atr, financial, tas
     bits: bits.join(''),
     dividendOk: fin(dividendYield) && dividendYield > DIVIDEND_MIN,
   };
+}
+
+/* ---------- تاريخ ظهور الإشارة ---------- */
+// scores: مجموع مفاتيح كل جلسة (الأقدم أولاً، والأخيرة هي اليوم)، dates بنفس الطول. يعيد بداية الفترة المتصلة الحالية التي بلغ فيها المجموع
+// العتبة، أو null إذا لم يبلغها اليوم. capped = بلغت الفترة أقدم جلسة مفحوصة فالبداية الحقيقية أقدم من التاريخ المعروض.
+export function runStart(scores, dates, threshold) {
+  const last = scores.length - 1;
+  if (last < 0 || !(scores[last] >= threshold)) return null;
+  let j = last; while (j > 0 && scores[j - 1] >= threshold) j--;
+  return { date: dates[j], sessions: last - j + 1, capped: j === 0 };
 }

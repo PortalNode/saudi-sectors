@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { swingLevels, trendAt, tasiKey, levelsKey, sma55Key, macdKey, financialKey, computeKeys, KEY_IDS } from '../scripts/quality-keys.mjs';
+import { swingLevels, trendAt, tasiKey, levelsKey, levelPosition, sma55Key, macdKey, financialKey, financialKeyAsOf, quarterAvailable, runStart, computeKeys, KEY_IDS } from '../scripts/quality-keys.mjs';
 
 const rising = n => Array.from({ length: n }, (_, i) => 100 + i);
 const falling = n => Array.from({ length: n }, (_, i) => 500 - i);
@@ -90,4 +90,44 @@ test('swing levels come from price structure, not moving averages', () => {
   // price at a new low: no support below it
   const down = Array.from({ length: 60 }, (_, k) => 200 - k);
   assert.equal(swingLevels(down.map(x => x + 1), down.map(x => x - 1), down, 59).support, null);
+});
+
+test('levels key: at support is 1 only with 2 ATR of room to resistance; a support cut right under a resistance is 0', () => {
+  assert.equal(levelsKey(100, Z(97, 99), Z(103, 105), 2).ok, 0);      // resistance 1.5 ATR away: not enough room
+  assert.equal(levelsKey(100, Z(97, 99), Z(104, 106), 2).ok, 1);      // exactly 2 ATR of room is enough
+  assert.equal(levelsKey(100, Z(98, 100.5), Z(100.6, 103), 2).ok, 0); // one band cut in two: support right under resistance
+  assert.equal(levelsKey(100, Z(95, 97), Z(99.5, 103), 2).ok, 0);     // price inside the resistance zone: at resistance
+});
+
+test('level position labels: support, resistance, squeezed, between, none; the key is 1 exactly when the position is support', () => {
+  assert.equal(levelPosition(100, Z(97, 99), Z(108, 110), 2), 'support');
+  assert.equal(levelPosition(100, Z(97, 99), null, 2), 'support');
+  assert.equal(levelPosition(100, Z(97, 99), Z(101, 103), 2), 'squeezed');   // near both
+  assert.equal(levelPosition(100, Z(97, 99), Z(103, 105), 2), 'squeezed');   // at support but only 1.5 ATR of room
+  assert.equal(levelPosition(100, Z(90, 92), Z(101, 103), 2), 'resistance');
+  assert.equal(levelPosition(100, Z(90, 92), Z(110, 112), 2), 'between');
+  assert.equal(levelPosition(100, null, null, 2), 'none');
+  assert.equal(levelPosition(null, Z(97, 99), null, 2), 'none');
+  for (const [s, r] of [[Z(97, 99), Z(108, 110)], [Z(97, 99), Z(101, 103)], [Z(90, 92), Z(101, 103)], [Z(99, 101), null], [null, Z(108, 110)]]) {
+    assert.equal(levelsKey(100, s, r, 2).ok === 1, levelPosition(100, s, r, 2) === 'support');
+  }
+});
+
+test('signal start: the current unbroken run at or above the threshold, with its length', () => {
+  const d = ['a', 'b', 'c', 'd', 'e', 'f'];
+  assert.deepEqual(runStart([3, 5, 5, 4, 5, 6], d, 5), { date: 'e', sessions: 2, capped: false });
+  assert.deepEqual(runStart([3, 5, 5, 4, 5, 6], d, 4), { date: 'b', sessions: 5, capped: false });
+  assert.deepEqual(runStart([3, 5, 5, 4, 5, 6], d, 6), { date: 'f', sessions: 1, capped: false });
+  assert.equal(runStart([5, 5, 4], d.slice(0, 3), 5), null);                                          // not in the signal today
+  assert.deepEqual(runStart([5, 5, 6], d.slice(0, 3), 5), { date: 'a', sessions: 3, capped: true });  // reaches the oldest session examined
+  assert.equal(runStart([], [], 5), null);
+});
+
+test('financial key as of a date uses only quarters published by then (no look-ahead)', () => {
+  assert.equal(quarterAvailable('2026Q1'), '2026-05-15');
+  assert.equal(quarterAvailable('2025Q4'), '2026-04-10');
+  const fin = { quarters: { '2025Q3': { netProfit: 5 }, '2025Q4': { netProfit: 5 }, '2026Q1': { netProfit: 5 }, '2026Q2': { netProfit: 5 }, '2026Q3': { netProfit: -100 } } };
+  assert.equal(financialKeyAsOf(fin, '2026-10-01').ok, 1);   // Q3 2026 results (a big loss) are not out yet
+  assert.equal(financialKeyAsOf(fin, '2026-12-01').ok, 0);   // after they are: trailing four quarters are negative
+  assert.equal(financialKeyAsOf(undefined, '2026-12-01').ok, 0);
 });

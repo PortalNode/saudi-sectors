@@ -27,7 +27,7 @@
 .ta-page .sc-count-line{margin:0 0 8px;font-size:11.5px;color:var(--pf-muted);line-height:1.8}
 
 .ta-page .sc-wrap{border:1px solid var(--pf-line);overflow:auto;max-height:70vh}
-.ta-page .sc-table{table-layout:auto;min-width:1180px;width:100%}
+.ta-page .sc-table{table-layout:auto;min-width:1400px;width:100%}
 .ta-page .sc-table th,.ta-page .sc-table td{padding:7px 10px;font-size:11.5px;vertical-align:middle}
 .ta-page .sc-table thead th{position:sticky;top:0;z-index:3;white-space:nowrap}
 .ta-page .sc-table tbody tr[data-open]{cursor:pointer}
@@ -101,6 +101,15 @@
 .ta-page .sc-keylist li>span{display:inline-block;min-width:26px;font-size:11px;font-weight:800}
 .ta-page .sc-keylist small{display:block;margin-inline-start:30px;font-size:11px;line-height:1.7}
 .ta-page .sc-watch-table tbody tr[data-open-watch]{cursor:pointer}
+
+/* عمر الإشارة وموقع السعر من المستويات */
+.ta-page .sc-since{white-space:nowrap}
+.ta-page .sc-age{display:inline-block;padding:0 7px;font-size:10px;font-weight:800;line-height:17px;border:1px solid var(--pf-line);color:var(--pf-muted)}
+.ta-page .sc-age.new{color:var(--pf-gold);border-color:var(--pf-gold);background:var(--pf-gold-soft)}
+.ta-page .sc-age.recent{color:var(--pf-ink)}
+.ta-page .sc-pos{font-size:11px;font-weight:700;color:var(--pf-muted);white-space:nowrap}
+.ta-page .sc-pos.support{color:var(--cq-up,#22c55e)}
+.ta-page .sc-pos.resistance{color:var(--cq-down,#f05252)}
 
 @media (max-width:760px){
   .ta-page .sc-filters{grid-template-columns:repeat(2,1fr)}

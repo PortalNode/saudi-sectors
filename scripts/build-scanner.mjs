@@ -13,10 +13,12 @@ import { loadStocks, loadMarket, OHLC_DIR, DIST } from './backtest/data.mjs';
 import { readCandles } from './ohlc-files.mjs';
 import { sma, atr as atrSeries } from '../dist/scanner/indicators.mjs';
 import { nearestZones } from './sr-levels.mjs';
-import { KEY_IDS, KEY_LABELS, MIN_SCORE, DIVIDEND_MIN, computeKeys, financialKey, tasiKey, loadFinancials } from './quality-keys.mjs';
+import { KEY_IDS, KEY_LABELS, MIN_SCORE, DIVIDEND_MIN, computeKeys, financialKey, financialKeyAsOf, tasiKey, levelPosition, precompute, runStart, loadFinancials } from './quality-keys.mjs';
 
 const OUT = new URL('../dist/scanner/signals.json', import.meta.url);
 const WARMUP = 250; // جلسات لازمة قبل الحكم (متوسط 200 مع هامش)
+const HISTORY = 120; // جلسات تُفحص للخلف لتحديد تاريخ بدء الإشارة (نحو ستة أشهر)
+const THRESHOLDS = [4, 5, 6]; // العتبات التي يختارها المستخدم في الواجهة
 const r = (x, d = 2) => x == null || !Number.isFinite(x) ? null : Math.round(x * 10 ** d) / 10 ** d;
 
 const { stocks } = await loadStocks();
@@ -24,7 +26,7 @@ const { data } = loadMarket();
 const official = new Map(data.sectors.flatMap(sec => sec.stocks).map(s => [s.symbol, s]));
 const ohlcIndex = JSON.parse(readFileSync(new URL('../dist/ohlc/index.json', import.meta.url), 'utf8'));
 const newest = stocks.map(s => s.d.at(-1)).sort().at(-1);
-const meta = { valid: true, dataDate: newest, officialDate: ohlcIndex.officialDate, generatedAt: new Date().toISOString(), universe: stocks.length, scanned: 0, minScore: MIN_SCORE, dividendMin: DIVIDEND_MIN, excluded: {}, reasonInvalid: null };
+const meta = { valid: true, dataDate: newest, officialDate: ohlcIndex.officialDate, generatedAt: new Date().toISOString(), universe: stocks.length, scanned: 0, minScore: MIN_SCORE, historySessions: HISTORY, dividendMin: DIVIDEND_MIN, excluded: {}, reasonInvalid: null };
 const keys = Object.fromEntries(KEY_IDS.map(id => [id, KEY_LABELS[id]]));
 
 const publish = payload => {
@@ -43,6 +45,10 @@ if (ohlcIndex.officialDate !== newest) {
 // مؤشر السوق الرسمي TASI
 const tasiFile = await readCandles(OHLC_DIR, 'TASI');
 const tasi = tasiKey(tasiFile?.c);
+const tasiPre = tasiFile?.c ? precompute(tasiFile.c) : null;
+// مفتاح السوق كما كان في تاريخ ما: آخر شمعة TASI بتاريخ ≤ تاريخ الشمعة (المؤشر مرجع واحد لكل الأسهم)
+const tasiAt = date => { const d = tasiFile?.d; if (!d) return false; let lo = 0, hi = d.length - 1, k = -1; while (lo <= hi) { const m = (lo + hi) >> 1; if (d[m] <= date) { k = m; lo = m + 1; } else hi = m - 1; } return k >= 0 ? tasiKey(tasiFile.c, k, tasiPre) : tasiKey(null); };
+const tasiCache = new Map(); const tasiOn = date => { if (!tasiCache.has(date)) tasiCache.set(date, tasiAt(date)); return tasiCache.get(date); };
 meta.tasi = { trend: tasi.trend, date: tasiFile?.d?.at(-1) ?? null, stale: tasiFile?.d?.at(-1) !== newest, detail: tasi.detail };
 const financials = loadFinancials(DIST);
 
@@ -63,13 +69,26 @@ for (const s of stocks) {
 
   const c = s.c[i];
   const sma50 = sma(s.c, 50)[i], sma200 = sma(s.c, 200)[i];
-  const { support, resistance, atr } = nearestZones(s.h, s.l, s.c, i, undefined, atrSeries(s.h, s.l, s.c, 14), s.d);
+  const atrArr = atrSeries(s.h, s.l, s.c, 14), pre = precompute(s.c);
+  const { support, resistance, atr } = nearestZones(s.h, s.l, s.c, i, undefined, atrArr, s.d);
   const avgVol20Prev = sma(s.v, 20)[i - 1], volRatio = avgVol20Prev > 0 ? s.v[i] / avgVol20Prev : null;
 
-  const k = computeKeys({ close: s.c, i, support, resistance, atr, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield });
+  const k = computeKeys({ close: s.c, i, support, resistance, atr, financial: financialKey(financials.get(s.symbol)), tasi, dividendYield: o.dividendYield, pre });
+
+  // مجموع المفاتيح في كل جلسة من آخر HISTORY جلسة بما كان معلوماً وقتها (مناطق الدعم من شموع حتى ذلك اليوم، TASI بتاريخه، والأرباع
+  // المتاحة وقتها بقاعدة تأخير تقريبية). الجلسة الأخيرة هي نتيجة اليوم نفسها فلا تختلف عمّا يُعرض.
+  const scores = [], dates = [];
+  for (let j = Math.max(WARMUP, i - HISTORY + 1); j <= i; j++) {
+    dates.push(s.d[j]);
+    if (j === i) { scores.push(k.score); continue; }
+    const z = nearestZones(s.h, s.l, s.c, j, undefined, atrArr, s.d);
+    scores.push(computeKeys({ close: s.c, i: j, support: z.support, resistance: z.resistance, atr: z.atr, financial: financialKeyAsOf(financials.get(s.symbol), s.d[j]), tasi: tasiOn(s.d[j]), dividendYield: null, pre }).score);
+  }
+  const since = Object.fromEntries(THRESHOLDS.map(th => [th, runStart(scores, dates, th)]).filter(([, v]) => v));
   outStocks[s.symbol] = {
     name: s.name, sector: s.sector, price: r(c), tradedValue: r(c * s.v[i], 0), avgVal20: r(avgVal20, 0), volRatio: r(volRatio),
     score: k.score, bits: k.bits, trend: k.trend, dividendYield: r(o.dividendYield), dividendOk: k.dividendOk,
+    levelPos: levelPosition(c, support, resistance, atr), since, hist: scores.slice(-30).join(''),
     support: r(support?.center), resistance: r(resistance?.center), supportZone: support ? [r(support.low), r(support.high), support.touches, s.d[support.first]] : null, resistanceZone: resistance ? [r(resistance.low), r(resistance.high), resistance.touches, s.d[resistance.first]] : null, atr: r(atr), sma50: r(sma50), sma200: r(sma200),
     keys: Object.fromEntries(KEY_IDS.map(id => [id, [k.keys[id].ok, k.keys[id].detail]])),
   };

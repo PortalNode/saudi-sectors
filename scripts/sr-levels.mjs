@@ -14,6 +14,8 @@ export const SR_DEFAULTS = {
   zoneAtr: 1.0,         // أقصى عرض للمنطقة = 1×ATR الحالي
   minTouches: 2,        // لمستان (محوران) على الأقل لتُقبل المنطقة
   halfLife: 250,        // نصف عمر الوزن بالجلسات
+  mergeGapAtr: 0.5,     // منطقتان بينهما فراغ أقل من 0.5×ATR (أو متداخلتان) حزمة واحدة لا دعم ومقاومة متجاورين
+  mergeMaxAtr: 2.0,     // لا يتجاوز عرض الحزمة المدمجة 2×ATR
 };
 
 // المحاور المؤكدة وما ارتدّ عنها. كل عنصر: { j, price, type: 'high'|'low', reaction (بوحدة ATR) }
@@ -55,6 +57,23 @@ export function zonesAt(high, low, close, i, atr, p = SR_DEFAULTS) {
     for (const x of z.items) { const wt = 0.5 ** ((i - x.j) / p.halfLife) * Math.min(x.reaction, 6); w += wt; wp += wt * x.price; }
     const lo = Math.min(...prices), hi = Math.max(...prices), pad = Math.max(0, 0.25 * a - (hi - lo) / 2);
     out.push({ low: lo - pad, high: hi + pad, center: wp / w, touches: z.items.length, score: w, first: Math.min(...z.items.map(x => x.j)), last: Math.max(...z.items.map(x => x.j)), highs: z.items.filter(x => x.type === 'high').length, lows: z.items.filter(x => x.type === 'low').length });
+  }
+  return mergeZones(out, a, p);
+}
+
+// التجميع بحدّ عرض 1×ATR يقطع الحزمة السعرية الواحدة إلى منطقتين متلاصقتين (قمم أعلى الحزمة وقيعان أسفلها)، فيرى الماسح السهم
+// «عند دعم» و«عند مقاومة» معاً. هنا تُدمج المناطق المتداخلة أو المتقاربة (فراغ ≤ mergeGapAtr×ATR) في حزمة واحدة ما لم يتجاوز عرضها mergeMaxAtr×ATR.
+export function mergeZones(zones, a, p = SR_DEFAULTS) {
+  const out = [];
+  for (const q of [...zones].sort((x, y) => x.low - y.low)) {
+    const cur = out.at(-1);
+    if (cur && q.low - cur.high <= p.mergeGapAtr * a && Math.max(cur.high, q.high) - cur.low <= p.mergeMaxAtr * a) {
+      const w = cur.score + q.score;
+      cur.center = (cur.center * cur.score + q.center * q.score) / w; cur.score = w;
+      cur.low = Math.min(cur.low, q.low); cur.high = Math.max(cur.high, q.high);
+      cur.touches += q.touches; cur.highs += q.highs; cur.lows += q.lows;
+      cur.first = Math.min(cur.first, q.first); cur.last = Math.max(cur.last, q.last);
+    } else out.push({ ...q });
   }
   return out;
 }
