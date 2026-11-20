@@ -250,6 +250,7 @@
 import { renderAnswer, toLatinDigits } from "./ai-format.mjs?v=ai-20261121c";
 const QUICK = {
   market: [
+    ["محفظة 3 سنوات","رشّح أفضل 5 شركات لمحفظة متنوعة تستهدف نمو رأس المال خلال 3 سنوات. اعتمد على الربح الأساسي لا المعلن، وأعطِ لكل شركة الأطروحة والمحفزات والتوقعات بالسيناريوهات والمخاطر، ثم توزيعًا توضيحيًا للمحفظة."],
     ["أرخص الشركات","ما أرخص 10 شركات في السوق تقييمًا (أقل مكرر موجب ومضاعف دفترية معقول) مع أرباح غير متراجعة؟ رتّبها مع القطاع والسبب وما يجب الحذر منه."],
     ["أعلى توزيعات","ما أعلى 10 شركات عائدًا للتوزيع في السوق؟ وهل أرباحها ونموها يدعمان استمرار التوزيع؟"],
     ["الأقوى فنيًا","ما أقوى 10 أسهم فنيًا الآن (اتجاه صاعد، فوق متوسط 200، تقييم ماسح عالٍ، RSI غير متشبع)؟ اذكر القطاع والأرقام."],
@@ -259,6 +260,7 @@ const QUICK = {
     ["الأكثر تراجعًا","ما أكثر 10 شركات تراجعًا خلال سنة؟ وهل بينها فرص بتقييم مغرٍ وأرباح متماسكة أم أن التراجع مبرر؟"],
   ],
   sector: [
+    ["أفضل فرص 3 سنوات","رشّح أفضل 3 شركات في القطاع لنمو رأس المال خلال 3 سنوات، مع جودة الأرباح والتقييم والمحفزات والتوقعات بالسيناريوهات والمخاطر لكل شركة."],
     ["تحليل القطاع","حلل القطاع تحليلًا شاملًا: التقييم، النمو، الأداء مقابل السوق، الاتجاه الفني، ثم الفرص والمخاطر."],
     ["أفضل شركة","ما أفضل شركة في القطاع من حيث الجمع بين النمو والتقييم والوضع الفني؟ وما الأضعف ولماذا؟"],
     ["الأرخص في القطاع","رتّب شركات القطاع من الأرخص إلى الأغلى تقييمًا (المكرر ومضاعف الدفترية) مع ربط ذلك بنمو أرباحها."],
@@ -267,7 +269,8 @@ const QUICK = {
     ["الأقوى فنيًا","ما أقوى شركات القطاع فنيًا وأضعفها؟ اذكر الاتجاه والمتوسطات والدعوم والمقاومات."],
   ],
   company: [
-  ["تحليل شامل","قدّم تحليلًا ماليًا وفنيًا شاملًا للشركة بالترتيب المعتاد، واختم بنظرتك العامة وأسبابها."],
+  ["تحليل شامل","قدّم تحليلًا ماليًا وفنيًا شاملًا للشركة بالترتيب المعتاد، بما فيه جودة الأرباح والتوقعات لـ3 سنوات، واختم بنظرتك العامة وأسبابها."],
+  ["التوقعات وجودة الأرباح","هل أرباح الشركة متكررة أم فيها بنود استثنائية أو دخل من خارج النشاط؟ وما توقعاتك لربح السهم والسعر خلال 3 سنوات بالسيناريوهات، وهل فرضياتها واقعية في ضوء آخر الأرباع والإعلانات؟"],
   ["التحليل الفني","حلل السهم فنيًا: الاتجاه، المتوسطات، الزخم (RSI وMACD وADX)، الدعوم والمقاومات، السيولة، والأداء مقابل تاسي. ما المستويات التي تؤكد الصعود أو تكسر الصورة؟"],
   ["هل التقييم مرتفع؟","هل تقييم السهم الحالي مرتفع أم منخفض مقارنة بأرباحه ونموه وبوسيط قطاعه وأكبر منافسيه؟"],
   ["اتجاه الأرباح الربعية","ما اتجاه الأرباح والهوامش في آخر الأرباع مقارنة بالربع السابق ونفس الربع من العام الماضي؟ وما الأسباب المحتملة من الإعلانات؟"],
@@ -494,6 +497,17 @@ $("q").addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey){ e
 // عرض الإجابة: جداول، أرقام إنجليزية معزولة LTR، وبلا تنصيص أو نجوم شاردة (dist/ai-format.mjs).
 const md = renderAnswer;
 
+/* سطر المرشحين في المرحلة الأولى: CANDIDATES: 1234,5678 (النموذج قد يحيطه بنجوم أو علامات كود). */
+const PICK_WORD = "CANDIDATES";
+const pickHead = t => String(t).replace(/^[\s*`#>_-]+/, "").toUpperCase();
+function looksLikePick(text){ const h = pickHead(text); return h.startsWith(PICK_WORD) || (h.length < PICK_WORD.length && PICK_WORD.startsWith(h)); }
+export function parsePicks(text){
+  const t = String(text);
+  if (!pickHead(t).startsWith(PICK_WORD) && !(t.length < 400 && new RegExp(PICK_WORD, "i").test(t))) return null;
+  const known = new Set(all.map(s => String(s.symbol)));
+  const syms = [...new Set((toLatinDigits(t).match(/\b\d{4}\b/g) || []).filter(s => known.has(s)))].slice(0, 8);
+  return syms.length ? syms : null;
+}
 async function ask(question, label){
   if (!current || busy) return;
   busy = true; setEnabled(true);
@@ -509,48 +523,73 @@ async function ask(question, label){
   chat.append(card); chat.scrollTop = chat.scrollHeight;
   const t0 = performance.now(), model = modelEl.value;
   const key = apiKey();
-  let answer = "", usage = null, remaining = null, offline = !key && !ENDPOINT, failure = "", finish = "", thought = false;
+  let answer = "", usage = null, remaining = null, offline = !key && !ENDPOINT, failure = "";
+  const thinking = text => `<span class="ai-thinking"><span class="typing"><i></i><i></i><i></i></span>${text}</span>`;
+  // طلب واحد مع بث الإجابة. hide: لا تُعرض الإجابة ما دامت تبدأ بسطر المرشحين.
+  const run = async ({ system, data, proxy, hide }) => {
+    let out = "", fin = "", th = false;
+    const r = key
+      ? await fetch(OPENROUTER, { method: "POST",
+          headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Saudi Sectors" },
+          body: JSON.stringify({ model, max_tokens: MAX_TOKENS, temperature: 0.3, stream: true, usage: { include: true }, reasoning: { effort: "medium" },
+            messages: [{ role: "system", content: `${system}\n\nالبيانات المرفقة:\n${data}` }, ...history.slice(-6), { role: "user", content: question }] }) })
+      : await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...proxy, question, history: history.slice(-6), model }) });
+    if (!key) remaining = r.headers.get("X-Remaining") ?? remaining;
+    if (!r.ok) {
+      const err = await r.json().catch(()=>({}));
+      failure = r.status === 401 ? "مفتاح OpenRouter غير صحيح."
+        : r.status === 402 ? "رصيد حسابك في OpenRouter بالسالب، فتوقفت حتى النماذج المجانية. أضف رصيدًا يعيده فوق الصفر."
+        : r.status === 429 ? limitMessage(err.error, r.headers)
+        : (typeof err.error === "string" ? err.error : err.error?.message) || `خطأ ${r.status}`;
+      throw new Error(failure);
+    }
+    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = "";
+    for (;;) {
+      const { done, value } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split("\n"); buf = lines.pop();
+      for (const l of lines) {
+        if (!l.startsWith("data: ") || l.includes("[DONE]")) continue;
+        let j; try { j = JSON.parse(l.slice(6)); } catch { continue; }
+        if (j.error) { failure = j.error.code === 429 ? limitMessage(j.error) : `خطأ من OpenRouter: ${j.error.message || j.error.code || "غير معروف"}`; throw new Error(failure); }
+        const c = j.choices?.[0];
+        out += c?.delta?.content || "";
+        if (c?.delta?.reasoning || c?.delta?.reasoning_details?.length) { if (!th && !out) bot.innerHTML = thinking("المحلل يحلل البيانات ويفكّر…"); th = true; }
+        if (c?.finish_reason) fin = c.finish_reason;
+        if (j.usage) usage = usage ? { prompt_tokens: usage.prompt_tokens + (j.usage.prompt_tokens || 0), completion_tokens: usage.completion_tokens + (j.usage.completion_tokens || 0) } : j.usage;
+      }
+      if (out && !(hide && looksLikePick(out))) { bot.innerHTML = md(out); chat.scrollTop = chat.scrollHeight; }
+    }
+    if (fin === "length" && out.trim()) out += "\n\n**تنبيه:** توقفت الإجابة لأنها بلغت الحد الأقصى للطول. اطلب «أكمل» لمتابعتها.";
+    if (!out.trim()) {
+      failure = fin === "length" || th ? "استهلك النموذج حد التوكنات في التفكير قبل أن يكتب الإجابة. جرّب نموذجًا آخر من الإعدادات."
+        : `لم تصل إجابة من النموذج${fin ? ` (سبب التوقف: ${fin})` : ""}. جرّب مرة أخرى أو اختر نموذجًا آخر.`;
+      throw new Error(failure);
+    }
+    return out;
+  };
   if (!offline) {
     try {
-      const r = key
-        ? await fetch(OPENROUTER, { method: "POST",
-            headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Saudi Sectors" },
-            body: JSON.stringify({ model, max_tokens: MAX_TOKENS, temperature: 0.3, stream: true, usage: { include: true }, reasoning: { effort: "medium" },
-              messages: [{ role: "system", content: `${current.system}\n\nالبيانات المرفقة (${SCOPE_LABEL[current.scope] || "ملف الشركة"}):\n${current.text}${extraText}` }, ...history.slice(-6), { role: "user", content: question }] }) })
-        : await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ scope: current.scope, id: current.scope === "company" ? current.symbol : current.id, extra: extras.map(p => p.symbol), question, history: history.slice(-6), model }) });
-      remaining = key ? null : r.headers.get("X-Remaining");
-      if (!r.ok) {
-        const err = await r.json().catch(()=>({}));
-        failure = r.status === 401 ? "مفتاح OpenRouter غير صحيح."
-          : r.status === 402 ? "رصيد حسابك في OpenRouter بالسالب، فتوقفت حتى النماذج المجانية. أضف رصيدًا يعيده فوق الصفر."
-          : r.status === 429 ? limitMessage(err.error, r.headers)
-          : (typeof err.error === "string" ? err.error : err.error?.message) || `خطأ ${r.status}`;
-        throw new Error(failure);
-      }
-      const reader = r.body.getReader(), dec = new TextDecoder(); let buf = "";
-      for (;;) {
-        const { done, value } = await reader.read(); if (done) break;
-        buf += dec.decode(value, { stream: true });
-        const lines = buf.split("\n"); buf = lines.pop();
-        for (const l of lines) {
-          if (!l.startsWith("data: ") || l.includes("[DONE]")) continue;
-          let j; try { j = JSON.parse(l.slice(6)); } catch { continue; }
-          if (j.error) { failure = j.error.code === 429 ? limitMessage(j.error) : `خطأ من OpenRouter: ${j.error.message || j.error.code || "غير معروف"}`; throw new Error(failure); }
-          const c = j.choices?.[0];
-          answer += c?.delta?.content || "";
-          if (c?.delta?.reasoning || c?.delta?.reasoning_details?.length) { if (!thought && !answer) bot.innerHTML = `<span class="ai-thinking"><span class="typing"><i></i><i></i><i></i></span> المحلل يحلل البيانات ويفكّر…</span>`; thought = true; }
-          if (c?.finish_reason) finish = c.finish_reason;
-          if (j.usage) usage = j.usage;
-        }
-        if (answer) { bot.innerHTML = md(answer); chat.scrollTop = chat.scrollHeight; }
-      }
-      if (finish === "length" && answer.trim()) answer += "\n\n**تنبيه:** توقفت الإجابة لأنها بلغت الحد الأقصى للطول. اطلب «أكمل» لمتابعتها.", bot.innerHTML = md(answer);
-      if (!answer.trim()) {
-        failure = finish === "length" || thought ? "استهلك النموذج حد التوكنات في التفكير قبل أن يكتب الإجابة. جرّب نموذجًا آخر من الإعدادات."
-          : `لم تصل إجابة من النموذج${finish ? ` (سبب التوقف: ${finish})` : ""}. جرّب مرة أخرى أو اختر نموذجًا آخر.`;
-        throw new Error(failure);
-      }
+      const id = current.scope === "company" ? current.symbol : current.id;
+      const twoStage = current.scope !== "company" && current.pick && current.deep;
+      answer = await run({
+        system: twoStage ? `${current.system}\n\n${current.pick}` : current.system,
+        data: `(${SCOPE_LABEL[current.scope] || "ملف الشركة"})\n${current.text}${extraText}`,
+        proxy: { scope: current.scope, id, extra: extras.map(p => p.symbol) }, hide: twoStage });
+      // المرحلة الثانية: النموذج رشّح شركات، فنرفق ملفاتها الكاملة ونطلب التحليل المفصل.
+      const picks = twoStage ? parsePicks(answer) : null;
+      if (picks) {
+        const packs = (await Promise.all(picks.map(s => getPack(`ai/${s}.json`)))).filter(Boolean);
+        if (!packs.length) { failure = "رشّح النموذج رموزًا غير موجودة في البيانات. أعد السؤال أو اختر نموذجًا آخر."; throw new Error(failure); }
+        bot.innerHTML = thinking(`يقرأ الملفات الكاملة لـ${packs.length} شركات مرشحة: ${packs.map(p => esc(p.name)).join("، ")}…`);
+        card.querySelector(".msg-head").insertAdjacentHTML("beforeend", `<small class="ai-attached">تحليل معمّق لـ${packs.length} مرشحين</small>`);
+        answer = await run({
+          system: `${current.system}\n\n${current.deep}`,
+          data: `(ملخص ${SCOPE_LABEL[current.scope]} وملفات المرشحين الكاملة)\n${current.digest || ""}${packs.map(p => `\n\n--- ملف شركة مرشحة: ${p.name} (${p.symbol}) | القطاع: ${p.sector} ---\n${p.text}`).join("")}`,
+          proxy: { scope: current.scope, id, deep: packs.map(p => p.symbol) } });
+      } else if (twoStage && looksLikePick(answer)) { failure = "لم يحدد النموذج مرشحين صالحين. أعد السؤال أو اختر نموذجًا آخر."; throw new Error(failure); }
+      bot.innerHTML = md(answer);
     } catch (err) {
       failure = failure || (err instanceof TypeError
         ? `تعذّر الوصول إلى ${key ? "openrouter.ai" : "خادم المحلل"}. تحقق من الإنترنت، أو أوقف مانع الإعلانات لهذا الموقع. (${err.message})`

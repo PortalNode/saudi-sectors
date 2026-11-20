@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { buildPack, technicalSection, buildSectorPack, buildMarketPack, companySummary, SECTOR_SLUGS, SYSTEM_PROMPT } from '../scripts/build-ai-packs.mjs';
+import { buildPack, technicalSection, buildSectorPack, buildMarketPack, companySummary, coreProfit, forecastSection, SECTOR_SLUGS, SYSTEM_PROMPT, PICK_PROMPT, DEEP_PROMPT } from '../scripts/build-ai-packs.mjs';
 
 const dist = new URL('../dist/', import.meta.url);
 const read = name => readFileSync(new URL(name, dist), 'utf8');
@@ -38,7 +38,7 @@ test('a company pack is a short table with the key figures, not the raw files', 
   assert.doesNotMatch(pack.text, /dilutedEps/);
   assert.match(pack.text, /2026Q1[\s\S]*2026Q2[\s\S]*2026Q3/, 'quarters in order');
   assert.match(pack.text, /- 2026-11-01: إعلان نتائج/);
-  assert.deepEqual(pack.facts.quarters.at(-1), ['2026Q3', 30]);
+  assert.deepEqual(pack.facts.quarters.at(-1), ['2026Q3', 30, 30]);
   assert.ok(pack.tokens > 0 && pack.rawTokens > 0);
   assert.equal(pack.system, SYSTEM_PROMPT);
   assert.match(SYSTEM_PROMPT, /محلل مالي وفني/);
@@ -105,7 +105,11 @@ test('sector and market packs list every company in one short row', () => {
   assert.equal(mkt.scope, 'market');
   assert.deepEqual(mkt.sectors, [['cement', 'الاسمنت', 2]]);
   assert.match(mkt.text, /## الاسمنت: عدد الشركات 2 .*\(100% من السوق\)/);
-  assert.match(mkt.text, /3010 \| أ \| 10 \| 500 \| 10 \| 1 \| 5 \| — \| 1 \| 2 \| -5 \(2025\) \| تحوّل لخسارة \| \+50\.0% \| صاعد \| 61 \| \+25\.0% \| 4/);
+  assert.match(mkt.text, /3010 \| أ \| 10 \| 500 \| 10 \| — \| 1 \| 5 \| 1 \| 2 \| -5 \(2025\) \| تحوّل لخسارة \| — \| \+50\.0% \| — \| — \| صاعد \| 61 \| \+25\.0% \| 4/);
+  assert.doesNotMatch(mkt.digest, /^3010 \|/m, 'the digest has no company rows');
+  assert.match(mkt.digest, /## الاسمنت/);
+  assert.equal(mkt.pick, PICK_PROMPT);
+  assert.equal(sec.deep, DEEP_PROMPT);
   assert.match(SYSTEM_PROMPT, /«الأرخص» تعني التقييم/);
   assert.match(SYSTEM_PROMPT, /الأرقام الإنجليزية 0123456789/);
   assert.match(SYSTEM_PROMPT, /بلا أسطر فارغة بين الصفوف/);
@@ -120,4 +124,57 @@ test('the analyst page asks about the market, a sector or a company, and attache
   assert.match(page, /\.slice\(0, 3\)/, 'at most three attached companies');
   const proxy = readFileSync(new URL('../worker/ai-proxy.js', import.meta.url), 'utf8');
   assert.match(proxy, /scope === 'market' \? 'market' : scope === 'sector' \? `sector-\$\{id\}`/);
+});
+
+test('core profit drops one-off items, so a gain from selling an asset is not growth', () => {
+  // نادك 2024: صافي 775 وربح السهم 2.57، وقبل البنود الاستثنائية 1.39.
+  assert.equal(Math.round(coreProfit({ netProfit: 774.63, eps: 2.57, epsBeforeExceptional: 1.39 })), 419);
+  assert.equal(Math.round(coreProfit({ netProfit: -285, eps: -1.34, epsBeforeExceptional: -0.48 })), -102, 'one-off losses are added back');
+  assert.equal(coreProfit({ netProfit: 100, eps: 1, epsBeforeExceptional: 1 }), 100);
+  assert.equal(coreProfit({ netProfit: 100 }), 100, 'no exceptional figure: net profit');
+  assert.equal(coreProfit({ netProfit: 821.7, eps: 9.75, epsBeforeExceptional: 9.75 }), 821.7, 'EPS in halalas does not matter');
+  assert.equal(coreProfit({ netProfit: -187, ffo: 21.8 }), 21.8, 'REITs use FFO');
+});
+
+test('forecasts grow core profit, not a year inflated by a one-off gain', () => {
+  const v = (rev, op, np, eps, be) => ({ revenue: rev, operatingIncome: op, netProfit: np, eps, epsBeforeExceptional: be });
+  const years = [
+    { year: 2022, values: v(1000, 120, 100, 1, 1) },
+    { year: 2023, values: v(1100, 130, 110, 1.1, 1.1) },
+    { year: 2024, values: v(1200, 140, 400, 4, 1.2) },   // ربح بيع أصل 280
+    { year: 2025, values: v(1300, 150, 130, 1.3, 1.3) },
+  ];
+  const quarters = ['2025Q1', '2025Q2', '2025Q3', '2025Q4'].map(q => [q, v(325, 37.5, 32.5, 0.325, 0.325)]);
+  const st = { price: 20, shares: 100e6, pe: 15, dividendYield: 2, priceDate: '2026-11-19' };
+  const { lines, facts } = forecastSection({ st, sectorPe: 15, years, quarters });
+  const text = lines.join('\n');
+  assert.match(text, /2024: 400 ← 120 \(استثنائي \+280\)/);
+  assert.ok(Math.abs(facts.coreEps - 1.3) < 1e-9);
+  assert.ok(facts.growth.base <= facts.revCagr3 + 0.03 + 1e-9, 'base growth capped by revenue growth');
+  assert.ok(facts.growth.base < 0.15);
+  assert.ok(facts.scenarios.bear.price3 < facts.scenarios.base.price3 && facts.scenarios.base.price3 < facts.scenarios.bull.price3);
+  assert.match(text, /السيناريو \| ربح السهم الأساسي 2029/);
+
+  // ربح أساسي يفوق التشغيلي: تنبيه دخل من خارج النشاط.
+  const holding = forecastSection({ st, sectorPe: 15, years: years.map(y => ({ ...y, values: { ...y.values, operatingIncome: 50 } })), quarters });
+  assert.ok(holding.facts.flags.includes('nonOperating'));
+  // شركة خاسرة أساسيًا: لا توقع بالمكرر.
+  const loss = forecastSection({ st, sectorPe: 15, years, quarters: quarters.map(([q]) => [q, v(300, -5, -10, -0.1, -0.1)]) });
+  assert.equal(loss.facts.scenarios, null);
+  assert.match(loss.lines.join('\n'), /لا توقع سعري/);
+});
+
+test('the analyst asks for depth, earnings quality and forecasts, and picks candidates in two stages', () => {
+  assert.match(SYSTEM_PROMPT, /الربح الأساسي/);
+  assert.match(SYSTEM_PROMPT, /لا يوجد محفز معلن في البيانات/);
+  assert.doesNotMatch(SYSTEM_PROMPT, /اكتب بنقاط قصيرة/);
+  assert.match(PICK_PROMPT, /CANDIDATES: 1234,5678/);
+  assert.match(DEEP_PROMPT, /## المحفظة/);
+  const page = read('ai-analyst.html');
+  assert.match(page, /function parsePicks\(/);
+  assert.match(page, /deep: packs\.map\(p => p\.symbol\)/);
+  assert.match(page, /محفظة 3 سنوات/);
+  const proxy = readFileSync(new URL('../worker/ai-proxy.js', import.meta.url), 'utf8');
+  assert.match(proxy, /\.slice\(0, 8\)/, 'at most eight candidates');
+  assert.match(proxy, /pack\.deep/);
 });

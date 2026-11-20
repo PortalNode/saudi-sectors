@@ -58,6 +58,8 @@ export default {
     if (scope === 'company' && !/^\d{4}$/.test(id)) return json({ error: 'رمز الشركة غير صالح.' }, 400, cors);
     if (scope === 'sector' && !/^[a-z-]{2,40}$/.test(id)) return json({ error: 'القطاع غير صالح.' }, 400, cors);
     const extra = (Array.isArray(body.extra) ? body.extra : []).map(String).filter(x => /^\d{4}$/.test(x) && x !== id).slice(0, 3);
+    // المرحلة الثانية لأسئلة الترشيح: ملفات المرشحين الكاملة (حتى 8) بدل جدول السوق أو القطاع.
+    const deep = scope === 'company' ? [] : [...new Set((Array.isArray(body.deep) ? body.deep : []).map(String).filter(x => /^\d{4}$/.test(x)))].slice(0, 8);
     if (!question || question.length > 500) return json({ error: 'السؤال فارغ أو أطول من 500 حرف.' }, 400, cors);
     const models = (env.MODELS || DEFAULT_MODELS).split(',').map(s => s.trim());
     const model = models.includes(body.model) ? body.model : models[0];
@@ -70,9 +72,18 @@ export default {
     const load = async name => { const r = await fetch(`${site}ai/${name}.json`, { cf: { cacheTtl: 600, cacheEverything: true } }); return r.ok ? r.json() : null; };
     const pack = await load(scope === 'market' ? 'market' : scope === 'sector' ? `sector-${id}` : id);
     if (!pack) return json({ error: 'لا توجد بيانات لهذا الاختيار.' }, 404, cors);
-    const extras = (await Promise.all(extra.map(load))).filter(Boolean);
     const LABEL = { market: 'جدول السوق كاملًا', sector: 'جدول القطاع', company: 'ملف الشركة' };
-    const data = `${pack.text}${extras.map(p => `\n\n--- ملف شركة ذكرها السائل: ${p.name} (${p.symbol}) ---\n${p.text}`).join('')}`;
+    let system = pack.system || SYSTEM, data;
+    if (deep.length) {
+      const picks = (await Promise.all(deep.map(load))).filter(Boolean);
+      if (!picks.length) return json({ error: 'لا توجد بيانات للشركات المرشحة.' }, 404, cors);
+      system += `\n\n${pack.deep || ''}`;
+      data = `(ملخص ${LABEL[scope]} وملفات المرشحين الكاملة)\n${pack.digest || ''}${picks.map(p => `\n\n--- ملف شركة مرشحة: ${p.name} (${p.symbol}) | القطاع: ${p.sector} ---\n${p.text}`).join('')}`;
+    } else {
+      const extras = (await Promise.all(extra.map(load))).filter(Boolean);
+      if (scope !== 'company' && pack.pick) system += `\n\n${pack.pick}`;
+      data = `(${LABEL[scope]})\n${pack.text}${extras.map(p => `\n\n--- ملف شركة ذكرها السائل: ${p.name} (${p.symbol}) ---\n${p.text}`).join('')}`;
+    }
 
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     const quota = await takeQuota(env, ip);
@@ -88,7 +99,7 @@ export default {
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: 'system', content: `${pack.system || SYSTEM}\n\nالبيانات المرفقة (${LABEL[scope]}):\n${data}` }, ...history, { role: 'user', content: question }],
+        messages: [{ role: 'system', content: `${system}\n\nالبيانات المرفقة:\n${data}` }, ...history, { role: 'user', content: question }],
         max_tokens: Number(env.MAX_TOKENS || 16000),
         reasoning: { effort: 'medium' },
         temperature: 0.3,
