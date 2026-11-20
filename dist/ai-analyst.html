@@ -67,6 +67,13 @@
     .msg.bot .up{color:var(--green)}.msg.bot .down{color:var(--red)}
     .msg-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--muted)}
     .msg-meta .demo{color:var(--teal);font-weight:700}
+    .ai-free{color:var(--green)}.ai-paid{color:var(--teal)}
+    .ai-account{display:grid;gap:8px;padding:10px 12px;border:1px solid var(--line);background:var(--white)}
+    .ai-account div{display:grid;gap:2px}
+    .ai-account span{font-size:11px;color:var(--muted)}
+    .ai-account strong{font-size:12.5px;color:var(--ink)}
+    .ai-account a{color:var(--teal);text-decoration:underline}
+    .ai-bar{display:block;height:5px;margin-top:4px;background:var(--line)}.ai-bar b{display:block;height:100%;background:var(--teal)}
     .ai-thinking{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
     .msg.bot .ai-local{margin:0 0 10px;padding:6px 10px;border:1px dashed var(--teal);color:var(--muted);font-size:12px}
     .typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
@@ -190,6 +197,7 @@
             <button type="button" id="key-clear">حذف</button>
           </div>
           <p id="model-note"></p>
+          <div class="ai-account" id="account" hidden></div>
           <p id="mode-note"></p>
         </div>
       </section>
@@ -213,6 +221,16 @@ const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
 // حد الإجابة كبير لأن النماذج القوية «تفكّر» أولًا، وتفكيرها يُحسب من الحد نفسه.
 const OUT_TOKENS = 4000, MAX_TOKENS = 16000;
 // أقوى نموذج من كل شركة (وبديل أرخص حيث يفيد). الأسعار بالدولار لكل مليون توكن، وتُحدَّث من OpenRouter عند فتح الصفحة.
+// النماذج المجانية أولًا (المعرّف ينتهي بـ :free، تكلفتها صفر، ولها حد يومي من OpenRouter).
+const FREE_MODELS = [
+  ["nvidia/nemotron-3-ultra-550b-a55b:free","NVIDIA Nemotron 3 Ultra — الأقوى المجاني"],
+  ["baidu/ernie-5.5-flash-preview:free","Baidu ERNIE 5.5 Flash"],
+  ["dots-studio/dots-3-note-preview:free","Dots3-Note"],
+  ["inclusionai/ling-3.2-flash:free","inclusionAI Ling 3.2 Flash"],
+  ["google/gemma-4-31b-it:free","Google Gemma 4 31B"],
+  ["nvidia/nemotron-3.5-super-vl:free","NVIDIA Nemotron 3.5 Super"],
+  ["openrouter/free","اختيار تلقائي لنموذج مجاني"],
+];
 const MODELS = [
   ["OpenAI", [["openai/gpt-6.2-astra","GPT-6.2 Astra — الأقوى",8,40],["openai/gpt-6.2-sol","GPT-6.2 Sol — متوازن",2,10]]],
   ["Anthropic", [["anthropic/claude-fable-5.2","Claude Fable 5.2 — الأقوى",8,40],["anthropic/claude-opus-5.5","Claude Opus 5.5",4,20],["anthropic/claude-sonnet-5.5","Claude Sonnet 5.5 — متوازن",2,10]]],
@@ -225,7 +243,8 @@ const MODELS = [
   ["Mistral", [["mistralai/mistral-large-4-0","Mistral Large 4 — الأقوى",0.7,2.1]]],
   ["MiniMax", [["minimax/minimax-m3","MiniMax M3 — الأقوى",0.3,1.2]]],
 ];
-const DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash";
+const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
+const isFree = id => FREE_MODELS.some(([m]) => m === id);
 const $ = id => document.getElementById(id);
 const norm = s => String(s||"").trim().toLowerCase().replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ـ/g,"");
 const fmt = (v,d=2) => v==null||v===""||isNaN(v) ? "—" : Number(v).toLocaleString("en-US",{maximumFractionDigits:d});
@@ -250,14 +269,39 @@ function setMode(){
     : mode === "proxy" ? "الإجابات عبر خادم الموقع، مع حد يومي لعدد الأسئلة."
     : "ضع مفتاح OpenRouter لتفعيل المحلل. بدونه تظهر قراءة آلية مبنية على الأرقام.";
 }
-keyEl.addEventListener("input", () => { store.set("ai-openrouter-key", apiKey()); setMode(); });
+/* ---------- حسابك في OpenRouter: الحد اليومي للنماذج المجانية والاستهلاك ---------- */
+let account = null, accountTimer = 0;
+const utcResetRiyadh = "3:00 فجرًا بتوقيت السعودية";
+async function loadAccount(){
+  const key = apiKey(), box = $("account");
+  if (!key) { account = null; box.hidden = true; updateMeter(); return; }
+  try {
+    const r = await fetch("https://openrouter.ai/api/v1/key", { headers: { Authorization: `Bearer ${key}` } });
+    if (!r.ok) { account = null; box.hidden = false; box.innerHTML = `<span class="down">${r.status === 401 ? "المفتاح غير صحيح." : `تعذّرت قراءة حسابك (${r.status}).`}</span>`; return; }
+    account = (await r.json()).data || null;
+  } catch { account = null; box.hidden = true; return; }
+  const f = account?.free_model_daily_requests, rows = [];
+  rows.push(`<div><span>نوع الحساب</span><strong>${account.is_free_tier ? "مجاني (لم تشترِ رصيدًا)" : "اشتريت رصيدًا من قبل"}</strong></div>`);
+  if (f) {
+    const left = Math.max(0, f.remaining), pctUsed = f.limit ? Math.min(100, f.used / f.limit * 100) : 0;
+    rows.push(`<div><span>طلبات النماذج المجانية اليوم</span><strong class="${left ? "" : "down"}"><span class="n">${f.used}</span> من <span class="n">${f.limit}</span> · المتبقي <span class="n">${left}</span></strong><i class="ai-bar"><b style="width:${pctUsed}%"></b></i></div>`);
+  }
+  rows.push(`<div><span>المخصوم اليوم من الرصيد</span><strong><span class="n">$${fmt(account.usage_daily ?? 0, 4)}</span> · منذ البداية <span class="n">$${fmt(account.usage ?? 0, 4)}</span></strong></div>`);
+  if (account.limit_remaining != null) rows.push(`<div><span>المتبقي من حد هذا المفتاح</span><strong class="n">$${fmt(account.limit_remaining, 4)}</strong></div>`);
+  rows.push(`<p>يتجدد العداد اليومي ${utcResetRiyadh}. الرصيد الكامل تجده في <a href="https://openrouter.ai/settings/credits" target="_blank" rel="noopener">صفحة الرصيد في OpenRouter</a>.</p>`);
+  box.hidden = false; box.innerHTML = rows.join("");
+  updateMeter();
+}
+keyEl.addEventListener("input", () => { store.set("ai-openrouter-key", apiKey()); setMode(); clearTimeout(accountTimer); accountTimer = setTimeout(loadAccount, 600); });
 $("key-show").onclick = e => { const show = keyEl.type === "password"; keyEl.type = show ? "text" : "password"; e.target.textContent = show ? "إخفاء" : "إظهار"; e.target.setAttribute("aria-pressed", String(show)); };
-$("key-clear").onclick = () => { keyEl.value = ""; try { localStorage.removeItem("ai-openrouter-key"); } catch {} setMode(); };
+$("key-clear").onclick = () => { keyEl.value = ""; try { localStorage.removeItem("ai-openrouter-key"); } catch {} setMode(); loadAccount(); };
 setMode();
-modelEl.innerHTML = MODELS.map(([company, list]) => `<optgroup label="${company}">${list.map(([id,label,i,o]) => `<option value="${id}" data-in="${i}" data-out="${o}">${label}</option>`).join("")}</optgroup>`).join("");
-const savedModel = store.get("ai-model");
+loadAccount();
+modelEl.innerHTML = `<optgroup label="مجانية — بدون أي تكلفة">${FREE_MODELS.map(([id,label]) => `<option value="${id}" data-in="0" data-out="0">${label}</option>`).join("")}</optgroup>`
+  + MODELS.map(([company, list]) => `<optgroup label="مدفوعة — ${company} (تُخصم من رصيدك)">${list.map(([id,label,i,o]) => `<option value="${id}" data-in="${i}" data-out="${o}">${label} (مدفوع)</option>`).join("")}</optgroup>`).join("");
+const savedModel = store.get("ai-model-v2");
 modelEl.value = savedModel && [...modelEl.options].some(o=>o.value===savedModel) ? savedModel : DEFAULT_MODEL;
-modelEl.addEventListener("change", () => { store.set("ai-model", modelEl.value); updateMeter(); });
+modelEl.addEventListener("change", () => { store.set("ai-model-v2", modelEl.value); updateMeter(); });
 // أسعار حية من OpenRouter (لا تحتاج مفتاحًا)؛ نموذج أُزيل من OpenRouter يُعطَّل بدل أن يفشل عند السؤال.
 fetch("https://openrouter.ai/api/v1/models").then(r=>r.ok?r.json():null).then(j => {
   if (!j?.data) return;
@@ -265,7 +309,7 @@ fetch("https://openrouter.ai/api/v1/models").then(r=>r.ok?r.json():null).then(j 
   for (const opt of modelEl.options) {
     const m = live.get(opt.value);
     if (!m) { opt.disabled = true; opt.textContent += " (غير متاح)"; continue; }
-    opt.dataset.in = +m.pricing.prompt * 1e6; opt.dataset.out = +m.pricing.completion * 1e6;
+    if (!isFree(opt.value)) { opt.dataset.in = +m.pricing.prompt * 1e6; opt.dataset.out = +m.pricing.completion * 1e6; }
   }
   if (modelEl.selectedOptions[0]?.disabled) modelEl.value = DEFAULT_MODEL;
   updateMeter();
@@ -313,15 +357,18 @@ function setEnabled(on){ $("q").disabled = !on; $("send").disabled = !on || busy
 
 /* ---------- العداد والتكلفة ---------- */
 function updateMeter(){
-  const opt = modelEl.selectedOptions[0];
+  const opt = modelEl.selectedOptions[0]; if (!opt) return;
   $("m-model").textContent = opt.textContent.split(" — ")[0];
-  if (!current) { $("m-tokens").textContent = "0"; $("m-save").textContent = ""; $("m-cost").textContent = "$0"; return; }
+  const free = isFree(opt.value);
+  $("model-note").innerHTML = free
+    ? `<b class="ai-free">مجاني:</b> لا يُخصم أي مبلغ. الحد ${account?.free_model_daily_requests?.limit ?? 50} طلبًا في اليوم و20 في الدقيقة.`
+    : `<b class="ai-paid">مدفوع:</b> ${fmt(+opt.dataset.in)}$ للدخل و${fmt(+opt.dataset.out)}$ للخرج لكل مليون توكن، تُخصم من رصيدك في OpenRouter.`;
+  if (!current) { $("m-tokens").textContent = "0"; $("m-save").textContent = ""; $("m-cost").textContent = free ? "مجاني" : "$0"; return; }
   const inT = current.tokens + 60 + history.reduce((n,m)=>n+tok(m.content),0);
   $("m-tokens").textContent = `≈ ${fmt(inT,0)}`;
   $("m-save").textContent = `بدل ≈ ${fmt(current.rawTokens,0)} للبيانات الخام`;
   const cost = inT/1e6*+opt.dataset.in + OUT_TOKENS/1e6*+opt.dataset.out;
-  $("model-note").textContent = `سعر ${opt.textContent.split(" — ")[0]}: ${fmt(+opt.dataset.in)}$ للدخل و${fmt(+opt.dataset.out)}$ للخرج لكل مليون توكن. التكلفة المعروضة تقديرية لإجابة متوسطة مع التفكير.`;
-  $("m-cost").textContent = cost < 0.001 ? `$${cost.toFixed(5)}` : `$${cost.toFixed(4)}`;
+  $("m-cost").textContent = free ? "مجاني" : cost < 0.001 ? `$${cost.toFixed(5)}` : `$${cost.toFixed(4)}`;
 }
 
 /* ---------- المحادثة ---------- */
@@ -368,7 +415,10 @@ async function ask(question, label){
       remaining = key ? null : r.headers.get("X-Remaining");
       if (!r.ok) {
         const err = await r.json().catch(()=>({}));
-        failure = r.status === 401 ? "مفتاح OpenRouter غير صحيح." : r.status === 402 ? "رصيد OpenRouter غير كافٍ." : (typeof err.error === "string" ? err.error : err.error?.message) || `خطأ ${r.status}`;
+        failure = r.status === 401 ? "مفتاح OpenRouter غير صحيح."
+          : r.status === 402 ? (isFree(model) ? "رصيد حسابك في OpenRouter بالسالب، فتوقفت حتى النماذج المجانية. أضف رصيدًا يعيده فوق الصفر." : "هذا نموذج مدفوع ورصيدك في OpenRouter لا يكفي. اختر نموذجًا من قائمة «مجانية».")
+          : r.status === 429 ? limitMessage(err.error, r.headers)
+          : (typeof err.error === "string" ? err.error : err.error?.message) || `خطأ ${r.status}`;
         throw new Error(failure);
       }
       const reader = r.body.getReader(), dec = new TextDecoder(); let buf = "";
@@ -379,7 +429,7 @@ async function ask(question, label){
         for (const l of lines) {
           if (!l.startsWith("data: ") || l.includes("[DONE]")) continue;
           let j; try { j = JSON.parse(l.slice(6)); } catch { continue; }
-          if (j.error) { failure = `خطأ من OpenRouter: ${j.error.message || j.error.code || "غير معروف"}`; throw new Error(failure); }
+          if (j.error) { failure = j.error.code === 429 ? limitMessage(j.error) : `خطأ من OpenRouter: ${j.error.message || j.error.code || "غير معروف"}`; throw new Error(failure); }
           const c = j.choices?.[0];
           answer += c?.delta?.content || "";
           if (c?.delta?.reasoning || c?.delta?.reasoning_details?.length) { if (!thought && !answer) bot.innerHTML = `<span class="ai-thinking"><span class="typing"><i></i><i></i><i></i></span> المحلل يراجع البيانات ويفكّر…</span>`; thought = true; }
@@ -412,6 +462,18 @@ async function ask(question, label){
     : `<span>${esc(model)}</span>${inT!=null?`<span>دخل <span class="n">${fmt(inT,0)}</span> توكن · خرج <span class="n">${fmt(outT,0)}</span></span>`:""}${remaining!=null?`<span>تبقّى لك اليوم <span class="n">${remaining}</span> سؤال</span>`:""}`;
   bot.insertAdjacentHTML("beforeend", `<div class="msg-meta">${meta}<span><span class="n">${((performance.now()-t0)/1000).toFixed(1)}</span> ث</span></div>`);
   chat.scrollTop = chat.scrollHeight; busy = false; setEnabled(true); updateMeter();
+  if (key) loadAccount();
+}
+
+/* رسالة واضحة لخطأ 429: الحد اليومي، أو حد الدقيقة، أو انشغال مزود النموذج. */
+function limitMessage(error, headers){
+  const remaining = headers?.get?.("X-RateLimit-Remaining"), limit = headers?.get?.("X-RateLimit-Limit");
+  const daily = account?.free_model_daily_requests;
+  if (error?.metadata?.provider_code || (/provider|upstream|capacity/i.test(error?.message || "") && !limit))
+    return "مزود هذا النموذج مشغول الآن. جرّب بعد دقيقة أو اختر نموذجًا مجانيًا آخر.";
+  if ((daily && daily.remaining <= 0) || (remaining === "0" && +limit >= 50))
+    return `وصلت الحد اليومي للنماذج المجانية (${daily?.limit ?? limit ?? 50} طلبًا). يتجدد ${utcResetRiyadh}. يمكنك حتى ذلك الوقت استخدام نموذج مدفوع إن كان لديك رصيد.`;
+  return "أرسلت طلبات كثيرة خلال دقيقة (الحد 20 طلبًا في الدقيقة للنماذج المجانية). انتظر دقيقة ثم أعد السؤال.";
 }
 
 /* ---------- قراءة آلية من الأرقام (حين لا يكون الذكاء الاصطناعي مفعّلًا) ---------- */

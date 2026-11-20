@@ -66,6 +66,8 @@ test('the analyst page keeps the key out of the site files and is in every top b
   const page = read('ai-analyst.html');
   assert.doesNotMatch(page, /sk-or-v1-[0-9a-f]{8}/, 'no API key written into the page');
   assert.match(page, /store\.get\("ai-openrouter-key"\)/, 'the key lives only in the visitor\'s browser');
+  assert.match(page, /const DEFAULT_MODEL = "[^"]+:free";/, 'a free model is the default');
+  assert.match(page, /fetch\("https:\/\/openrouter\.ai\/api\/v1\/key"/, 'shows the free daily allowance');
   assert.match(page, /ai-config\.js/);
   assert.match(page, /`ai\/\$\{[^}]+\}\.json`/);
   const worker = readFileSync(new URL('../worker/ai-proxy.js', import.meta.url), 'utf8');
