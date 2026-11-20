@@ -67,6 +67,7 @@
     .msg.bot .up{color:var(--green)}.msg.bot .down{color:var(--red)}
     .msg-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--muted)}
     .msg-meta .demo{color:var(--teal);font-weight:700}
+    .ai-thinking{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
     .msg.bot .ai-local{margin:0 0 10px;padding:6px 10px;border:1px dashed var(--teal);color:var(--muted);font-size:12px}
     .typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
     @keyframes blink{50%{opacity:.25}}
@@ -180,11 +181,7 @@
         <div class="ai-card-head"><h3>الإعدادات</h3><span class="ai-mode"><i class="ai-dot" id="mode-dot"></i><span id="mode-text">غير مفعّل</span></span></div>
         <div class="ai-settings">
           <label>النموذج
-            <select id="model">
-              <option value="deepseek/deepseek-v4.1-flash" data-in="0.30" data-out="1.20">DeepSeek V4.1 Flash — الأرخص</option>
-              <option value="google/gemini-2.5-flash" data-in="0.30" data-out="2.50">Gemini 2.5 Flash — سريع</option>
-              <option value="google/gemini-3.8-flash" data-in="0.825" data-out="4.125">Gemini 3.8 Flash — أدق</option>
-            </select>
+            <select id="model"></select>
           </label>
           <label for="key">مفتاح OpenRouter</label>
           <div class="ai-key">
@@ -192,6 +189,7 @@
             <button type="button" id="key-show" aria-pressed="false">إظهار</button>
             <button type="button" id="key-clear">حذف</button>
           </div>
+          <p id="model-note"></p>
           <p id="mode-note"></p>
         </div>
       </section>
@@ -212,7 +210,22 @@ const QUICK = [
 ];
 const ENDPOINT = String(window.AI_ENDPOINT || "").trim();
 const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
-const OUT_TOKENS = 1200, MAX_TOKENS = 2500;
+// حد الإجابة كبير لأن النماذج القوية «تفكّر» أولًا، وتفكيرها يُحسب من الحد نفسه.
+const OUT_TOKENS = 4000, MAX_TOKENS = 16000;
+// أقوى نموذج من كل شركة (وبديل أرخص حيث يفيد). الأسعار بالدولار لكل مليون توكن، وتُحدَّث من OpenRouter عند فتح الصفحة.
+const MODELS = [
+  ["OpenAI", [["openai/gpt-6.2-astra","GPT-6.2 Astra — الأقوى",8,40],["openai/gpt-6.2-sol","GPT-6.2 Sol — متوازن",2,10]]],
+  ["Anthropic", [["anthropic/claude-fable-5.2","Claude Fable 5.2 — الأقوى",8,40],["anthropic/claude-opus-5.5","Claude Opus 5.5",4,20],["anthropic/claude-sonnet-5.5","Claude Sonnet 5.5 — متوازن",2,10]]],
+  ["Google", [["google/gemini-4-argon","Gemini 4 Argon — الأقوى",2,10],["google/gemini-3.8-flash","Gemini 3.8 Flash — سريع",0.825,4.125]]],
+  ["xAI", [["x-ai/grok-4.7","Grok 4.7 — الأقوى",2,6]]],
+  ["DeepSeek", [["deepseek/deepseek-v4-pro-0813","DeepSeek V4 Pro — الأقوى",1.32,3.96],["deepseek/deepseek-v4.1-flash","DeepSeek V4.1 Flash — الأرخص",0.3,1.2]]],
+  ["Qwen (Alibaba)", [["qwen/qwen4-max","Qwen4 Max — الأقوى",1.42,4.27]]],
+  ["Moonshot (Kimi)", [["moonshotai/kimi-k3.1-pro","Kimi K3.1 Pro — الأقوى",0.25,8.8]]],
+  ["Z.ai (GLM)", [["z-ai/glm-5.3","GLM 5.3 — الأقوى",0.07,1.4]]],
+  ["Mistral", [["mistralai/mistral-large-4-0","Mistral Large 4 — الأقوى",0.7,2.1]]],
+  ["MiniMax", [["minimax/minimax-m3","MiniMax M3 — الأقوى",0.3,1.2]]],
+];
+const DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash";
 const $ = id => document.getElementById(id);
 const norm = s => String(s||"").trim().toLowerCase().replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ـ/g,"");
 const fmt = (v,d=2) => v==null||v===""||isNaN(v) ? "—" : Number(v).toLocaleString("en-US",{maximumFractionDigits:d});
@@ -241,9 +254,22 @@ keyEl.addEventListener("input", () => { store.set("ai-openrouter-key", apiKey())
 $("key-show").onclick = e => { const show = keyEl.type === "password"; keyEl.type = show ? "text" : "password"; e.target.textContent = show ? "إخفاء" : "إظهار"; e.target.setAttribute("aria-pressed", String(show)); };
 $("key-clear").onclick = () => { keyEl.value = ""; try { localStorage.removeItem("ai-openrouter-key"); } catch {} setMode(); };
 setMode();
+modelEl.innerHTML = MODELS.map(([company, list]) => `<optgroup label="${company}">${list.map(([id,label,i,o]) => `<option value="${id}" data-in="${i}" data-out="${o}">${label}</option>`).join("")}</optgroup>`).join("");
 const savedModel = store.get("ai-model");
-if (savedModel && [...modelEl.options].some(o=>o.value===savedModel)) modelEl.value = savedModel;
+modelEl.value = savedModel && [...modelEl.options].some(o=>o.value===savedModel) ? savedModel : DEFAULT_MODEL;
 modelEl.addEventListener("change", () => { store.set("ai-model", modelEl.value); updateMeter(); });
+// أسعار حية من OpenRouter (لا تحتاج مفتاحًا)؛ نموذج أُزيل من OpenRouter يُعطَّل بدل أن يفشل عند السؤال.
+fetch("https://openrouter.ai/api/v1/models").then(r=>r.ok?r.json():null).then(j => {
+  if (!j?.data) return;
+  const live = new Map(j.data.map(m => [m.id, m]));
+  for (const opt of modelEl.options) {
+    const m = live.get(opt.value);
+    if (!m) { opt.disabled = true; opt.textContent += " (غير متاح)"; continue; }
+    opt.dataset.in = +m.pricing.prompt * 1e6; opt.dataset.out = +m.pricing.completion * 1e6;
+  }
+  if (modelEl.selectedOptions[0]?.disabled) modelEl.value = DEFAULT_MODEL;
+  updateMeter();
+}).catch(()=>{});
 
 /* ---------- قائمة الشركات (محلية) ---------- */
 const market = await fetch("data.json").then(r=>r.json());
@@ -294,6 +320,7 @@ function updateMeter(){
   $("m-tokens").textContent = `≈ ${fmt(inT,0)}`;
   $("m-save").textContent = `بدل ≈ ${fmt(current.rawTokens,0)} للبيانات الخام`;
   const cost = inT/1e6*+opt.dataset.in + OUT_TOKENS/1e6*+opt.dataset.out;
+  $("model-note").textContent = `سعر ${opt.textContent.split(" — ")[0]}: ${fmt(+opt.dataset.in)}$ للدخل و${fmt(+opt.dataset.out)}$ للخرج لكل مليون توكن. التكلفة المعروضة تقديرية لإجابة متوسطة مع التفكير.`;
   $("m-cost").textContent = cost < 0.001 ? `$${cost.toFixed(5)}` : `$${cost.toFixed(4)}`;
 }
 
@@ -334,7 +361,7 @@ async function ask(question, label){
         ? await fetch(OPENROUTER, { method: "POST",
             headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Saudi Sectors" },
             // بدون معامل reasoning: طلبه يشغّل «التفكير» في بعض النماذج فيستهلك حد التوكنات ولا يبقى للإجابة شيء.
-            body: JSON.stringify({ model, max_tokens: MAX_TOKENS, temperature: 0.3, stream: true, usage: { include: true },
+            body: JSON.stringify({ model, max_tokens: MAX_TOKENS, temperature: 0.3, stream: true, usage: { include: true }, reasoning: { effort: "medium" },
               messages: [{ role: "system", content: `${current.system}\n\nبيانات الشركة:\n${current.text}` }, ...history.slice(-6), { role: "user", content: question }] }) })
         : await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ symbol: current.symbol, question, history: history.slice(-6), model }) });
@@ -355,12 +382,13 @@ async function ask(question, label){
           if (j.error) { failure = `خطأ من OpenRouter: ${j.error.message || j.error.code || "غير معروف"}`; throw new Error(failure); }
           const c = j.choices?.[0];
           answer += c?.delta?.content || "";
-          if (c?.delta?.reasoning) thought = true;
+          if (c?.delta?.reasoning || c?.delta?.reasoning_details?.length) { if (!thought && !answer) bot.innerHTML = `<span class="ai-thinking"><span class="typing"><i></i><i></i><i></i></span> المحلل يراجع البيانات ويفكّر…</span>`; thought = true; }
           if (c?.finish_reason) finish = c.finish_reason;
           if (j.usage) usage = j.usage;
         }
-        bot.innerHTML = md(answer); chat.scrollTop = chat.scrollHeight;
+        if (answer) { bot.innerHTML = md(answer); chat.scrollTop = chat.scrollHeight; }
       }
+      if (finish === "length" && answer.trim()) answer += "\n\n**تنبيه:** توقفت الإجابة لأنها بلغت الحد الأقصى للطول. اطلب «أكمل» لمتابعتها.", bot.innerHTML = md(answer);
       if (!answer.trim()) {
         failure = finish === "length" || thought ? "استهلك النموذج حد التوكنات في التفكير قبل أن يكتب الإجابة. جرّب نموذجًا آخر من الإعدادات."
           : `لم تصل إجابة من النموذج${finish ? ` (سبب التوقف: ${finish})` : ""}. جرّب مرة أخرى أو اختر نموذجًا آخر.`;

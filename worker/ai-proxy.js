@@ -5,7 +5,7 @@
 
 // احتياطي فقط: الدور الكامل يأتي من ملف الشركة (pack.system).
 const SYSTEM = 'أنت محلل مالي للسوق السعودي. أجب بالعربية باختصار ووضوح بعناوين قصيرة ونقاط. اعتمد فقط على بيانات الشركة المرفقة واذكر الأرقام وتواريخها. لا تقدم توصية شراء أو بيع مباشرة. إذا لم تكفِ البيانات للإجابة فقل ذلك صراحة.';
-const DEFAULT_MODELS = 'deepseek/deepseek-v4.1-flash,google/gemini-2.5-flash,google/gemini-3.8-flash';
+const DEFAULT_MODELS = 'deepseek/deepseek-v4.1-flash,google/gemini-3.8-flash,google/gemini-4-argon,deepseek/deepseek-v4-pro-0813';
 
 const json = (body, status, cors, extra = {}) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors, ...extra } });
@@ -81,7 +81,8 @@ export default {
       body: JSON.stringify({
         model,
         messages: [{ role: 'system', content: `${pack.system || SYSTEM}\n\nبيانات الشركة:\n${pack.text}` }, ...history, { role: 'user', content: question }],
-        max_tokens: Number(env.MAX_TOKENS || 2500),
+        max_tokens: Number(env.MAX_TOKENS || 16000),
+        reasoning: { effort: 'medium' },
         temperature: 0.3,
         stream: true,
         usage: { include: true },
