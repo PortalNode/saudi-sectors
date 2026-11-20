@@ -146,14 +146,45 @@ def normalise(item: dict) -> dict:
     return {
         "id": str(item.get("PRESS_REL_ID") or item.get("announcementNumber") or ""),
         "symbol": str(item.get("SYMBOL") or item.get("indexSymbol") or ""),
-        "date": str(item.get("newsDateStr") or item.get("PR_DATE") or "").strip(),
-        "hijriDate": str(item.get("HijriDate") or "").strip(),
-        "text": re.sub(r"\s+", " ", str(item.get("SHORT_DESC") or item.get("TITLE") or "")).strip(),
+        "date": str(item.get("newsDateStr") or item.get("PR_DATE") or "").strip().split(" ")[0],
+        "title": re.sub(r"\s+", " ", str(item.get("SHORT_DESC") or item.get("TITLE") or "")).strip(),
+        "body": "",
         "url": url,
     }
 
 
-def fetch_company(page, endpoint: str, symbol: str, start: date, end: date, delay: tuple[float, float]) -> list[dict]:
+def fetch_detail(detail_page, item: dict) -> dict:
+    """يقرأ العنوان والفقرات وجدول التوضيح من صفحة الإعلان العربية."""
+    detail_page.goto(item["url"], wait_until="domcontentloaded", timeout=60000)
+    detail_page.wait_for_timeout(700)
+    result = detail_page.evaluate("""
+      () => {
+        const root = document.querySelector('.article_body');
+        const title = [...document.querySelectorAll('h3')]
+          .map(node => node.innerText.trim())
+          .find(text => text.length > 15 && !/تسجيل الدخول|الإعلانات السابقة|Forgot Password|أهلا بك|أدخل رمز التحقق/.test(text)) || '';
+        if (!root) return {title, body: ''};
+        const parts = [];
+        root.querySelectorAll('tbody tr').forEach(row => {
+          const cells = [...row.querySelectorAll('td')].map(cell => cell.innerText.trim()).filter(Boolean);
+          if (cells.length) parts.push(cells.join(': '));
+        });
+        root.querySelectorAll(':scope > p').forEach(p => {
+          if (p.querySelector('table')) return;
+          const text = p.innerText.trim();
+          if (text) parts.push(text);
+        });
+        return {title, body: [...new Set(parts)].join('\\n\\n')};
+      }
+    """)
+    if result.get("title"):
+        item["title"] = re.sub(r"\s+", " ", result["title"]).strip()
+    if result.get("body"):
+        item["body"] = re.sub(r"[ \t]+", " ", result["body"]).strip()
+    return item
+
+
+def fetch_company(page, detail_page, endpoint: str, symbol: str, start: date, end: date, delay: tuple[float, float]) -> list[dict]:
     collected: list[dict] = []
     total = 0
     for page_number in range(1, MAX_PAGES + 1):
@@ -191,7 +222,15 @@ def fetch_company(page, endpoint: str, symbol: str, start: date, end: date, dela
             break
         time.sleep(random.uniform(*delay))
     unique = {item["id"]: item for item in collected if item["id"]}
-    return list(unique.values())
+    enriched = []
+    for item in unique.values():
+        try:
+            enriched.append(fetch_detail(detail_page, item))
+        except Exception as exc:
+            print(f"    ⚠ تعذر قراءة تفاصيل الإعلان {item['id']}: {exc}")
+            enriched.append(item)
+        time.sleep(random.uniform(max(0.8, delay[0] / 2), max(1.2, delay[1] / 2)))
+    return enriched
 
 
 def cache_path(output_dir: Path, sector: str) -> Path:
@@ -200,7 +239,12 @@ def cache_path(output_dir: Path, sector: str) -> Path:
 
 def load_cache(path: Path) -> dict[str, list[dict]]:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        cache = json.loads(path.read_text(encoding="utf-8"))
+        for items in cache.values():
+            for item in items:
+                item.setdefault("title", item.get("text", ""))
+                item.setdefault("body", "")
+        return cache
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
@@ -212,26 +256,26 @@ def save_cache(path: Path, cache: dict[str, list[dict]]) -> None:
 def style_sheet(ws, company: dict, announcements: list[dict], start: date, end: date) -> None:
     ws.sheet_view.rightToLeft = True
     ws.freeze_panes = "A5"
-    ws.merge_cells("A1:E1")
+    ws.merge_cells("A1:D1")
     ws["A1"] = f"{company['name']} ({company['symbol']}) — إعلانات تداول السعودية"
     ws["A1"].font = Font(bold=True, size=14, color="FFFFFF")
     ws["A1"].fill = PatternFill("solid", fgColor="17365D")
     ws["A1"].alignment = Alignment(horizontal="right")
-    ws.merge_cells("A2:E2")
+    ws.merge_cells("A2:D2")
     ws["A2"] = f"الفترة: من {start.strftime('%d/%m/%Y')} إلى {end.strftime('%d/%m/%Y')} | المصدر: تداول السعودية"
     ws["A2"].font = Font(italic=True, color="666666")
     ws["A2"].alignment = Alignment(horizontal="right")
-    ws.merge_cells("A3:E3")
+    ws.merge_cells("A3:D3")
     ws["A3"] = f"عدد الإعلانات: {len(announcements)}"
     ws["A3"].alignment = Alignment(horizontal="right")
-    headers = ["التاريخ الميلادي", "التاريخ الهجري", "نص الإعلان الرسمي", "رابط الإعلان في تداول", "رمز الشركة"]
+    headers = ["التاريخ الميلادي", "عنوان الإعلان", "فحوى الإعلان الكامل", "الرابط المرجعي في تداول"]
     for col, value in enumerate(headers, 1):
         cell = ws.cell(4, col, value)
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill("solid", fgColor="4472C4")
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     for row, item in enumerate(announcements, 5):
-        values = [item["date"], item["hijriDate"], item["text"], "فتح الإعلان", item["symbol"]]
+        values = [item["date"], item.get("title", ""), item.get("body", "") or item.get("title", ""), "فتح الإعلان"]
         for col, value in enumerate(values, 1):
             cell = ws.cell(row, col, value)
             cell.alignment = Alignment(horizontal="right", vertical="top", wrap_text=col == 3)
@@ -239,15 +283,15 @@ def style_sheet(ws, company: dict, announcements: list[dict], start: date, end: 
                 cell.hyperlink = item["url"]
                 cell.font = Font(color="0563C1", underline="single")
     thin = Side(style="thin", color="D9E2F3")
-    for row in ws.iter_rows(min_row=4, max_row=max(4, 4 + len(announcements)), min_col=1, max_col=5):
+    for row in ws.iter_rows(min_row=4, max_row=max(4, 4 + len(announcements)), min_col=1, max_col=4):
         for cell in row:
             cell.border = Border(bottom=thin)
-    widths = {"A": 22, "B": 16, "C": 90, "D": 22, "E": 14}
+    widths = {"A": 18, "B": 55, "C": 110, "D": 24}
     for col, width in widths.items():
         ws.column_dimensions[col].width = width
     ws.row_dimensions[1].height = 26
     ws.row_dimensions[4].height = 32
-    ws.auto_filter.ref = f"A4:E{max(4, 4 + len(announcements))}"
+    ws.auto_filter.ref = f"A4:D{max(4, 4 + len(announcements))}"
 
 
 def write_workbook(sector: str, companies: list[dict], cache: dict, output_dir: Path, start: date, end: date) -> Path:
@@ -267,7 +311,7 @@ def write_workbook(sector: str, companies: list[dict], cache: dict, output_dir: 
     return output
 
 
-def run_sector(sector: str, companies: list[dict], args: argparse.Namespace, page, endpoint) -> None:
+def run_sector(sector: str, companies: list[dict], args: argparse.Namespace, page, detail_page, endpoint) -> None:
     start, end = date_range(args.months)
     output_dir = Path(args.output_dir)
     cache_file = cache_path(output_dir, sector)
@@ -277,7 +321,7 @@ def run_sector(sector: str, companies: list[dict], args: argparse.Namespace, pag
         for index, company in enumerate(companies, 1):
             print(f"[{index}/{len(companies)}] {company['name']} ({company['symbol']}) ...", flush=True)
             try:
-                items = fetch_company(page, endpoint, company["symbol"], start, end, (args.delay_min, args.delay_max))
+                items = fetch_company(page, detail_page, endpoint, company["symbol"], start, end, (args.delay_min, args.delay_max))
                 cache[company["symbol"]] = items
                 print(f"    ✓ {len(items)} إعلان")
                 save_cache(cache_file, cache)
@@ -316,11 +360,12 @@ def main() -> None:
     with sync_playwright() as playwright:
         try:
             context, page, endpoint = create_browser(playwright)
+            detail_page = context.new_page()
         except Exception as exc:
             raise SystemExit(f"تعذر تشغيل Chrome أو فتح تداول: {exc}") from exc
         try:
             for sector, companies in selected:
-                run_sector(sector, companies, args, page, endpoint)
+                run_sector(sector, companies, args, page, detail_page, endpoint)
                 if args.all:
                     time.sleep(random.uniform(10, 20))
         finally:
