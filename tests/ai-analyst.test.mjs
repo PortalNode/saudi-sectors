@@ -107,6 +107,8 @@ test('sector and market packs list every company in one short row', () => {
   assert.match(mkt.text, /## الاسمنت: عدد الشركات 2 .*\(100% من السوق\)/);
   assert.match(mkt.text, /3010 \| أ \| 10 \| 500 \| 10 \| 1 \| 5 \| — \| 1 \| 2 \| -5 \(2025\) \| تحوّل لخسارة \| \+50\.0% \| صاعد \| 61 \| \+25\.0% \| 4/);
   assert.match(SYSTEM_PROMPT, /«الأرخص» تعني التقييم/);
+  assert.match(SYSTEM_PROMPT, /الأرقام الإنجليزية 0123456789/);
+  assert.match(SYSTEM_PROMPT, /بلا أسطر فارغة بين الصفوف/);
 });
 
 test('the analyst page asks about the market, a sector or a company, and attaches named companies', () => {

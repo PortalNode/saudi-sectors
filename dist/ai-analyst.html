@@ -69,7 +69,17 @@
     .msg.bot h4{margin:10px 0 4px;font-size:13.5px;color:var(--teal)}
     .msg.bot h4:first-child{margin-top:0}
     .msg.bot p{margin:0 0 6px}
-    .msg.bot ul{margin:0 0 6px;padding-inline-start:20px}
+    .msg.bot :is(ul,ol){margin:0 0 8px;padding-inline-start:22px}
+    .msg.bot ol li::marker{font-weight:700;color:var(--teal)}
+    .msg.bot b{color:var(--ink)}
+    .msg.bot .ai-table-wrap{margin:8px 0 12px;overflow-x:auto;border:1px solid var(--line)}
+    .msg.bot table.ai-table{width:100%;min-width:0;table-layout:auto;border-collapse:collapse;font-size:12px;line-height:1.6}
+    .msg.bot .ai-table :is(th,td){height:auto;padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:middle;color:var(--ink);background:var(--white)}
+    .msg.bot .ai-table th{position:static;background:var(--head);color:var(--muted);font-size:11px;font-weight:700}
+    .msg.bot .ai-table tbody tr:nth-child(even) td{background:var(--panel)}
+    .msg.bot .ai-table tbody tr:hover td{background:var(--hover)}
+    .msg.bot .n{display:inline}
+    .msg.bot .ai-table td.ai-num{font-variant-numeric:tabular-nums}
     .msg.bot li{margin:2px 0}
     .msg.bot .up{color:var(--green)}.msg.bot .down{color:var(--red)}
     .msg-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--muted)}
@@ -224,6 +234,7 @@
 
 <script src="ai-config.js?v=ai-20261120"></script>
 <script type="module">
+import { renderAnswer } from "./ai-format.mjs?v=ai-20261121b";
 const QUICK = {
   market: [
     ["أرخص الشركات","ما أرخص 10 شركات في السوق تقييمًا (أقل مكرر موجب ومضاعف دفترية معقول) مع أرباح غير متراجعة؟ رتّبها مع القطاع والسبب وما يجب الحذر منه."],
@@ -460,18 +471,8 @@ $("quick").onclick = e => { const b = e.target.closest("button"); if (b && !b.di
 $("compose").onsubmit = e => { e.preventDefault(); const v = $("q").value.trim(); if (v && !busy) { $("q").value = ""; ask(v); } };
 $("q").addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey){ e.preventDefault(); $("compose").requestSubmit(); } });
 
-function md(s){
-  return esc(s).split(/\n{2,}/).map(b=>{
-    const lines = b.split("\n"); let html = "", inList = false;
-    for (const l of lines) {
-      if (/^\s*[-•*] /.test(l)) { if (!inList) { html += "<ul>"; inList = true; } html += `<li>${l.replace(/^\s*[-•*] /,"")}</li>`; continue; }
-      if (inList) { html += "</ul>"; inList = false; }
-      if (/^#{1,4} /.test(l)) html += `<h4>${l.replace(/^#{1,4} /,"")}</h4>`;
-      else if (l.trim()) html += `<p>${l}</p>`;
-    }
-    return html + (inList ? "</ul>" : "");
-  }).join("").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
-}
+// عرض الإجابة: جداول، أرقام إنجليزية معزولة LTR، وبلا تنصيص أو نجوم شاردة (dist/ai-format.mjs).
+const md = renderAnswer;
 
 async function ask(question, label){
   if (!current || busy) return;
