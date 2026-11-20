@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 const read = name => readFileSync(new URL(`../dist/${name}`, import.meta.url), 'utf8');
 const sectorPages = readdirSync(new URL('../dist/', import.meta.url))
-  .filter(name => name.endsWith('.html') && !['index.html', 'comparison.html', 'technical-analysis.html'].includes(name))
+  .filter(name => name.endsWith('.html') && !['index.html', 'comparison.html', 'technical-analysis.html', 'ai-analyst.html'].includes(name))
   .map(name => name.replace(/\.html$/, ''));
 const layout = read('layout.js');
 const listed = [...layout.matchAll(/\['([a-z-]+)', '([؀-ۿ][^']*)'\]/g)].map(match => ({ page: match[1], name: match[2] }));
@@ -19,7 +19,7 @@ test('the sector switcher lists every results page once, under its main-table se
 test('the top bar has a «نتائج الشركات» tab on every page, current on the results pages', () => {
   for (const page of [...sectorPages, 'index', 'comparison']) {
     const nav = read(`${page}.html`).match(/<nav class="site-nav"[^>]*>(.*?)<\/nav>/)[1];
-    assert.deepEqual([...nav.matchAll(/>([^<]+)<\/a>/g)].map(match => match[1]), ['الرئيسية', 'نتائج الشركات', 'مقارنة النتائج المالية', 'التحليل الفني'], page);
+    assert.deepEqual([...nav.matchAll(/>([^<]+)<\/a>/g)].map(match => match[1]), ['الرئيسية', 'نتائج الشركات', 'مقارنة النتائج المالية', 'التحليل الفني', 'المحلل الذكي'], page);
     const current = nav.match(/<a [^>]*aria-current="page"[^>]*>([^<]+)</)[1];
     assert.equal(current, page === 'index' ? 'الرئيسية' : page === 'comparison' ? 'مقارنة النتائج المالية' : 'نتائج الشركات', page);
     assert.match(nav, /<a href="banks\.html" data-results-link/, page);

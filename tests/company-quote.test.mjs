@@ -165,7 +165,7 @@ test('weekly candles run Sunday to Thursday and monthly by calendar month', () =
 });
 
 test('every results page loads the stock card and its chart, with the library kept on the site', () => {
-  const pages = readdirSync(dist).filter(name => name.endsWith('.html') && !['index.html', 'comparison.html', 'technical-analysis.html'].includes(name));
+  const pages = readdirSync(dist).filter(name => name.endsWith('.html') && !['index.html', 'comparison.html', 'technical-analysis.html', 'ai-analyst.html'].includes(name));
   assert.ok(pages.length >= 31);
   for (const page of pages) {
     const html = read(page);

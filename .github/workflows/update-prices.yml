@@ -140,6 +140,10 @@ jobs:
           done
           echo "Could not publish the refreshed data after 3 attempts."
           exit 1
+      # Short per-company data files for the AI analyst page (dist/ai, not kept in git).
+      - name: Build AI company packs
+        if: steps.commit.outputs.changed == 'true'
+        run: node scripts/build-ai-packs.mjs || echo "::warning::AI company packs were not built."
       - name: Upload website files
         if: steps.commit.outputs.changed == 'true'
         uses: actions/upload-pages-artifact@v4

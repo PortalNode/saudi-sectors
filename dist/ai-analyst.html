@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11161d"><title>المحلل الذكي | السوق السعودي</title>
+  <script src="theme.js?v=comparison-v4"></script>
+  <link rel="stylesheet" href="styles.css?v=comparison-v4"><link rel="stylesheet" href="banks.css?v=comparison-v4"><link rel="stylesheet" href="theme.css?v=comparison-v4">
+  <link rel="stylesheet" href="layout.css?v=logos-20261116">
+  <link rel="stylesheet" href="mobile.css?v=mobile-20261119g">
+  <link rel="icon" href="favicon.ico?v=20261120-favicon2" sizes="any" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261120-favicon2">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=20261120-favicon2">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20261120-favicon2">
+  <link rel="manifest" href="site.webmanifest?v=20261120-favicon2">
+  <style>
+    /* صفحة المحلل الذكي — تستخدم متغيرات الثيم الحالية فقط */
+    .ai-page .main-content{max-width:1280px;padding-bottom:40px}
+    .ai-page .n{direction:ltr;unicode-bidi:isolate;display:inline-block;font-variant-numeric:tabular-nums}
+    .ai-page button{font-family:inherit;cursor:pointer}
+    .ai-page :is(button,select,input,textarea):focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+    .ai-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;margin:18px 0 12px}
+    .ai-title h2{margin:0 0 4px;font-size:22px;line-height:1.4;color:var(--ink)}
+    .ai-title p{margin:0;font-size:12.5px;line-height:1.7;color:var(--muted)}
+    .ai-ghost{min-height:32px;padding:6px 12px;border:1px solid var(--line);border-radius:2px;background:var(--panel);color:var(--muted);font-size:11.5px;font-weight:700}
+    .ai-ghost:hover{color:var(--ink);border-color:var(--muted)}
+
+    .ai-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+    .ai-card{background:var(--panel);border:1px solid var(--line)}
+    .ai-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--head)}
+    .ai-card-head h3{margin:0;font-size:13px;color:var(--ink)}
+    .ai-card-head small{color:var(--muted);font-size:11px}
+
+    /* اختيار الشركة */
+    .ai-pick{position:relative;padding:12px 14px;border-bottom:1px solid var(--line)}
+    .ai-pick label{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--muted)}
+    .ai-search{width:100%;min-height:38px;padding:7px 12px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--ink);font-size:13px}
+    .ai-search:focus{border-color:var(--teal);outline:0}
+    .ai-sugg{position:absolute;inset-inline:14px;top:calc(100% - 8px);z-index:20;max-height:280px;overflow:auto;margin:0;padding:0;list-style:none;background:var(--panel);border:1px solid var(--line);box-shadow:0 10px 24px #0005}
+    .ai-sugg li{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;font-size:12.5px;cursor:pointer;color:var(--ink)}
+    .ai-sugg li small{color:var(--muted)}
+    .ai-sugg li:hover,.ai-sugg li[aria-selected="true"]{background:var(--hover)}
+    .ai-hint{margin:6px 0 0;font-size:11px;color:var(--muted)}
+
+    .ai-company{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
+    .ai-company strong{font-size:15px;color:var(--ink)}
+    .ai-company .symbol-badge{font-size:11px}
+    .ai-company .ai-sector{color:var(--muted);font-size:12px}
+    .ai-company .ai-price{margin-inline-start:auto;font-size:15px;font-weight:700;color:var(--ink)}
+
+    .ai-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
+    .ai-chip{min-height:30px;padding:5px 11px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--muted);font-size:12px;font-weight:700}
+    .ai-chip:hover{color:var(--ink);border-color:var(--teal)}
+    .ai-chip:disabled{opacity:.45;cursor:not-allowed}
+
+    /* المحادثة */
+    .ai-chat{min-height:340px;max-height:62vh;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+    .ai-empty{margin:auto;max-width:420px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.9}
+    .ai-empty b{display:block;margin-bottom:4px;font-size:15px;color:var(--ink)}
+    .msg{max-width:92%;font-size:13px;line-height:1.95}
+    .msg.user{align-self:flex-start;padding:8px 12px;background:var(--head);border:1px solid var(--line);color:var(--ink)}
+    .msg.bot{align-self:stretch;max-width:100%;padding:12px 14px;border:1px solid var(--line);border-inline-start:3px solid var(--teal);background:var(--white);color:var(--ink)}
+    .msg.bot h4{margin:10px 0 4px;font-size:13.5px;color:var(--teal)}
+    .msg.bot h4:first-child{margin-top:0}
+    .msg.bot p{margin:0 0 6px}
+    .msg.bot ul{margin:0 0 6px;padding-inline-start:20px}
+    .msg.bot li{margin:2px 0}
+    .msg.bot .up{color:var(--green)}.msg.bot .down{color:var(--red)}
+    .msg-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--muted)}
+    .msg-meta .demo{color:var(--teal);font-weight:700}
+    .typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+    @keyframes blink{50%{opacity:.25}}
+
+    .ai-compose{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+    .ai-compose textarea{flex:1;min-height:40px;max-height:120px;resize:vertical;padding:9px 12px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--ink);font-family:inherit;font-size:13px;line-height:1.6}
+    .ai-compose textarea:focus{border-color:var(--teal);outline:0}
+    .ai-send{min-width:84px;border:1px solid #e19109;border-radius:2px;background:#f59e0b;color:var(--on-accent);font-size:13px;font-weight:700}
+    .ai-send:disabled{opacity:.45;cursor:not-allowed}
+    .ai-disclaimer{margin:0;padding:0 14px 10px;font-size:10.5px;color:var(--muted)}
+
+    /* الجانب */
+    .ai-side{display:grid;gap:14px}
+    .ai-meter{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+    .ai-meter div{padding:10px 14px}
+    .ai-meter div+div{border-inline-start:1px solid var(--line)}
+    .ai-meter span{display:block;font-size:11px;color:var(--muted)}
+    .ai-meter strong{display:block;margin-top:2px;font-size:18px;color:var(--ink)}
+    .ai-meter strong.n{display:block;text-align:right}
+    .ai-meter em{display:block;font-style:normal;font-size:11px;color:var(--green)}
+    .ai-sources{margin:0;padding:10px 14px;list-style:none;display:grid;gap:6px;font-size:12px;color:var(--ink)}
+    .ai-sources li{display:flex;justify-content:space-between;gap:8px}
+    .ai-sources li small{color:var(--muted)}
+    .ai-sources li::before{content:"✓";color:var(--green);font-weight:700;margin-inline-end:6px}
+    .ai-sources li span{flex:1}
+    details.ai-raw{border-top:1px solid var(--line)}
+    details.ai-raw summary{padding:9px 14px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+    details.ai-raw pre{margin:0;max-height:300px;overflow:auto;padding:10px 14px;border-top:1px solid var(--line);background:var(--white);color:var(--ink);font-size:11px;line-height:1.75;white-space:pre-wrap;direction:rtl;font-family:var(--font)}
+    .ai-steps{margin:0;padding:12px 14px;list-style:none;counter-reset:s;display:grid;gap:10px}
+    .ai-steps li{counter-increment:s;display:grid;grid-template-columns:24px 1fr;gap:8px;font-size:12px;line-height:1.75;color:var(--muted)}
+    .ai-steps li::before{content:counter(s);display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--teal);border-radius:2px;color:var(--teal);font-weight:700;font-size:11px}
+    .ai-steps b{color:var(--ink)}
+
+    /* الإعدادات */
+    .ai-settings{display:grid;gap:10px;padding:12px 14px}
+    .ai-settings label{display:grid;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted)}
+    .ai-settings :is(input,select){min-height:34px;padding:6px 10px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--ink);font-family:inherit;font-size:12.5px}
+    .ai-settings p{margin:0;font-size:11px;line-height:1.75;color:var(--muted)}
+    .ai-mode{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink)}
+    .ai-dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+    .ai-dot.live{background:var(--green)}
+
+    @media(max-width:960px){.ai-grid{grid-template-columns:1fr}.ai-chat{max-height:none}}
+    @media(max-width:560px){.ai-compose{flex-direction:column}.ai-send{min-height:40px}.msg{max-width:100%}}
+  </style>
+</head>
+<body class="banks-page ai-page"><main class="main-content">
+  <header class="site-bar">
+    <h1 class="site-name"><a href="index.html">السوق السعودي</a></h1>
+    <div class="hero-date">اسأل عن أي شركة مدرجة</div>
+    <nav class="site-nav" aria-label="صفحات الموقع"><a href="index.html">الرئيسية</a><a href="banks.html" data-results-link>نتائج الشركات</a><a href="comparison.html">مقارنة النتائج المالية</a><a href="technical-analysis.html">التحليل الفني</a><a href="ai-analyst.html" aria-current="page">المحلل الذكي</a></nav>
+    <div class="theme-switch" role="group" aria-label="اختيار مظهر الموقع"><span class="theme-switch-label">المظهر</span><button type="button" data-theme-option="light" aria-pressed="false">فاتح</button><button type="button" data-theme-option="dark" aria-pressed="true">داكن</button></div>
+  </header>
+
+  <div class="ai-title">
+    <div>
+      <h2>المحلل الذكي</h2>
+      <p>اختر شركة ثم اسأل. يقرأ المحلل بيانات الموقع نفسها (الأسعار، النتائج السنوية والربعية، الإعلانات) ولا يبحث في الإنترنت.</p>
+    </div>
+    <button type="button" class="ai-ghost" id="clear-chat">محادثة جديدة</button>
+  </div>
+
+  <div class="ai-grid">
+    <!-- ===== المحادثة ===== -->
+    <section class="ai-card" aria-label="المحادثة">
+      <div class="ai-pick">
+        <label for="company-search">الشركة</label>
+        <input id="company-search" class="ai-search" type="search" autocomplete="off" placeholder="اكتب اسم الشركة أو رمزها، مثل أرامكو أو 1120" role="combobox" aria-expanded="false" aria-controls="sugg">
+        <ul id="sugg" class="ai-sugg" role="listbox" hidden></ul>
+        <p class="ai-hint">البحث هنا يتم داخل المتصفح ولا يستهلك أي توكن.</p>
+      </div>
+      <div id="company-bar" class="ai-company" hidden></div>
+      <div class="ai-chips" id="quick" role="group" aria-label="أسئلة سريعة"></div>
+      <div class="ai-chat" id="chat" aria-live="polite">
+        <div class="ai-empty"><b>ابدأ باختيار شركة</b>بعدها اضغط سؤالًا جاهزًا أو اكتب سؤالك. كل سؤال يرسل طلبًا واحدًا فقط مع ملف بيانات صغير خاص بالشركة.</div>
+      </div>
+      <form class="ai-compose" id="compose">
+        <textarea id="q" rows="1" maxlength="500" placeholder="اسأل عن الشركة المختارة…" disabled></textarea>
+        <button class="ai-send" id="send" disabled>إرسال</button>
+      </form>
+      <p class="ai-disclaimer">التحليل آلي لأغراض تعليمية وليس توصية بالشراء أو البيع.</p>
+    </section>
+
+    <!-- ===== الجانب ===== -->
+    <aside class="ai-side">
+      <section class="ai-card" aria-label="البيانات المرسلة">
+        <div class="ai-card-head"><h3>ما يُرسل للذكاء الاصطناعي</h3><small id="pack-co">—</small></div>
+        <div class="ai-meter">
+          <div><span>حجم السياق</span><strong class="n" id="m-tokens">0</strong><em id="m-save"></em></div>
+          <div><span>تكلفة السؤال تقريبًا</span><strong class="n" id="m-cost">$0</strong><em id="m-model"></em></div>
+        </div>
+        <ul class="ai-sources" id="sources"><li><span>لم تُختر شركة بعد</span></li></ul>
+        <details class="ai-raw"><summary>عرض ملف البيانات كما يراه النموذج</summary><pre id="raw">—</pre></details>
+      </section>
+
+      <section class="ai-card" aria-label="كيف نوفر التوكن">
+        <div class="ai-card-head"><h3>كيف يوفّر التوكن</h3></div>
+        <ol class="ai-steps">
+          <li><span><b>البحث عن الشركة محلي</b> — قائمة الشركات موجودة في الصفحة، فلا يحتاج النموذج أن يبحث أو يستدعي أدوات.</span></li>
+          <li><span><b>ملف جاهز لكل شركة</b> — يُبنى مع كل تحديث للأسعار: الأرقام المهمة فقط في جدول مختصر بدل الملفات الكاملة.</span></li>
+          <li><span><b>طلب واحد لكل سؤال</b> — البيانات تُرسل مع السؤال مباشرة، بدون حلقات بحث، والمحادثة تحتفظ بآخر 3 أسئلة فقط.</span></li>
+          <li><span><b>حدود ثابتة</b> — طول الإجابة محدود، ونموذج اقتصادي افتراضيًا، وعدد أسئلة يومي لكل زائر.</span></li>
+        </ol>
+      </section>
+
+      <section class="ai-card" aria-label="الإعدادات">
+        <div class="ai-card-head"><h3>الإعدادات</h3><span class="ai-mode"><i class="ai-dot" id="mode-dot"></i><span id="mode-text">غير مفعّل</span></span></div>
+        <div class="ai-settings">
+          <label>النموذج
+            <select id="model">
+              <option value="deepseek/deepseek-v4.1-flash" data-in="0.30" data-out="1.20">DeepSeek V4.1 Flash — الأرخص</option>
+              <option value="google/gemini-2.5-flash" data-in="0.30" data-out="2.50">Gemini 2.5 Flash — سريع</option>
+              <option value="google/gemini-3.8-flash" data-in="0.825" data-out="4.125">Gemini 3.8 Flash — أدق</option>
+            </select>
+          </label>
+          <p id="mode-note">المحلل غير مفعّل بعد، فتظهر قراءة آلية مبنية على الأرقام بدل إجابة الذكاء الاصطناعي.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script src="ai-config.js?v=ai-20261120"></script>
+<script type="module">
+const QUICK = [
+  ["تحليل شامل","حلل الشركة تحليلًا شاملًا: الربحية، النمو، التقييم، والمخاطر، ثم خلاصة في سطرين."],
+  ["هل التقييم مرتفع؟","هل تقييم السهم الحالي مرتفع أم منخفض مقارنة بأرباحه ونموه وبمتوسط قطاعه؟"],
+  ["اتجاه الأرباح الربعية","ما اتجاه الأرباح في آخر الأرباع؟ هل هناك تحسن أو تراجع واضح وما أسبابه المحتملة؟"],
+  ["نقاط القوة والضعف","اذكر أبرز 3 نقاط قوة و3 نقاط ضعف للشركة من أرقامها."],
+  ["مقارنة بالقطاع","قارن الشركة بمتوسط قطاعها في المكرر والعائد والأداء السنوي."],
+];
+const ENDPOINT = String(window.AI_ENDPOINT || "").trim();
+const SYSTEM_TOKENS = 90, OUT_TOKENS = 600;
+const $ = id => document.getElementById(id);
+const norm = s => String(s||"").trim().toLowerCase().replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ـ/g,"");
+const fmt = (v,d=2) => v==null||v===""||isNaN(v) ? "—" : Number(v).toLocaleString("en-US",{maximumFractionDigits:d});
+const pct = v => v==null ? "—" : (v*100).toFixed(1)+"%";
+const tok = s => Math.round(String(s).length/3.2);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch {} } };
+
+let all = [], current = null, history = [], busy = false;
+const chat = $("chat"), input = $("company-search"), sugg = $("sugg"), modelEl = $("model");
+
+/* ---------- الحالة ---------- */
+if (ENDPOINT) { $("mode-dot").classList.add("live"); $("mode-text").textContent = "متصل"; $("mode-note").textContent = "الإجابات من نموذج الذكاء الاصطناعي المختار، مع حد يومي لعدد الأسئلة."; }
+const savedModel = store.get("ai-model");
+if (savedModel && [...modelEl.options].some(o=>o.value===savedModel)) modelEl.value = savedModel;
+modelEl.addEventListener("change", () => { store.set("ai-model", modelEl.value); updateMeter(); });
+
+/* ---------- قائمة الشركات (محلية) ---------- */
+const market = await fetch("data.json").then(r=>r.json());
+for (const sec of market.sectors) for (const st of sec.stocks) all.push({...st, sector: sec.name, _n: norm(st.name)});
+
+let hi = -1, list = [];
+function showSugg(){
+  const q = norm(input.value);
+  list = q ? all.filter(s => s.symbol.startsWith(q) || s._n.includes(q)).slice(0,8) : [];
+  hi = list.length ? 0 : -1;
+  sugg.innerHTML = list.map((s,i)=>`<li role="option" data-i="${i}" aria-selected="${i===hi}"><span>${esc(s.name)} <small class="n">${s.symbol}</small></span><small>${esc(s.sector)}</small></li>`).join("");
+  sugg.hidden = !list.length; input.setAttribute("aria-expanded", String(!!list.length));
+}
+input.addEventListener("input", showSugg);
+input.addEventListener("keydown", e => {
+  if (sugg.hidden) return;
+  if (e.key==="ArrowDown"||e.key==="ArrowUp"){ e.preventDefault(); hi=(hi+(e.key==="ArrowDown"?1:-1)+list.length)%list.length; [...sugg.children].forEach((li,i)=>li.setAttribute("aria-selected",i===hi)); }
+  if (e.key==="Enter"&&hi>-1){ e.preventDefault(); choose(list[hi]); }
+  if (e.key==="Escape") sugg.hidden = true;
+});
+sugg.addEventListener("mousedown", e => { const li = e.target.closest("li"); if (li) { e.preventDefault(); choose(list[+li.dataset.i]); } });
+document.addEventListener("click", e => { if (!e.target.closest(".ai-pick")) sugg.hidden = true; });
+
+/* ---------- ملف الشركة الجاهز (يبنيه scripts/build-ai-packs.mjs) ---------- */
+async function choose(st){
+  sugg.hidden = true; input.value = `${st.name} (${st.symbol})`;
+  const bar = $("company-bar"); bar.hidden = false;
+  bar.innerHTML = `<span class="symbol-badge">${st.symbol}</span><strong>${esc(st.name)}</strong><span class="ai-sector">${esc(st.sector)}</span><span class="ai-price"><span class="n">${fmt(st.price)}</span> ريال <span class="n ${st.day>0?"up":st.day<0?"down":"flat"}">${st.day>0?"+":""}${fmt(st.day)}%</span></span>`;
+  const pack = await fetch(`ai/${st.symbol}.json`).then(r=>r.ok?r.json():null).catch(()=>null);
+  history = [];
+  if (!pack) { current = null; setEnabled(false); updateMeter(); resetChat(`<b>لا يتوفر ملف بيانات لهذه الشركة</b>جرّب شركة أخرى أو عد لاحقًا.`); return; }
+  current = { ...pack, st };
+  try { window.history.replaceState(null, "", `?s=${st.symbol}`); } catch {}
+  $("raw").textContent = pack.text;
+  $("pack-co").textContent = st.name;
+  $("sources").innerHTML = pack.sources.map(([a,b])=>`<li><span>${esc(a)}</span><small>${esc(b)}</small></li>`).join("");
+  setEnabled(true); updateMeter();
+  resetChat(`<b>${esc(st.name)} جاهزة</b>اختر سؤالًا جاهزًا أو اكتب سؤالك.`);
+}
+function setEnabled(on){ $("q").disabled = !on; $("send").disabled = !on || busy; [...$("quick").children].forEach(b=>b.disabled=!on||busy); }
+
+/* ---------- العداد والتكلفة ---------- */
+function updateMeter(){
+  const opt = modelEl.selectedOptions[0];
+  $("m-model").textContent = opt.textContent.split(" — ")[0];
+  if (!current) { $("m-tokens").textContent = "0"; $("m-save").textContent = ""; $("m-cost").textContent = "$0"; return; }
+  const inT = SYSTEM_TOKENS + current.tokens + 60 + history.reduce((n,m)=>n+tok(m.content),0);
+  $("m-tokens").textContent = `≈ ${fmt(inT,0)}`;
+  $("m-save").textContent = `بدل ≈ ${fmt(current.rawTokens,0)} للبيانات الخام`;
+  const cost = inT/1e6*+opt.dataset.in + OUT_TOKENS/1e6*+opt.dataset.out;
+  $("m-cost").textContent = cost < 0.001 ? `$${cost.toFixed(5)}` : `$${cost.toFixed(4)}`;
+}
+
+/* ---------- المحادثة ---------- */
+function resetChat(html){ chat.innerHTML = `<div class="ai-empty">${html}</div>`; }
+$("clear-chat").onclick = () => { history = []; updateMeter(); resetChat(current ? `<b>محادثة جديدة</b>عن ${esc(current.st.name)}.` : `<b>ابدأ باختيار شركة</b>`); };
+$("quick").innerHTML = QUICK.map(([l],i)=>`<button type="button" class="ai-chip" data-i="${i}" disabled>${l}</button>`).join("");
+$("quick").onclick = e => { const b = e.target.closest("button"); if (b && !b.disabled) ask(QUICK[+b.dataset.i][1], QUICK[+b.dataset.i][0]); };
+$("compose").onsubmit = e => { e.preventDefault(); const v = $("q").value.trim(); if (v && !busy) { $("q").value = ""; ask(v); } };
+$("q").addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey){ e.preventDefault(); $("compose").requestSubmit(); } });
+
+function md(s){
+  return esc(s).split(/\n{2,}/).map(b=>{
+    const lines = b.split("\n"); let html = "", inList = false;
+    for (const l of lines) {
+      if (/^\s*[-•*] /.test(l)) { if (!inList) { html += "<ul>"; inList = true; } html += `<li>${l.replace(/^\s*[-•*] /,"")}</li>`; continue; }
+      if (inList) { html += "</ul>"; inList = false; }
+      if (/^#{1,4} /.test(l)) html += `<h4>${l.replace(/^#{1,4} /,"")}</h4>`;
+      else if (l.trim()) html += `<p>${l}</p>`;
+    }
+    return html + (inList ? "</ul>" : "");
+  }).join("").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+}
+
+async function ask(question, label){
+  if (!current || busy) return;
+  busy = true; setEnabled(true);
+  chat.querySelector(".ai-empty")?.remove();
+  chat.insertAdjacentHTML("beforeend", `<div class="msg user">${esc(label||question)}</div>`);
+  const bot = document.createElement("div"); bot.className = "msg bot"; bot.innerHTML = `<span class="typing"><i></i><i></i><i></i></span>`;
+  chat.append(bot); chat.scrollTop = chat.scrollHeight;
+  const t0 = performance.now(), model = modelEl.value;
+  let answer = "", usage = null, remaining = null, offline = !ENDPOINT, failure = "";
+  if (!offline) {
+    try {
+      const r = await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ symbol: current.symbol, question, history: history.slice(-6), model }) });
+      remaining = r.headers.get("X-Remaining");
+      if (!r.ok) { failure = (await r.json().catch(()=>({}))).error || `خطأ ${r.status}`; throw new Error(failure); }
+      const reader = r.body.getReader(), dec = new TextDecoder(); let buf = "";
+      for (;;) {
+        const { done, value } = await reader.read(); if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split("\n"); buf = lines.pop();
+        for (const l of lines) {
+          if (!l.startsWith("data: ") || l.includes("[DONE]")) continue;
+          try { const j = JSON.parse(l.slice(6)); answer += j.choices?.[0]?.delta?.content || ""; if (j.usage) usage = j.usage; } catch {}
+        }
+        bot.innerHTML = md(answer); chat.scrollTop = chat.scrollHeight;
+      }
+      if (!answer.trim()) throw new Error("لم تصل إجابة من النموذج.");
+    } catch (err) { failure = failure || "تعذّر الاتصال بالمحلل الآن."; offline = true; answer = ""; }
+  }
+  if (offline) { await new Promise(r=>setTimeout(r,400)); answer = numbersReading(); bot.innerHTML = (failure ? `<p class="down">${esc(failure)}</p>` : "") + md(answer); }
+  if (!failure && !offline) { history.push({role:"user",content:question},{role:"assistant",content:answer}); history = history.slice(-6); }
+  const inT = usage?.prompt_tokens, outT = usage?.completion_tokens;
+  const meta = offline
+    ? `<span class="demo">قراءة آلية من الأرقام${ENDPOINT ? "" : " — المحلل غير مفعّل بعد"}</span>`
+    : `<span>${esc(model)}</span>${inT!=null?`<span>دخل <span class="n">${fmt(inT,0)}</span> توكن · خرج <span class="n">${fmt(outT,0)}</span></span>`:""}${remaining!=null?`<span>تبقّى لك اليوم <span class="n">${remaining}</span> سؤال</span>`:""}`;
+  bot.insertAdjacentHTML("beforeend", `<div class="msg-meta">${meta}<span><span class="n">${((performance.now()-t0)/1000).toFixed(1)}</span> ث</span></div>`);
+  chat.scrollTop = chat.scrollHeight; busy = false; setEnabled(true); updateMeter();
+}
+
+/* ---------- قراءة آلية من الأرقام (حين لا تتوفر خدمة الذكاء الاصطناعي) ---------- */
+function numbersReading(){
+  const { st, facts } = current, ys = facts.years || [];
+  const last = ys.at(-1) || {}, prev = ys.at(-2) || {}, first = ys[0] || {};
+  const g = (x,y) => x!=null && y ? (x/Math.abs(y)-1)*100*(y<0?-1:1) : null, sg = v => v==null?"—":`${v>0?"+":""}${v.toFixed(1)}%`;
+  const change = (x,y) => x==null||y==null ? "—" : y>0&&x<0 ? "تحوّل إلى خسارة" : y<0&&x>0 ? "تحوّل إلى ربح" : y<0&&x<0 ? (x>y?"تقلّصت الخسارة":"زادت الخسارة") : sg(g(x,y));
+  const np = change(last.netProfit, prev.netProfit), rv = g(last.revenue, prev.revenue);
+  const cagr = ys.length>2 && first.netProfit>0 && last.netProfit>0 && ys.length>1 ? (Math.pow(last.netProfit/first.netProfit,1/(ys.length-1))-1)*100 : null;
+  const qs = facts.quarters || [], ql = qs.at(-1), qy = qs.length>=5 ? qs.at(-5) : null, qg = ql && qy ? change(ql[1], qy[1]) : null;
+  const avgPe = facts.avgPe, avgDy = facts.avgDy;
+  const peTxt = st.pe && avgPe ? (st.pe > avgPe*1.15 ? "أعلى من وسيط القطاع، أي أن السوق يسعّر نموًا أو جودة أعلى" : st.pe < avgPe*0.85 ? "أقل من وسيط القطاع، وقد يعني ذلك فرصة أو مخاوف لدى السوق" : "قريب من وسيط القطاع") : "غير متاح";
+  const mid = (st.week52Low+st.week52High)/2;
+  return [
+    `## الخلاصة`,
+    `${st.name} تتداول عند ${fmt(st.price)} ريال ${st.pe ? `بمكرر ${fmt(st.pe,1)}` : "بدون مكرر لأن أرباحها سالبة"} (وسيط القطاع ${fmt(avgPe,1)})، وعائد توزيع ${fmt(st.dividendYield)}% مقابل ${fmt(avgDy)}% لوسيط القطاع.`,
+    `## الربحية والنمو`,
+    [ys.length ? `- صافي الربح في ${last.year}: **${fmt(last.netProfit,0)} مليون ريال** (${np} عن السنة السابقة).` : "- لا تتوفر نتائج سنوية.",
+     rv!=null ? `- الإيرادات: ${sg(rv)} سنويًا.` : "",
+     last.netMargin!=null ? `- الهامش الصافي ${pct(last.netMargin)} مقابل ${pct(prev.netMargin)} قبل سنة.` : "",
+     cagr!=null ? `- متوسط نمو الأرباح السنوي على ${ys.length-1} سنوات: ${sg(cagr)}.` : "",
+     ql && qg!=null ? `- آخر ربع (${ql[0]}): صافي الربح ${fmt(ql[1],0)} مليون، ${qg} عن نفس الربع من العام الماضي.` : ""].filter(Boolean).join("\n"),
+    `## التقييم`,
+    `- المكرر ${peTxt}.\n- مضاعف القيمة الدفترية ${fmt(st.pb,2)}${isFinite(mid) ? `، والسهم ${st.price > mid ? "في النصف الأعلى" : "في النصف الأدنى"} من نطاقه السنوي (${fmt(st.week52Low)}–${fmt(st.week52High)})` : ""}.`,
+    `## ما يجب متابعته`,
+    `- اتجاه الأرباح في الإعلان الربعي القادم.\n- أداء السهم منذ بداية السنة ${sg(st.ytd)} مقابل سنة كاملة ${sg(st.year1)}.`,
+  ].join("\n\n");
+}
+
+/* ---------- فتح الصفحة على شركة: ai-analyst.html?s=1120 ---------- */
+const pre = new URLSearchParams(location.search).get("s");
+const preStock = pre && all.find(s => s.symbol === pre);
+if (preStock) choose(preStock);
+updateMeter();
+</script>
+<script src="layout.js?v=logos-20261116" defer></script>
+</body>
+</html>

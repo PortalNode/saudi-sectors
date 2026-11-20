@@ -1,0 +1,5 @@
+
+# Built at deploy time by scripts/build-ai-packs.mjs
+dist/ai/
+worker/.wrangler/
+worker/node_modules/

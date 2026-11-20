@@ -1,0 +1,99 @@
+// خادم وسيط لصفحة «المحلل الذكي» على Cloudflare Workers.
+// - يحفظ مفتاح OpenRouter سرًّا (لا يصل للمتصفح أبدًا).
+// - يأخذ ملف الشركة المختصر من الموقع نفسه، فلا يستطيع أحد إرسال نصوص ضخمة على حسابك.
+// - يحدد عدد الأسئلة لكل زائر في اليوم وسقفًا يوميًا للموقع كله، ويحصر النماذج في قائمة رخيصة.
+
+const SYSTEM = 'أنت محلل مالي للسوق السعودي. أجب بالعربية باختصار ووضوح بعناوين قصيرة ونقاط. اعتمد فقط على بيانات الشركة المرفقة واذكر الأرقام وتواريخها. لا تقدم توصية شراء أو بيع مباشرة. إذا لم تكفِ البيانات للإجابة فقل ذلك صراحة.';
+const DEFAULT_MODELS = 'deepseek/deepseek-v4.1-flash,google/gemini-2.5-flash,google/gemini-3.8-flash';
+
+const json = (body, status, cors, extra = {}) =>
+  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors, ...extra } });
+
+function corsFor(request, env) {
+  const allowed = (env.ALLOWED_ORIGINS || 'https://portalnode.github.io').split(',').map(s => s.trim());
+  const origin = request.headers.get('Origin') || '';
+  if (!allowed.includes(origin)) return null;
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Expose-Headers': 'X-Remaining',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
+  };
+}
+
+// عدّاد يومي في KV (اختياري؛ بدون KV لا يوجد حد). العد تقريبي وهذا كافٍ هنا.
+async function takeQuota(env, ip) {
+  if (!env.RATE) return { ok: true, remaining: null };
+  const day = new Date().toISOString().slice(0, 10);
+  const perIp = Number(env.DAILY_LIMIT || 20), global = Number(env.GLOBAL_DAILY_LIMIT || 1000);
+  const ipKey = `ip:${day}:${ip}`, allKey = `all:${day}`;
+  const [usedIp, usedAll] = await Promise.all([env.RATE.get(ipKey), env.RATE.get(allKey)]).then(v => v.map(x => Number(x || 0)));
+  if (usedAll >= global) return { ok: false, reason: 'تم بلوغ الحد اليومي للموقع. جرّب غدًا.' };
+  if (usedIp >= perIp) return { ok: false, reason: `استخدمت أسئلتك اليومية (${perIp}). جرّب غدًا.` };
+  await Promise.all([
+    env.RATE.put(ipKey, String(usedIp + 1), { expirationTtl: 172800 }),
+    env.RATE.put(allKey, String(usedAll + 1), { expirationTtl: 172800 }),
+  ]);
+  return { ok: true, remaining: perIp - usedIp - 1 };
+}
+
+export default {
+  async fetch(request, env, ctx) {
+    const cors = corsFor(request, env);
+    if (!cors) return new Response('Forbidden', { status: 403 });
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+    if (request.method !== 'POST') return json({ error: 'POST only' }, 405, cors);
+    if (!env.OPENROUTER_API_KEY) return json({ error: 'الخدمة غير مهيأة.' }, 503, cors);
+
+    let body;
+    try { body = await request.json(); } catch { return json({ error: 'طلب غير صالح.' }, 400, cors); }
+    const symbol = String(body.symbol || '');
+    const question = String(body.question || '').trim();
+    if (!/^\d{4}$/.test(symbol)) return json({ error: 'رمز الشركة غير صالح.' }, 400, cors);
+    if (!question || question.length > 500) return json({ error: 'السؤال فارغ أو أطول من 500 حرف.' }, 400, cors);
+    const models = (env.MODELS || DEFAULT_MODELS).split(',').map(s => s.trim());
+    const model = models.includes(body.model) ? body.model : models[0];
+    // آخر 3 أسئلة وأجوبتها فقط، وبطول محدود.
+    const history = (Array.isArray(body.history) ? body.history : []).slice(-6)
+      .filter(m => (m?.role === 'user' || m?.role === 'assistant') && typeof m.content === 'string')
+      .map(m => ({ role: m.role, content: m.content.slice(0, 2500) }));
+
+    const site = (env.SITE_URL || 'https://portalnode.github.io/saudi-sectors/').replace(/\/?$/, '/');
+    const packRes = await fetch(`${site}ai/${symbol}.json`, { cf: { cacheTtl: 600, cacheEverything: true } });
+    if (!packRes.ok) return json({ error: 'لا توجد بيانات لهذه الشركة.' }, 404, cors);
+    const pack = await packRes.json();
+
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const quota = await takeQuota(env, ip);
+    if (!quota.ok) return json({ error: quota.reason }, 429, cors);
+
+    const upstream = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': site,
+        'X-Title': 'Saudi Sectors',
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'system', content: `${SYSTEM}\n\nبيانات الشركة:\n${pack.text}` }, ...history, { role: 'user', content: question }],
+        max_tokens: Number(env.MAX_TOKENS || 900),
+        temperature: 0.3,
+        reasoning: { effort: 'low', exclude: true },
+        stream: true,
+        usage: { include: true },
+      }),
+    });
+    if (!upstream.ok || !upstream.body) {
+      const detail = (await upstream.text()).slice(0, 300);
+      console.error('OpenRouter error', upstream.status, detail);
+      return json({ error: 'تعذّر الوصول إلى نموذج الذكاء الاصطناعي الآن.' }, 502, cors);
+    }
+    const headers = { ...cors, 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-store', 'X-Model': model };
+    if (quota.remaining != null) headers['X-Remaining'] = String(quota.remaining);
+    return new Response(upstream.body, { status: 200, headers });
+  },
+};

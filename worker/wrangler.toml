@@ -1,0 +1,22 @@
+name = "saudi-sectors-ai"
+main = "ai-proxy.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+# المواقع المسموح لها باستخدام الخادم (افصل بفاصلة).
+ALLOWED_ORIGINS = "https://portalnode.github.io,http://localhost:8765"
+SITE_URL = "https://portalnode.github.io/saudi-sectors/"
+# أول نموذج هو الافتراضي. أي نموذج خارج القائمة يُستبدل بالأول.
+MODELS = "deepseek/deepseek-v4.1-flash,google/gemini-2.5-flash,google/gemini-3.8-flash"
+DAILY_LIMIT = "20"          # أسئلة لكل زائر في اليوم
+GLOBAL_DAILY_LIMIT = "1000" # أسئلة للموقع كله في اليوم
+MAX_TOKENS = "900"          # أقصى طول للإجابة
+
+# عدّاد الحدود اليومية. أنشئه بالأمر:  npx wrangler kv namespace create RATE
+# ثم ضع الـ id الناتج هنا وأزل علامة # من السطور الثلاثة.
+# [[kv_namespaces]]
+# binding = "RATE"
+# id = "ضع_المعرف_هنا"
+
+# المفتاح لا يُكتب هنا أبدًا. أضفه سرًّا بالأمر:
+#   npx wrangler secret put OPENROUTER_API_KEY

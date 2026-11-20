@@ -29,6 +29,8 @@ jobs:
           node-version: '22'
       - name: Test price integrity and existing UI
         run: node --test scripts/*.test.mjs tests/*.test.mjs
+      - name: Build AI company packs
+        run: node scripts/build-ai-packs.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website files
