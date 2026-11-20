@@ -10,7 +10,7 @@ SITE_URL = "https://portalnode.github.io/saudi-sectors/"
 MODELS = "deepseek/deepseek-v4.1-flash,google/gemini-2.5-flash,google/gemini-3.8-flash"
 DAILY_LIMIT = "20"          # أسئلة لكل زائر في اليوم
 GLOBAL_DAILY_LIMIT = "1000" # أسئلة للموقع كله في اليوم
-MAX_TOKENS = "900"          # أقصى طول للإجابة
+MAX_TOKENS = "2000"         # أقصى طول للإجابة
 
 # عدّاد الحدود اليومية. أنشئه بالأمر:  npx wrangler kv namespace create RATE
 # ثم ضع الـ id الناتج هنا وأزل علامة # من السطور الثلاثة.

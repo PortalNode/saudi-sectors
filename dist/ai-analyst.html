@@ -325,14 +325,14 @@ async function ask(question, label){
   chat.append(bot); chat.scrollTop = chat.scrollHeight;
   const t0 = performance.now(), model = modelEl.value;
   const key = apiKey();
-  let answer = "", usage = null, remaining = null, offline = !key && !ENDPOINT, failure = "";
+  let answer = "", usage = null, remaining = null, offline = !key && !ENDPOINT, failure = "", finish = "", thought = false;
   if (!offline) {
     try {
       const r = key
         ? await fetch(OPENROUTER, { method: "POST",
             headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Saudi Sectors" },
-            body: JSON.stringify({ model, max_tokens: 900, temperature: 0.3, stream: true, usage: { include: true },
-              reasoning: { effort: "low", exclude: true },
+            // بدون معامل reasoning: طلبه يشغّل «التفكير» في بعض النماذج فيستهلك حد التوكنات ولا يبقى للإجابة شيء.
+            body: JSON.stringify({ model, max_tokens: 2000, temperature: 0.3, stream: true, usage: { include: true },
               messages: [{ role: "system", content: `${SYSTEM}\n\nبيانات الشركة:\n${current.text}` }, ...history.slice(-6), { role: "user", content: question }] }) })
         : await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ symbol: current.symbol, question, history: history.slice(-6), model }) });
@@ -349,12 +349,28 @@ async function ask(question, label){
         const lines = buf.split("\n"); buf = lines.pop();
         for (const l of lines) {
           if (!l.startsWith("data: ") || l.includes("[DONE]")) continue;
-          try { const j = JSON.parse(l.slice(6)); answer += j.choices?.[0]?.delta?.content || ""; if (j.usage) usage = j.usage; } catch {}
+          let j; try { j = JSON.parse(l.slice(6)); } catch { continue; }
+          if (j.error) { failure = `خطأ من OpenRouter: ${j.error.message || j.error.code || "غير معروف"}`; throw new Error(failure); }
+          const c = j.choices?.[0];
+          answer += c?.delta?.content || "";
+          if (c?.delta?.reasoning) thought = true;
+          if (c?.finish_reason) finish = c.finish_reason;
+          if (j.usage) usage = j.usage;
         }
         bot.innerHTML = md(answer); chat.scrollTop = chat.scrollHeight;
       }
-      if (!answer.trim()) throw new Error("لم تصل إجابة من النموذج.");
-    } catch (err) { failure = failure || "تعذّر الاتصال بالمحلل الآن."; offline = true; answer = ""; }
+      if (!answer.trim()) {
+        failure = finish === "length" || thought ? "استهلك النموذج حد التوكنات في التفكير قبل أن يكتب الإجابة. جرّب نموذجًا آخر من الإعدادات."
+          : `لم تصل إجابة من النموذج${finish ? ` (سبب التوقف: ${finish})` : ""}. جرّب مرة أخرى أو اختر نموذجًا آخر.`;
+        throw new Error(failure);
+      }
+    } catch (err) {
+      failure = failure || (err instanceof TypeError
+        ? `تعذّر الوصول إلى ${key ? "openrouter.ai" : "خادم المحلل"}. تحقق من الإنترنت، أو أوقف مانع الإعلانات لهذا الموقع. (${err.message})`
+        : `تعذّر الاتصال بالمحلل: ${err.message}`);
+      console.error("AI analyst:", err);
+      offline = true; answer = "";
+    }
   }
   if (offline) { await new Promise(r=>setTimeout(r,400)); answer = numbersReading(); bot.innerHTML = (failure ? `<p class="down">${esc(failure)}</p>` : "") + md(answer); }
   if (!failure && !offline) { history.push({role:"user",content:question},{role:"assistant",content:answer}); history = history.slice(-6); }

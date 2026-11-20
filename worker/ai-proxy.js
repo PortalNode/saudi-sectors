@@ -80,9 +80,8 @@ export default {
       body: JSON.stringify({
         model,
         messages: [{ role: 'system', content: `${SYSTEM}\n\nبيانات الشركة:\n${pack.text}` }, ...history, { role: 'user', content: question }],
-        max_tokens: Number(env.MAX_TOKENS || 900),
+        max_tokens: Number(env.MAX_TOKENS || 2000),
         temperature: 0.3,
-        reasoning: { effort: 'low', exclude: true },
         stream: true,
         usage: { include: true },
       }),
