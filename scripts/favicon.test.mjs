@@ -21,11 +21,11 @@ test('favicon assets exist and every HTML page declares browser, Apple, and mani
   assert.ok(pages.length > 0, 'expected static HTML pages');
   for (const page of pages) {
     const html = await readFile(join(dist, page), 'utf8');
-    assert.match(html, /rel="icon"[^>]*favicon\.ico\?v=20261109-favicon1/, `${page}: ico link`);
-    assert.match(html, /rel="icon"[^>]*favicon-32x32\.png\?v=20261109-favicon1/, `${page}: 32px link`);
-    assert.match(html, /rel="icon"[^>]*favicon-16x16\.png\?v=20261109-favicon1/, `${page}: 16px link`);
-    assert.match(html, /rel="apple-touch-icon"[^>]*apple-touch-icon\.png\?v=20261109-favicon1/, `${page}: Apple link`);
-    assert.match(html, /rel="manifest"[^>]*site\.webmanifest\?v=20261109-favicon1/, `${page}: manifest link`);
+    assert.match(html, /rel="icon"[^>]*favicon\.ico\?v=20261120-favicon2/, `${page}: ico link`);
+    assert.match(html, /rel="icon"[^>]*favicon-32x32\.png\?v=20261120-favicon2/, `${page}: 32px link`);
+    assert.match(html, /rel="icon"[^>]*favicon-16x16\.png\?v=20261120-favicon2/, `${page}: 16px link`);
+    assert.match(html, /rel="apple-touch-icon"[^>]*apple-touch-icon\.png\?v=20261120-favicon2/, `${page}: Apple link`);
+    assert.match(html, /rel="manifest"[^>]*site\.webmanifest\?v=20261120-favicon2/, `${page}: manifest link`);
     assert.ok(html.indexOf('favicon.ico') < html.indexOf('</head>'), `${page}: icon tags are in head`);
   }
   const ico = await readFile(join(dist, 'favicon.ico'));

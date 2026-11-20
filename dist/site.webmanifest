@@ -3,12 +3,12 @@
   "short_name": "السوق السعودي",
   "icons": [
     {
-      "src": "android-chrome-192x192.png?v=20261109-favicon1",
+      "src": "android-chrome-192x192.png?v=20261120-favicon2",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "android-chrome-512x512.png?v=20261109-favicon1",
+      "src": "android-chrome-512x512.png?v=20261120-favicon2",
       "sizes": "512x512",
       "type": "image/png"
     }
