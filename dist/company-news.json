@@ -1,7 +1,942 @@
 {
-  "updatedAt": "2026-11-20T00:31:00Z",
+  "updatedAt": "2026-11-20T14:15:02.692Z",
+  "period": {
+    "months": 3,
+    "from": "08/20/2026",
+    "to": "11/20/2026"
+  },
   "source": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements?locale=ar",
   "companies": {
+    "2020": {
+      "symbol": "2020",
+      "name": "سابك للمغذيات الزراعية",
+      "totalCount": 2,
+      "announcements": [
+        {
+          "id": "98616",
+          "symbol": "2020",
+          "title": "سابك للمغذيات الزراعية",
+          "description": "تعلن شركة سابك للمغذيات الزراعية عن النتائج المالية الأولية الموحدة للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "20/10/2026 08:34:08",
+          "hijriDate": "1448/05/09",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98616&anCat=1&cs=2020&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98073",
+          "symbol": "2020",
+          "title": "سابك للمغذيات الزراعية",
+          "description": "إعلان شركة سابك للمغذيات الزراعية عن آخر التطورات لمشروعها السابع لإنتاج الأمونيا واليوريا وصدور قرار الاستثمار النهائي وترسية عقد المشروع.",
+          "date": "10/09/2026 08:12:48",
+          "hijriDate": "1448/03/28",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98073&anCat=1&cs=2020&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2030": {
+      "symbol": "2030",
+      "name": "المصافي",
+      "totalCount": 11,
+      "announcements": [
+        {
+          "id": "99251",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "إعلان شركة المصافي العربية السعودية – ساركو عن تقديم ملف طلب زيادة رأس مالها عن طريق طرح أسهم حقوق أولوية إلى هيئة السوق المالية",
+          "date": "12/11/2026 08:01:14",
+          "hijriDate": "1448/06/02",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99251&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "99234",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "اعلان شركة المصافي العربية السعودية عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "11/11/2026 15:38:10",
+          "hijriDate": "1448/06/01",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99234&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98705",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "إعلان تصحيحي من شركة المصافي العربية السعودية – ساركو عن توصية مجلس الإدارة بزيادة رأس المال عن طريق طرح أسهم حقوق الأولوية",
+          "date": "25/10/2026 15:51:39",
+          "hijriDate": "1448/05/14",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98705&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98491",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "اعلان شركة المصافي العربية السعودية (ساركو) عن آخر التطورات بخصوص مذكرة التفاهم مع شركة جو انرجي للطاقة الإماراتية",
+          "date": "12/10/2026 08:02:46",
+          "hijriDate": "1448/05/01",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98491&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98435",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "تعلن شركة المصافي العربية السعودية (ساركو) عن ترسية مشروع لشركة لوازم الصناعية المتطورة – المملوكة لإحدى شركاتها التابعة لتنفيذ أعمال لمشروع إسكان الحرس الوطني من الباطن مجموعة بن لادن السعودية",
+          "date": "07/10/2026 08:02:07",
+          "hijriDate": "1448/04/26",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98435&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98422",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "تعلن شركة المصافي العربية السعودية (ساركو) عن ترسية مشروع لشركة راية التجديد – المملوكة لإحدى شركاتها التابعة، مشروع مركز برجيل للجراحة اليومية، الرياض",
+          "date": "06/10/2026 08:04:22",
+          "hijriDate": "1448/04/25",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98422&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98395",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "إعلان شركة المصافي العربية السعودية (ساركو) عن تعاقد شركة راية التجديد – المملوكة لإحدى شركاتها التابعة عن توقيع عقد تنفيذ أعمال تأهيل وتجهيز قسم التنويم بمستشفى الملك خالد بالمجمعة",
+          "date": "05/10/2026 08:04:16",
+          "hijriDate": "1448/04/24",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98395&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98276",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "إعلان شركة المصافي العربية السعودية (ساركو) عن تعاقد شركة لوازم الصناعية المتطورة – المملوكة لإحدى شركاتها التابعة عن توقيع عقد تنفيذ أعمال مشروع باقة بنان (1)",
+          "date": "27/09/2026 08:38:18",
+          "hijriDate": "1448/04/16",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98276&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98080",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "إعلان شركة المصافي العربية السعودية (ساركو) بشأن بدء مفاوضات للاستحواذ على حصة إضافية في شركة تشغيلية مستثمر فيها",
+          "date": "10/09/2026 15:36:27",
+          "hijriDate": "1448/03/28",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98080&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97978",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "إعلان شركة المصافي العربية السعودية (ساركو) عن توقيع شركة راية التجديد للمقاولات – المملوكة لها بنسبة 35% – عقد مع شركة الفايزية للتطوير العقاري.",
+          "date": "02/09/2026 16:00:15",
+          "hijriDate": "1448/03/20",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97978&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97726",
+          "symbol": "2030",
+          "title": "المصافي",
+          "description": "إعلان شركة المصافي العربية السعودية (ساركو) عن تعاقد شركة لوازم الصناعية المتطورة – المملوكة لإحدى شركاتها التابعة لتنفيذ أعمال لمشروع إسكان الحرس الوطني – مدينة ينبع من الباطن مجموعة بن لادن السعودية",
+          "date": "23/08/2026 08:00:16",
+          "hijriDate": "1448/03/10",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97726&anCat=1&cs=2030&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2040": {
+      "symbol": "2040",
+      "name": "الخزف السعودي",
+      "totalCount": 4,
+      "announcements": [
+        {
+          "id": "98800",
+          "symbol": "2040",
+          "title": "الخزف السعودي",
+          "description": "اعلان شركة الخزف السعودي عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "29/10/2026 08:03:28",
+          "hijriDate": "1448/05/18",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98800&anCat=1&cs=2040&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98758",
+          "symbol": "2040",
+          "title": "الخزف السعودي",
+          "description": "إعلان شركة الخزف السعودي عن الأثر المالي لتعديل تعريفتي الخدمة الكهربائية وخدمة المياه وذلك وفقاً لإجراءات حوكمة تعديل أسعار منتجات الطاقة والمياه",
+          "date": "27/10/2026 15:35:05",
+          "hijriDate": "1448/05/16",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98758&anCat=1&cs=2040&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98390",
+          "symbol": "2040",
+          "title": "الخزف السعودي",
+          "description": "إعلان شركة الخزف السعودية عن افتتاح معرض جديد بالمنطقة الغربية بمدينة مكة المكرمة",
+          "date": "05/10/2026 08:00:05",
+          "hijriDate": "1448/04/24",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98390&anCat=1&cs=2040&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98089",
+          "symbol": "2040",
+          "title": "الخزف السعودي",
+          "description": "إعلان شركة الخزف السعودي عن آخر التطورات بشأن وقوع حريق في إحدى محطات الكهرباء المغذية لأحد خطوط إنتاج مصانع البلاط",
+          "date": "10/09/2026 16:00:43",
+          "hijriDate": "1448/03/28",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98089&anCat=1&cs=2040&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2050": {
+      "symbol": "2050",
+      "name": "مجموعة صافولا",
+      "totalCount": 2,
+      "announcements": [
+        {
+          "id": "99036",
+          "symbol": "2050",
+          "title": "مجموعة صافولا",
+          "description": "تعلن مجموعة صافولا عن قرار مجلس الإدارة بتوزيع أرباح نقدية مرحلية على المساهمين عن النصف الأول من العام 2026م",
+          "date": "05/11/2026 09:18:43",
+          "hijriDate": "1448/05/25",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99036&anCat=1&cs=2050&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "99031",
+          "symbol": "2050",
+          "title": "مجموعة صافولا",
+          "description": "تعلن مجموعة صافولا عن النتائج المالية الأولية للفترة المنتهية في 30/09/2026 (تسعة أشهر)",
+          "date": "05/11/2026 09:15:29",
+          "hijriDate": "1448/05/25",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99031&anCat=1&cs=2050&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2060": {
+      "symbol": "2060",
+      "name": "التصنيع",
+      "totalCount": 3,
+      "announcements": [
+        {
+          "id": "99108",
+          "symbol": "2060",
+          "title": "التصنيع",
+          "description": "اعلان شركة التصنيع الوطنية عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "08/11/2026 08:42:17",
+          "hijriDate": "1448/05/28",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99108&anCat=1&cs=2060&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98045",
+          "symbol": "2060",
+          "title": "التصنيع",
+          "description": "اعلان شركة التصنيع الوطنية عن إعادة جدولة قرض مرابحة طويل الأجل المقدم من إعلان شركة التصنيع الوطنية عن توقيع اتفاقية لإعادة جدولة تمويل قائم مع البنك السعودي الفرنسي.",
+          "date": "07/09/2026 15:35:28",
+          "hijriDate": "1448/03/25",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98045&anCat=1&cs=2060&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97917",
+          "symbol": "2060",
+          "title": "التصنيع",
+          "description": "تعلن شركة التصنيع الوطنية عن آخر التطورات المتعلقة بصفقة بيع شركة الرواد التحويلية الصناعية",
+          "date": "01/09/2026 08:13:33",
+          "hijriDate": "1448/03/19",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97917&anCat=1&cs=2060&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2070": {
+      "symbol": "2070",
+      "name": "الدوائية",
+      "totalCount": 2,
+      "announcements": [
+        {
+          "id": "98828",
+          "symbol": "2070",
+          "title": "الدوائية",
+          "description": "اعلان الشركة السعودية للصناعات الدوائية والمستلزمات الطبية عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "29/10/2026 15:59:15",
+          "hijriDate": "1448/05/18",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98828&anCat=1&cs=2070&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98204",
+          "symbol": "2070",
+          "title": "الدوائية",
+          "description": "تعلن الشركة السعودية للصناعات الدوائية والمستلزمات الطبية موافقة الجمعية العامة لشركة القصيم للخدمات الطبية (شركة تابعه) على البدء في إجراءات طرح وإدراج أسهمها في السوق الموازية (نمو)",
+          "date": "20/09/2026 08:07:18",
+          "hijriDate": "1448/04/09",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98204&anCat=1&cs=2070&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2080": {
+      "symbol": "2080",
+      "name": "الغاز القابضة",
+      "totalCount": 1,
+      "announcements": [
+        {
+          "id": "98969",
+          "symbol": "2080",
+          "title": "الغاز القابضة",
+          "description": "إعلان شركة الغاز والتصنيع الأهلية القابضة عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "04/11/2026 08:05:20",
+          "hijriDate": "1448/05/24",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98969&anCat=1&cs=2080&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2081": {
+      "symbol": "2081",
+      "name": "الخريف",
+      "totalCount": 7,
+      "announcements": [
+        {
+          "id": "99308",
+          "symbol": "2081",
+          "title": "الخريف",
+          "description": "تعلن شركة الخريف لتقنية المياه والطاقة عن عقد مكالمة هاتفية لمناقشة نتائج الربع الثالث من عام 2026",
+          "date": "16/11/2026 09:12:20",
+          "hijriDate": "1448/06/06",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99308&anCat=1&cs=2081&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98957",
+          "symbol": "2081",
+          "title": "الخريف",
+          "description": "اعلان شركة الخريف لتقنية المياه والطاقة عن النتائج المالية الأولية للفترة المنتهية في 30-09-2026 ( تسعة أشهر )",
+          "date": "03/11/2026 15:47:14",
+          "hijriDate": "1448/05/23",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98957&anCat=1&cs=2081&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98650",
+          "symbol": "2081",
+          "title": "الخريف",
+          "description": "تعلن شركة الخريّف لتقنية المياه والطاقة عن رفع تصنيفها الائتماني طويل الأجل من (-A) الى (A) من قبل شركة التحليلات المالية للتصنيف الائتماني",
+          "date": "22/10/2026 08:08:06",
+          "hijriDate": "1448/05/11",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98650&anCat=1&cs=2081&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98494",
+          "symbol": "2081",
+          "title": "الخريف",
+          "description": "إعلان شركة الخريف لتقنية المياه والطاقة عن تعيين عضو لجنة المراجعة والمخاطر",
+          "date": "12/10/2026 15:33:18",
+          "hijriDate": "1448/05/01",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98494&anCat=1&cs=2081&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98391",
+          "symbol": "2081",
+          "title": "الخريف",
+          "description": "إعلان شركة الخریف لتقنية المياه والطاقة عن توقيع عقد تأهيل البنية التحتية للمياه مع شركة مطارات الدمام",
+          "date": "05/10/2026 08:00:25",
+          "hijriDate": "1448/04/24",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98391&anCat=1&cs=2081&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98319",
+          "symbol": "2081",
+          "title": "الخريف",
+          "description": "إعلان شركة الخریف لتقنية المياه والطاقة عن ترسية عقد تأهيل البنية التحتية للمياه مع شركة مطارات الدمام‬‬‬‬‬‬‬‬‬‬‬‬‬‬",
+          "date": "29/09/2026 15:37:17",
+          "hijriDate": "1448/04/18",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98319&anCat=1&cs=2081&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97777",
+          "symbol": "2081",
+          "title": "الخريف",
+          "description": "اعلان شركة الخريف لتقنية المياه والطاقة عن توقيع اتفاقية تسهيلات بنكية متوافقة مع أحكام الشريعة الإسلامية مع بنك قطر الوطني‬‬‬‬‬",
+          "date": "25/08/2026 15:38:37",
+          "hijriDate": "1448/03/12",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97777&anCat=1&cs=2081&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2082": {
+      "symbol": "2082",
+      "name": "أكوا",
+      "totalCount": 12,
+      "announcements": [
+        {
+          "id": "99329",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "إعلان شركة أكوا باور\"أكوا\" عن تعيين عضو في المقعد الشاغر في مجلس إدارتها",
+          "date": "17/11/2026 15:36:33",
+          "hijriDate": "1448/06/07",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99329&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "99277",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "تعلن شركة أكوا باور عن تحقيق الإغلاق المالي لمشروع محطة باش 2 لطاقة الرياح بقدرة 300 ميجاواط في أوزبكستان",
+          "date": "15/11/2026 08:02:36",
+          "hijriDate": "1448/06/05",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99277&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "99059",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "اعلان شركة أكوا باور عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 (تسعة أشهر)",
+          "date": "05/11/2026 15:43:41",
+          "hijriDate": "1448/05/25",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99059&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98813",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "تُعلن شركة أكوا باور (أكوا) عن توقيع اتفاقية مع شركة إي آي جي للإدارة ( إي آي جي) لتأسيس شراكة استراتيجية للاستثمار في البنية التحتية لقطاع الطاقة في الولايات المتحدة الأمريكية",
+          "date": "29/10/2026 08:34:45",
+          "hijriDate": "1448/05/18",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98813&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98789",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "تعلن شركة أكوا باور (أكوا) عن توقيع اتفاقية شراء المياه مع هيئة كهرباء ومياه دبي (ديوا)",
+          "date": "28/10/2026 15:41:00",
+          "hijriDate": "1448/05/17",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98789&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98374",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "تعلن شركة أكوا باور (أكوا) عن تحقيق الإغلاق المالي لمشروع محطة توسعة رابغ الثانية للإنتاج المستقل في المملكة العربية السعودية",
+          "date": "04/10/2026 08:04:06",
+          "hijriDate": "1448/04/23",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98374&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98258",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "تعلن شركة أكوا باور (\"أكوا\" أو \" الشركة\") عن بدء التشغيل التجاري الأولي لمشروع محطة القصيم 1 الغازية بنظام الدورة المركبة",
+          "date": "24/09/2026 08:02:10",
+          "hijriDate": "1448/04/13",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98258&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98254",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "تعلن شركة أكوا باور (\"أكوا\" أو \" الشركة\") عن بدء التشغيل التجاري الأولي لمشروع محطة طيبة 1 الغازية بنظام الدورة المركبة",
+          "date": "24/09/2026 08:00:24",
+          "hijriDate": "1448/04/13",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98254&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98183",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "تعلن شركة أكوا باور (أكوا) عن استقالة عضو مجلس إدارتها الأستاذ/ إسماعيل السلوم",
+          "date": "17/09/2026 08:23:58",
+          "hijriDate": "1448/04/06",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98183&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97793",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "إعلان شركة أكوا باور عن نتائج اجتماع الجمعية العامة العادية (الاجتماع الأول )",
+          "date": "26/08/2026 08:03:56",
+          "hijriDate": "1448/03/13",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97793&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97727",
+          "symbol": "2082",
+          "title": "أكوا",
+          "description": "تعلن شركة أكوا باور (أكوا) عن توقيع عقود أنظمة تخزين الطاقة بتقنية البطاريات مع الشركة السعودية لشراء الطاقة",
+          "date": "23/08/2026 08:00:24",
+          "hijriDate": "1448/03/10",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97727&anCat=1&cs=2082&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2083": {
+      "symbol": "2083",
+      "name": "مرافق",
+      "totalCount": 3,
+      "announcements": [
+        {
+          "id": "98956",
+          "symbol": "2083",
+          "title": "مرافق",
+          "description": "اعلان شركة مرافق الكهرباء والمياه بالجبيل وينبع عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "03/11/2026 15:42:32",
+          "hijriDate": "1448/05/23",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98956&anCat=1&cs=2083&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98837",
+          "symbol": "2083",
+          "title": "مرافق",
+          "description": "اعلان الحاقي من شركة مرافق بخصوص تعديل تعريفتي الخدمة الكهربائية وخدمة المياه وذلك وفقاً لإجراءات حوكمة تعديل أسعار منتجات الطاقة والمياه",
+          "date": "29/10/2026 16:22:24",
+          "hijriDate": "1448/05/18",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98837&anCat=1&cs=2083&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98709",
+          "symbol": "2083",
+          "title": "مرافق",
+          "description": "تعلن مرافق عن تعديل تعريفتي الخدمة الكهربائية وخدمة المياه وذلك وفقاً لإجراءات حوكمة تعديل أسعار منتجات الطاقة والمياه",
+          "date": "26/10/2026 08:01:13",
+          "hijriDate": "1448/05/15",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98709&anCat=1&cs=2083&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2084": {
+      "symbol": "2084",
+      "name": "مياهنا",
+      "totalCount": 4,
+      "announcements": [
+        {
+          "id": "99248",
+          "symbol": "2084",
+          "title": "مياهنا",
+          "description": "تعلن شركة مياهنا \"الشركة\" عن اكتمال عملية شراء أسهمها المخصصة لبرنامج أسهم حوافز الموظفين",
+          "date": "11/11/2026 16:20:54",
+          "hijriDate": "1448/06/01",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99248&anCat=1&cs=2084&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "99017",
+          "symbol": "2084",
+          "title": "مياهنا",
+          "description": "اعلان شركة مياهنا عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "05/11/2026 08:41:27",
+          "hijriDate": "1448/05/25",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99017&anCat=1&cs=2084&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98929",
+          "symbol": "2084",
+          "title": "مياهنا",
+          "description": "تعلن شركة مياهنا عن إكتمال صفقة الإستحواذ على كامل حصص الملكية في شركة شاس لخدمات المياه المحدودة",
+          "date": "02/11/2026 15:55:44",
+          "hijriDate": "1448/05/22",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98929&anCat=1&cs=2084&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98103",
+          "symbol": "2084",
+          "title": "مياهنا",
+          "description": "تعلن شركة مياهنا عن آخر التطورات بخصوص اتفاقية بيع وشراء (SPA) للاستحواذ على كامل حصص الملكية في شركة شاس لخدمات المياه المحدوده بصدور عدم ممانعة الهيئة العامة للمنافسة.",
+          "date": "13/09/2026 09:16:21",
+          "hijriDate": "1448/04/02",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98103&anCat=1&cs=2084&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2090": {
+      "symbol": "2090",
+      "name": "جبسكو",
+      "totalCount": 4,
+      "announcements": [
+        {
+          "id": "99208",
+          "symbol": "2090",
+          "title": "جبسكو",
+          "description": "اعلان شركة الجبس الأهلية عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "11/11/2026 08:04:24",
+          "hijriDate": "1448/06/01",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99208&anCat=1&cs=2090&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98785",
+          "symbol": "2090",
+          "title": "جبسكو",
+          "description": "إعلان شركة الجبس الاهلية عن الأثر المالي المتوقع لتعديل تعريفة خدمات الكهرباء والمياه في اعمالها",
+          "date": "28/10/2026 15:31:08",
+          "hijriDate": "1448/05/17",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98785&anCat=1&cs=2090&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98268",
+          "symbol": "2090",
+          "title": "جبسكو",
+          "description": "اعلان شركة الجبس الأهلية عن النتائج المالية الأولية للفترة المنتهية في 2026-06-30 ( ستة أشهر )",
+          "date": "24/09/2026 15:53:44",
+          "hijriDate": "1448/04/13",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98268&anCat=1&cs=2090&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98056",
+          "symbol": "2090",
+          "title": "جبسكو",
+          "description": "اعلان شركة الجبس الأهلية عن آخر التطورات لـ إعلانها عن عدم التمكن من نشر النتائج المالية الأولية للفترة المنتهية في 2026-06-30 (ستة أشهر)",
+          "date": "08/09/2026 08:50:36",
+          "hijriDate": "1448/03/26",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98056&anCat=1&cs=2090&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2100": {
+      "symbol": "2100",
+      "name": "وفرة",
+      "totalCount": 3,
+      "announcements": [
+        {
+          "id": "99180",
+          "symbol": "2100",
+          "title": "وفرة",
+          "description": "اعلان شركة وفرة للصناعة والتنمية عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "10/11/2026 08:20:57",
+          "hijriDate": "1448/05/30",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99180&anCat=1&cs=2100&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98696",
+          "symbol": "2100",
+          "title": "وفرة",
+          "description": "إعلان شركة وفرة للصناعة والتنمية عن توقيع عقد مع شركة تصنيع الأغذية الممتازة المحدودة",
+          "date": "25/10/2026 09:44:37",
+          "hijriDate": "1448/05/14",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98696&anCat=1&cs=2100&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98086",
+          "symbol": "2100",
+          "title": "وفرة",
+          "description": "اعلان شركة وفرة للصناعة والتنمية عن فتح باب الترشح لعضوية مجلس الإدارة",
+          "date": "10/09/2026 15:49:55",
+          "hijriDate": "1448/03/28",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98086&anCat=1&cs=2100&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2110": {
+      "symbol": "2110",
+      "name": "الكابلات السعودية",
+      "totalCount": 3,
+      "announcements": [
+        {
+          "id": "99221",
+          "symbol": "2110",
+          "title": "الكابلات السعودية",
+          "description": "تعلن شركة الكابلات السعودية عن التطورات في ملف زيادة رأس مال الشركة عن طريق طرح أسهم حقوق أولوية لدى هيئة السوق المالية",
+          "date": "11/11/2026 09:07:32",
+          "hijriDate": "1448/06/01",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99221&anCat=1&cs=2110&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98812",
+          "symbol": "2110",
+          "title": "الكابلات السعودية",
+          "description": "اعلان شركة الكابلات السعودية عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "29/10/2026 08:25:22",
+          "hijriDate": "1448/05/18",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98812&anCat=1&cs=2110&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97896",
+          "symbol": "2110",
+          "title": "الكابلات السعودية",
+          "description": "تعلن شركة الكابلات السعودية عن آخر التطورات لـ إعلان الشركة السابق المتضمن الاعتراض على إنهاء إجراء إعادة التنظيم المالي",
+          "date": "31/08/2026 09:22:06",
+          "hijriDate": "1448/03/18",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97896&anCat=1&cs=2110&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2120": {
+      "symbol": "2120",
+      "name": "متطورة",
+      "totalCount": 1,
+      "announcements": [
+        {
+          "id": "99148",
+          "symbol": "2120",
+          "title": "متطورة",
+          "description": "اعلان الشركة السعودية للصناعات المتطورة عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "09/11/2026 09:21:06",
+          "hijriDate": "1448/05/29",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99148&anCat=1&cs=2120&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2130": {
+      "symbol": "2130",
+      "name": "صدق",
+      "totalCount": 4,
+      "announcements": [
+        {
+          "id": "99175",
+          "symbol": "2130",
+          "title": "صدق",
+          "description": "تعلن الشركة السعودية للتنمية الصناعية (صدق) عن تلقي فرعها مصنع صدق للخزف (خزفية) أمر شراء لتوريد الأدوات الصحية وتجهيزات الحمامات وملحقاتهما بقيمة تمثل نسبة 7.34% من أجمالي إيرادات الشركة لعام 2025م.",
+          "date": "10/11/2026 08:11:30",
+          "hijriDate": "1448/05/30",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99175&anCat=1&cs=2130&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "99101",
+          "symbol": "2130",
+          "title": "صدق",
+          "description": "اعلان من الشركة السعودية للتنمية الصناعية (صدق) عن آخر التطورات بخصوص توقيع مذكرة تفاهم غير ملزمة مع شركة سدم للاستثمار وشركة محمد العلي السويلم القابضة لدراسة الاستحواذ على كامل أسهم رأس مال شركة خدمات الإنتاج الصناعية",
+          "date": "08/11/2026 08:24:59",
+          "hijriDate": "1448/05/28",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99101&anCat=1&cs=2130&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "99083",
+          "symbol": "2130",
+          "title": "صدق",
+          "description": "تعلن الشركة السعودية للتنمية الصناعية (صدق) عن النتائج المالية الأولية الموحدة للفترة المنتهية في 2026/09/30 (تسعة أشهر)",
+          "date": "05/11/2026 16:24:46",
+          "hijriDate": "1448/05/25",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99083&anCat=1&cs=2130&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98172",
+          "symbol": "2130",
+          "title": "صدق",
+          "description": "اعلان من الشركة السعودية للتنمية الصناعية (صدق) عن آخر التطورات بخصوص توقيع مذكرة تفاهم غير ملزمة مع شركة سدم للاستثمار وشركة محمد العلي السويلم القابضة لدراسة الاستحواذ على كامل أسهم رأس مال شركة خدمات الإنتاج الصناعية",
+          "date": "16/09/2026 15:46:18",
+          "hijriDate": "1448/04/05",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98172&anCat=1&cs=2130&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2140": {
+      "symbol": "2140",
+      "name": "أيان",
+      "totalCount": 5,
+      "announcements": [
+        {
+          "id": "98981",
+          "symbol": "2140",
+          "title": "أيان",
+          "description": "إعلان شركة أيان للإستثمار عن التطورات في ملف تخفيض رأس مال الشركة لدى هيئة السوق المالية",
+          "date": "04/11/2026 08:47:31",
+          "hijriDate": "1448/05/24",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98981&anCat=1&cs=2140&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98979",
+          "symbol": "2140",
+          "title": "أيان",
+          "description": "اعلان شركة أيان للإستثمار عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "04/11/2026 08:34:25",
+          "hijriDate": "1448/05/24",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98979&anCat=1&cs=2140&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98387",
+          "symbol": "2140",
+          "title": "أيان",
+          "description": "تعلن شركة أيان للاستثمارعن استقالة وتعيين الرئيس التنفيذي للشركة",
+          "date": "04/10/2026 15:46:24",
+          "hijriDate": "1448/04/23",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98387&anCat=1&cs=2140&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97911",
+          "symbol": "2140",
+          "title": "أيان",
+          "description": "تعلن شركة أيان للاستثمار عن توقيع اتفاقية تسهيلات ائتمانية متوافقة مع أحكام الشريعة الإسلامية مع البنك السعودي الأول",
+          "date": "01/09/2026 08:02:11",
+          "hijriDate": "1448/03/19",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97911&anCat=1&cs=2140&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "97865",
+          "symbol": "2140",
+          "title": "أيان",
+          "description": "تعلن شركة أيان للإستثمار عن تقديم ملف طلب تخفيض رأس مال الشركة إلى هيئة السوق المالية",
+          "date": "30/08/2026 15:59:26",
+          "hijriDate": "1448/03/17",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=97865&anCat=1&cs=2140&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2150": {
+      "symbol": "2150",
+      "name": "زجاج",
+      "totalCount": 3,
+      "announcements": [
+        {
+          "id": "99104",
+          "symbol": "2150",
+          "title": "زجاج",
+          "description": "إعلان شركة الصناعات الزجاجية الوطنية \"زجاج\"عن الأثر المالي المتوقع لتعديل تعرفة الكهرباء والمياه والصرف الصحي.",
+          "date": "08/11/2026 08:29:40",
+          "hijriDate": "1448/05/28",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99104&anCat=1&cs=2150&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98749",
+          "symbol": "2150",
+          "title": "زجاج",
+          "description": "اعلان شركة الصناعات الزجاجية الوطنية \"زجاج\" عن النتائج المالية الأولية للفترة المنتهية في 30-09-2026 (تسعة أشهر)",
+          "date": "27/10/2026 08:42:20",
+          "hijriDate": "1448/05/16",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98749&anCat=1&cs=2150&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98020",
+          "symbol": "2150",
+          "title": "زجاج",
+          "description": "إعلان شركة الصناعات الزجاجية الوطنية عن قرار مجلس الإدارة بتوزيع أرباح نقدية على المساهمين عن النصف الأول من عام 2026.",
+          "date": "06/09/2026 08:49:58",
+          "hijriDate": "1448/03/24",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98020&anCat=1&cs=2150&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2160": {
+      "symbol": "2160",
+      "name": "أميانتيت",
+      "totalCount": 2,
+      "announcements": [
+        {
+          "id": "99073",
+          "symbol": "2160",
+          "title": "أميانتيت",
+          "description": "اعلان شركة أميانتيت العربية السعودية عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "05/11/2026 16:06:55",
+          "hijriDate": "1448/05/25",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99073&anCat=1&cs=2160&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98617",
+          "symbol": "2160",
+          "title": "أميانتيت",
+          "description": "إعلان شركة أميانتيت العربية السعودية بخصوص آخر المستجدات بشأن الأرض المملوكة لها في مخطط المليساء (القوزين) بمدينة جدة",
+          "date": "20/10/2026 15:56:47",
+          "hijriDate": "1448/05/09",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98617&anCat=1&cs=2160&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
+    "2170": {
+      "symbol": "2170",
+      "name": "اللجين",
+      "totalCount": 4,
+      "announcements": [
+        {
+          "id": "99212",
+          "symbol": "2170",
+          "title": "اللجين",
+          "description": "إعلان شركة اللجين عن تنظيمها لقاء هاتفي لمناقشة النتائج المالية والتشغيلية للربع الثالث المنتهي في 30 سبتمبر 2026م مع المستثمرين والمحللين الماليين",
+          "date": "11/11/2026 08:08:01",
+          "hijriDate": "1448/06/01",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=99212&anCat=1&cs=2170&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98846",
+          "symbol": "2170",
+          "title": "اللجين",
+          "description": "اعلان شركة اللجين عن النتائج المالية الأولية للفترة المنتهية في 2026-09-30 ( تسعة أشهر )",
+          "date": "01/11/2026 08:18:03",
+          "hijriDate": "1448/05/21",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98846&anCat=1&cs=2170&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98271",
+          "symbol": "2170",
+          "title": "اللجين",
+          "description": "اعلان شركة اللجين عن إنهاء تكليف الرئيس التنفيذي المكلف وتعيين رئيس تنفيذي جديد",
+          "date": "27/09/2026 08:00:11",
+          "hijriDate": "1448/04/16",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98271&anCat=1&cs=2170&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        },
+        {
+          "id": "98098",
+          "symbol": "2170",
+          "title": "اللجين",
+          "description": "اعلان شركة اللجين عن استقالة وتكليف الرئيس التنفيذي",
+          "date": "13/09/2026 08:41:21",
+          "hijriDate": "1448/04/02",
+          "url": "https://www.saudiexchange.sa/wps/portal/saudiexchange/newsandreports/issuer-news/issuer-announcements/issuer-announcements-details/?anId=98098&anCat=1&cs=2170&locale=ar",
+          "source": "Saudi Exchange / تداول السعودية"
+        }
+      ]
+    },
     "4142": {
       "symbol": "4142",
       "name": "كابلات الرياض",
@@ -39,10 +974,5 @@
         }
       ]
     }
-  },
-  "period": {
-    "months": 3,
-    "from": "08/20/2026",
-    "to": "11/20/2026"
   }
 }
