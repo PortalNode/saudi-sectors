@@ -25,6 +25,7 @@
     .ai-ghost:hover{color:var(--ink);border-color:var(--muted)}
 
     .ai-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+    .ai-grid > *{min-width:0}
     .ai-card{background:var(--panel);border:1px solid var(--line)}
     .ai-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--head)}
     .ai-card-head h3{margin:0;font-size:13px;color:var(--ink)}
@@ -53,26 +54,49 @@
     .ai-scope button:hover{color:var(--ink);border-color:var(--teal)}
     .ai-scope button[aria-pressed="true"]{background:#f59e0b;border-color:#e19109;color:var(--on-accent)}
     select.ai-search{appearance:auto;font-family:inherit;font-weight:700}
-    .msg.user .ai-attached{display:block;margin-top:4px;font-size:11px;color:var(--muted)}
-    .ai-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
-    .ai-chip{min-height:30px;padding:5px 11px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--muted);font-size:12px;font-weight:700}
-    .ai-chip:hover{color:var(--ink);border-color:var(--teal)}
-    .ai-chip:disabled{opacity:.45;cursor:not-allowed}
 
     /* المحادثة */
-    .ai-chat{min-height:340px;max-height:62vh;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
-    .ai-empty{margin:auto;max-width:420px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.9}
-    .ai-empty b{display:block;margin-bottom:4px;font-size:15px;color:var(--ink)}
-    .msg{max-width:92%;font-size:13px;line-height:1.95}
-    .msg.user{align-self:flex-start;padding:8px 12px;background:var(--head);border:1px solid var(--line);color:var(--ink)}
-    .msg.bot{align-self:stretch;max-width:100%;padding:12px 14px;border:1px solid var(--line);border-inline-start:3px solid var(--teal);background:var(--white);color:var(--ink)}
-    .msg.bot h4{margin:10px 0 4px;font-size:13.5px;color:var(--teal)}
-    .msg.bot h4:first-child{margin-top:0}
-    .msg.bot p{margin:0 0 6px}
-    .msg.bot :is(ul,ol){margin:0 0 8px;padding-inline-start:22px}
-    .msg.bot ol li::marker{font-weight:700;color:var(--teal)}
-    .msg.bot b{color:var(--ink)}
-    .msg.bot .ai-table-wrap{margin:8px 0 12px;overflow-x:auto;border:1px solid var(--line)}
+    /* ---------- المحادثة ---------- */
+    .ai-chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+    .ai-chip{min-height:32px;padding:5px 14px;border:1px solid var(--line);border-radius:999px;background:var(--white);color:var(--muted);font-size:12px;font-weight:700;transition:color .15s,border-color .15s,background .15s}
+    .ai-chip:hover{color:var(--ink);border-color:var(--teal);background:color-mix(in srgb,var(--teal) 8%,var(--white))}
+    .ai-chip:disabled{opacity:.45;cursor:not-allowed}
+    .ai-chat{min-height:440px;max-height:72vh;overflow:auto;padding:20px 16px;display:flex;flex-direction:column;gap:18px;background:var(--bg);scroll-behavior:smooth}
+    .ai-empty{margin:auto;max-width:460px;padding:28px 12px;text-align:center;color:var(--muted);font-size:13px;line-height:1.9}
+    .ai-empty::before{content:"";display:block;width:52px;height:52px;margin:0 auto 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel) url(favicon-32x32.png?v=20261120-favicon2) center/30px no-repeat}
+    .ai-empty b{display:block;margin-bottom:6px;font-size:17px;color:var(--ink)}
+    .msg{font-size:13.5px;line-height:2;color:var(--ink);animation:msg-in .2s ease-out}
+    @keyframes msg-in{from{opacity:0;transform:translateY(6px)}}
+    .msg.user{align-self:flex-start;max-width:min(80%,680px);padding:10px 16px;border:1px solid color-mix(in srgb,var(--teal) 35%,var(--line));border-radius:16px;border-start-start-radius:4px;background:color-mix(in srgb,var(--teal) 13%,var(--panel));font-weight:600}
+    .msg.user .ai-attached{display:block;margin-top:4px;font-size:11px;font-weight:400;color:var(--muted)}
+    .msg.bot{align-self:stretch;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;box-shadow:0 6px 20px #0000001f}
+    .msg-head{display:flex;align-items:center;gap:9px;padding:9px 16px;border-bottom:1px solid var(--line);background:var(--head);font-size:12.5px}
+    .msg-head img{width:24px;height:24px;border-radius:7px;background:var(--panel)}
+    .msg-head b{color:var(--ink)}
+    .msg-model{margin-inline-start:auto;color:var(--muted);font-size:11px;direction:ltr;unicode-bidi:isolate}
+    .msg-body{padding:16px 18px 10px}
+    .msg-body > :first-child{margin-top:0}
+    .msg.bot h4{margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.7;color:var(--teal)}
+    .msg.bot p{margin:0 0 10px}
+    .msg.bot :is(ul,ol){margin:0 0 12px;padding-inline-start:22px}
+    .msg.bot li{margin:4px 0;padding-inline-start:2px}
+    .msg.bot li::marker{color:var(--teal);font-weight:700}
+    .msg.bot b{color:var(--ink);font-weight:700}
+    .msg.bot .ai-table-wrap{margin:10px 0 14px;overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+    .msg-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding:8px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+    .msg-meta .demo{color:var(--teal);font-weight:700}
+    .msg-copy{margin-inline-start:auto;min-height:28px;padding:2px 12px;border:1px solid var(--line);border-radius:999px;background:var(--white);color:var(--muted);font-size:11px;font-weight:700}
+    .msg-copy:hover{color:var(--ink);border-color:var(--teal)}
+    .ai-thinking{display:inline-flex;align-items:center;gap:10px;color:var(--muted);font-size:12.5px}
+    .msg.bot .ai-local{margin:0 0 12px;padding:8px 12px;border:1px dashed var(--teal);border-radius:8px;color:var(--muted);font-size:12px}
+    .ai-compose{display:flex;align-items:flex-end;gap:8px;padding:12px 14px 6px;border-top:1px solid var(--line);background:var(--panel)}
+    .ai-compose textarea{flex:1;min-height:48px;max-height:180px;resize:none;padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:var(--white);color:var(--ink);font-family:inherit;font-size:13.5px;line-height:1.7;transition:border-color .15s,box-shadow .15s}
+    .ai-compose textarea:focus{border-color:var(--teal);outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--teal) 18%,transparent)}
+    .ai-send{display:grid;place-items:center;width:48px;height:48px;flex:none;border:1px solid #e19109;border-radius:14px;background:#f59e0b;color:var(--on-accent)}
+    .ai-send svg{width:20px;height:20px;transform:scaleX(-1)}
+    .ai-send:hover:not(:disabled){filter:brightness(1.06)}
+    .ai-send:disabled{opacity:.45;cursor:not-allowed}
+    .ai-disclaimer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;margin:0;padding:2px 16px 12px;background:var(--panel);font-size:10.5px;color:var(--muted)}
     .msg.bot table.ai-table{width:100%;min-width:0;table-layout:auto;border-collapse:collapse;font-size:12px;line-height:1.6}
     .msg.bot .ai-table :is(th,td){height:auto;padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:middle;color:var(--ink);background:var(--white)}
     .msg.bot .ai-table th{position:static;background:var(--head);color:var(--muted);font-size:11px;font-weight:700}
@@ -80,10 +104,7 @@
     .msg.bot .ai-table tbody tr:hover td{background:var(--hover)}
     .msg.bot .n{display:inline}
     .msg.bot .ai-table td.ai-num{font-variant-numeric:tabular-nums}
-    .msg.bot li{margin:2px 0}
     .msg.bot .up{color:var(--green)}.msg.bot .down{color:var(--red)}
-    .msg-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--muted)}
-    .msg-meta .demo{color:var(--teal);font-weight:700}
     .ai-free{color:var(--green)}
     .ai-account{display:grid;gap:8px;padding:10px 12px;border:1px solid var(--line);background:var(--white)}
     .ai-account div{display:grid;gap:2px}
@@ -91,17 +112,9 @@
     .ai-account strong{font-size:12.5px;color:var(--ink)}
     .ai-account a{color:var(--teal);text-decoration:underline}
     .ai-bar{display:block;height:5px;margin-top:4px;background:var(--line)}.ai-bar b{display:block;height:100%;background:var(--teal)}
-    .ai-thinking{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
-    .msg.bot .ai-local{margin:0 0 10px;padding:6px 10px;border:1px dashed var(--teal);color:var(--muted);font-size:12px}
     .typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
     @keyframes blink{50%{opacity:.25}}
 
-    .ai-compose{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
-    .ai-compose textarea{flex:1;min-height:40px;max-height:120px;resize:vertical;padding:9px 12px;border:1px solid var(--line);border-radius:2px;background:var(--white);color:var(--ink);font-family:inherit;font-size:13px;line-height:1.6}
-    .ai-compose textarea:focus{border-color:var(--teal);outline:0}
-    .ai-send{min-width:84px;border:1px solid #e19109;border-radius:2px;background:#f59e0b;color:var(--on-accent);font-size:13px;font-weight:700}
-    .ai-send:disabled{opacity:.45;cursor:not-allowed}
-    .ai-disclaimer{margin:0;padding:0 14px 10px;font-size:10.5px;color:var(--muted)}
 
     /* الجانب */
     .ai-side{display:grid;gap:14px}
@@ -138,8 +151,8 @@
     .ai-dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
     .ai-dot.live{background:var(--green)}
 
-    @media(max-width:960px){.ai-grid{grid-template-columns:1fr}.ai-chat{max-height:none}}
-    @media(max-width:560px){.ai-compose{flex-direction:column}.ai-send{min-height:40px}.msg{max-width:100%}}
+    @media(max-width:960px){.ai-grid{grid-template-columns:minmax(0,1fr)}.ai-chat{max-height:none}}
+    @media(max-width:560px){.ai-chat{min-height:360px;padding:14px 10px}.msg.user{max-width:92%}.msg-body{padding:14px 14px 8px}}
   </style>
 </head>
 <body class="banks-page ai-page"><main class="main-content">
@@ -184,9 +197,9 @@
       </div>
       <form class="ai-compose" id="compose">
         <textarea id="q" rows="1" maxlength="500" placeholder="اكتب أي سؤال… مثل: وش أرخص شركة؟ أو قارن الراجحي بالأهلي" disabled></textarea>
-        <button class="ai-send" id="send" disabled>إرسال</button>
+        <button class="ai-send" id="send" disabled aria-label="إرسال" title="إرسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></button>
       </form>
-      <p class="ai-disclaimer">التحليل آلي لأغراض تعليمية وليس توصية بالشراء أو البيع.</p>
+      <p class="ai-disclaimer"><span>التحليل آلي لأغراض تعليمية وليس توصية بالشراء أو البيع.</span><span>Enter للإرسال · Shift+Enter لسطر جديد</span></p>
     </section>
 
     <!-- ===== الجانب ===== -->
@@ -234,7 +247,7 @@
 
 <script src="ai-config.js?v=ai-20261120"></script>
 <script type="module">
-import { renderAnswer } from "./ai-format.mjs?v=ai-20261121b";
+import { renderAnswer, toLatinDigits } from "./ai-format.mjs?v=ai-20261121c";
 const QUICK = {
   market: [
     ["أرخص الشركات","ما أرخص 10 شركات في السوق تقييمًا (أقل مكرر موجب ومضاعف دفترية معقول) مع أرباح غير متراجعة؟ رتّبها مع القطاع والسبب وما يجب الحذر منه."],
@@ -469,6 +482,13 @@ function resetChat(html){ chat.innerHTML = `<div class="ai-empty">${html}</div>`
 $("clear-chat").onclick = () => { history = []; updateMeter(); resetChat(current ? `<b>محادثة جديدة</b>عن ${esc(current.name || current.st?.name || "")}.` : `<b>اختر نطاق السؤال</b>`); };
 $("quick").onclick = e => { const b = e.target.closest("button"); if (b && !b.disabled) { const [l, q] = QUICK[scope][+b.dataset.i]; ask(q, l); } };
 $("compose").onsubmit = e => { e.preventDefault(); const v = $("q").value.trim(); if (v && !busy) { $("q").value = ""; ask(v); } };
+chat.addEventListener("click", e => {
+  const b = e.target.closest(".msg-copy"); if (!b) return;
+  navigator.clipboard?.writeText(b.closest(".msg").querySelector(".msg-body").innerText).then(() => { b.textContent = "تم النسخ"; setTimeout(() => b.textContent = "نسخ", 1500); }).catch(() => {});
+});
+const grow = () => { const q = $("q"); q.style.height = "auto"; q.style.height = Math.min(q.scrollHeight + 2, 180) + "px"; };
+$("q").addEventListener("input", grow);
+$("compose").addEventListener("submit", () => setTimeout(grow));
 $("q").addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey){ e.preventDefault(); $("compose").requestSubmit(); } });
 
 // عرض الإجابة: جداول، أرقام إنجليزية معزولة LTR، وبلا تنصيص أو نجوم شاردة (dist/ai-format.mjs).
@@ -482,9 +502,11 @@ async function ask(question, label){
   const named = label ? [] : mentionedStocks(question, current.st?.symbol);
   const extras = (await Promise.all(named.map(s => getPack(`ai/${s.symbol}.json`)))).filter(Boolean);
   const extraText = extras.map(p => `\n\n--- ملف شركة ذكرها السائل: ${p.name} (${p.symbol}) ---\n${p.text}`).join("");
-  chat.insertAdjacentHTML("beforeend", `<div class="msg user">${esc(label||question)}${extras.length ? `<small class="ai-attached">أُرفقت بيانات: ${extras.map(p=>esc(p.name)).join("، ")}</small>` : ""}</div>`);
-  const bot = document.createElement("div"); bot.className = "msg bot"; bot.innerHTML = `<span class="typing"><i></i><i></i><i></i></span>`;
-  chat.append(bot); chat.scrollTop = chat.scrollHeight;
+  chat.insertAdjacentHTML("beforeend", `<div class="msg user">${esc(toLatinDigits(label||question))}${extras.length ? `<small class="ai-attached">أُرفقت بيانات: ${extras.map(p=>esc(p.name)).join("، ")}</small>` : ""}</div>`);
+  const card = document.createElement("article"); card.className = "msg bot";
+  card.innerHTML = `<header class="msg-head"><img src="favicon-32x32.png?v=20261120-favicon2" alt=""><b>المحلل الذكي</b><span class="msg-model">${esc(modelEl.selectedOptions[0]?.textContent.split(" — ")[0] || "")}</span></header><div class="msg-body"><span class="ai-thinking"><span class="typing"><i></i><i></i><i></i></span>المحلل يقرأ البيانات…</span></div>`;
+  const bot = card.querySelector(".msg-body");
+  chat.append(card); chat.scrollTop = chat.scrollHeight;
   const t0 = performance.now(), model = modelEl.value;
   const key = apiKey();
   let answer = "", usage = null, remaining = null, offline = !key && !ENDPOINT, failure = "", finish = "", thought = false;
@@ -517,7 +539,7 @@ async function ask(question, label){
           if (j.error) { failure = j.error.code === 429 ? limitMessage(j.error) : `خطأ من OpenRouter: ${j.error.message || j.error.code || "غير معروف"}`; throw new Error(failure); }
           const c = j.choices?.[0];
           answer += c?.delta?.content || "";
-          if (c?.delta?.reasoning || c?.delta?.reasoning_details?.length) { if (!thought && !answer) bot.innerHTML = `<span class="ai-thinking"><span class="typing"><i></i><i></i><i></i></span> المحلل يراجع البيانات ويفكّر…</span>`; thought = true; }
+          if (c?.delta?.reasoning || c?.delta?.reasoning_details?.length) { if (!thought && !answer) bot.innerHTML = `<span class="ai-thinking"><span class="typing"><i></i><i></i><i></i></span> المحلل يحلل البيانات ويفكّر…</span>`; thought = true; }
           if (c?.finish_reason) finish = c.finish_reason;
           if (j.usage) usage = j.usage;
         }
@@ -545,8 +567,8 @@ async function ask(question, label){
   const inT = usage?.prompt_tokens, outT = usage?.completion_tokens;
   const meta = failure ? `<span>لم يُحتسب هذا السؤال</span>` : offline
     ? `<span class="demo">قراءة آلية — ليست من الذكاء الاصطناعي</span>`
-    : `<span>${esc(model)}</span>${inT!=null?`<span>دخل <span class="n">${fmt(inT,0)}</span> توكن · خرج <span class="n">${fmt(outT,0)}</span></span>`:""}${remaining!=null?`<span>تبقّى لك اليوم <span class="n">${remaining}</span> سؤال</span>`:""}`;
-  bot.insertAdjacentHTML("beforeend", `<div class="msg-meta">${meta}<span><span class="n">${((performance.now()-t0)/1000).toFixed(1)}</span> ث</span></div>`);
+    : `${inT!=null?`<span>دخل <span class="n">${fmt(inT,0)}</span> توكن · خرج <span class="n">${fmt(outT,0)}</span></span>`:""}${remaining!=null?`<span>تبقّى لك اليوم <span class="n">${remaining}</span> سؤال</span>`:""}`;
+  card.insertAdjacentHTML("beforeend", `<footer class="msg-meta">${meta}<span><span class="n">${((performance.now()-t0)/1000).toFixed(1)}</span> ث</span>${failure ? "" : `<button type="button" class="msg-copy">نسخ</button>`}</footer>`);
   chat.scrollTop = chat.scrollHeight; busy = false; setEnabled(true); updateMeter();
   if (key) loadAccount();
 }
