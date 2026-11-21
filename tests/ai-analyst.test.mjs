@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { buildPack, technicalSection, buildSectorPack, buildMarketPack, companySummary, coreProfit, forecastSection, SECTOR_SLUGS, SYSTEM_PROMPT, PICK_PROMPT, DEEP_PROMPT } from '../scripts/build-ai-packs.mjs';
+import { buildPack, technicalSection, buildSectorPack, buildMarketPack, companySummary, coreProfit, forecastSection, earningsSection, calendarSection, SECTOR_SLUGS, SYSTEM_PROMPT, PICK_PROMPT, DEEP_PROMPT } from '../scripts/build-ai-packs.mjs';
 
 const dist = new URL('../dist/', import.meta.url);
 const read = name => readFileSync(new URL(name, dist), 'utf8');
@@ -177,4 +177,62 @@ test('the analyst asks for depth, earnings quality and forecasts, and picks cand
   const proxy = readFileSync(new URL('../worker/ai-proxy.js', import.meta.url), 'utf8');
   assert.match(proxy, /\.slice\(0, 8\)/, 'at most eight candidates');
   assert.match(proxy, /pack\.deep/);
+});
+
+// مواعيد إعلان النتائج (dist/earnings-calendar): يعرفها المحلل في ملف الشركة وجداول القطاع والسوق.
+const cal = (s, n, next, recs, extra = {}) => ({ s, n, sec: 'الاسمنت', fye: 12, rel: -4, rank: 1, peers: 2, bt: { n: 6, w7: 83, med: 3 }, next, recs, ...extra });
+const rec = (fy, q, pe, d, extra = {}) => ({ fy, q, pe, d, tm: '08:05', lag: Math.round((Date.parse(d) - Date.parse(pe)) / 864e5), src: 'tadawul', sp: '', rx: 1.5, yoy: 12, ...extra });
+const nextQ4 = { fy: 2026, q: 4, pe: '2026-12-31', d: '2027-02-25', lo: '2027-02-22', hi: '2027-03-01', conf: 'عالية', n: 3, m: 'company' };
+
+test('the company pack carries the expected results date, its range and the announcement history', () => {
+  const c = cal('3010', 'أ', nextQ4, [rec(2025, 4, '2025-12-31', '2026-02-24', { rx: -2 , yoy: -5 }), rec(2026, 3, '2026-09-30', '2026-11-03')]);
+  const ed = earningsSection(c, { today: '2026-11-22' });
+  const text = ed.lines.join('\n');
+  assert.match(text, /تقدير من سجل الشركة وليس موعدًا رسميًا/);
+  assert.match(text, /الفترة القادمة: النتائج السنوية 2026 \(تنتهي 2026-12-31\)\. الموعد المتوقع 2027-02-25 \(بعد 95 يومًا\) · النطاق التاريخي 2027-02-22 إلى 2027-03-01 · الثقة عالية/);
+  assert.match(text, /آخر إعلان نتائج: الربع الثالث 2026 في 2026-11-03 الساعة 08:05، بعد 34 يومًا/);
+  assert.match(text, /أبكر من وسيط السوق بنحو 4 أيام · ترتيبها في سرعة الإعلان داخل القطاع 1 من 2/);
+  assert.match(text, /عند نمو الربح سنويًا \+1\.5% · عند تراجعه -2\.0%/);
+  assert.match(text, /^الربع الثالث 2026 \| 2026-11-03 \| 34 \| \+12\.0% \| \+1\.5%$/m);
+  assert.equal(ed.facts.late, false);
+  // موعد تجاوز نطاقه بلا إعلان
+  assert.equal(earningsSection(c, { today: '2027-03-05' }).facts.late, true);
+  assert.equal(earningsSection(null), null);
+
+  const sector = { name: 'الاسمنت', stocks: [{ symbol: '3010', name: 'أ', pe: 10 }] };
+  const pack = buildPack({ stock: sector.stocks[0], sector, earnings: c, today: '2026-11-22' });
+  assert.match(pack.text, /مواعيد إعلان النتائج \(حتى 2026-11-22/);
+  assert.ok(pack.sources.some(([name]) => name === 'مواعيد إعلان النتائج'));
+  const sum = companySummary(sector.stocks[0], pack);
+  assert.equal(sum.nextResults, '2027-02-25');
+  assert.equal(sum.lastResults, '2026-11-03');
+  const rows = [{ st: sector.stocks[0], pack, sum }];
+  assert.match(buildSectorPack(sector, 'cement', rows, { asOf: '2026-11-19' }).text, /\| آخر إعلان نتائج \| النتائج القادمة \(متوقع\)[\s\S]*\| 2026-11-03 \| 2027-02-25$/m);
+  const mkt = buildMarketPack({ asOf: '2026-11-19', sectors: [sector] }, [{ sector, slug: 'cement', rows }], { calendar: calendarSection([c], { today: '2026-11-22' }) });
+  assert.match(mkt.text, /^3010 \| أ \|.*\| 2027-02-25$/m);
+  assert.match(mkt.text, /روزنامة إعلان النتائج/);
+});
+
+test('the market calendar lists the season, recent, late and upcoming announcements', () => {
+  const a = cal('3010', 'أ', nextQ4, [rec(2026, 3, '2026-09-30', '2026-11-12')]);
+  const b = cal('3020', 'ب', { ...nextQ4, d: '2026-12-01', lo: '2026-11-15', hi: '2026-11-20', pe: '2026-09-30', q: 3 }, [rec(2026, 2, '2026-06-30', '2026-08-10')]);
+  const c = cal('3030', 'ج', { ...nextQ4, d: '2026-12-20' }, [rec(2026, 3, '2026-09-30', '2026-10-25')]);
+  const text = calendarSection([a, b, c], { today: '2026-11-22' }).lines.join('\n');
+  assert.match(text, /موسم الفترة المنتهية 2026-09-30: أعلنت 2 من 3 شركة/);
+  assert.match(text, /أعلنت خلال آخر 14 يومًا \(1\): أ \(3010\) 2026-11-12/);
+  assert.match(text, /متأخرة عن نطاقها المعتاد ولم يصل إعلانها: ب \(3020\) \(الربع الثالث 2026، المعتاد 2026-11-15 إلى 2026-11-20\)/);
+  assert.match(text, /^  2026-12-20: ج \(3030\) \[عالية\]$/m);
+  assert.match(text, /2027-02: 1/);
+  assert.equal(calendarSection([]), null);
+});
+
+test('the analyst is told how to answer results-date questions and offers them as quick questions', () => {
+  assert.match(SYSTEM_PROMPT, /مواعيد النتائج: عند السؤال عن موعد إعلان نتائج شركة/);
+  assert.match(SYSTEM_PROMPT, /تقدير من سجل الشركة لا موعد رسمي معلن/);
+  const page = read('ai-analyst.html');
+  for (const label of ['روزنامة النتائج', 'مواعيد النتائج', 'موعد النتائج']) assert.match(page, new RegExp(`\\["${label}","`));
+  const build = readFileSync(new URL('../scripts/build-ai-packs.mjs', import.meta.url), 'utf8');
+  assert.match(build, /readJSON\(`earnings-calendar\/\$\{sym\}\.json`\)/);
+  const mcp = readFileSync(new URL('../mcp/saudi_sectors_mcp.py', import.meta.url), 'utf8');
+  assert.match(mcp, /fetch\(f"earnings-calendar\/\{sym\}\.json"\)/);
 });

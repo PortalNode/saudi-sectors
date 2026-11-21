@@ -137,6 +137,16 @@ def tool_company(args):
         qs = fin["quarterly"].get("quarters", {})
         n = int(args.get("quarters", 8))
         out["quarterly"] = [{"quarter": k, **v} for k, v in sorted(qs.items())[-n:]]
+    cal = fetch(f"earnings-calendar/{sym}.json")
+    if cal and cal.get("recs"):
+        out["resultsDates"] = {
+            "note": "next = الموعد المتوقع لإعلان النتائج القادمة: تقدير من سجل الشركة (وسيط آخر 3 سنوات للفترة نفسها) وليس موعدًا رسميًا. lag = أيام بعد نهاية الفترة، rx = حركة السهم % في أول جلسة بعد الإعلان، yoy = تغير صافي الربح % عن نفس الفترة.",
+            "fiscalYearEndMonth": cal.get("fye"),
+            "next": cal.get("next"),
+            "speedVsMarketDays": cal.get("rel"), "sectorSpeedRank": cal.get("rank"), "sectorCompanies": cal.get("peers"),
+            "backtest": cal.get("bt"),
+            "history": [{k: r.get(k) for k in ("fy", "q", "pe", "d", "tm", "lag", "yoy", "rx")} for r in cal["recs"][-12:]],
+        }
     ohlc = fetch(f"ohlc/{sym}.json")
     if ohlc and ohlc.get("c"):
         c, dts = ohlc["c"], ohlc["d"]
@@ -185,7 +195,7 @@ def tool_market(args):
 TOOLS = {
     "search_companies": (tool_search, "ابحث عن شركة بالاسم أو الرمز أو القطاع في موقع قطاعات السوق السعودي. Search companies by name, symbol or sector.",
                          {"query": {"type": "string", "description": "اسم الشركة أو رمزها أو اسم القطاع"}}, ["query"]),
-    "get_company": (tool_company, "كل بيانات شركة من الموقع: السعر والمكررات والأداء، النبذة، النتائج السنوية والربعية، وملخص تاريخ السعر.",
+    "get_company": (tool_company, "كل بيانات شركة من الموقع: السعر والمكررات والأداء، النبذة، النتائج السنوية والربعية، مواعيد إعلان النتائج (السابقة والموعد المتوقع القادم)، وملخص تاريخ السعر.",
                     {"company": {"type": "string", "description": "اسم الشركة أو رمزها مثل 2222 أو الراجحي"},
                      "quarters": {"type": "integer", "description": "عدد الأرباع الأخيرة (افتراضي 8)"},
                      "first": {"type": "boolean", "description": "خذ أول تطابق إذا تعددت النتائج"}}, ["company"]),
