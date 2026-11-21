@@ -1,0 +1,12 @@
+/* فلتر «موعد النتائج» في جدول الصفحة الرئيسية وعموده. ألوان الموقع وخطه كما هي. */
+.earn-filter button b{margin-inline-start:4px;font-weight:700;font-variant-numeric:tabular-nums;opacity:.75}
+.earn-filter button.empty{opacity:.55}
+.sections col.col-earn{width:185px!important}
+td.earn-cell{line-height:1.35}
+td.earn-cell .num{display:block;font-weight:700}
+td.earn-cell .num.down{color:var(--red)}
+td.earn-cell small{display:block;font-size:10px;color:var(--muted)}
+.earn-conf{display:inline-block;width:6px;height:6px;border-radius:50%;margin-inline-end:3px;vertical-align:middle;background:var(--muted)}
+.earn-conf.c-3{background:var(--green)}
+.earn-conf.c-2{background:#f59e0b}
+@media(max-width:760px){.earn-filter{flex-wrap:wrap;white-space:normal}}
