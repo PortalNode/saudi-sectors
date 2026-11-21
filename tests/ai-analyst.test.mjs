@@ -189,7 +189,7 @@ test('the company pack carries the expected results date, its range and the anno
   const ed = earningsSection(c, { today: '2026-11-22' });
   const text = ed.lines.join('\n');
   assert.match(text, /تقدير من سجل الشركة وليس موعدًا رسميًا/);
-  assert.match(text, /الفترة القادمة: النتائج السنوية 2026 \(تنتهي 2026-12-31\)\. الموعد المتوقع 2027-02-25 \(بعد 95 يومًا\) · النطاق التاريخي 2027-02-22 إلى 2027-03-01 · الثقة عالية/);
+  assert.match(text, /الفترة القادمة: الربع الرابع والنتائج السنوية 2026 \(تنتهي 2026-12-31\)\. الموعد المتوقع 2027-02-25 \(بعد 95 يومًا\) · النطاق التاريخي 2027-02-22 إلى 2027-03-01 · الثقة عالية/);
   assert.match(text, /آخر إعلان نتائج: الربع الثالث 2026 في 2026-11-03 الساعة 08:05، بعد 34 يومًا/);
   assert.match(text, /أبكر من وسيط السوق بنحو 4 أيام · ترتيبها في سرعة الإعلان داخل القطاع 1 من 2/);
   assert.match(text, /عند نمو الربح سنويًا \+1\.5% · عند تراجعه -2\.0%/);
@@ -221,14 +221,19 @@ test('the market calendar lists the season, recent, late and upcoming announceme
   assert.match(text, /موسم الفترة المنتهية 2026-09-30: أعلنت 2 من 3 شركة/);
   assert.match(text, /أعلنت خلال آخر 14 يومًا \(1\): أ \(3010\) 2026-11-12/);
   assert.match(text, /متأخرة عن نطاقها المعتاد ولم يصل إعلانها: ب \(3020\) \(الربع الثالث 2026، المعتاد 2026-11-15 إلى 2026-11-20\)/);
-  assert.match(text, /^  2026-12-20: ج \(3030\) \[عالية\]$/m);
-  assert.match(text, /2027-02: 1/);
+  // أول المتوقعين لكل فترة، ثم القائمة بالتاريخ مع اسم الفترة
+  assert.match(text, /^  الربع 3 2026 \(1 شركة\): ب \(3020\) 2026-12-01 \[عالية\]$/m);
+  assert.match(text, /^  الربع الرابع\/السنوية 2026 \(2 شركة\): ج \(3030\) 2026-12-20 \[عالية\] · أ \(3010\) 2027-02-25 \[عالية\]$/m);
+  assert.match(text, /^  2026-12-20: ج \(3030\) \[الربع الرابع\/السنوية 2026، عالية\]$/m);
+  assert.match(text, /المتوقع حسب التاريخ \(أول 3 من 3/);
   assert.equal(calendarSection([]), null);
 });
 
 test('the analyst is told how to answer results-date questions and offers them as quick questions', () => {
   assert.match(SYSTEM_PROMPT, /مواعيد النتائج: عند السؤال عن موعد إعلان نتائج شركة/);
   assert.match(SYSTEM_PROMPT, /تقدير من سجل الشركة لا موعد رسمي معلن/);
+  assert.match(SYSTEM_PROMPT, /نتائج الربع الرابع تُعلن مع النتائج السنوية/);
+  assert.match(read('ai-analyst.html'), /fetch\(path, \{ cache: "no-cache" \}\)/, 'packs are revalidated, never served stale');
   const page = read('ai-analyst.html');
   for (const label of ['روزنامة النتائج', 'مواعيد النتائج', 'موعد النتائج']) assert.match(page, new RegExp(`\\["${label}","`));
   const build = readFileSync(new URL('../scripts/build-ai-packs.mjs', import.meta.url), 'utf8');

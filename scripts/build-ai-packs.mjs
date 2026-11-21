@@ -160,7 +160,7 @@ export const SYSTEM_PROMPT = `أنت محلل مالي وفني محترف مت�
 - جودة الأرباح أولًا: احكم على النمو والتقييم بالربح الأساسي (بعد استبعاد البنود الاستثنائية) لا بصافي الربح المعلن. إذا كان نمو الصافي أو انخفاض المكرر ناتجًا عن ربح استثنائي (بيع أصل، تعويض، عكس مخصص) أو عن دخل من خارج النشاط فقل ذلك صراحة ولا تعدّه نموًا. المكرر المعلن في السوق مبني على الربح المعلن، فقارنه بالمكرر الأساسي.
 - التوقعات: استخدم قسم جودة الأرباح والتوقعات المحسوب (فرضيات النمو والمكرر وسيناريوهات 3 سنوات)، واشرح افتراضاته، وقل هل تراه واقعيًا في ضوء اتجاه الأرباع الأخيرة والهوامش والإعلانات. يجوز أن تعدّل التقدير إذا ذكرت السبب من البيانات والرقم الذي اعتمدته. التوقعات تقديرات لا ضمانات.
 - المحفزات تأتي فقط من نشاط الشركة وإعلاناتها المرفقة مع تاريخ الإعلان. إن لم يوجد محفز معلن فاكتب: لا يوجد محفز معلن في البيانات.
-- مواعيد النتائج: عند السؤال عن موعد إعلان نتائج شركة، أو من سيعلن قريبًا، أو من تأخر، أجب من قسم مواعيد إعلان النتائج أو روزنامة النتائج أو عمود النتائج المتوقعة: اذكر الموعد المتوقع ونطاقه ودرجة الثقة وتاريخ إعلان الفترة نفسها في السنوات السابقة، وقل صراحة إنه تقدير من سجل الشركة لا موعد رسمي معلن. إن تجاوزت الشركة نطاقها المعتاد بلا إعلان فقل إنها متأخرة عن عادتها. واربط عند الحاجة بين الإعلان وحركة السهم المعتادة بعده.
+- مواعيد النتائج: عند السؤال عن موعد إعلان نتائج شركة، أو من سيعلن قريبًا، أو من تأخر، أجب من قسم مواعيد إعلان النتائج أو روزنامة النتائج أو عمود النتائج المتوقعة: اذكر الموعد المتوقع ونطاقه ودرجة الثقة وتاريخ إعلان الفترة نفسها في السنوات السابقة، وقل صراحة إنه تقدير من سجل الشركة لا موعد رسمي معلن. نتائج الربع الرابع تُعلن مع النتائج السنوية، وأول من يُتوقع أن يعلن كل فترة مذكور في الروزنامة. إن تجاوزت الشركة نطاقها المعتاد بلا إعلان فقل إنها متأخرة عن عادتها. واربط عند الحاجة بين الإعلان وحركة السهم المعتادة بعده.
 - اجمع بين التحليل الأساسي والفني، ووضّح هل يتفقان أم يتعارضان ولماذا.
 - احسب ما تحتاجه من الأرقام المتاحة (نمو، هوامش، مقارنات، متوسطات، المسافة عن الدعم والمقاومة).
 - أسئلة الترتيب بمعيار واضح في السوق أو القطاع (الأرخص، الأعلى عائدًا، الأسرع نموًا، الأقوى فنيًا...): اذكر المعيار، وأعطِ جدولًا (عادة أفضل 5 إلى 10) مع الأرقام والقطاع، ثم فقرة لكل من أبرز 3 فيها تشرح لماذا تستحق المكان وما يجب الحذر منه.
@@ -252,7 +252,9 @@ const LEVEL = { support: 'عند دعم', resistance: 'عند مقاومة', squ
 /** يبني ملف الشركة من البيانات الخام. كل المدخلات اختيارية عدا stock و sector. */
 /* ---------- مواعيد إعلان النتائج (dist/earnings-calendar، scripts/build-earnings-calendar.py) ---------- */
 const Q_AR = ['', 'الأول', 'الثاني', 'الثالث', 'الرابع'];
-export const periodName = (r, fye = 12) => (r.q === 4 && fye === 12 ? `النتائج السنوية ${r.fy}` : `الربع ${Q_AR[r.q]} ${r.fy}${fye === 12 ? '' : ' من السنة المالية'}`);
+export const periodName = (r, fye = 12) => (r.q === 4 && fye === 12 ? `الربع الرابع والنتائج السنوية ${r.fy}` : `الربع ${Q_AR[r.q]} ${r.fy}${fye === 12 ? '' : ' من السنة المالية'}`);
+/** اسم مختصر للفترة في الروزنامة: «السنوية 2026» أو «الربع 3 2026»، وتُذكر السنة المالية غير الميلادية. */
+export const shortPeriod = (r, fye = 12) => (fye === 12 ? (r.q === 4 ? `الربع الرابع/السنوية ${r.fy}` : `الربع ${r.q} ${r.fy}`) : `الربع ${r.q} من سنة مالية تنتهي في الشهر ${fye} ${r.fy}`);
 export const riyadhToday = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
 const daysFrom = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 864e5);
 const dueText = (d, today) => { const n = daysFrom(today, d); return n > 0 ? `بعد ${n} يومًا` : n === 0 ? 'اليوم' : `مضى بـ${-n} يومًا`; };
@@ -300,18 +302,28 @@ export function calendarSection(cals, { today = riyadhToday() } = {}) {
   if (recent.length) L.push(`- أعلنت خلال آخر 14 يومًا (${recent.length}): ${recent.slice(0, 25).map(c => `${name(c)} ${c.recs.at(-1).d}`).join(' · ')}${recent.length > 25 ? ` … و${recent.length - 25} غيرها (تواريخها في عمود النتائج المتوقعة ضمن ملف كل شركة)` : ''}`);
   const late = list.filter(c => daysFrom(today, c.next.hi) < 0).sort((a, b) => a.next.d.localeCompare(b.next.d));
   L.push(`- متأخرة عن نطاقها المعتاد ولم يصل إعلانها: ${late.length ? late.map(c => `${name(c)} (${periodName(c.next, c.fye)}، المعتاد ${c.next.lo} إلى ${c.next.hi})`).join(' · ') : 'لا يوجد'}`);
-  const soon = list.filter(c => daysFrom(today, c.next.d) >= 0 && daysFrom(today, c.next.d) <= 45).sort((a, b) => a.next.d.localeCompare(b.next.d) || a.s.localeCompare(b.s));
-  if (soon.length) {
-    L.push(`- المتوقع خلال 45 يومًا (${soon.length} شركة، التاريخ: الشركات [الثقة]):`);
+  // القادم بالترتيب: أول المتوقعين لكل فترة، ثم القائمة حسب التاريخ، ثم العدد حسب الشهر لما بعدها.
+  const upcoming = list.filter(c => daysFrom(today, c.next.d) >= 0).sort((a, b) => a.next.d.localeCompare(b.next.d) || a.s.localeCompare(b.s));
+  const label = c => shortPeriod(c.next, c.fye);
+  if (upcoming.length) {
+    const firsts = new Map();
+    for (const c of upcoming) { const k = label(c); if (!firsts.has(k)) firsts.set(k, []); if (firsts.get(k).length < 5) firsts.get(k).push(c); }
+    L.push('- أول الشركات المتوقع أن تعلن كل فترة قادمة (الفترة: الشركة التاريخ المتوقع [الثقة]):');
+    for (const [k, cs] of [...firsts].sort((a, b) => a[1][0].next.d.localeCompare(b[1][0].next.d))) {
+      const total = upcoming.filter(c => label(c) === k).length;
+      L.push(`  ${k} (${total} شركة): ${cs.map(c => `${name(c)} ${c.next.d} [${c.next.conf}]`).join(' · ')}`);
+    }
+    const shown = upcoming.slice(0, 100);
+    L.push(`- المتوقع حسب التاريخ (أول ${shown.length} من ${upcoming.length}، التاريخ: الشركة [الفترة، الثقة]):`);
     const byDay = new Map();
-    for (const c of soon) { if (!byDay.has(c.next.d)) byDay.set(c.next.d, []); byDay.get(c.next.d).push(`${name(c)} [${c.next.conf}]`); }
+    for (const c of shown) { if (!byDay.has(c.next.d)) byDay.set(c.next.d, []); byDay.get(c.next.d).push(`${name(c)} [${label(c)}، ${c.next.conf}]`); }
     for (const [d, names] of byDay) L.push(`  ${d}: ${names.join(' · ')}`);
-  }
-  const later = list.filter(c => daysFrom(today, c.next.d) > 45);
-  if (later.length) {
-    const months = new Map();
-    for (const c of later) { const m = c.next.d.slice(0, 7); months.set(m, (months.get(m) || 0) + 1); }
-    L.push(`- بعد ذلك (عدد الشركات المتوقعة حسب الشهر): ${[...months].sort().map(([m, n]) => `${m}: ${n}`).join(' · ')}. الموعد المتوقع لكل شركة في عمود «النتائج المتوقعة» بالجدول.`);
+    const rest = upcoming.slice(100);
+    if (rest.length) {
+      const months = new Map();
+      for (const c of rest) { const m = c.next.d.slice(0, 7); months.set(m, (months.get(m) || 0) + 1); }
+      L.push(`- بعد ذلك ${rest.length} شركة (العدد حسب الشهر): ${[...months].sort().map(([m, n]) => `${m}: ${n}`).join(' · ')}. الموعد المتوقع لكل شركة في عمود «النتائج المتوقعة» بالجدول.`);
+    }
   }
   return { lines: L };
 }

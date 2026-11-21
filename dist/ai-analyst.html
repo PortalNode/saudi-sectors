@@ -389,7 +389,8 @@ document.addEventListener("click", e => { if (!e.target.closest(".ai-pick")) sug
 
 /* ---------- نطاق السؤال: السوق كامل، أو قطاع، أو شركة (ملفات جاهزة يبنيها scripts/build-ai-packs.mjs) ---------- */
 let scope = "market", marketPack = null;
-const getPack = path => fetch(path).then(r=>r.ok?r.json():null).catch(()=>null);
+// no-cache: يتحقق المتصفح من الخادم في كل مرة، فلا يُرسل للنموذج ملف قديم بعد تحديث البيانات.
+const getPack = path => fetch(path, { cache: "no-cache" }).then(r=>r.ok?r.json():null).catch(()=>null);
 const SCOPE_LABEL = { market: "جدول السوق كاملًا", sector: "جدول القطاع", company: "ملف الشركة" };
 function setScopeUI(next){
   scope = next;
