@@ -284,3 +284,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .market-movers-body.is-expanded .mover-list li:nth-child(n+4){display:block}
   .mover-more{display:block;width:100%;min-height:34px;margin-top:2px;border:0;border-radius:0;background:transparent;color:var(--teal);font:700 11px var(--font)}
 }
+
+/* Safari on iPhone/iPad only: give each frozen cell (symbol, company name) its own compositing layer.
+   Otherwise iOS may paint the name cell into the symbol cell's layer while the table is near its start
+   (price…P/E showing), and the whole name column disappears while scrolling. */
+@supports (-webkit-touch-callout:none){
+  .sections .table-wrap .sticky-1,.sections .table-wrap .sticky-2{will-change:transform}
+}
