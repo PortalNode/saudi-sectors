@@ -7,7 +7,8 @@ const columns = [
 // «موعد النتائج»: تصفية الجدول حسب الموعد المتوقع لإعلان النتائج (earnings-calendar/index.json،
 // scripts/build-earnings-calendar.py). عند التصفية يظهر عمود «موعد النتائج» ويُرتب الجدول بالأقرب.
 const EARN_COL = ['earnDate','موعد النتائج','earn'];
-const EARN_FILTERS = [['all','الكل'],['d7','خلال 7 أيام'],['d30','خلال 30 يومًا'],['d90','خلال 90 يومًا'],['recent','أعلنت آخر 14 يومًا'],['late','متأخرة']];
+// «كل المواعيد» يعرض كل شركة لها سجل مرتبة بموعدها، فلا تختفي شركة موعدها بعيد (مجموعة تداول مثلًا).
+const EARN_FILTERS = [['all','الكل'],['d7','خلال 7 أيام'],['d30','خلال 30 يومًا'],['d90','خلال 90 يومًا'],['upcoming','كل المواعيد'],['recent','أعلنت آخر 30 يومًا'],['late','متأخرة']];
 let earnFilter = 'all', earnings = new Map();
 const riyadhToday = () => new Date(Date.now()+3*3600e3).toISOString().slice(0,10);
 const earnDays = (a,b) => Math.round((Date.parse(`${b}T00:00:00Z`)-Date.parse(`${a}T00:00:00Z`))/864e5);
@@ -17,7 +18,8 @@ function earnMatch(stock,filter=earnFilter){
   if(filter==='all')return true;
   const e=earnings.get(stock.symbol);if(!e)return false;
   const today=riyadhToday(),toNext=earnDays(today,e.d);
-  if(filter==='recent'){const ago=earnDays(e.last,today);return ago>=0&&ago<=14;}
+  if(filter==='upcoming')return true;
+  if(filter==='recent'){const ago=earnDays(e.last,today);return ago>=0&&ago<=30;}
   if(filter==='late')return earnDays(today,e.hi)<0;
   return toNext>=0&&toNext<=({d7:7,d30:30,d90:90})[filter];
 }

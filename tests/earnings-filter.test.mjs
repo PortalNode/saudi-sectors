@@ -15,7 +15,7 @@ test('the home page has the «موعد النتائج» filter next to the table
 test('the filter reads the earnings calendar, filters rows and adds the date column only when active', () => {
   const app = read('app.js');
   assert.match(app, /fetch\('earnings-calendar\/index\.json',\{cache:'no-cache'\}\)/);
-  for (const id of ['all', 'd7', 'd30', 'd90', 'recent', 'late']) assert.match(app, new RegExp(`\\['${id}','`));
+  for (const id of ['all', 'd7', 'd30', 'd90', 'upcoming', 'recent', 'late']) assert.match(app, new RegExp(`\\['${id}','`));
   assert.match(app, /&&earnMatch\(s\)\)/, 'rows pass through the filter');
   assert.match(app, /const viewColumns = \(\) => earnFilter==='all'\?columns:\[\.\.\.columns,EARN_COL\]/);
   assert.match(app, /\$\{earnFilter==='all'\?'':earnCell\(stock\)\}<\/tr>/);
