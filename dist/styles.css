@@ -178,9 +178,11 @@ table{min-width:1594px}
 
 /* Keep sortable column headings visible while scrolling through table rows. */
 .sections .table-wrap{overflow:auto;max-height:none;overscroll-behavior:auto}
-.sections .table-wrap thead{position:relative;z-index:30;transform:translateY(var(--table-head-offset,0px))}
-.sections .table-wrap thead th{position:relative;top:auto;z-index:1;background:#242d37}
-.sections .table-wrap thead th.sticky-1,.sections .table-wrap thead th.sticky-2{position:sticky;z-index:2}
+/* The offset (sticky-header.js) moves each heading cell, not the <thead>: Safari (WebKit) mis-stacks the
+   sticky symbol/name cells when they sit inside a transformed <thead>, and on the iPhone the name column vanished. */
+.sections .table-wrap thead{position:static;z-index:auto;transform:none}
+.sections .table-wrap thead th{position:relative;top:auto;z-index:20;background:#242d37;transform:translateY(var(--table-head-offset,0px))}
+.sections .table-wrap thead th.sticky-1,.sections .table-wrap thead th.sticky-2{position:sticky;z-index:22}
 .sections .table-wrap thead th.sticky-1{right:0}
 .sections .table-wrap thead th.sticky-2{right:86px}
 
