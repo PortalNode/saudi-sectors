@@ -82,6 +82,21 @@
         <p class="ced-note">الموعد المتوقع = نهاية الفترة + وسيط أيام الإعلان في آخر ثلاث سنوات للفترة نفسها، ويُنقل من الجمعة والسبت إلى أقرب يوم تداول. حركة السهم متاحة منذ 2025.</p></details>`;
   }
 
+  // ترتيب ما بين بطاقات الشركة وجدول النتائج: إعلانات الشركة ← موعد النتائج القادمة ←
+  // آخر النتائج المالية (layout.js) ← شريط الفترة. لا يُنقل عنصر إلا إذا خرج عن مكانه،
+  // ولا تتحرك البطاقات الأخرى (كل منها يلتصق بما قبله فقط)، فلا تتعارض المراقبات.
+  function order(panel, card = document.getElementById('company-earnings')) {
+    const anchor = ['company-announcements', 'company-quote', 'company-profile'].map(id => document.getElementById(id)).find(el => el?.parentElement === panel)
+      || panel.querySelector(':scope > .bank-heading');
+    if (!anchor) return;
+    let prev = anchor;
+    for (const el of [card, panel.querySelector(':scope > .key-figures-title'), panel.querySelector(':scope > .key-figures'), panel.querySelector(':scope > .period-bar')]) {
+      if (!el || (el.parentElement !== panel && el !== card)) continue;
+      if (prev.nextElementSibling !== el) prev.after(el);
+      prev = el;
+    }
+  }
+
   let shown = null;
   async function paint() {
     const panel = document.querySelector('.bank-panel');
@@ -89,15 +104,16 @@
     const table = panel?.querySelector(':scope > .table-wrap');
     let box = document.getElementById('company-earnings');
     if (!symbol || !table) return;
-    if (box && shown === symbol) { if (box.nextElementSibling !== table) table.before(box); return; }
+    order(panel);
+    if (box && shown === symbol) return;
     shown = symbol;
     const c = await load(symbol);
     if (shown !== symbol) return;
     box = document.getElementById('company-earnings');
-    if (!c?.recs?.length) { box?.remove(); return; }
+    if (!c?.recs?.length) { box?.remove(); order(panel); return; }
     if (!box) { box = document.createElement('section'); box.id = 'company-earnings'; box.className = 'company-profile company-earnings'; box.setAttribute('aria-labelledby', 'ced-title'); }
     box.innerHTML = html(c);
-    if (box.nextElementSibling !== table) table.before(box);
+    order(panel, box);
   }
 
   function start() {

@@ -57,9 +57,12 @@ test('every company results page loads the earnings-date card', () => {
   }
 });
 
-test('the card sits above the results table and loads each company file without caching', () => {
+test('the card follows the announcements, before the latest results and the period bar, and loads each company file without caching', () => {
   const script = read('company-earnings-date.js');
   assert.match(script, /earnings-calendar\/\$\{encodeURIComponent\(symbol\)\}\.json/);
   assert.match(script, /cache: 'no-cache'/);
-  assert.match(script, /table\.before\(box\)/);
+  // إعلانات الشركة ← موعد النتائج القادمة ← آخر النتائج المالية ← شريط الفترة ← الجدول
+  assert.match(script, /\['company-announcements', 'company-quote', 'company-profile'\]/);
+  assert.match(script, /order\(panel, box\)/, 'a new card is placed even before it has an id in the page');
+  assert.match(script, /\[card, panel\.querySelector\(':scope > \.key-figures-title'\), panel\.querySelector\(':scope > \.key-figures'\), panel\.querySelector\(':scope > \.period-bar'\)\]/);
 });
