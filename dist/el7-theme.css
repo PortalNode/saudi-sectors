@@ -783,3 +783,24 @@ html body .ai-chat{border-radius:var(--e7-r-sm);border:1px solid var(--pf-line);
 html body .ai-send,html body .ai-compose button{border-radius:12px}
 html body .msg-body{border-radius:var(--e7-r-sm)}
 html body .ai-card button:not(.ai-send):not([data-scope]){border-radius:10px}
+
+/* ---------------- أهم الأرقام: أسماء البنود في الموقع السعودي ----------------
+   أيقونة افتراضية لأي بند جديد، ثم أيقونة لكل اسم (الأخص يأتي بعد الأعم لأن الوزن متساوٍ) */
+.key-figure dt{--ico:var(--i-gauge)}
+.key-figure dt[title^="إجمالي الدخل"],.key-figure dt[title^="إجمالي الإيرادات"],.key-figure dt[title^="إيرادات"]{--ico:var(--i-bars)}
+.key-figure dt[title^="دخل العمليات"],.key-figure dt[title^="الربح التشغيلي"],.key-figure dt[title^="الدخل من العمليات"]{--ico:var(--i-briefcase)}
+.key-figure dt[title^="صافي الدخل"],.key-figure dt[title^="صافي الربح"]{--ico:var(--i-coins)}
+.key-figure dt[title^="صافي الدخل من التمويل"],.key-figure dt[title^="صافي دخل عمولات"]{--ico:var(--i-bars)}
+.key-figure dt[title^="ربح السهم"],.key-figure dt[title^="ربحية السهم"],.key-figure dt[title^="ربح الوحدة"]{--ico:var(--i-wallet)}
+.key-figure dt[title^="هامش"]{--ico:var(--i-pie)}
+.key-figure dt[title^="هامش دخل العمليات"],.key-figure dt[title^="هامش الربح التشغيلي"]{--ico:var(--i-sliders)}
+.key-figure dt[title^="الموجودات"]{--ico:var(--i-building)}
+.key-figure dt[title^="حقوق المساهمين"],.key-figure dt[title^="إجمالي الأقساط"]{--ico:var(--i-shield)}
+.key-figure dt[title^="العائد"]{--ico:var(--i-trend)}
+.key-figure dt[title^="ودائع"]{--ico:var(--i-cash)}
+.key-figure dt[title^="التمويل"],.key-figure dt[title^="عدد الوحدات"]{--ico:var(--i-layers)}
+.key-figure dt[title^="نسبة"]{--ico:var(--i-percent)}
+.key-figure dt[title^="مكرر"]{--ico:var(--i-scale)}
+/* الشارت المصغر: تسعة أزرار (بعد إضافة «شهر») في سطر واحد */
+html body.banks-page .cq-mini-ranges{gap:2px}
+html body.banks-page .cq-mini-ranges button{padding:3px 6px}

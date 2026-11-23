@@ -16,6 +16,7 @@
   const MINI_RANGES = [
     { id: '1d', label: 'يوم', sessions: 1 },
     { id: '5d', label: '5 أيام', sessions: 5 },
+    { id: '1m', label: 'شهر', months: 1 },
     { id: '3m', label: '3 أشهر', months: 3 },
     { id: '6m', label: '6 أشهر', months: 6 },
     { id: '1y', label: 'سنة', months: 12 },
@@ -81,7 +82,7 @@
     });
     const dividends = (file.div || []).filter(([d]) => d > raw[0].time && d <= raw.at(-1).time);
     const bars = calc.adjustDividends(raw, dividends);
-    const range = MINI_RANGES.find(r => r.id === rangeId) || MINI_RANGES[4];
+    const range = MINI_RANGES.find(r => r.id === rangeId) || MINI_RANGES.find(r => r.id === '1y');
     let series, base, intra = false;
     if (range.sessions && intraday?.t?.length > 1) {
       // آخر جلسات التداول في الملف، ونقطة الأساس إغلاق الجلسة السابقة لأول جلسة معروضة
