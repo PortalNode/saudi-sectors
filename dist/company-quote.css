@@ -223,7 +223,7 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 /* نافذة إعدادات المؤشر: مدخلات، نمط، الظهور */
 .cc-dlg{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.45)}
 .cc-dlg[hidden]{display:none}
-.cc-dlg-box{width:min(440px,100%);max-height:min(660px,calc(100dvh - 32px));display:flex;flex-direction:column;background:var(--pf-bg);color:var(--pf-ink);border:1px solid var(--pf-line);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.45);overflow:hidden}
+.cc-dlg-box{width:min(500px,100%);max-height:min(660px,calc(100dvh - 32px));display:flex;flex-direction:column;background:var(--pf-bg);color:var(--pf-ink);border:1px solid var(--pf-line);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.45);overflow:hidden}
 .cc-dlg-head{display:flex;align-items:center;gap:10px;padding:14px 18px 4px}
 .cc-dlg-head b{font-size:19px}
 .cc-dlg-head small{color:var(--pf-muted);font-size:11.5px}
@@ -240,6 +240,22 @@ html.cc-lock,html.cc-lock body{overflow:hidden}
 .cc-dlg-plot>.cc-dlg-check,.cc-dlg-plot>span{flex:1}
 .cc-dlg-plot select{width:80px}
 .cc-dlg-plot input[type=color]{width:44px;height:34px;padding:3px;border:1px solid var(--pf-line);border-radius:7px;background:var(--pf-bg2);cursor:pointer}
+/* إعدادات RSI: مربع لون بالعتامة (الشفاف مربعات كما في TradingView) وشريط العتامة تحته، وقيمة الحد بجانبه */
+.cc-dlg-plot{flex-wrap:wrap;row-gap:6px}
+.cc-dlg-body .cc-dlg-plot input[type=number]{width:62px;min-height:34px}
+.cc-dlg-body .cc-dlg-plot select[data-dtype],.cc-dlg-body .cc-dlg-plot select[data-dline],.cc-dlg-body .cc-dlg-plot select[data-dw]{width:92px}
+.cc-dlg-plot>.cc-sw{flex:0 0 auto;display:inline-flex;flex-direction:column;align-items:center;gap:3px}
+.cc-dlg-fill{padding-inline-end:204px}
+@media (max-width:520px){
+  .cc-dlg-body .cc-dlg-plot{gap:6px}
+  .cc-dlg-body .cc-dlg-plot select[data-dtype],.cc-dlg-body .cc-dlg-plot select[data-dline],.cc-dlg-body .cc-dlg-plot select[data-dw]{width:70px;padding:4px 6px}
+  .cc-dlg-body .cc-dlg-plot input[type=number]{width:50px;padding:4px 6px}
+  .cc-dlg-fill{padding-inline-end:152px}
+}
+.cc-sw-box{position:relative;display:block;width:40px;height:30px;border:1px solid var(--pf-line);border-radius:7px;overflow:hidden;cursor:pointer;background:repeating-conic-gradient(#2a2e39 0 25%,#4a4e59 0 50%) 0 0/10px 10px}
+.cc-sw-box::after{content:"";position:absolute;inset:0;background:var(--c);pointer-events:none}
+.cc-dlg-plot .cc-sw-box input[type=color]{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;opacity:0;cursor:pointer}
+.cc-sw input[type=range]{width:40px;height:10px;margin:0;accent-color:var(--pf-gold);cursor:pointer}
 .cc-dlg-sub{padding-inline-start:26px;font-size:12.5px}
 .cc-dlg-sub small{color:var(--pf-muted);font-size:11px}
 .cc-dlg-check{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer}

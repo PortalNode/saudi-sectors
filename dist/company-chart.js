@@ -46,6 +46,11 @@
   const srcOf = (b, key) => key === 'open' ? b.open : key === 'high' ? b.high : key === 'low' ? b.low : key === 'hl2' ? (b.high + b.low) / 2
     : key === 'hlc3' ? (b.high + b.low + b.close) / 3 : key === 'ohlc4' ? (b.open + b.high + b.low + b.close) / 4 : b.close;
   const plot = (color, width = 1.5) => ({ color, width, on: true });
+  // نوع رسم الخط، ونمطه، ودقة الأرقام، وأنواع متوسط RSI كما في TradingView
+  const PLOT_TYPES = [['line', 'خط'], ['step', 'خط درجات'], ['curve', 'منحنى']];
+  const LINE_STYLES = ['solid', 'dotted', 'dashed'];
+  const PRECISIONS = [0, 1, 2, 3, 4];
+  const MA_TYPES = [['SMA', 'SMA'], ['EMA', 'EMA'], ['RMA', 'SMMA (RMA)'], ['WMA', 'WMA']];
   const maDefault = color => ({ inputs: { length: 0, source: 'close' }, plots: { ma: plot(color) } });
   const IND_DEFAULT = {
     sma20: { ...maDefault('#3987e5'), inputs: { length: 20, source: 'close' } },
@@ -54,23 +59,33 @@
     ema20: { ...maDefault('#199e70'), inputs: { length: 20, source: 'close' } },
     bb: { inputs: { length: 20, mult: 2, source: 'close' }, plots: { basis: plot('#c98500', 1), upper: plot('#c98500'), lower: plot('#c98500') } },
     vol: { inputs: {}, plots: { up: plot(null), down: plot(null) } },
-    rsi: { inputs: { length: 14, source: 'close', upper: 70, lower: 30 }, plots: { rsi: plot('#9085e9'), upper: plot(null, 1), lower: plot(null, 1) } },
+    // RSI كما في TradingView: الخط ومتوسطه، والحدود الثلاثة (70 و50 و30) بخط متقطع، وتعبئة الخلفية بين الحدين،
+    // وتعبئة متدرجة فوق 70 (تشبع شرائي) وتحت 30 (تشبع بيعي). alpha هي العتامة من 0 إلى 100
+    rsi: { inputs: { length: 14, source: 'close', maType: 'SMA', maLength: 14, upper: 70, middle: 50, lower: 30 },
+      plots: { rsi: { ...plot('#9085e9'), type: 'line' }, ma: { ...plot('#f5c518', 1), type: 'line' },
+        upper: { ...plot('#787b86', 1), line: 'dashed', alpha: 100 }, middle: { ...plot('#787b86', 1), line: 'dashed', alpha: 50 }, lower: { ...plot('#787b86', 1), line: 'dashed', alpha: 100 },
+        bg: { on: true, colors: ['#9085e9'], alphas: [10] }, ob: { on: true, colors: ['#4caf50', '#4caf50'], alphas: [100, 0] }, os: { on: true, colors: ['#f23645', '#f23645'], alphas: [0, 100] } } },
     macd: { inputs: { source: 'close', fast: 12, slow: 26, signal: 9, osc: 'EMA', sig: 'EMA' }, plots: { hist: { on: true, colors: ['#26a69a', '#b2dfdb', '#ffcdd2', '#ff5252'] }, macd: plot('#3987e5'), signal: plot('#d95926'), zero: plot(null, 1) } }
   };
-  for (const s of Object.values(IND_DEFAULT)) Object.assign(s, { hidden: false, vis: { d: true, w: true, m: true }, scaleLabels: true, statusValues: true, statusInputs: true });
+  for (const s of Object.values(IND_DEFAULT)) Object.assign(s, { hidden: false, vis: { d: true, w: true, m: true }, scaleLabels: true, statusValues: true, statusInputs: true, precision: null });
   // دمج المحفوظ مع الافتراضي حقلًا حقلًا، فلا يكسر إعدادٌ قديم أو تالف الشارت
   function mergeInd(def, saved) {
     const out = structuredClone(def);
     if (!saved || typeof saved !== 'object') return out;
     for (const k of ['hidden', 'scaleLabels', 'statusValues', 'statusInputs']) if (typeof saved[k] === 'boolean') out[k] = saved[k];
     for (const k of ['d', 'w', 'm']) if (typeof saved.vis?.[k] === 'boolean') out.vis[k] = saved.vis[k];
+    if (saved.precision === null || PRECISIONS.includes(saved.precision)) out.precision = saved.precision ?? null;
     for (const k of Object.keys(out.inputs)) if (typeof saved.inputs?.[k] === typeof out.inputs[k]) out.inputs[k] = saved.inputs[k];
     for (const [k, p] of Object.entries(out.plots)) {
       const s = saved.plots?.[k]; if (!s) continue;
       if (typeof s.on === 'boolean') p.on = s.on;
       if ('color' in p && (s.color === null || /^#[0-9a-f]{6}$/i.test(s.color))) p.color = s.color;
       if ('width' in p && [1, 1.5, 2, 3, 4].includes(s.width)) p.width = s.width;
-      if (p.colors && Array.isArray(s.colors) && s.colors.length === 4 && s.colors.every(c => /^#[0-9a-f]{6}$/i.test(c))) p.colors = [...s.colors];
+      if (p.colors && Array.isArray(s.colors) && s.colors.length === p.colors.length && s.colors.every(c => /^#[0-9a-f]{6}$/i.test(c))) p.colors = [...s.colors];
+      if (p.alphas && Array.isArray(s.alphas) && s.alphas.length === p.alphas.length && s.alphas.every(a => Number.isInteger(a) && a >= 0 && a <= 100)) p.alphas = [...s.alphas];
+      if ('alpha' in p && Number.isInteger(s.alpha) && s.alpha >= 0 && s.alpha <= 100) p.alpha = s.alpha;
+      if ('line' in p && LINE_STYLES.includes(s.line)) p.line = s.line;
+      if ('type' in p && PLOT_TYPES.some(([v]) => v === s.type)) p.type = s.type;
     }
     return out;
   }
@@ -358,7 +373,27 @@
     }
     return out;
   }
-  const maOf = (values, n, type) => type === 'SMA' ? sma(values, n) : ema(values, n);
+  // متوسط وايلدر (RMA): يبدأ بمتوسط بسيط ثم (السابق × (n−1) + القيمة) ÷ n
+  function rma(values, n) {
+    const out = []; let prev = null, run = [];
+    for (const v of values) {
+      if (v == null) { out.push(null); prev = null; run = []; continue; }
+      if (prev == null) { run.push(v); if (run.length === n) prev = run.reduce((a, b) => a + b, 0) / n; out.push(prev); continue; }
+      prev = (prev * (n - 1) + v) / n; out.push(prev);
+    }
+    return out;
+  }
+  // المتوسط الموزون: أحدث قيمة وزنها n وأقدمها وزنها 1
+  function wma(values, n) {
+    const den = n * (n + 1) / 2;
+    return values.map((_, i) => {
+      if (i < n - 1) return null;
+      let sum = 0;
+      for (let k = 0; k < n; k++) { const v = values[i - k]; if (v == null) return null; sum += v * (n - k); }
+      return sum / den;
+    });
+  }
+  const maOf = (values, n, type) => type === 'SMA' ? sma(values, n) : type === 'RMA' ? rma(values, n) : type === 'WMA' ? wma(values, n) : ema(values, n);
   function macd(values, fastLen = 12, slowLen = 26, signalLen = 9, oscType = 'EMA', signalType = 'EMA') {
     const fast = maOf(values, fastLen, oscType), slow = maOf(values, slowLen, oscType);
     const line = values.map((_, i) => fast[i] != null && slow[i] != null ? fast[i] - slow[i] : null), signal = maOf(line, signalLen, signalType);
@@ -556,14 +591,15 @@
       for (const r of ilegend.querySelectorAll('[data-irow]')) {
         const id = r.dataset.irow, s = indCfg[id], out = r.querySelector('.cc-ivals');
         if (!s.statusValues || s.hidden || !b) { out.innerHTML = ''; continue; }
-        const val = (v, color) => v == null ? '' : `<bdi style="color:${color}">${f2.format(v)}</bdi>`;
+        const val = (v, color) => v == null ? '' : `<bdi style="color:${color}">${s.precision == null ? f2.format(v) : v.toFixed(s.precision)}</bdi>`;
         const v = calc[id]?.[i];
         if (id === 'vol') out.innerHTML = `<bdi style="color:${plotColor('vol', b.close >= b.open ? 'up' : 'down')}">${big.format(b.volume)}</bdi>`;
         else if (id === 'bb') out.innerHTML = v ? `${val(v.mid, plotColor(id, 'basis'))}${val(v.up, plotColor(id, 'upper'))}${val(v.low, plotColor(id, 'lower'))}` : '';
         else if (id === 'macd') {
           const prev = calc.macd[i - 1]?.hist, hist = v?.hist;
           out.innerHTML = v ? `${hist == null ? '' : val(hist, s.plots.hist.colors[histColorIndex(hist, prev)])}${val(v.macd, plotColor(id, 'macd'))}${val(v.signal, plotColor(id, 'signal'))}` : '';
-        } else out.innerHTML = val(v, plotColor(id, id === 'rsi' ? 'rsi' : 'ma'));
+        } else if (id === 'rsi') out.innerHTML = `${s.plots.rsi.on ? val(v, plotColor(id, 'rsi')) : ''}${s.plots.ma.on ? val(calc.rsiMa?.[i], plotColor(id, 'ma')) : ''}`;
+        else out.innerHTML = val(v, plotColor(id, 'ma'));
       }
     }
     function selectInd(id) {
@@ -631,29 +667,44 @@
     const INPUT_FIELDS = {
       ma: [['length', 'الطول', 'int'], ['source', 'المصدر', SOURCES]],
       bb: [['length', 'الطول', 'int'], ['source', 'المصدر', SOURCES], ['mult', 'الانحراف المعياري', 'num']],
-      rsi: [['length', 'طول RSI', 'int'], ['source', 'المصدر', SOURCES], ['upper', 'الحد العلوي', 'num'], ['lower', 'الحد السفلي', 'num']],
+      rsi: [['length', 'طول RSI', 'int'], ['source', 'المصدر', SOURCES], 'المتوسط المبني على RSI', ['maType', 'النوع', MA_TYPES], ['maLength', 'الطول', 'int']],
       macd: [['source', 'المصدر', SOURCES], ['fast', 'طول الخط السريع', 'int'], ['slow', 'طول الخط البطيء', 'int'], ['signal', 'طول خط الإشارة', 'int'], ['osc', 'نوع متوسط المذبذب', [['EMA', 'EMA'], ['SMA', 'SMA']]], ['sig', 'نوع متوسط الإشارة', [['EMA', 'EMA'], ['SMA', 'SMA']]]],
       vol: []
     };
     const fieldsOf = id => INPUT_FIELDS[id] ?? INPUT_FIELDS.ma;
+    // أسماء خطوط RSI في تبويب النمط كما في TradingView
+    const RSI_LABELS = { rsi: 'مؤشر القوة النسبية', ma: 'المتوسط المبني على RSI', upper: 'الحد العلوي', middle: 'الحد الأوسط', lower: 'الحد السفلي', bg: 'تعبئة خلفية RSI', ob: 'تعبئة تدرج التشبع الشرائي', os: 'تعبئة تدرج التشبع البيعي' };
+    const rgba = (color, alpha = 100) => { const h = toHex(color); return `rgba(${parseInt(h.slice(1, 3), 16)},${parseInt(h.slice(3, 5), 16)},${parseInt(h.slice(5, 7), 16)},${alpha / 100})`; };
     function renderIndSettings() {
       const { id, tab } = dlgState, s = indCfg[id];
       const check = (attr, on, label) => `<label class="cc-dlg-check"><input type="checkbox" ${attr}${on ? ' checked' : ''}><span>${label}</span></label>`;
       const color = (attr, value) => `<input type="color" ${attr} value="${toHex(value)}" aria-label="اللون">`;
       const widthSel = key => `<select data-dw="${key}" aria-label="السماكة">${[1, 1.5, 2, 3, 4].map(w => `<option value="${w}"${s.plots[key].width === w ? ' selected' : ''}>${w}px</option>`).join('')}</select>`;
+      // قيم الإخراج كما في TradingView: الدقة (عدد الخانات العشرية)، والملصقات على المقياس، والقيم في سطر الحالة
+      const outputOpts = () => `<h4>قيم الإخراج</h4><label class="cc-dlg-row"><span>الدقة</span><select data-dprec aria-label="الدقة"><option value=""${s.precision == null ? ' selected' : ''}>افتراضي</option>${PRECISIONS.map(n => `<option value="${n}"${s.precision === n ? ' selected' : ''}>${n}</option>`).join('')}</select></label>`
+        + `${check('data-dopt="scaleLabels"', s.scaleLabels, 'الملصقات على مقياس السعر')}${check('data-dopt="statusValues"', s.statusValues, 'القيم في سطر الحالة')}`
+        + `<h4>قيم الإدخال</h4>${check('data-dopt="statusInputs"', s.statusInputs, 'المدخلات في سطر الحالة')}`;
       let content = '';
       if (tab === 'inputs') {
         const fields = fieldsOf(id);
-        content = fields.length ? fields.map(([key, label, kind]) => `<label class="cc-dlg-row"><span>${label}</span>${Array.isArray(kind)
+        content = fields.length ? fields.map(f => typeof f === 'string' ? `<h4>${f}</h4>` : f).map(f => typeof f === 'string' ? f : (([key, label, kind]) => `<label class="cc-dlg-row"><span>${label}</span>${Array.isArray(kind)
           ? `<select data-din="${key}">${kind.map(([v, t]) => `<option value="${v}"${s.inputs[key] === v ? ' selected' : ''}>${t}</option>`).join('')}</select>`
-          : `<input type="number" data-din="${key}" value="${s.inputs[key]}" ${kind === 'int' ? 'min="1" max="1000" step="1"' : key === 'mult' ? 'min="0.1" max="10" step="0.1"' : 'min="0" max="100" step="1"'} dir="ltr">`}</label>`).join('')
+          : `<input type="number" data-din="${key}" value="${s.inputs[key]}" ${kind === 'int' ? 'min="1" max="1000" step="1"' : key === 'mult' ? 'min="0.1" max="10" step="0.1"' : 'min="0" max="100" step="1"'} dir="ltr">`}</label>`)(f)).join('')
           : '<p class="cc-dlg-note">لا توجد مدخلات لهذا المؤشر.</p>';
+      } else if (tab === 'style' && id === 'rsi') {
+        // مربع لون بالعتامة كما في TradingView: الشفاف يظهر مربعات، والشريط تحته للعتامة
+        const sw = (attr, hex, alpha) => `<span class="cc-sw"><label class="cc-sw-box" style="--c:${rgba(hex, alpha)}" title="اللون"><input type="color" ${attr} value="${toHex(hex)}" aria-label="اللون"></label><input type="range" ${attr.replace('data-dc=', 'data-da=').replace('data-dfc=', 'data-dfa=')} min="0" max="100" step="5" value="${alpha}" aria-label="العتامة" title="العتامة ${alpha}%"></span>`;
+        const typeSel = key => `<select data-dtype="${key}" aria-label="نوع الرسم" title="نوع الرسم">${PLOT_TYPES.map(([v, t]) => `<option value="${v}"${s.plots[key].type === v ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
+        const lineSel = key => `<select data-dline="${key}" aria-label="نمط الخط" title="نمط الخط">${LINE_OPTIONS.map(([v, t]) => `<option value="${v}"${s.plots[key].line === v ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
+        const band = key => `<div class="cc-dlg-plot">${check(`data-don="${key}"`, s.plots[key].on, RSI_LABELS[key])}<input type="number" data-din="${key}" value="${s.inputs[key]}" min="0" max="100" step="1" dir="ltr" aria-label="القيمة">${sw(`data-dc="${key}"`, plotColor(id, key), s.plots[key].alpha)}${widthSel(key)}${lineSel(key)}</div>`;
+        const fill = key => `<div class="cc-dlg-plot cc-dlg-fill">${check(`data-don="${key}"`, s.plots[key].on, RSI_LABELS[key])}${s.plots[key].colors.map((c, k) => sw(`data-dfc="${key}:${k}"`, c, s.plots[key].alphas[k])).join('')}</div>`;
+        content = ['rsi', 'ma'].map(key => `<div class="cc-dlg-plot">${check(`data-don="${key}"`, s.plots[key].on, RSI_LABELS[key])}${color(`data-dc="${key}"`, plotColor(id, key))}${widthSel(key)}${typeSel(key)}</div>`).join('')
+          + ['upper', 'middle', 'lower'].map(band).join('') + ['bg', 'ob', 'os'].map(fill).join('') + outputOpts();
       } else if (tab === 'style') {
         content = Object.entries(s.plots).map(([key, p]) => key === 'hist'
           ? `<div class="cc-dlg-plot">${check(`data-don="hist"`, p.on, PLOT_LABELS.hist)}</div>${p.colors.map((c, k) => `<div class="cc-dlg-plot cc-dlg-sub"><span>لون ${k} <small>${HIST_LABELS[k]}</small></span>${color(`data-dhc="${k}"`, c)}</div>`).join('')}`
           : `<div class="cc-dlg-plot">${check(`data-don="${key}"`, p.on, PLOT_LABELS[key])}${color(`data-dc="${key}"`, plotColor(id, key))}${id === 'vol' ? '' : widthSel(key)}</div>`).join('')
-          + `<h4>قيم الإخراج</h4>${check('data-dopt="scaleLabels"', s.scaleLabels, 'الملصقات على مقياس السعر')}${check('data-dopt="statusValues"', s.statusValues, 'القيم في سطر الحالة')}`
-          + `<h4>قيم الإدخال</h4>${check('data-dopt="statusInputs"', s.statusInputs, 'المدخلات في سطر الحالة')}`;
+          + outputOpts();
       } else {
         content = `<p class="cc-dlg-note">يظهر المؤشر على فترات الشموع المحددة فقط.</p>${INTERVALS.map(([k]) => check(`data-dvis="${k}"`, s.vis[k], { d: 'الأيام (يومي)', w: 'الأسابيع (أسبوعي)', m: 'الشهور (شهري)' }[k])).join('')}`;
       }
@@ -684,16 +735,23 @@
       if (!dlgState) return;
       const t = event.target, s = indCfg[dlgState.id];
       if (t.dataset.din) {
-        const key = t.dataset.din, kind = fieldsOf(dlgState.id).find(f => f[0] === key)?.[2];
+        const key = t.dataset.din, kind = fieldsOf(dlgState.id).find(f => Array.isArray(f) && f[0] === key)?.[2];
         if (Array.isArray(kind)) s.inputs[key] = t.value;
         else { const v = kind === 'int' ? Math.round(Number(t.value)) : Number(t.value); if (!Number.isFinite(v) || t.value === '' || v < Number(t.min) || v > Number(t.max)) return; s.inputs[key] = v; }
       } else if (t.dataset.don) s.plots[t.dataset.don].on = t.checked;
       else if (t.dataset.dc) s.plots[t.dataset.dc].color = t.value;
       else if (t.dataset.dhc) s.plots.hist.colors[Number(t.dataset.dhc)] = t.value;
       else if (t.dataset.dw) s.plots[t.dataset.dw].width = Number(t.value);
+      else if (t.dataset.dline) s.plots[t.dataset.dline].line = t.value;
+      else if (t.dataset.dtype) s.plots[t.dataset.dtype].type = t.value;
+      else if (t.dataset.da) s.plots[t.dataset.da].alpha = Number(t.value);
+      else if (t.dataset.dfc || t.dataset.dfa) { const [key, k] = (t.dataset.dfc || t.dataset.dfa).split(':'); s.plots[key][t.dataset.dfc ? 'colors' : 'alphas'][Number(k)] = t.dataset.dfc ? t.value : Number(t.value); }
+      else if ('dprec' in t.dataset) s.precision = t.value === '' ? null : Number(t.value);
       else if (t.dataset.dopt) s[t.dataset.dopt] = t.checked;
       else if (t.dataset.dvis) s.vis[t.dataset.dvis] = t.checked;
       else return;
+      const box = t.closest('.cc-sw');
+      if (box) { const [c, a] = box.querySelectorAll('input'); box.querySelector('.cc-sw-box').style.setProperty('--c', rgba(c.value, Number(a.value))); a.title = `العتامة ${a.value}%`; }
       previewInd();
     });
     dlg.addEventListener('click', event => {
@@ -890,6 +948,45 @@
       paneViews() { return [{ zOrder: () => 'top', renderer: () => ({ draw: target => { target.useMediaCoordinateSpace(({ context }) => drawShapes(context)); queueMicrotask(() => { positionIndRows(); positionFtb(); }); } }) }]; }
     };
 
+    // تعبئات RSI تحت الخطوط كما في TradingView: خلفية بين الحدين العلوي والسفلي،
+    // وتدرج فوق الحد العلوي (من لون عند 100 إلى لون عند الحد) وتحت الحد السفلي (من لون عند الحد إلى لون عند 0)
+    function rsiFills(series, values) {
+      const s = indCfg.rsi, { upper, lower } = s.inputs, P = s.plots;
+      const col = (key, k) => rgba(P[key].colors[k], P[key].alphas[k]);
+      return {
+        attached() {}, detached() {}, updateAllViews() {},
+        paneViews() {
+          return [{ zOrder: () => 'bottom', renderer: () => ({ draw: target => target.useMediaCoordinateSpace(({ context: ctx, mediaSize }) => {
+            if (!chart) return;
+            const yU = series.priceToCoordinate(upper), yL = series.priceToCoordinate(lower);
+            if (yU == null || yL == null) return;
+            const w = mediaSize.width, h = mediaSize.height;
+            if (P.bg.on) { ctx.fillStyle = col('bg', 0); ctx.fillRect(0, Math.min(yU, yL), w, Math.abs(yL - yU)); }
+            if (!P.ob.on && !P.os.on) return;
+            const ts = chart.timeScale(), r = ts.getVisibleLogicalRange(); if (!r) return;
+            const from = Math.max(0, Math.floor(r.from) - 1), to = Math.min(values.length - 1, Math.ceil(r.to) + 1);
+            // منطقة بين خط RSI والحد، مقصوصة على ما فوقه (أو تحته)
+            const area = (baseY, clipY, clipH, top, bottom, yTop, yBottom) => {
+              ctx.save(); ctx.beginPath(); ctx.rect(0, clipY, w, clipH); ctx.clip();
+              const g = ctx.createLinearGradient(0, yTop, 0, yBottom); g.addColorStop(0, top); g.addColorStop(1, bottom); ctx.fillStyle = g;
+              ctx.beginPath();
+              let open = false, lastX = 0;
+              for (let i = from; i <= to; i++) {
+                const v = values[i], x = ts.logicalToCoordinate(i), y = v == null ? null : series.priceToCoordinate(v);
+                if (x == null || y == null) { if (open) { ctx.lineTo(lastX, baseY); ctx.closePath(); open = false; } continue; }
+                if (!open) { ctx.moveTo(x, baseY); open = true; }
+                ctx.lineTo(x, y); lastX = x;
+              }
+              if (open) { ctx.lineTo(lastX, baseY); ctx.closePath(); }
+              ctx.fill(); ctx.restore();
+            };
+            const y100 = series.priceToCoordinate(100) ?? 0, y0 = series.priceToCoordinate(0) ?? h;
+            if (P.ob.on) area(yU, 0, yU, col('ob', 0), col('ob', 1), y100, yU);
+            if (P.os.on) area(yL, yL, h - yL, col('os', 0), col('os', 1), yL, y0);
+          }) }) }];
+        }
+      };
+    }
     function build(keepRange) {
       const saved = keepRange && chart ? chart.timeScale().getVisibleLogicalRange() : null;
       chart?.remove();
@@ -904,7 +1001,7 @@
         if (id === 'sma20' || id === 'sma50' || id === 'sma200') calc[id] = sma(source(i.source), i.length);
         else if (id === 'ema20') calc[id] = ema(source(i.source), i.length);
         else if (id === 'bb') calc[id] = bollinger(source(i.source), i.length, i.mult);
-        else if (id === 'rsi') calc[id] = rsi(source(i.source), i.length);
+        else if (id === 'rsi') { calc[id] = rsi(source(i.source), i.length); calc.rsiMa = maOf(calc[id], i.maLength, i.maType); }
         else if (id === 'macd') calc[id] = macd(source(i.source), i.fast, i.slow, i.signal, i.osc, i.sig);
       }
       const panes = ['rsi', 'macd'].filter(shownInd);
@@ -936,7 +1033,9 @@
         const s = indCfg[id], p = s.plots[key];
         if (!p.on) return null;
         const color = plotColor(id, key);
-        const series = chart.addSeries(LWC.LineSeries, { color, lineWidth: p.width, lastValueVisible: s.scaleLabels, priceLineVisible: false, crosshairMarkerVisible: false, visible: !s.hidden, ...opts }, pane);
+        const fmt = s.precision == null ? {} : { priceFormat: { type: 'custom', minMove: 10 ** -s.precision, formatter: v => v.toFixed(s.precision) } };
+        const type = p.type ? { lineType: { line: LWC.LineType.Simple, step: LWC.LineType.WithSteps, curve: LWC.LineType.Curved }[p.type] } : {};
+        const series = chart.addSeries(LWC.LineSeries, { color, lineWidth: p.width, lastValueVisible: s.scaleLabels, priceLineVisible: false, crosshairMarkerVisible: false, visible: !s.hidden, ...opts, ...fmt, ...type }, pane);
         series.setData(data.map((b, i) => values[i] == null ? { time: b.time } : { time: b.time, value: values[i] }));
         const marks = selectionMarks(id, values, color); series.attachPrimitive(marks); marks.series = series;
         if (pane === 0) indLines.push({ id, series, values });
@@ -949,14 +1048,21 @@
         line('bb', 'lower', calc.bb.map(v => v?.low ?? null), 0, { lineStyle: 2 });
       }
       // خط ثابت (حدود RSI وخط صفر الماكد) على لوحة المؤشر
-      const level = (series, id, key, price) => { const p = indCfg[id].plots[key]; if (p.on && series && !indCfg[id].hidden) series.createPriceLine({ price, color: plotColor(id, key), lineWidth: Math.max(1, Math.round(p.width)), lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: false }); };
+      const level = (series, id, key, price) => {
+        const p = indCfg[id].plots[key]; if (!p.on || !series || indCfg[id].hidden) return;
+        const lineStyle = { solid: LWC.LineStyle.Solid, dotted: LWC.LineStyle.Dotted, dashed: LWC.LineStyle.Dashed }[p.line ?? 'dashed'];
+        series.createPriceLine({ price, color: rgba(plotColor(id, key), p.alpha ?? 100), lineWidth: Math.max(1, Math.round(p.width)), lineStyle, axisLabelVisible: false });
+      };
       // سلسلة غير مرئية تثبّت لوحة المؤشر حتى لو أُطفئت كل خطوطه
       const anchor = (values, pane) => { const s = chart.addSeries(LWC.LineSeries, { visible: false, lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false }, pane); s.setData(data.map((b, i) => values[i] == null ? { time: b.time } : { time: b.time, value: values[i] })); return s; };
       let pane = 1;
       if (calc.rsi) {
         const s = indCfg.rsi;
-        const base = line('rsi', 'rsi', calc.rsi, pane, { priceFormat: { type: 'price', precision: 1, minMove: 0.1 } }) ?? anchor(calc.rsi, pane);
-        level(base, 'rsi', 'upper', s.inputs.upper); level(base, 'rsi', 'lower', s.inputs.lower);
+        const rsiLine = line('rsi', 'rsi', calc.rsi, pane, { priceFormat: { type: 'price', precision: 1, minMove: 0.1 } });
+        const maLine = line('rsi', 'ma', calc.rsiMa, pane, { priceFormat: { type: 'price', precision: 1, minMove: 0.1 } });
+        const base = rsiLine ?? maLine ?? anchor(calc.rsi, pane);
+        level(base, 'rsi', 'upper', s.inputs.upper); level(base, 'rsi', 'middle', s.inputs.middle); level(base, 'rsi', 'lower', s.inputs.lower);
+        if (!s.hidden) base.attachPrimitive(rsiFills(base, calc.rsi));
         pane += 1;
       }
       if (calc.macd) {
@@ -1801,5 +1907,5 @@
   }
 
   // الحسابات مكشوفة للاختبارات
-  window.CompanyChart = { mount, load: loadCandleFile, indexEntry: INDEX_ENTRY, calc: { joinCandles, adjustDividends, dividendFactors, group, sma, ema, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, IND_DEFAULT, mergeInd, indParams, srcOf, histColorIndex, crosshairDate, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
+  window.CompanyChart = { mount, load: loadCandleFile, indexEntry: INDEX_ENTRY, calc: { joinCandles, adjustDividends, dividendFactors, group, sma, ema, rma, wma, maOf, bollinger, rsi, macd, fibLevels, FIB_DEFAULT, nearestPrice, IND_DEFAULT, mergeInd, indParams, srcOf, histColorIndex, crosshairDate, norm, searchStocks, SECTOR_PAGES, rangeLabel, addPeriods, periodsBetween } };
 })();
