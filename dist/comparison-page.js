@@ -1,10 +1,10 @@
 // صفحة المقارنة: تقرأ ملفات ‎*-financials.json‎ (سنوي) و‎*-quarterly-financials.json‎ (ربعي) لكل قطاع.
 import { DEFAULT_PERIOD_SPEC, sumQuarters, withMargins, quarterLabel, monthRange, isCalendarYear, MONTH_NAMES, QUARTER_NAMES } from './quarterly-periods.mjs?v=quarterly-20261115';
 import { loadMarketCaps, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
-import { openExportDialog } from './comparison-export.mjs?v=export-20261123f';
+import { openExportDialog } from './comparison-export.mjs?v=export-20261123j';
 const DATA_BASE = '';
 const VERSION = 'comparison-v6';
-const MAX_COMPANIES = 8; // ثمانية ألوان متمايزة ومتحقق منها؛ أكثر من ذلك يفقد الرسم وضوحه
+const MAX_COMPANIES = 15; // خمسة عشر لونًا في comparison-page.css؛ الأعمدة بلون موحّد والشعار يميّز الشركة
 const $ = id => document.getElementById(id);
 const SECTORS = [
  ['الزراعة','agriculture'],['البنوك','banks'],['التأمين','insurance'],['التمويل','finance'],['الخدمات المالية','financial-services'],['البتروكيماويات','petrochem'],['النفط و الغاز','oilgas'],['الاسمنت','cement'],['تجارة و تجزئة','retail'],['الأغذية والمشروبات','food'],['الصناعات التحويلية','industrial'],['العقارات','realestate'],['الصناديق العقارية المتداولة','reits'],['النقل','transport'],['الاتصالات','telecom'],['الرعاية الصحية','health'],['خدمات الرعاية الصحية','healthservices'],['التعليم و التدريب','education'],['تقنية المعلومات','information-technology'],['المواد الاساسية','materials'],['التعدين والمعادن','mining'],['المراكز الرياضية','sports'],['موردي الادوية','pharma'],['الفنادق و السياحة','hotels-tourism'],['وسائل الاعلام','media'],['متعددة الأنشطة','multi'],['المرافق والطاقة','utilities'],['خدمات الاعمال','business-services'],['المنتجات الزجاجية','glass'],['أسواق الاوراق المالية','exchange'],['السلع الاستهلاكية','consumer']
@@ -208,6 +208,7 @@ function axisFmt(v,step){
   const x = isPct(state.metric) ? v*100 : v, s = isPct(state.metric) ? step*100 : step;
   return new Intl.NumberFormat('en-US',{maximumFractionDigits: s>=1?0:s>=0.1?1:2}).format(x) + (isPct(state.metric)?'%':'');
 }
+const byValue = (list,y) => [...list].sort((a,b) => (valueAt(b,y) ?? -Infinity)-(valueAt(a,y) ?? -Infinity));
 function renderChart(list){
   const box = $('chart'), W = Math.max(280, box.clientWidth-20), H = matchMedia('(max-width:760px)').matches ? 300 : 440;
   const yrs = state.years, n = list.length;
@@ -252,7 +253,8 @@ function renderChart(list){
   let logos = '';
   if(bars){
     const inner = gw*0.8, slot = inner/n, bw = Math.max(3, Math.min(48, slot-2)), showVal = slot>=42 && n*yrs.length<=18;
-    yrs.forEach((y,i) => list.forEach((c,j) => {
+    // داخل كل فترة: الأعلى قيمة أولًا (يسار المجموعة) ثم الأقل، والشركة بلا قيمة في الآخر
+    yrs.forEach((y,i) => byValue(list,y).forEach((c,j) => {
       const v = valueAt(c,y); if(v==null) return;
       const x = cx(i) - (n*slot)/2 + j*slot + (slot-bw)/2, y0 = Y(0), y1 = Y(v), h = Math.max(1.5, Math.abs(y1-y0)), r = Math.min(3, bw/2, h);
       const d = v>=0

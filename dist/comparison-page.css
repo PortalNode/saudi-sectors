@@ -1,7 +1,7 @@
 /* صفحة المقارنة.
    يعتمد على متغيرات الثيم الحالية (styles.css / theme.css / layout.css) ولا يعيد تعريفها. */
-:root{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;--cx-grid:#232c36}
-:root[data-theme="light"]{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#6250d6;--s8:#e34948;--cx-grid:#e6ebf0}
+:root{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;--s9:#17b3c7;--s10:#a3b52a;--s11:#c77dde;--s12:#b07a4f;--s13:#6fa58a;--s14:#8a96a6;--s15:#d0457a;--cx-grid:#232c36}
+:root[data-theme="light"]{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#6250d6;--s8:#e34948;--s9:#0f9fb3;--s10:#7f9a12;--s11:#a855c7;--s12:#9a6236;--s13:#4d8a6c;--s14:#66717f;--s15:#c22e66;--cx-grid:#e6ebf0}
 
 .cx-page .main-content{max-width:1280px;padding-bottom:40px}
 .cx-page .n{direction:ltr;unicode-bidi:isolate;display:inline-block;font-variant-numeric:tabular-nums}
@@ -220,3 +220,6 @@ html body #cx-save-img{--ico:var(--i-download)}
 .cx-export-share{border:0;border-radius:10px;background:var(--cx-gold);color:#111;font-weight:800;font-size:13px;padding:10px 18px;cursor:pointer}
 .cx-export-dl{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 16px;color:var(--ink);font-size:13px;font-weight:700}
 .cx-export-hint{margin:0;color:var(--muted);font-size:11.5px}
+.cx-export-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cx-export-label{min-width:52px;color:var(--muted);font-size:12px;font-weight:700}
+.cx-export-parts{display:flex;gap:6px;flex-wrap:wrap}
