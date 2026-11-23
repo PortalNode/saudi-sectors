@@ -1,0 +1,94 @@
+/* قائمة المراقبة الجانبية في صفحة التحليل الفني (ta-watchlist.js): بجوار الشارت كما في TradingView */
+:root{--wl-up:#54e878;--wl-down:#ff6b6b;--wl-flat:#9da7b2;--wl-hover:color-mix(in srgb,var(--pf-ink) 5%,transparent);--wl-on:color-mix(in srgb,var(--pf-gold) 13%,transparent)}
+:root[data-theme="light"]{--wl-up:#087f68;--wl-down:#ca3f3f;--wl-flat:#6b7b8c}
+
+/* الشارت والقائمة جنبًا إلى جنب؛ القائمة على اليمين وارتفاعها يتبع ارتفاع الشارت */
+.ta-workspace{position:relative;display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-areas:"wl chart";gap:10px;align-items:stretch}
+.ta-workspace>.ta-panel{grid-area:chart;min-width:0}
+.ta-wl-slot{grid-area:wl;position:relative;min-height:560px}
+.ta-wl{position:absolute;inset:0;display:flex;flex-direction:column;min-height:0;border:1px solid var(--pf-line);border-radius:8px;background:var(--pf-bg2);overflow:hidden;font-variant-numeric:tabular-nums}
+.ta-workspace.wl-closed{grid-template-columns:minmax(0,1fr);grid-template-areas:"chart"}
+.ta-workspace.wl-closed .ta-wl-slot{display:none}
+.wl-opener{position:absolute;top:-38px;inset-inline-start:0;border:1px solid var(--pf-line);background:var(--pf-bg2);color:var(--pf-ink);border-radius:8px;padding:6px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.wl-opener:hover{border-color:var(--pf-gold);color:var(--pf-gold)}
+.wl-opener[hidden]{display:none}
+
+.wl-head{display:flex;align-items:center;gap:6px;padding:10px 10px 6px}
+.wl-select{flex:1 1 auto;min-width:0;position:relative}
+.wl-select::after{content:"";position:absolute;inset-inline-end:11px;top:50%;width:7px;height:7px;border:solid var(--pf-muted);border-width:0 1.6px 1.6px 0;transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.wl-select select{width:100%;appearance:none;-webkit-appearance:none;border:1px solid var(--pf-line);background:var(--pf-bg);color:var(--pf-ink);border-radius:8px;padding:8px 12px 8px 28px;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer;text-overflow:ellipsis}
+.wl-select select:hover,.wl-select select:focus{border-color:var(--pf-gold);outline:0}
+.wl-select option,.wl-select optgroup{background:var(--pf-bg);color:var(--pf-ink)}
+.wl-collapse{flex:none;display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--pf-line);border-radius:8px;background:transparent;color:var(--pf-muted);cursor:pointer}
+.wl-collapse:hover{color:var(--pf-gold);border-color:var(--pf-gold)}
+
+.wl-stats{display:flex;align-items:center;gap:10px;padding:0 12px 6px;font-size:11px;font-weight:700;min-height:18px}
+.wl-stats .wl-avg{margin-inline-start:auto;color:var(--pf-muted);font-weight:600}
+.ta-wl .up{color:var(--wl-up)}.ta-wl .down{color:var(--wl-down)}.ta-wl .flat{color:var(--wl-flat)}
+
+.wl-filter{padding:0 10px 6px}
+.wl-filter input{width:100%;box-sizing:border-box;border:1px solid var(--pf-line);background:var(--pf-bg);color:var(--pf-ink);border-radius:7px;padding:6px 10px;font:inherit;font-size:12px}
+.wl-filter input:focus{outline:0;border-color:var(--pf-gold)}
+
+.wl-cols,.wl-row{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;align-items:center;column-gap:8px}
+.wl-cols{padding:5px 12px;border-block:1px solid var(--pf-line);font-size:11px}
+.wl-cols button{border:0;background:none;padding:0;color:var(--pf-muted);font:inherit;font-weight:700;cursor:pointer;text-align:start;white-space:nowrap}
+.wl-cols button:first-child{padding-inline-start:34px}
+.wl-cols button:not(:first-child){text-align:right}
+.wl-cols button:hover,.wl-cols button.on{color:var(--pf-gold)}
+.wl-cols button.on::after{content:attr(data-arrow);font-size:8px;margin-inline-start:3px}
+
+.wl-list{flex:1 1 auto;min-height:0;overflow-y:auto;list-style:none;margin:0;padding:0;scrollbar-width:thin;outline:0}
+.wl-list:focus-visible{box-shadow:inset 0 0 0 2px var(--pf-gold-soft)}
+.wl-row{grid-template-columns:26px minmax(0,1fr) 66px 70px;padding:7px 12px;border-bottom:1px solid color-mix(in srgb,var(--pf-line) 55%,transparent);cursor:pointer;position:relative}
+.wl-row:hover{background:var(--wl-hover)}
+.wl-row.on{background:var(--wl-on)}
+.wl-row.on::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:3px;background:var(--pf-gold)}
+.wl-row.wl-pinned{border-bottom:1px solid var(--pf-line)}
+.wl-row.wl-susp .wl-price{opacity:.55}
+.wl-logo{width:26px;height:26px;border-radius:50%;object-fit:contain;flex:none;background:var(--pf-bg)}
+.wl-logo-txt{display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--pf-gold);background:var(--pf-gold-soft)}
+.wl-id{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.wl-id b{font-size:12.5px;color:var(--pf-ink);direction:ltr;text-align:right;unicode-bidi:isolate}
+.wl-id small{font-size:11px;color:var(--pf-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wl-num{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+.wl-price{text-align:right;font-size:12.5px;font-weight:700;color:var(--pf-ink)}
+.wl-chg{display:flex;flex-direction:column;align-items:flex-end;line-height:1.25;text-align:right}
+.wl-chg b{font-size:12px}
+.wl-chg small{font-size:10.5px;opacity:.85}
+.wl-empty{padding:22px 14px;text-align:center;color:var(--pf-muted);font-size:12px;line-height:1.8}
+
+/* لوحة تفاصيل السهم المعروض أسفل القائمة */
+.wl-detail{flex:none;border-top:1px solid var(--pf-line);padding:10px 12px 12px;background:var(--pf-bg)}
+.wl-detail:empty{display:none}
+.wl-d-head{display:flex;align-items:center;gap:8px}
+.wl-d-head .wl-logo{width:30px;height:30px}
+.wl-d-name{display:flex;flex-direction:column;min-width:0;flex:1 1 auto;line-height:1.3}
+.wl-d-name b{font-size:13.5px;color:var(--pf-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wl-d-name small{font-size:11px;color:var(--pf-muted)}
+.wl-d-link{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--pf-gold);border:1px solid var(--pf-line);border-radius:6px;padding:4px 8px}
+.wl-d-link:hover{border-color:var(--pf-gold)}
+.wl-d-price{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin-top:8px}
+.wl-d-price b{font-size:24px;font-weight:800;color:var(--pf-ink)}
+.wl-d-price span{font-size:13px;font-weight:700}
+.wl-d-date{margin:2px 0 0;font-size:11px;color:var(--pf-muted)}
+.wl-range{margin-top:9px}
+.wl-range-top{display:flex;justify-content:space-between;font-size:11px;color:var(--pf-muted);margin-bottom:5px}
+.wl-range-top .wl-num{color:var(--pf-ink);font-weight:700}
+.wl-range-bar{position:relative;height:4px;border-radius:3px;background:var(--pf-track)}
+.wl-range-bar i{position:absolute;inset-block:0;left:0;border-radius:3px;background:linear-gradient(90deg,var(--wl-down),var(--pf-gold),var(--wl-up))}
+.wl-range-bar em{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;background:var(--pf-ink);border:2px solid var(--pf-bg);transform:translate(-50%,-50%)}
+.wl-facts{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:10px 0 0}
+.wl-facts div{display:flex;justify-content:space-between;gap:6px;font-size:11px}
+.wl-facts dt{color:var(--pf-muted)}
+.wl-facts dd{margin:0;color:var(--pf-ink);font-weight:700}
+
+/* شاشات أضيق: القائمة تحت الشارت بارتفاع محدود */
+@media (max-width:1100px){.ta-workspace{grid-template-columns:260px minmax(0,1fr)}.wl-row{grid-template-columns:22px minmax(0,1fr) 60px 64px}.wl-cols{grid-template-columns:minmax(0,1fr) 60px 64px}.wl-logo{width:22px;height:22px}.wl-cols button:first-child{padding-inline-start:30px}}
+@media (max-width:860px){
+  .ta-workspace,.ta-workspace.wl-closed{grid-template-columns:minmax(0,1fr);grid-template-areas:"chart" "wl"}
+  .ta-wl-slot{min-height:0}
+  .ta-wl{position:static;max-height:620px}
+  .wl-list{max-height:360px}
+  .wl-opener{position:static;justify-self:start}
+}

@@ -24,7 +24,8 @@
     }
     throw new Error('data.json unavailable');
   };
-  const ready = fetchData().then(data => {
+  const dataReady = fetchData();
+  const ready = dataReady.then(data => {
     stocks = new Map(data.sectors.flatMap(sector => sector.stocks).map(stock => [String(stock.symbol), stock]));
     return stocks;
   }).catch(error => {
@@ -59,7 +60,7 @@
     if (name === 'chart' && mount && !mounted) mountChart(params.get('symbol'));
   }
 
-  const api = { ready, mountChart, setTab, current: () => mounted, chartPanel: panel };
+  const api = { ready, dataReady: dataReady.catch(() => null), mountChart, setTab, current: () => mounted, chartPanel: panel };
   window.TA = api;
 
   function start() {
