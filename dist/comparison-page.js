@@ -42,6 +42,9 @@ const unitOf = k => k==='ffoPerUnit' ? 'ريال' : k==='units' ? 'مليون و
 const label = k => SECTOR_LABELS[state.sector]?.[k] || LABELS[k] || k;
 const valueAt = (c,y) => { const v = valueIndex.get(c.symbol)?.get(y)?.[state.metric]; return Number.isFinite(v) ? v : null; };
 const color = c => `var(--s${(slots.get(c.symbol) ?? 0) + 1})`;
+// الأعمدة بلون موحّد (الذهبي، والسالب بالأحمر)؛ الشعار هو ما يميّز الشركة. الخطوط في «اتجاه» تبقى بألوان الشركات.
+const uni = () => state.view==='bars';
+const tone = (c, v) => !uni() ? color(c) : v!=null && v<0 ? 'var(--cx-neg)' : 'var(--cx-gold)';
 function fmt(v, signed=false){
   if(v==null) return '—';
   const x = isPct(state.metric) ? v*100 : v, a = Math.abs(x);
@@ -51,6 +54,25 @@ function fmt(v, signed=false){
 const num = (v,signed) => `<span class="n">${fmt(v,signed)}</span>`;
 // المختارة بترتيب القائمة (الأكبر قيمة سوقية أولًا)، لا بترتيب الاختيار
 const chosen = () => companies.filter(c => state.symbols.includes(c.symbol));
+/* ---------- شعارات الشركات ---------- */
+// logos/<الرمز>.svg و manifest.json يذكر الرموز التي لها شعار؛ الشركة بلا شعار تأخذ أول حرف من اسمها
+const logosPromise = fetch('logos/manifest.json?v=20261116').then(r => r.ok ? r.json() : {symbols:[]}).then(m => new Set((m.symbols||[]).map(String))).catch(() => new Set());
+let logoSet = new Set();
+const hasLogo = c => logoSet.has(String(c.symbol));
+const initial = c => String(c.name||'').trim().charAt(0);
+// شعار HTML (المفتاح والترتيب والتلميح والجدول)
+const logoHtml = c => hasLogo(c)
+  ? `<img class="cx-logo" src="logos/${esc(c.symbol)}.svg" alt="" width="18" height="18" loading="lazy" decoding="async">`
+  : `<span class="cx-logo cx-logo-letter">${esc(initial(c))}</span>`;
+// شعار SVG بقطر L وزاويته العليا اليسرى (x,y): مربع بزوايا ناعمة، بظل خفيف وحدّ رفيع.
+// ring: لون الحدّ (في «اتجاه» لون خط الشركة)، وإلا حدّ محايد.
+function logoSvg(c, x, y, L, cls='', attrs='', pre='', ring=''){
+  const rx = L*0.26, box = `x="${x}" y="${y}" width="${L}" height="${L}" rx="${rx}"`;
+  const inner = hasLogo(c)
+    ? `<image href="logos/${esc(c.symbol)}.svg" x="${x}" y="${y}" width="${L}" height="${L}" clip-path="url(#cx-clip-tile)" preserveAspectRatio="xMidYMid slice"/>`
+    : `<rect class="logo-bg" ${box}/><text class="logo-letter" x="${x+L/2}" y="${y+L/2+L*0.18}" font-size="${L*0.5}" text-anchor="middle">${esc(initial(c))}</text>`;
+  return `<g class="logo mark ${cls}" data-s="${esc(c.symbol)}" ${attrs}>${pre}<rect class="logo-under" ${box} filter="url(#cx-logo-shadow)"/>${inner}<rect class="logo-edge${ring?' ringed':''}" ${box}${ring?` style="stroke:${ring}"`:''}/></g>`;
+}
 
 /* التغير بين قيمتين: نقاط مئوية للبنود النسبية، نسبة عند أساس موجب، وإلا فرق مطلق */
 function change(a,b){
@@ -199,7 +221,19 @@ function renderChart(list){
   const twoLine = gw0 < wide && names.some(t => t.includes(' '));
   const part = twoLine ? Math.max(...names.flatMap(t => t.split(' ')).map(t => t.length))*6.6+8 : wide;
   const every = Math.max(1, Math.ceil(part/gw0));
-  const m = { l: m0, r: 8, t: 20, b: twoLine ? 42 : 30 };
+  // ---- مكان الشعارات (يتكيّف مع عدد الأعمدة) ----
+  // واسع: مكان العمود ≥ 14 بكسل ← شعار فوق رأس كل عمود (وتحت رأس السالب) بقطر مكانه، حتى 24.
+  // مزدحم: أضيق من ذلك ← صف شعارات واحد أعلى الرسم لمجموعة واحدة (آخر فترة، أو التي يمرّ عليها المؤشر)،
+  //         ينفتح أعرض من المجموعة ويصل كل شعار بعموده بخط منقّط، فلا يتلاصق مهما زاد عدد الأعمدة ولا يأكل ارتفاع الرسم.
+  // اتجاه: شعار عند نهاية كل خط، تُباعد الشعارات المتقاربة عموديًا.
+  const neg = lo<0;
+  let LG = null;
+  if(bars){
+    const gwB = (W-m0-8)/yrs.length, slot = gwB*0.8/n, bw = Math.max(3, Math.min(36, slot-2));
+    const full = slot >= 14, L = full ? Math.min(24, slot-1) : (matchMedia('(max-width:760px)').matches ? 16 : 18);
+    LG = { full, L, room: L+(full ? 6 : 12) };
+  } else LG = { L: 20, room: 0 };
+  const m = { l: m0, r: bars ? 8 : 8+LG.L+12, t: 20 + (bars ? LG.room : 4), b: (twoLine ? 42 : 30) + (bars && neg && LG.full ? LG.room : 0) };
   const pw = W-m.l-m.r, ph = H-m.t-m.b, gw = pw/yrs.length;
   const Y = v => m.t + (hi-v)/(hi-lo)*ph, cx = i => m.l + gw*(i+.5);
   let g = '';
@@ -210,6 +244,7 @@ function renderChart(list){
     const [a,b] = names[i].split(' ');
     g += twoLine && b ? `<text class="year" x="${cx(i)}" y="${H-22}" text-anchor="middle">${esc(a)}<tspan x="${cx(i)}" dy="14">${esc(b)}</tspan></text>` : `<text class="year" x="${cx(i)}" y="${H-8}" text-anchor="middle">${esc(names[i])}</text>`;
   });
+  let logos = '';
   if(bars){
     const inner = gw*0.8, slot = inner/n, bw = Math.max(3, Math.min(36, slot-2)), showVal = slot>=42 && n*yrs.length<=18;
     yrs.forEach((y,i) => list.forEach((c,j) => {
@@ -218,8 +253,21 @@ function renderChart(list){
       const d = v>=0
         ? `M${x},${y0}V${y0-h+r}q0,${-r} ${r},${-r}H${x+bw-r}q${r},0 ${r},${r}V${y0}Z`
         : `M${x},${y0}V${y0+h-r}q0,${r} ${r},${r}H${x+bw-r}q${r},0 ${r},${-r}V${y0}Z`;
-      g += `<path class="mark" data-s="${esc(c.symbol)}" d="${d}" fill="${color(c)}"/>`;
-      if(showVal) g += `<text class="val mark" data-s="${esc(c.symbol)}" x="${x+bw/2}" y="${v>=0 ? y0-h-5 : y0+h+13}" text-anchor="middle">${fmt(v)}</text>`;
+      // لون موحّد: عمود ذهبي (والسالب أحمر) بتدرّج يخفت نحو الصفر وخط مضيء على رأسه؛ آخر فترة أسطع
+      const down = v<0, last = i===yrs.length-1, grad = `url(#cx-g-${down?'dn':'up'}${last?'-last':''})`, mid = x+bw/2, tipY = v>=0 ? y0-h : y0+h;
+      g += `<path class="mark bar${last?' last':''}" data-s="${esc(c.symbol)}" d="${d}" fill="${grad}"/><rect class="mark cap${down?' dn':''}${last?' last':''}" data-s="${esc(c.symbol)}" x="${x+Math.min(2,bw/4)}" y="${v>=0 ? tipY : tipY-2.5}" width="${Math.max(1,bw-2*Math.min(2,bw/4))}" height="2.5" rx="1.25"/>`;
+      const L = LG.L;
+      if(LG.full){
+        // فوق رأس العمود الموجب وتحت رأس السالب، والقيمة بعد الشعار
+        logos += logoSvg(c, mid-L/2, v>=0 ? y0-h-4-L : y0+h+4, L);
+        if(showVal) g += `<text class="val mark" data-s="${esc(c.symbol)}" x="${mid}" y="${v>=0 ? y0-h-L-9 : y0+h+L+17}" text-anchor="middle">${fmt(v)}</text>`;
+      } else {
+        // صف المجموعة أعلى الرسم بترتيب الأعمدة نفسه (فلا تتقاطع الخطوط)، متمركز على المجموعة ومحصور داخل الرسم
+        const total = n*(L+3)-3, start = Math.max(m.l, Math.min(W-m.r-total, cx(i)-total/2));
+        const lx = start + j*(L+3), ly = m.t-L-8, tip = v>=0 ? y0-h : y0;
+        const lead = `<path class="leader" d="M${lx+L/2},${ly+L+1}L${mid},${tip-1}" stroke="${tone(c,v)}"/>`;
+        logos += logoSvg(c, lx, ly, L, `pop${i===yrs.length-1?' show':''}`, `data-year="${esc(y)}"`, lead);
+      }
     }));
   } else {
     list.forEach(c => {
@@ -227,19 +275,33 @@ function renderChart(list){
       yrs.forEach((y,i) => { const v = valueAt(c,y); if(v==null){ pen = false; return; } d += `${pen?'L':'M'}${cx(i)},${Y(v)}`; pen = true; dots += `<circle class="dot" cx="${cx(i)}" cy="${Y(v)}" r="4.5" fill="${color(c)}"/>`; });
       g += `<g class="mark" data-s="${esc(c.symbol)}"><path class="line" d="${d}" stroke="${color(c)}"/>${dots}</g>`;
     });
+    // شعار عند آخر نقطة لكل خط، والمتقاربة تُباعد عموديًا داخل حدود الرسم
+    const L = LG.L, gap = L+3;
+    const ends = list.map(c => { const i = yrs.findLastIndex(y => valueAt(c,y)!=null); return i<0 ? null : { c, px: cx(i), py: Y(valueAt(c,yrs[i])) }; }).filter(Boolean).sort((a,b) => a.py-b.py);
+    ends.forEach((e,k) => { e.ly = Math.max(e.py, k ? ends[k-1].ly+gap : m.t-L/2); });
+    const over = ends.length ? ends.at(-1).ly - (m.t+ph-L/2) : 0;
+    if(over>0) ends.forEach(e => e.ly -= over);
+    const lx = W-m.r+8;
+    ends.forEach(e => { logos += logoSvg(e.c, lx, e.ly-L/2, L, '', '', `<path class="leader" d="M${e.px+5},${e.py}L${lx-2},${e.ly}" stroke="${color(e.c)}"/>`, color(e.c)); });
   }
-  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label(state.metric))} حسب ${isSeq() ? 'الربع' : 'السنة'} · ${esc(periodName())}">${g}</svg>`;
+  const stop = (o, c, a) => `<stop offset="${o}" style="stop-color:var(${c});stop-opacity:${a}"/>`;
+  const lg = (id, rev, c, a, b) => `<linearGradient id="${id}" x1="0" y1="${rev?1:0}" x2="0" y2="${rev?0:1}">${stop(0,c,a)}${stop(1,c,b)}</linearGradient>`;
+  const defs = `<defs><clipPath id="cx-clip-tile" clipPathUnits="objectBoundingBox"><rect width="1" height="1" rx=".26" ry=".26"/></clipPath>`
+    + `<filter id="cx-logo-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.8" flood-color="#000" flood-opacity=".45"/></filter>`
+    + lg('cx-g-up',0,'--cx-gold',.78,.10) + lg('cx-g-up-last',0,'--cx-gold-hi',1,.22) + lg('cx-g-dn',1,'--cx-neg',.78,.10) + lg('cx-g-dn-last',1,'--cx-neg',1,.22) + `</defs>`;
+  box.innerHTML = `<svg class="${bars && !LG.full ? 'dense' : ''}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label(state.metric))} حسب ${isSeq() ? 'الربع' : 'السنة'} · ${esc(periodName())}">${defs}${g}${logos}</svg>`;
 }
 function showTip(year, x, y){
   const tip = $('cx-tip'), list = chosen();
   const rows = list.map(c => ({c, v:valueAt(c,year)})).sort((a,b) => (b.v??-Infinity)-(a.v??-Infinity));
-  tip.innerHTML = `<h4>${esc(label(state.metric))} · <span class="n">${esc(lab(year))}</span> · ${esc(unit(state.metric))}</h4>` + rows.map(r => `<div><i style="--c:${color(r.c)}"></i><span>${esc(r.c.name)}</span><b>${num(r.v)}</b></div>`).join('');
+  tip.innerHTML = `<h4>${esc(label(state.metric))} · <span class="n">${esc(lab(year))}</span> · ${esc(unit(state.metric))}</h4>` + rows.map(r => `<div style="--c:${tone(r.c)}">${logoHtml(r.c)}<span>${esc(r.c.name)}</span><b>${num(r.v)}</b></div>`).join('');
   tip.hidden = false;
   const w = tip.offsetWidth, h = tip.offsetHeight;
   tip.style.left = Math.max(8, Math.min(innerWidth-w-8, x+14 + (x+14+w>innerWidth-8 ? -w-28 : 0))) + 'px';
   tip.style.top = Math.max(8, Math.min(innerHeight-h-8, y-h/2)) + 'px';
 }
-function hideTip(){ $('cx-tip').hidden = true; document.querySelectorAll('.cx-chart .band.on').forEach(b => b.classList.remove('on')); }
+function showLogos(year){ document.querySelectorAll('.cx-chart svg.dense .logo.pop').forEach(el => el.classList.toggle('show', el.dataset.year===(year ?? state.years.at(-1)))); }
+function hideTip(){ $('cx-tip').hidden = true; document.querySelectorAll('.cx-chart .band.on').forEach(b => b.classList.remove('on')); showLogos(null); }
 function highlight(symbol){
   for(const el of [$('chart'), $('rank-list')]) el.classList.toggle('dim', !!symbol);
   document.querySelectorAll('.cx-page [data-s]').forEach(el => el.classList.toggle('hl', el.dataset.s===symbol));
@@ -256,7 +318,7 @@ function renderRank(list){
   $('rank-list').innerHTML = rows.map((r,i) => {
     const ch = prev!=null ? change(valueAt(r.c,prev), r.v) : null;
     const fill = r.v==null ? '' : `<span class="fill" style="left:${(Math.min(r.v,0)-lo)/span*100}%;width:${Math.abs(r.v)/span*100}%"></span>`;
-    return `<li data-s="${esc(r.c.symbol)}" style="--c:${color(r.c)}"><span class="pos">${r.v==null?'—':i+1}</span><span class="who">${esc(r.c.name)} <bdi>${esc(r.c.symbol)}</bdi></span><span class="fig">${num(r.v)}</span><span class="track">${fill}${lo<0?`<span class="axis0" style="left:${-lo/span*100}%"></span>`:''}</span>${ch?`<span class="delta"><span class="n ${dirClass(ch.dir)}">${arrow(ch.dir)} ${esc(ch.text)}</span> عن <span class="n">${esc(lab(prev))}</span></span>`:''}</li>`;
+    return `<li data-s="${esc(r.c.symbol)}" style="--c:${tone(r.c,r.v)}"><span class="pos">${r.v==null?'—':i+1}</span><span class="who">${logoHtml(r.c)}${esc(r.c.name)} <bdi>${esc(r.c.symbol)}</bdi></span><span class="fig">${num(r.v)}</span><span class="track">${fill}${lo<0?`<span class="axis0" style="left:${-lo/span*100}%"></span>`:''}</span>${ch?`<span class="delta"><span class="n ${dirClass(ch.dir)}">${arrow(ch.dir)} ${esc(ch.text)}</span> عن <span class="n">${esc(lab(prev))}</span></span>`:''}</li>`;
   }).join('');
 }
 
@@ -287,7 +349,7 @@ function renderTable(list){
   $('table-sub').textContent = `${label(state.metric)} · ${periodName()} · ${unit(state.metric)} · اضغط على عنوان العمود للترتيب`;
   $('cx-table').innerHTML = `<thead><tr>${head('name','الشركة')}${yrs.map(y => head(y,`<span class="n">${esc(lab(y))}</span>`)).join('')}${multi?head('chg',`التغير <span class="n cx-th-range">${esc(lab(a))} ← ${esc(lab(b))}</span>`)+'<th>الاتجاه</th>':''}</tr></thead><tbody>${rows.map(c => {
     const ch = multi ? change(valueAt(c,a),valueAt(c,b)) : null;
-    return `<tr data-s="${esc(c.symbol)}" style="--c:${color(c)}"><th scope="row"><span><i></i>${esc(c.name)} <bdi>${esc(c.symbol)}</bdi></span></th>${yrs.map(y => { const v = valueAt(c,y); return `<td class="${v==null?'miss':v<0?'neg':''}${v!=null&&v===best.get(y)&&list.length>1?' best':''}">${num(v)}</td>`; }).join('')}${multi?`<td class="chg">${ch?`<span class="n ${dirClass(ch.dir)}">${esc(ch.text)}</span>`:'<span class="miss">—</span>'}</td><td>${spark(c)}</td>`:''}</tr>`;
+    return `<tr data-s="${esc(c.symbol)}" style="--c:${tone(c)}"><th scope="row"><span>${logoHtml(c)}${esc(c.name)} <bdi>${esc(c.symbol)}</bdi></span></th>${yrs.map(y => { const v = valueAt(c,y); return `<td class="${v==null?'miss':v<0?'neg':''}${v!=null&&v===best.get(y)&&list.length>1?' best':''}">${num(v)}</td>`; }).join('')}${multi?`<td class="chg">${ch?`<span class="n ${dirClass(ch.dir)}">${esc(ch.text)}</span>`:'<span class="miss">—</span>'}</td><td>${spark(c)}</td>`:''}</tr>`;
   }).join('')}</tbody>`;
 }
 
@@ -308,7 +370,8 @@ const list = chosen(), ok = list.length>=Math.min(2,companies.length) && list.le
   $('cx-summary').innerHTML = `<b>${esc(label(state.metric))}</b> · ${esc(periodName())} · ${esc(unit(state.metric))} · ${list.length===1 ? 'شركة واحدة' : `${list.length} شركات`} من قطاع ${esc(sectorName)} · <span class="n">${esc(span)}</span>`;
   $('chart-title').textContent = label(state.metric);
   $('chart-sub').textContent = `${periodName()} · ${unit(state.metric)} · مرّر على ${isSeq() ? 'الربع' : 'السنة'} لعرض القيم`;
-  $('chart-legend').innerHTML = list.map(c => `<button type="button" data-s="${esc(c.symbol)}" style="--c:${color(c)}"><i></i>${esc(c.name)}</button>`).join('');
+  $('chart-legend').innerHTML = list.map(c => `<button type="button" data-s="${esc(c.symbol)}" style="--c:${color(c)}">${logoHtml(c)}${esc(c.name)}</button>`).join('');
+  document.body.classList.toggle('cx-uni', uni());
   renderFigures(list); renderChart(list); renderRank(list); renderTable(list);
   writeHash();
 }
@@ -370,7 +433,7 @@ function applyData(wanted={}){
 }
 async function loadSector(slug, wanted={}){
   state.sector = slug; $('sector-select').value = slug;
-  [{ annual, quarterly }, caps] = await Promise.all([fetchSector(slug), capsPromise]);
+  [{ annual, quarterly }, caps, logoSet] = await Promise.all([fetchSector(slug), capsPromise, logosPromise]);
   if(state.sector!==slug) return; // اختار المستخدم قطاعًا آخر أثناء التحميل
   slots = new Map(); state.query = ''; $('company-search').value = '';
   state.symbols = []; state.years = [];
@@ -399,7 +462,7 @@ document.querySelector('[data-pick]').parentElement.addEventListener('click', e 
 });
 $('chart-view').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if(b){ state.view = b.dataset.view; render(); } });
 $('cx-table').addEventListener('click', e => { const b = e.target.closest('[data-sort]'); if(!b) return; const k = b.dataset.sort; state.sort = { key:k, dir: state.sort.key===k ? -state.sort.dir : -1 }; renderTable(chosen()); });
-$('chart').addEventListener('pointermove', e => { const band = e.target.closest?.('.band') || document.elementsFromPoint(e.clientX,e.clientY).find(el => el.classList?.contains('band')); if(!band){ hideTip(); return; } document.querySelectorAll('.cx-chart .band.on').forEach(b => b!==band && b.classList.remove('on')); band.classList.add('on'); showTip(band.dataset.year, e.clientX, e.clientY); });
+$('chart').addEventListener('pointermove', e => { const band = e.target.closest?.('.band') || document.elementsFromPoint(e.clientX,e.clientY).find(el => el.classList?.contains('band')); if(!band){ hideTip(); return; } document.querySelectorAll('.cx-chart .band.on').forEach(b => b!==band && b.classList.remove('on')); band.classList.add('on'); showLogos(band.dataset.year); showTip(band.dataset.year, e.clientX, e.clientY); });
 $('chart').addEventListener('pointerleave', hideTip);
 addEventListener('scroll', hideTip, {passive:true});
 for(const id of ['chart-legend','rank-list','cx-table']){

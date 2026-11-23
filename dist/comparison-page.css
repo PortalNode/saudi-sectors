@@ -157,3 +157,35 @@
   .cx-table th,.cx-table td{padding:9px 9px;font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){.cx-page *{animation:none!important;transition:none!important}}
+
+/* ===== شعارات الشركات ولون موحّد للأعمدة ===== */
+:root{--cx-gold:var(--pf-gold,#f59e0b);--cx-gold-hi:#fbbf24;--cx-neg:var(--cq-down,#f05252)}
+.cx-chart .logo image{pointer-events:none}
+.cx-chart .logo-under{fill:var(--panel,#151b22)}
+.cx-chart .logo-bg{fill:var(--head)}
+.cx-chart .logo-letter{fill:var(--ink);font-weight:700;font-family:inherit}
+.cx-chart .logo-edge{fill:none;stroke:#ffffff30;stroke-width:1}
+:root[data-theme="light"] .cx-chart .logo-edge{stroke:#0f1b2a24}
+.cx-chart .logo-edge.ringed{stroke-width:2}
+.cx-chart .cap{fill:var(--cx-gold);opacity:.9}
+.cx-chart .cap.last{fill:var(--cx-gold-hi);opacity:1}
+.cx-chart .cap.dn{fill:var(--cx-neg)}
+.cx-chart .bar.last{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--cx-gold) 35%,transparent))}
+.cx-chart .leader{fill:none;stroke-width:1;stroke-dasharray:2 2;opacity:.7}
+/* مزدحم: صف شعارات لفترة واحدة (آخر فترة أو التي يمرّ عليها المؤشر) */
+.cx-chart svg.dense .logo.pop{opacity:0;transition:opacity .15s}
+.cx-chart svg.dense .logo.pop.show,.cx-chart.dim svg.dense .logo.pop.hl{opacity:1}
+.cx-chart.dim svg.dense .logo.pop.show:not(.hl){opacity:.18}
+.cx-logo{width:18px;height:18px;border-radius:26%;flex:none;object-fit:cover;box-shadow:0 0 0 2px var(--c);display:inline-grid;place-items:center}
+.cx-uni .cx-logo{box-shadow:0 0 0 1px #ffffff30,0 1px 3px #0006}
+:root[data-theme="light"] .cx-uni .cx-logo{box-shadow:0 0 0 1px #0f1b2a24,0 1px 3px #0f1b2a22}
+.cx-logo-letter{background:var(--head);color:var(--ink);font-size:10px;font-weight:700;line-height:1}
+.cx-legend button{gap:8px;padding:4px 8px}
+.cx-tip .cx-logo{width:16px;height:16px}
+.cx-rank .who{display:flex;align-items:center;gap:8px}
+.cx-rank .who .cx-logo{width:20px;height:20px}
+.cx-table tbody th .cx-logo{width:20px;height:20px}
+.cx-uni .cx-rank .fill{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 35%,transparent),var(--c))}
+
+/* الجدول: زر العنوان يتوسّط عموده مثل الأرقام (كان ملتصقًا ببداية الخلية) */
+.cx-table thead th:not(:first-child)>button{margin-inline:auto;justify-content:center}
