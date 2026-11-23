@@ -204,7 +204,7 @@ function axisFmt(v,step){
   return new Intl.NumberFormat('en-US',{maximumFractionDigits: s>=1?0:s>=0.1?1:2}).format(x) + (isPct(state.metric)?'%':'');
 }
 function renderChart(list){
-  const box = $('chart'), W = Math.max(280, box.clientWidth-20), H = matchMedia('(max-width:760px)').matches ? 290 : 340;
+  const box = $('chart'), W = Math.max(280, box.clientWidth-20), H = matchMedia('(max-width:760px)').matches ? 300 : 440;
   const yrs = state.years, n = list.length;
   const vals = list.flatMap(c => yrs.map(y => valueAt(c,y))).filter(v => v!=null);
   if(!vals.length){ box.innerHTML = `<div class="cx-empty" style="direction:rtl;border:0;margin:0">لا توجد قيم متاحة لهذا البند في السنوات المختارة.</div>`; return; }
@@ -229,7 +229,7 @@ function renderChart(list){
   const neg = lo<0;
   let LG = null;
   if(bars){
-    const gwB = (W-m0-8)/yrs.length, slot = gwB*0.8/n, bw = Math.max(3, Math.min(36, slot-2));
+    const gwB = (W-m0-8)/yrs.length, slot = gwB*0.8/n, bw = Math.max(3, Math.min(48, slot-2));
     const full = slot >= 14, L = full ? Math.min(24, slot-1) : (matchMedia('(max-width:760px)').matches ? 16 : 18);
     LG = { full, L, room: L+(full ? 6 : 12) };
   } else LG = { L: 20, room: 0 };
@@ -246,7 +246,7 @@ function renderChart(list){
   });
   let logos = '';
   if(bars){
-    const inner = gw*0.8, slot = inner/n, bw = Math.max(3, Math.min(36, slot-2)), showVal = slot>=42 && n*yrs.length<=18;
+    const inner = gw*0.8, slot = inner/n, bw = Math.max(3, Math.min(48, slot-2)), showVal = slot>=42 && n*yrs.length<=18;
     yrs.forEach((y,i) => list.forEach((c,j) => {
       const v = valueAt(c,y); if(v==null) return;
       const x = cx(i) - (n*slot)/2 + j*slot + (slot-bw)/2, y0 = Y(0), y1 = Y(v), h = Math.max(1.5, Math.abs(y1-y0)), r = Math.min(3, bw/2, h);

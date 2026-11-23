@@ -66,7 +66,8 @@
 .cx-up{color:var(--green)}.cx-down{color:var(--red)}
 
 /* ---------- البطاقات ---------- */
-.cx-grid{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:12px;align-items:stretch}
+/* الرسم بعرض الصفحة، والترتيب تحته */
+.cx-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:stretch}
 .cx-card{min-width:0;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column}
 .cx-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
 .cx-card-head h3{margin:0;font-size:14px;line-height:1.5;color:var(--teal)}
@@ -78,8 +79,8 @@
 .cx-legend button{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;padding:3px 6px;border-radius:2px;color:var(--muted);font-size:11.5px;transition:color .15s,opacity .15s}
 .cx-legend button i{width:10px;height:10px;border-radius:2px;background:var(--c);flex:none}
 .cx-legend button:hover,.cx-legend button.on{color:var(--ink);background:var(--head)}
-.cx-chart{position:relative;padding:6px 10px 10px;flex:1;min-height:340px;direction:ltr}
-.cx-chart svg{display:block;width:100%;height:340px;overflow:visible;animation:cx-in .25s ease-out}
+.cx-chart{position:relative;padding:6px 10px 10px;flex:1;min-height:440px;direction:ltr}
+.cx-chart svg{display:block;width:100%;height:440px;overflow:visible;animation:cx-in .25s ease-out}
 @keyframes cx-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .cx-chart .grid{stroke:var(--cx-grid);stroke-width:1}
 .cx-chart .zero{stroke:var(--muted);stroke-width:1}
@@ -109,10 +110,18 @@
 .cx-rank .who{min-width:0;font-size:12.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cx-rank .who bdi{font-size:10.5px;font-weight:400;color:var(--muted)}
 .cx-rank .fig{font-size:13px;font-weight:700;color:var(--ink);text-align:left}
-.cx-rank .track{grid-column:2/4;position:relative;height:8px;background:var(--cx-grid);border-radius:2px;direction:ltr}
+.cx-rank .track{position:relative;height:8px;background:var(--cx-grid);border-radius:2px;direction:ltr}
 .cx-rank .fill{position:absolute;top:0;bottom:0;background:var(--c);border-radius:2px;min-width:2px;transition:left .3s ease,width .3s ease}
+/* الترتيب: كل شركة في صف واحد — المركز، الشركة، الشريط، القيمة، التغير (على الجوال سطران) */
+.cx-rank{padding:4px 18px 10px}
+.cx-rank li{grid-template-columns:28px minmax(170px,240px) minmax(0,1fr) 96px minmax(150px,190px);grid-template-areas:"pos who track fig delta";gap:0 18px;padding:12px 0}
+.cx-rank .pos{grid-area:pos;font-size:13px;font-weight:700}
+.cx-rank .who{grid-area:who;font-size:13.5px}
+.cx-rank .track{grid-area:track;height:10px}
+.cx-rank .fig{grid-area:fig;font-size:15px}
+.cx-rank .delta{grid-area:delta;font-size:11.5px;text-align:left}
 .cx-rank .axis0{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--muted)}
-.cx-rank .delta{grid-column:2/4;font-size:10.5px;color:var(--muted)}
+.cx-rank .delta{color:var(--muted)}
 .cx-rank.dim li:not(.hl){opacity:.3}
 
 /* ---------- الجدول ---------- */
@@ -147,13 +156,15 @@
 .cx-guide{margin-top:12px}
 .cx-guide p{margin:6px 0 0;font-size:11.5px;line-height:1.9;color:var(--muted)}
 
-@media(max-width:980px){.cx-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:760px){
   .cx-row{grid-template-columns:minmax(0,1fr);gap:6px;padding:10px 12px}
   .cx-label{padding-top:0}.cx-label small{display:inline;margin-inline-start:6px}
   .cx-chip{min-height:34px}
   .cx-companies{max-height:160px}
-  .cx-chart{min-height:290px;padding-inline:4px}.cx-chart svg{height:290px}
+  .cx-chart{min-height:300px;padding-inline:4px}.cx-chart svg{height:300px}
+  .cx-rank{padding:4px 12px 8px}
+  .cx-rank li{grid-template-columns:22px minmax(0,1fr) auto;grid-template-areas:"pos who fig" ". track track" ". delta delta";gap:5px 9px}
+  .cx-rank .delta{text-align:right}
   .cx-table th,.cx-table td{padding:9px 9px;font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){.cx-page *{animation:none!important;transition:none!important}}
