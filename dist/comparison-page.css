@@ -200,3 +200,23 @@
 
 /* الجدول: زر العنوان يتوسّط عموده مثل الأرقام (كان ملتصقًا ببداية الخلية) */
 .cx-table thead th:not(:first-child)>button{margin-inline:auto;justify-content:center}
+
+/* ---------- حفظ كصورة ---------- */
+.cx-title-actions{display:flex;gap:8px;flex-wrap:wrap}
+html body #cx-save-img{--ico:var(--i-download)}
+.cx-export{width:min(94vw,760px);max-height:94vh;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--white);color:var(--ink);font-family:var(--font);direction:rtl;overflow:auto}
+.cx-export::backdrop{background:rgba(5,8,12,.72);backdrop-filter:blur(3px)}
+.cx-export-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line);margin:0}
+.cx-export-head h3{margin:0;font-size:15px;color:var(--ink)}
+.cx-export-x{border:0;background:transparent;color:var(--muted);font-size:24px;line-height:1;padding:2px 8px;cursor:pointer}
+.cx-export-body{padding:14px 18px 18px;display:grid;gap:12px}
+.cx-export-sizes button{display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px}
+.cx-export-sizes button small{display:block;unicode-bidi:isolate;font-size:10px;opacity:.75;font-weight:600;margin-top:2px}
+.cx-export-stage{position:relative;display:grid;place-items:center;min-height:320px;background:color-mix(in srgb,var(--ink) 5%,transparent);border-radius:10px;padding:14px}
+.cx-export-stage img{max-width:100%;max-height:60vh;border-radius:10px;box-shadow:0 12px 34px rgba(0,0,0,.4);display:block;transition:opacity .2s}
+.cx-export-stage img:not([src]){display:none}
+.cx-export-busy{position:absolute;inset:auto 0 50%;text-align:center;color:var(--muted);font-size:12.5px;font-weight:700}
+.cx-export-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cx-export-share{border:0;border-radius:10px;background:var(--cx-gold);color:#111;font-weight:800;font-size:13px;padding:10px 18px;cursor:pointer}
+.cx-export-dl{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 16px;color:var(--ink);font-size:13px;font-weight:700}
+.cx-export-hint{margin:0;color:var(--muted);font-size:11.5px}

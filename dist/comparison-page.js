@@ -1,6 +1,7 @@
 // صفحة المقارنة: تقرأ ملفات ‎*-financials.json‎ (سنوي) و‎*-quarterly-financials.json‎ (ربعي) لكل قطاع.
 import { DEFAULT_PERIOD_SPEC, sumQuarters, withMargins, quarterLabel, monthRange, isCalendarYear, MONTH_NAMES, QUARTER_NAMES } from './quarterly-periods.mjs?v=quarterly-20261115';
 import { loadMarketCaps, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
+import { openExportDialog } from './comparison-export.mjs?v=export-20261123f';
 const DATA_BASE = '';
 const VERSION = 'comparison-v6';
 const MAX_COMPANIES = 8; // ثمانية ألوان متمايزة ومتحقق منها؛ أكثر من ذلك يفقد الرسم وضوحه
@@ -169,25 +170,29 @@ function renderCompanies(){
 }
 
 /* ---------- أرقام سريعة ---------- */
-function renderFigures(list){
+// بيانات الأرقام السريعة (للصفحة ولصورة المقارنة)
+function figureData(list){
   const y = state.years.at(-1), first = state.years[0];
   const withV = list.map(c => ({c, v:valueAt(c,y)})).filter(r => r.v!=null).sort((a,b) => b.v-a.v);
-  const who = c => `<i style="--c:${color(c)}"></i>${esc(c.name)}`;
-  const tiles = [];
+  const out = [];
   if(withV.length){
     const top = withV[0], low = withV.at(-1), avg = withV.reduce((s,r) => s+r.v,0)/withV.length;
-    tiles.push([`الأعلى في ${esc(lab(y))}`, num(top.v), who(top.c)]);
-    tiles.push([`الأدنى في ${esc(lab(y))}`, num(low.v), who(low.c)]);
-    tiles.push([`متوسط الشركات المختارة`, num(avg), `من ${withV.length} شركات · ${esc(unit(state.metric))}`]);
+    out.push({ title:`الأعلى في ${lab(y)}`, v:top.v, c:top.c });
+    out.push({ title:`الأدنى في ${lab(y)}`, v:low.v, c:low.c });
+    out.push({ title:'متوسط الشركات المختارة', v:avg, note:`من ${withV.length} شركات · ${unit(state.metric)}` });
   }
   const base = state.years.length>1 ? first : prevOf(y);
   if(base!=null){
     const moves = list.map(c => ({c, ch:change(valueAt(c,base),valueAt(c,y))})).filter(r => r.ch);
     const usePct = moves.length && moves.every(r => r.ch.pct!=null);
     moves.sort((a,b) => usePct ? b.ch.pct-a.ch.pct : b.ch.diff-a.ch.diff);
-    if(moves.length) tiles.push([`الأكثر ارتفاعًا ${esc(lab(base))} ← ${esc(lab(y))}`, `<span class="n ${dirClass(moves[0].ch.dir)}">${esc(moves[0].ch.text)}</span>`, who(moves[0].c)]);
+    if(moves.length) out.push({ title:`الأكثر ارتفاعًا ${lab(base)} ← ${lab(y)}`, ch:moves[0].ch, c:moves[0].c });
   }
-  $('cx-figures').innerHTML = tiles.map(([dt,dd,small]) => `<div class="key-figure"><dt>${dt}</dt><dd>${dd}</dd><small>${small}</small></div>`).join('');
+  return out;
+}
+function renderFigures(list){
+  const who = c => `<i style="--c:${color(c)}"></i>${esc(c.name)}`;
+  $('cx-figures').innerHTML = figureData(list).map(f => `<div class="key-figure"><dt>${esc(f.title)}</dt><dd>${f.ch ? `<span class="n ${dirClass(f.ch.dir)}">${esc(f.ch.text)}</span>` : num(f.v)}</dd><small>${f.c ? who(f.c) : esc(f.note)}</small></div>`).join('');
 }
 
 /* ---------- الرسم ---------- */
@@ -309,17 +314,44 @@ function highlight(symbol){
 }
 
 /* ---------- الترتيب ---------- */
-function renderRank(list){
+function rankData(list){
   const y = state.years.at(-1), prev = prevOf(y);
-  const rows = list.map(c => ({c, v:valueAt(c,y)})).sort((a,b) => (b.v??-Infinity)-(a.v??-Infinity));
+  const rows = list.map(c => ({c, v:valueAt(c,y)})).sort((a,b) => (b.v??-Infinity)-(a.v??-Infinity))
+    .map(r => ({ ...r, ch: prev!=null ? change(valueAt(r.c,prev), r.v) : null }));
+  return { y, prev, rows };
+}
+function renderRank(list){
+  const { y, prev, rows } = rankData(list);
   const vs = rows.map(r => r.v).filter(v => v!=null), lo = Math.min(0,...vs), hi = Math.max(0,...vs), span = hi-lo || 1;
   $('rank-title').textContent = `الترتيب في ${lab(y)}`;
   $('rank-sub').textContent = prev!=null ? `مع التغير عن ${lab(prev)}` : '';
   $('rank-list').innerHTML = rows.map((r,i) => {
-    const ch = prev!=null ? change(valueAt(r.c,prev), r.v) : null;
+    const ch = r.ch;
     const fill = r.v==null ? '' : `<span class="fill" style="left:${(Math.min(r.v,0)-lo)/span*100}%;width:${Math.abs(r.v)/span*100}%"></span>`;
     return `<li data-s="${esc(r.c.symbol)}" style="--c:${tone(r.c,r.v)}"><span class="pos">${r.v==null?'—':i+1}</span><span class="who">${logoHtml(r.c)}${esc(r.c.name)} <bdi>${esc(r.c.symbol)}</bdi></span><span class="fig">${num(r.v)}</span><span class="track">${fill}${lo<0?`<span class="axis0" style="left:${-lo/span*100}%"></span>`:''}</span>${ch?`<span class="delta"><span class="n ${dirClass(ch.dir)}">${arrow(ch.dir)} ${esc(ch.text)}</span> عن <span class="n">${esc(lab(prev))}</span></span>`:''}</li>`;
   }).join('');
+}
+
+/* ---------- صورة المقارنة ---------- */
+// كل ما تحتاجه الصورة كنصوص وأرقام جاهزة؛ الرسم نفسه في comparison-export.mjs
+function exportData(){
+  const list = chosen(), css = getComputedStyle(document.documentElement);
+  const sectorName = SECTORS.find(([,s]) => s===state.sector)?.[0] || '';
+  const dirOf = ch => { const k = dirClass(ch.dir); return k==='cx-up' ? 1 : k==='cx-down' ? -1 : 0; };
+  const { prev, rows } = rankData(list);
+  return {
+    theme: document.documentElement.dataset.theme==='light' ? 'light' : 'dark',
+    site:'السوق السعودي', url:'portalnode.github.io/saudi-sectors',
+    stamp:`صدرت في ${new Intl.DateTimeFormat('ar-u-nu-latn',{dateStyle:'long'}).format(new Date())}`,
+    title: label(state.metric), sub: `${periodName()} · ${unit(state.metric)} · قطاع ${sectorName}`,
+    span: state.years.length>1 ? `${lab(state.years[0])} – ${lab(state.years.at(-1))}` : lab(state.years[0]),
+    view: state.view, periods: state.years.map(lab), fmt: v => fmt(v), axisFmt,
+    companies: list.map(c => ({ symbol:String(c.symbol), name:c.name, initial:initial(c), logo: hasLogo(c) ? `logos/${c.symbol}.svg` : null,
+      color: css.getPropertyValue(`--s${(slots.get(c.symbol) ?? 0)+1}`).trim() || '#3987e5', values: state.years.map(y => valueAt(c,y)) })),
+    figures: figureData(list).map(f => ({ title:f.title, text: f.ch ? f.ch.text : fmt(f.v), dir: f.ch ? dirOf(f.ch) : 0, neg: !f.ch && f.v<0, symbol: f.c ? String(f.c.symbol) : null, note: f.note })),
+    rank: { title:`الترتيب في ${lab(state.years.at(-1))}`, sub: prev!=null ? `مع التغير عن ${lab(prev)}` : '',
+      rows: rows.map(r => ({ symbol:String(r.c.symbol), v:r.v, text:fmt(r.v), delta: r.ch ? `${arrow(r.ch.dir)} ${r.ch.text} عن ${lab(prev)}` : '', dir: r.ch ? dirOf(r.ch) : 0 })) },
+  };
 }
 
 /* ---------- الجدول ---------- */
@@ -469,6 +501,7 @@ for(const id of ['chart-legend','rank-list','cx-table']){
   $(id).addEventListener('pointerover', e => { const el = e.target.closest('[data-s]'); if(el) highlight(el.dataset.s); });
   $(id).addEventListener('pointerleave', () => highlight(null));
 }
+$('cx-save-img').addEventListener('click', () => { if(!$('cx-results').hidden) openExportDialog(exportData); });
 $('cx-share').addEventListener('click', async e => { const b = e.currentTarget, t = b.textContent; try{ await navigator.clipboard.writeText(location.href); b.textContent = 'تم نسخ الرابط ✓'; }catch{ b.textContent = 'انسخ الرابط من شريط العنوان'; } setTimeout(() => b.textContent = t, 1800); });
 let lastW = 0;
 new ResizeObserver(() => { const w = $('chart').clientWidth; if(w && w!==lastW && !$('cx-results').hidden){ lastW = w; renderChart(chosen()); } }).observe($('chart'));
