@@ -36,7 +36,8 @@
 .wl-cols button:first-child{padding-inline-start:34px}
 .wl-cols button:not(:first-child){text-align:right}
 .wl-cols button:hover,.wl-cols button.on{color:var(--pf-gold)}
-.wl-cols button.on::after{content:attr(data-arrow);font-size:8px;margin-inline-start:3px}
+.wl-cols button::after{content:attr(data-arrow);font-size:9px;margin-inline-start:3px;opacity:.45}
+.wl-cols button.on::after{opacity:1}
 
 .wl-list{flex:1 1 auto;min-height:0;overflow-y:auto;list-style:none;margin:0;padding:0;scrollbar-width:thin;outline:0}
 .wl-list:focus-visible{box-shadow:inset 0 0 0 2px var(--pf-gold-soft)}
@@ -44,7 +45,14 @@
 .wl-row:hover{background:var(--wl-hover)}
 .wl-row.on{background:var(--wl-on)}
 .wl-row.on::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:3px;background:var(--pf-gold)}
-.wl-row.wl-pinned{border-bottom:1px solid var(--pf-line)}
+/* بطاقة المؤشر المستقلة أعلى القائمة */
+.wl-index{padding:10px 10px 0}
+.wl-index[hidden]{display:none}
+.wl-index-row{width:100%;box-sizing:border-box;border:1px solid var(--pf-line);border-radius:8px;background:var(--pf-bg);color:inherit;font:inherit;text-align:inherit;padding:8px 10px}
+.wl-index-row:hover{border-color:color-mix(in srgb,var(--pf-gold) 55%,var(--pf-line))}
+.wl-index-row.on{border-color:var(--pf-gold);background:var(--wl-on)}
+.wl-index-row.on::before{display:none}
+.wl-index-row .wl-id b{font-size:13px}
 .wl-row.wl-susp .wl-price{opacity:.55}
 .wl-logo{width:26px;height:26px;border-radius:50%;object-fit:contain;flex:none;background:var(--pf-bg)}
 .wl-logo-txt{display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--pf-gold);background:var(--pf-gold-soft)}

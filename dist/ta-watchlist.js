@@ -33,6 +33,7 @@
   const ICON_LINK = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
 
   box.innerHTML = `
+    <div class="wl-index" id="wl-index"></div>
     <div class="wl-head">
       <label class="wl-select"><span class="sr-only">اختر القطاع</span><select id="wl-sector" aria-label="اختر القطاع"></select></label>
       <button type="button" class="wl-collapse" data-wl-toggle aria-expanded="true" title="إخفاء قائمة المراقبة">${ICON_LIST}</button>
@@ -40,14 +41,14 @@
     <div class="wl-stats" id="wl-stats"></div>
     <div class="wl-filter"><input type="search" id="wl-filter" placeholder="تصفية بالاسم أو الرمز" aria-label="تصفية الشركات بالاسم أو الرمز" autocomplete="off" spellcheck="false"></div>
     <div class="wl-cols" role="presentation">
-      <button type="button" data-sort="symbol">الرمز</button>
-      <button type="button" data-sort="price">آخر سعر</button>
-      <button type="button" data-sort="day">تغير%</button>
+      <button type="button" data-sort="symbol" title="ترتيب حسب الرمز: اضغط مرة أخرى لعكس الترتيب">الرمز</button>
+      <button type="button" data-sort="price" title="ترتيب حسب آخر سعر: اضغط مرة أخرى لعكس الترتيب">آخر سعر</button>
+      <button type="button" data-sort="day" title="ترتيب حسب التغير: اضغط مرة أخرى لعكس الترتيب (تنازلي ▼ / تصاعدي ▲)">تغير%</button>
     </div>
     <ul class="wl-list" id="wl-list" role="listbox" aria-label="شركات القطاع" tabindex="0"></ul>
     <div class="wl-detail" id="wl-detail" aria-live="polite"></div>`;
   const $ = id => box.querySelector(`#${id}`);
-  const select = $('wl-sector'), list = $('wl-list'), detail = $('wl-detail'), stats = $('wl-stats'), filter = $('wl-filter');
+  const select = $('wl-sector'), list = $('wl-list'), indexBox = $('wl-index'), detail = $('wl-detail'), stats = $('wl-stats'), filter = $('wl-filter');
   const workspace = box.closest('.ta-workspace');
   const opener = document.querySelector('[data-wl-open]');
 
@@ -102,20 +103,31 @@
     </li>`;
   }
 
+  // مؤشر السوق في بطاقة مستقلة أعلى القائمة، لا يدخل مع الشركات في الترتيب ولا التصفية
+  function renderIndex() {
+    if (!index) { indexBox.hidden = true; return; }
+    const d = dir(index.day);
+    indexBox.innerHTML = `<button type="button" class="wl-row wl-index-row${active === index.symbol ? ' on' : ''}" data-sym="${esc(index.symbol)}" title="فتح شارت مؤشر السوق">
+      <img class="wl-logo" src="logos/${esc(index.symbol)}.svg" alt="" width="26" height="26" onerror="this.remove()">
+      <span class="wl-id"><b>TASI</b><small>مؤشر السوق الرئيسية (تاسي)</small></span>
+      <span class="wl-num wl-price">${num(index.price)}</span>
+      <span class="wl-num wl-chg ${d}"><b>${signed(index.day, 2, '%')}</b><small>${signed(pointChange(index))}</small></span>
+    </button>`;
+  }
+
   function render() {
     const q = norm(query);
     let items = stocksOf(sector).slice();
     if (q) items = items.filter(s => s.symbol.includes(q) || norm(s.name).includes(q));
     items.sort((a, b) => sort.dir * SORTERS[sort.key](a, b));
     rows = items.map(s => s.symbol);
-    const showIndex = index && !q;
-    if (showIndex) rows.unshift(index.symbol);
-    list.innerHTML = (showIndex ? rowHtml(index, true) : '') + (items.length ? items.map(s => rowHtml(s)).join('') :
+    list.innerHTML = (items.length ? items.map(s => rowHtml(s)).join('') :
       `<li class="wl-empty">${sector === MINE && !q ? 'قائمتك فارغة. أضف أسهمًا بالنجمة ☆ من تبويب «مفاتيح جودة السهم».' : 'لا توجد شركات مطابقة.'}</li>`);
     for (const b of box.querySelectorAll('[data-sort]')) {
       const on = b.dataset.sort === sort.key;
       b.classList.toggle('on', on);
-      b.dataset.arrow = on ? (sort.dir > 0 ? '▲' : '▼') : '';
+      b.dataset.arrow = on ? (sort.dir > 0 ? '▲' : '▼') : '⇅';
+      b.setAttribute('aria-sort', on ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none');
     }
     // ملخص القطاع: عدد المرتفعة والمنخفضة ومتوسط التغير المرجّح بالقيمة السوقية
     const all = stocksOf(sector).filter(s => Number.isFinite(s.day));
@@ -161,6 +173,8 @@
       li.classList.toggle('on', on); li.setAttribute('aria-selected', String(on));
       if (on && scroll) li.scrollIntoView({ block: 'nearest' });
     }
+    const card = indexBox.querySelector('.wl-row');
+    if (card) { const on = card.dataset.sym === active; card.classList.toggle('on', on); card.setAttribute('aria-pressed', String(on)); }
     if (active && rows.includes(active)) list.setAttribute('aria-activedescendant', `wl-opt-${active}`); else list.removeAttribute('aria-activedescendant');
   }
 
@@ -179,11 +193,17 @@
   filter.addEventListener('keydown', e => { if (e.key === 'ArrowDown') { e.preventDefault(); list.focus(); move(1); } });
   for (const b of box.querySelectorAll('[data-sort]')) b.addEventListener('click', () => {
     const key = b.dataset.sort;
-    sort = sort.key === key ? (sort.dir === 1 ? { key, dir: -1 } : { key: 'cap', dir: -1 }) : { key, dir: key === 'symbol' ? 1 : -1 };
+    // الضغط على العمود نفسه يقلب الترتيب بين تنازلي ▼ وتصاعدي ▲، وعمود جديد يبدأ تنازليًا (والرمز تصاعديًا)
+    sort = sort.key === key ? { key, dir: -sort.dir } : { key, dir: key === 'symbol' ? 1 : -1 };
     store.set(SORT_KEY, sort); render();
   });
   // على الجوال القائمة تحت الشارت، فبعد الاختيار يُمرَّر إلى الشارت ليرى المستخدم السهم الجديد
   const stacked = window.matchMedia('(max-width: 860px)');
+  indexBox.addEventListener('click', e => {
+    if (!e.target.closest('[data-sym]')) return;
+    open(index.symbol);
+    if (stacked.matches) TA.chartPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   list.addEventListener('click', e => {
     const li = e.target.closest('[data-sym]'); if (!li) return;
     open(li.dataset.sym);
@@ -221,7 +241,7 @@
     // القطاع الافتراضي: قطاع السهم المعروض، أو آخر قطاع اختاره المستخدم
     const valid = id => id === ALL || id === MINE || sectors.some(s => s.name === id);
     if (!valid(sector)) sector = bySymbol.get(active)?.sector || sectors[0]?.name;
-    fillSelect(); render(); renderDetail(); markActive();
+    fillSelect(); renderIndex(); render(); renderDetail(); markActive();
     box.classList.add('ready');
   }).catch(error => {
     console.warn('Watchlist unavailable:', error);
