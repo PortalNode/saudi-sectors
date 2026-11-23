@@ -47,7 +47,8 @@
     const file = await window.CompanyChart.load(symbol);
     if (!file) { fail(`تعذر تحميل شموع السهم ${symbol}. جرّب إعادة تحميل الصفحة بعد قليل.`); return false; }
     document.getElementById('ta-status')?.remove();
-    window.CompanyChart.mount(panel, file, { home: { symbol, file, name: stock.name }, levels });
+    // keepFull: تبديل السهم من قائمة المراقبة وهي في ملء الشاشة لا يخرج منه
+    window.CompanyChart.mount(panel, file, { home: { symbol, file, name: stock.name }, levels, keepFull: panel.classList.contains('cc-full') });
     mounted = symbol;
     return true;
   }

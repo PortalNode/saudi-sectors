@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="company-profile.css?v=20261119-ticks">
   <link rel="stylesheet" href="company-quote.css?v=chart-20261118-tools">
   <link rel="stylesheet" href="technical-analysis.css?v=ta-20261118a">
-  <link rel="stylesheet" href="ta-watchlist.css?v=wl-20261123d">
+  <link rel="stylesheet" href="ta-watchlist.css?v=wl-20261123e">
   <link rel="stylesheet" href="scanner/scanner.css?v=sc-20261120c">
   <link rel="stylesheet" href="layout.css?v=logos-20261116">
   <link rel="stylesheet" href="mobile.css?v=mobile-20261119g">
@@ -43,20 +43,19 @@
     <section id="sc-watch" class="sc-section" data-tabpanel="watch" aria-label="قائمة المراقبة"></section>
     <div data-tabpanel="chart">
       <div id="sc-card" class="sc-card-slot" hidden></div>
-      <div class="ta-workspace">
+      <div class="ta-workspace" data-cc-full-host>
         <section class="ta-panel company-quote" aria-label="شارت السهم">
           <div id="ta-chart" class="cq-chart-panel ta-chart"><p class="cq-empty" id="ta-status" role="status">جار تحميل الشارت…</p></div>
         </section>
         <aside class="ta-wl-slot" aria-label="قائمة المراقبة حسب القطاع">
           <div id="ta-wl" class="ta-wl"></div>
         </aside>
-        <button type="button" class="wl-opener" data-wl-open hidden title="إظهار قائمة المراقبة">قائمة المراقبة</button>
       </div>
     </div>
     <noscript><p class="financial-status">يرجى تفعيل JavaScript لعرض الشارت.</p></noscript>
   </main>
-  <script src="company-chart.js?v=chart-20261120-adjzones" defer></script>
-  <script src="technical-analysis.js?v=ta-20261119g-wl" defer></script>
-  <script src="ta-watchlist.js?v=wl-20261123b" defer></script>
+  <script src="company-chart.js?v=chart-20261120-adjzones-wl" defer></script>
+  <script src="technical-analysis.js?v=ta-20261119g-wl2" defer></script>
+  <script src="ta-watchlist.js?v=wl-20261123c" defer></script>
 </body>
 </html>

@@ -1008,9 +1008,13 @@
     }
 
     /* ---------- ملء الشاشة: Fullscreen API إن توفّر، وإلا تغطية الصفحة بالـ CSS (آيفون) ---------- */
+    // fullHost: إن كان الشارت داخل عنصر يحمل data-cc-full-host (مثل الشارت مع قائمة المراقبة في التحليل الفني)
+    // يملأ ذلك العنصر كله الشاشة فتبقى القائمة بجوار الشارت، وإلا يملؤها الشارت وحده
+    const fullHost = panel.closest('[data-cc-full-host]') || panel;
     const isFull = () => panel.classList.contains('cc-full');
     function setFull(on) {
       panel.classList.toggle('cc-full', on);
+      if (fullHost !== panel) fullHost.classList.toggle('cc-full-host', on);
       document.documentElement.classList.toggle('cc-lock', on);
       const button = panel.querySelector('[data-full]');
       if (button) {
@@ -1018,8 +1022,9 @@
         button.title = on ? 'الخروج من ملء الشاشة (F أو Esc)' : 'تكبير الرسم البياني ليملأ الشاشة (F)';
         button.innerHTML = `${on ? ICON_EXIT : ICON_FULL}<span>${on ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}</span>`;
       }
-      if (on && panel.requestFullscreen && !document.fullscreenElement) panel.requestFullscreen().catch(() => { /* تبقى التغطية بالـ CSS */ });
-      if (!on && document.fullscreenElement === panel) document.exitFullscreen().catch(() => {});
+      if (on && fullHost.requestFullscreen && !document.fullscreenElement) fullHost.requestFullscreen().catch(() => { /* تبقى التغطية بالـ CSS */ });
+      if (!on && document.fullscreenElement === fullHost) document.exitFullscreen().catch(() => {});
+      window.dispatchEvent(new Event('resize'));
     }
     // الخروج بزر المتصفح أو Esc في وضع ملء الشاشة الأصلي
     const onFullscreenChange = () => { if (!document.fullscreenElement && isFull()) setFull(false); };

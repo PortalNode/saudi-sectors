@@ -50,18 +50,44 @@
   const $ = id => box.querySelector(`#${id}`);
   const select = $('wl-sector'), list = $('wl-list'), indexBox = $('wl-index'), detail = $('wl-detail'), stats = $('wl-stats'), filter = $('wl-filter');
   const workspace = box.closest('.ta-workspace');
-  const opener = document.querySelector('[data-wl-open]');
 
   /* ---------- إظهار القائمة وإخفاؤها ---------- */
+  // القائمة جزء من الشارت: زرها في شريط أدوات الشارت بجوار «ملء الشاشة»، ويعمل في الوضع العادي وفي ملء الشاشة،
+  // فيمكن تكبير الشارت وحده أو معه القائمة
+  let isOpen = store.get(OPEN_KEY, true) !== false;
+  const toolbarButton = () => TA.chartPanel.querySelector('[data-wl-btn]');
+  function paintButton() {
+    const b = toolbarButton(); if (!b) return;
+    b.setAttribute('aria-pressed', String(isOpen));
+    b.title = isOpen ? 'إخفاء قائمة المراقبة (W)' : 'إظهار قائمة المراقبة (W)';
+  }
   function setOpen(open) {
+    isOpen = open;
     workspace?.classList.toggle('wl-closed', !open);
     box.querySelector('[data-wl-toggle]').setAttribute('aria-expanded', String(open));
-    if (opener) opener.hidden = open;
+    paintButton();
     store.set(OPEN_KEY, open);
     window.dispatchEvent(new Event('resize')); // يعيد الشارت حساب عرضه
   }
+  // الشارت يعيد بناء شريط أدواته مع كل سهم، فيُعاد إدراج الزر كلما اختفى
+  function ensureButton() {
+    if (toolbarButton()) return;
+    const end = TA.chartPanel.querySelector('.cc-toolbar .cc-end'); if (!end) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'cc-full-btn cc-wl-btn'; b.dataset.wlBtn = '';
+    b.innerHTML = `${ICON_LIST}<span>قائمة المراقبة</span>`;
+    b.addEventListener('click', () => setOpen(!isOpen));
+    end.insertBefore(b, end.querySelector('[data-full]'));
+    paintButton();
+  }
   box.querySelector('[data-wl-toggle]').addEventListener('click', () => setOpen(false));
-  opener?.addEventListener('click', () => setOpen(true));
+  // W يُظهر القائمة أو يخفيها كما F لملء الشاشة، إلا أثناء الكتابة في حقل
+  document.addEventListener('keydown', e => {
+    if (e.code !== 'KeyW' || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.repeat) return;
+    if (e.target.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+    if (document.body.dataset.tab && document.body.dataset.tab !== 'chart') return;
+    e.preventDefault(); setOpen(!isOpen);
+  });
 
   /* ---------- البيانات ---------- */
   function readMine() {
@@ -222,6 +248,7 @@
 
   // إذا غيّر المستخدم السهم من بحث الشارت نفسه تتبعه القائمة واللوحة
   const syncFromChart = () => {
+    ensureButton();
     const sym = TA.chartPanel.querySelector('.cc-head-sym')?.textContent?.trim();
     if (sym && sym !== active) { active = sym; markActive(); renderDetail(); }
   };
@@ -248,5 +275,6 @@
     box.innerHTML = '<p class="cq-empty">تعذّر تحميل قائمة المراقبة.</p>';
   });
 
-  if (store.get(OPEN_KEY, true) === false) setOpen(false);
+  if (!isOpen) setOpen(false);
+  ensureButton();
 })();

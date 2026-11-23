@@ -9,9 +9,16 @@
 .ta-wl{position:absolute;inset:0;display:flex;flex-direction:column;min-height:0;border:1px solid var(--pf-line);border-radius:8px;background:var(--pf-bg2);overflow:hidden;font-variant-numeric:tabular-nums}
 .ta-workspace.wl-closed{grid-template-columns:minmax(0,1fr);grid-template-areas:"chart"}
 .ta-workspace.wl-closed .ta-wl-slot{display:none}
-.wl-opener{position:absolute;top:-38px;inset-inline-start:0;border:1px solid var(--pf-line);background:var(--pf-bg2);color:var(--pf-ink);border-radius:8px;padding:6px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
-.wl-opener:hover{border-color:var(--pf-gold);color:var(--pf-gold)}
-.wl-opener[hidden]{display:none}
+
+/* زر القائمة في شريط أدوات الشارت (بجوار ملء الشاشة) */
+.cc-wl-btn svg{width:15px;height:15px}
+.cc-wl-btn[aria-pressed="true"]{color:var(--pf-gold);border-color:var(--pf-gold)}
+
+/* ملء الشاشة: الشارت والقائمة معًا يملآن الشاشة، والقائمة تُخفى بزرها ليكبر الشارت وحده */
+.ta-workspace.cc-full-host{position:fixed;inset:0;z-index:1000;box-sizing:border-box;height:100vh;height:100dvh;margin:0;padding:8px;gap:8px;grid-template-rows:minmax(0,1fr);background:var(--pf-bg)}
+.ta-workspace.cc-full-host .ta-panel{display:flex;flex-direction:column;min-height:0}
+.ta-workspace.cc-full-host .cq-chart-panel.cc-full{position:relative;inset:auto;z-index:auto;flex:1 1 auto;min-height:0;height:auto}
+.ta-workspace.cc-full-host .ta-wl-slot{min-height:0}
 
 .wl-head{display:flex;align-items:center;gap:6px;padding:10px 10px 6px}
 .wl-select{flex:1 1 auto;min-width:0;position:relative}
@@ -97,6 +104,8 @@
   .ta-workspace,.ta-workspace.wl-closed{grid-template-columns:minmax(0,1fr);grid-template-areas:"chart" "wl"}
   .ta-wl-slot{min-height:0}
   .ta-wl{position:static;max-height:620px}
+  /* على الجوال في ملء الشاشة: الشارت يملأ الشاشة والقائمة تحته بالتمرير */
+  .ta-workspace.cc-full-host{overflow-y:auto;grid-template-rows:calc(100dvh - 16px) auto}
+  .ta-workspace.cc-full-host .ta-wl{max-height:none}
   .wl-list{max-height:360px}
-  .wl-opener{position:static;justify-self:start}
 }
