@@ -803,7 +803,7 @@ html body .ai-card button:not(.ai-send):not([data-scope]){border-radius:10px}
 .key-figure dt[title^="مكرر"]{--ico:var(--i-scale)}
 /* الشارت المصغر: تسعة أزرار (بعد إضافة «شهر») في سطر واحد */
 html body.banks-page .cq-mini-ranges{gap:2px}
-html body.banks-page .cq-mini-ranges button{padding:3px 6px}
+html body.banks-page .cq-mini-ranges button{padding:3px 4px}
 
 /* ---------------- ملخص السوق: المؤشر العام ----------------
    الشعار بجانب العنوان في منتصف البطاقة، والأرقام تحتهما في المنتصف.
@@ -814,3 +814,7 @@ html body .market-summary .market-group-index .market-group-logo{position:static
 html body .market-summary .market-group-index .market-group-label{margin:0;font-size:12px;color:var(--pf-ink)}
 html body .market-summary .market-group-index .market-group-label::before{display:none}
 html body .market-summary .market-group-index .market-group-cards{flex:0 0 100%;justify-content:center;margin-top:10px}
+
+/* ---------------- نتائج الشركات: شعار الشركة بجانب اسمها ----------------
+   كل الشعارات مربعات كاملة بلون خلفيتها، فتظهر كاملة بزوايا خفيفة بلا قرص أبيض ولا قص دائري */
+html body.banks-page .bank-heading .co-logo-lg{padding:0;background:none;border-radius:14px;object-fit:cover;box-shadow:0 0 0 1px var(--pf-line),0 6px 16px -8px rgba(0,0,0,.6)}
