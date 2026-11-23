@@ -1,0 +1,785 @@
+/* ============================================================
+   تصميم البطاقات والأيقونات (مستوحى من el7.ai) لكل صفحات الموقع
+   - طبقة CSS فقط فوق التنسيقات الحالية: لا تغيّر HTML ولا JS، وتعتمد ألوان الثيم
+     (--pf-gold, --pf-bg, --pf-line ...) فتعمل في المظهرين الداكن والفاتح.
+   - تُحمَّل في كل صفحة بعد mobile.css. لإلغائها احذف سطر el7-theme.css من الصفحات.
+   ============================================================ */
+
+:root{
+  /* نفس قيم company-profile.css، لتعمل الألوان في الصفحات التي لا تحمّله (الرئيسية والمقارنة) */
+  --pf-bg:#151b22;--pf-bg2:#1b232d;--pf-line:#27313b;--pf-ink:#eef2f5;--pf-muted:#9da7b2;--pf-gold:#f59e0b;--pf-gold-soft:#f59e0b26;--pf-track:#2b3540;
+  --e7-r:16px;            /* زوايا البطاقات */
+  --e7-r-sm:12px;         /* زوايا البلاطات الداخلية */
+  --e7-tile:#19212a;      /* خلفية البلاطة */
+  --e7-tile-hover:#1f2934;
+  --e7-on-gold:#15191f;
+  --e7-shadow:0 12px 32px -22px rgba(0,0,0,.9);
+  --e7-glow:color-mix(in srgb,var(--pf-gold) 7%,transparent);
+
+  /* الأيقونات (Lucide، رخصة ISC) — تُرسم بـ mask فتأخذ لون النص */
+  --i-logo:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m22 7-8.5 8.5-5-5L2 17'/%3E%3Cpath d='M16 7h6v6'/%3E%3C/svg%3E");
+  --i-home:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpath d='M9 22V12h6v10'/%3E%3C/svg%3E");
+  --i-results:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3Cpath d='M8 18v-2M12 18v-4M16 18v-6'/%3E%3C/svg%3E");
+  --i-compare:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 3 4 7l4 4'/%3E%3Cpath d='M4 7h16'/%3E%3Cpath d='m16 21 4-4-4-4'/%3E%3Cpath d='M20 17H4'/%3E%3C/svg%3E");
+  --i-candles:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5v4'/%3E%3Crect width='4' height='6' x='7' y='9' rx='1'/%3E%3Cpath d='M9 15v2'/%3E%3Cpath d='M17 3v2'/%3E%3Crect width='4' height='8' x='15' y='5' rx='1'/%3E%3Cpath d='M17 13v3'/%3E%3Cpath d='M3 3v18h18'/%3E%3C/svg%3E");
+  --i-wallet:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12V7H5a2 2 0 0 1 0-4h14v4'/%3E%3Cpath d='M3 5v14a2 2 0 0 0 2 2h16v-5'/%3E%3Cpath d='M18 12a2 2 0 0 0 0 4h4v-4Z'/%3E%3C/svg%3E");
+  --i-sun:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41'/%3E%3C/svg%3E");
+  --i-moon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'/%3E%3C/svg%3E");
+  --i-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 18-6-6 6-6'/%3E%3C/svg%3E");
+  --i-building:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z'/%3E%3Cpath d='M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2'/%3E%3Cpath d='M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2'/%3E%3Cpath d='M10 6h4M10 10h4M10 14h4M10 18h4'/%3E%3C/svg%3E");
+  --i-calendar:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='4' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+  --i-flag:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/%3E%3Cpath d='M4 22v-7'/%3E%3C/svg%3E");
+  --i-hourglass:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 22h14M5 2h14'/%3E%3Cpath d='M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22'/%3E%3Cpath d='M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2'/%3E%3C/svg%3E");
+  --i-briefcase:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='20' height='14' x='2' y='7' rx='2'/%3E%3Cpath d='M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16'/%3E%3C/svg%3E");
+  --i-clock:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E");
+  --i-dollar:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2v20'/%3E%3Cpath d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/svg%3E");
+  --i-trend:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-4l-3 9L9 3l-3 9H2'/%3E%3C/svg%3E");
+  --i-coins:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8' cy='8' r='6'/%3E%3Cpath d='M18.09 10.37A6 6 0 1 1 10.34 18'/%3E%3Cpath d='M7 6h1v4'/%3E%3Cpath d='m16.71 13.88.7.71-2.82 2.82'/%3E%3C/svg%3E");
+  --i-scale:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z'/%3E%3Cpath d='m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z'/%3E%3Cpath d='M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2'/%3E%3C/svg%3E");
+  --i-book:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'/%3E%3Cpath d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'/%3E%3C/svg%3E");
+  --i-percent:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 5 5 19'/%3E%3Ccircle cx='6.5' cy='6.5' r='2.5'/%3E%3Ccircle cx='17.5' cy='17.5' r='2.5'/%3E%3C/svg%3E");
+  --i-gauge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 14 4-4'/%3E%3Cpath d='M3.34 19a10 10 0 1 1 17.32 0'/%3E%3C/svg%3E");
+  --i-table:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2'/%3E%3Cpath d='M3 9h18M3 15h18M9 3v18'/%3E%3C/svg%3E");
+  --i-bars:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='M18 17V9M13 17V5M8 17v-3'/%3E%3C/svg%3E");
+  --i-pie:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.21 15.89A10 10 0 1 1 8 2.83'/%3E%3Cpath d='M22 12A10 10 0 0 0 12 2v10z'/%3E%3C/svg%3E");
+  --i-cash:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='20' height='12' x='2' y='6' rx='2'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Cpath d='M6 12h.01M18 12h.01'/%3E%3C/svg%3E");
+  --i-shield:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'/%3E%3C/svg%3E");
+  --i-plus:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8M12 8v8'/%3E%3C/svg%3E");
+  --i-minus:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E");
+  --i-sliders:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4'/%3E%3C/svg%3E");
+  --i-layers:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z'/%3E%3Cpath d='m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65'/%3E%3Cpath d='m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65'/%3E%3C/svg%3E");
+  --i-info:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E");
+  --i-down:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m22 17-8.5-8.5-5 5L2 7'/%3E%3Cpath d='M16 17h6v-6'/%3E%3C/svg%3E");
+  --i-list:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 12h11M10 18h11M10 6h11M4 10h2M4 6h1v4M6 18H4c0-1 2-2 2-3s-1-1.5-2-1'/%3E%3C/svg%3E");
+  --i-link:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/%3E%3C/svg%3E");
+  --i-key:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7.5' cy='15.5' r='5.5'/%3E%3Cpath d='m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3'/%3E%3C/svg%3E");
+  --i-eye:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+  --i-grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='7' height='7' x='3' y='3' rx='1'/%3E%3Crect width='7' height='7' x='14' y='3' rx='1'/%3E%3Crect width='7' height='7' x='14' y='14' rx='1'/%3E%3Crect width='7' height='7' x='3' y='14' rx='1'/%3E%3C/svg%3E");
+  --i-columns:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2'/%3E%3Cpath d='M9 3v18M15 3v18'/%3E%3C/svg%3E");
+  --i-zap:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2 3 14h9l-1 8 10-12h-9l1-8z'/%3E%3C/svg%3E");
+  --i-search:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  --i-star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.5 2.3a.5.5 0 0 1 1 0l2.3 4.7a2 2 0 0 0 1.5 1.1l5.2.8a.5.5 0 0 1 .3.9l-3.8 3.6a2 2 0 0 0-.6 1.8l.9 5.2a.5.5 0 0 1-.8.5l-4.6-2.4a2 2 0 0 0-1.9 0l-4.6 2.4a.5.5 0 0 1-.8-.5l.9-5.2a2 2 0 0 0-.6-1.8L1.7 9.8a.5.5 0 0 1 .3-.9l5.2-.8a2 2 0 0 0 1.5-1.1z'/%3E%3C/svg%3E");
+  --i-users:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+  --i-download:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3Cpath d='M12 15V3'/%3E%3C/svg%3E");
+  --i-upload:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpath d='m17 8-5-5-5 5'/%3E%3Cpath d='M12 3v12'/%3E%3C/svg%3E");
+  --i-reset:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'/%3E%3Cpath d='M3 3v5h5'/%3E%3C/svg%3E");
+}
+:root[data-theme="light"]{
+  --pf-bg:#fff;--pf-bg2:#f7f9fb;--pf-line:#d4dce5;--pf-ink:#172d42;--pf-muted:#5e6e80;--pf-gold:#b86e00;--pf-gold-soft:#f59e0b1f;--pf-track:#e3e9ef;
+  --e7-tile:#f6f8fa;
+  --e7-tile-hover:#eef2f6;
+  --e7-shadow:0 10px 28px -22px rgba(23,45,66,.35);
+}
+
+/* أداة عامة: أيقونة بلون النص الحالي */
+.site-nav a::before,
+.theme-switch button::before,
+.bank-breadcrumb p > a:first-child::before,
+.bank-breadcrumb span[aria-hidden]::before,
+.cq-label::before,
+.key-figure dt::before,
+.period-group > span::before,
+.annual-table caption::before,
+.bank-period::before,
+#cq-tag::before,
+.pf-trade-btn::before,
+.bank-chart-control label::before{
+  content:"";display:inline-block;flex:none;width:15px;height:15px;vertical-align:-3px;
+  background:currentColor;
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+
+/* أداة عامة: عنوان قسم بأيقونة داخل مربع ذهبي شفاف (مثل عناوين el7) */
+.cp-head h3,.cq-head h3,.bank-charts-heading h3,.annual-margin-section > h3,.key-figures-title{
+  position:relative;display:flex;align-items:center;min-height:30px;padding-inline-start:40px;
+}
+.cp-head h3::before,.cq-head h3::before,.bank-charts-heading h3::before,.annual-margin-section > h3::before,.key-figures-title::before{
+  content:"";position:absolute;inset-inline-start:0;top:50%;width:30px;height:30px;margin-top:-15px;border-radius:10px;
+  background:var(--pf-gold-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pf-gold) 30%,transparent);
+}
+.cp-head h3::after,.cq-head h3::after,.bank-charts-heading h3::after,.annual-margin-section > h3::after,.key-figures-title::after{
+  content:"";position:absolute;inset-inline-start:7px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--pf-gold);
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+
+/* ---------------- الشريط العلوي ---------------- */
+html body .site-bar{
+  border-radius:var(--e7-r);padding:10px 14px;border-color:var(--pf-line);
+  background:linear-gradient(180deg,var(--e7-glow),transparent 70%),var(--pf-bg);box-shadow:var(--e7-shadow);
+}
+.site-bar .site-name{display:flex;align-items:center;gap:10px}
+.site-bar .site-name::before{
+  content:"";flex:none;width:34px;height:34px;border-radius:11px;
+  background:linear-gradient(135deg,#fbbf24,var(--pf-gold) 55%,#d97706);
+  box-shadow:0 6px 16px -6px color-mix(in srgb,var(--pf-gold) 70%,transparent);
+}
+.site-bar .site-name{position:relative}
+.site-bar .site-name::after{
+  content:"";position:absolute;inset-inline-start:8px;top:50%;width:18px;height:18px;margin-top:-9px;background:var(--e7-on-gold);
+  -webkit-mask:var(--i-logo) center/contain no-repeat;mask:var(--i-logo) center/contain no-repeat;
+}
+html body .site-nav{gap:4px}
+html body .site-nav a{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;border-bottom:0;transition:background .15s,color .15s}
+html body .site-nav a:hover{background:var(--e7-tile-hover);color:var(--pf-ink)}
+html body .site-nav a[aria-current="page"]{background:var(--pf-gold-soft);color:var(--pf-gold);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pf-gold) 35%,transparent)}
+.site-nav a[href^="index"]{--ico:var(--i-home)}
+.site-nav a[href^="company"]{--ico:var(--i-results)}
+.site-nav a[href^="comparison"]{--ico:var(--i-compare)}
+.site-nav a[href^="technical"]{--ico:var(--i-candles)}
+.site-nav a[href^="portfolio"]{--ico:var(--i-wallet)}
+html body .sector-switch select{border-radius:10px;background:var(--e7-tile);border-color:var(--pf-line)}
+html body .site-bar .theme-switch{border-radius:999px;padding:3px;background:var(--e7-tile);border-color:var(--pf-line)}
+/* أزرار المظهر أيقونات فقط (النص يبقى مقروءًا لقارئ الشاشة) */
+html body .theme-switch button{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;min-width:0;min-height:30px;padding:5px 11px;font-size:0}
+html body .theme-switch button::before{width:16px;height:16px;vertical-align:0}
+.theme-switch button[data-theme-option="light"]{--ico:var(--i-sun)}
+.theme-switch button[data-theme-option="dark"]{--ico:var(--i-moon)}
+html body .theme-switch button[aria-pressed="true"]{background:var(--pf-gold);color:var(--e7-on-gold)}
+
+/* ---------------- مسار التنقل ---------------- */
+.bank-breadcrumb p{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bank-breadcrumb p > a:first-child{display:inline-flex;align-items:center;gap:6px;--ico:var(--i-home)}
+.bank-breadcrumb span[aria-hidden]{font-size:0;display:inline-flex;--ico:var(--i-chevron);opacity:.6}
+.bank-breadcrumb span[aria-hidden]::before{width:13px;height:13px;vertical-align:0}
+#crumb{color:var(--pf-ink);font-weight:700}
+
+/* ---------------- رأس الشركة (ملف الشركة) ---------------- */
+body.banks-page .bank-heading{
+  margin:0 0 16px;padding:14px 18px;border:1px solid var(--pf-line);border-radius:var(--e7-r);
+  background:linear-gradient(180deg,var(--e7-glow),transparent 80%),var(--pf-bg);box-shadow:var(--e7-shadow);
+}
+body.banks-page .bank-heading h2{margin:0;font-size:24px}
+body.banks-page .bank-heading .co-logo-lg{width:52px;height:52px;padding:7px;background:#fff;object-fit:contain;box-shadow:0 0 0 1px var(--pf-line),0 6px 16px -8px rgba(0,0,0,.6)}
+body.banks-page .bank-heading .symbol-badge{
+  border:0;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:800;letter-spacing:.3px;
+  background:var(--pf-gold-soft);color:var(--pf-gold);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pf-gold) 35%,transparent);
+}
+body.banks-page .bank-period{
+  --ico:var(--i-calendar);display:grid;grid-template-columns:auto auto;align-items:center;column-gap:8px;
+  padding:8px 14px;border-radius:var(--e7-r-sm);border-color:var(--pf-line);background:var(--e7-tile);color:var(--pf-muted);
+}
+.bank-period::before{grid-row:span 2;width:18px;height:18px;color:var(--pf-gold)}
+.bank-period bdi{margin-top:2px;text-align:start}
+
+/* ---------------- البطاقات (نبذة الشركة + السهم) ---------------- */
+body.banks-page .company-profile{
+  border:1px solid var(--pf-line);border-radius:var(--e7-r);overflow:hidden;margin:0 0 16px;
+  background:linear-gradient(180deg,var(--e7-glow),transparent 140px),var(--pf-bg);box-shadow:var(--e7-shadow);
+}
+.cp-head,.cq-head{padding:14px 18px!important;border-bottom:0!important;flex-wrap:wrap}
+.cp-head h3{--ico:var(--i-building);font-size:14px!important}
+.cq-head h3{--ico:var(--i-candles);font-size:14px!important}
+.cp-tags{gap:6px}
+body.banks-page .cp-tag{border-radius:999px;padding:3px 10px;font-size:10.5px;background:var(--e7-tile);border-color:var(--pf-line)}
+body.banks-page .cp-tag.market{display:inline-flex;align-items:center;gap:6px;background:var(--pf-gold-soft);border-color:color-mix(in srgb,var(--pf-gold) 45%,transparent);font-weight:800}
+.cp-tag.market::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--pf-gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--pf-gold) 25%,transparent)}
+
+/* داخل النبذة: بلاطات منفصلة بفراغات بدل الخطوط */
+body.banks-page .cp-body{gap:12px;padding:0 14px 14px}
+body.banks-page .cp-activity{border:1px solid var(--pf-line)!important;border-radius:var(--e7-r-sm);background:var(--e7-tile)}
+body.banks-page .cp-facts{gap:10px}
+body.banks-page .cp-fact{position:relative;border:1px solid var(--pf-line)!important;border-radius:var(--e7-r-sm);background:var(--e7-tile);padding:14px}
+body.banks-page .cp-fact .cp-label{display:flex;align-items:center;gap:6px}
+body.banks-page .cp-fact .cp-label::before{
+  content:"";width:14px;height:14px;flex:none;background:currentColor;
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+.cp-fact:nth-child(1){--ico:var(--i-flag)}
+.cp-fact.listed{--ico:var(--i-briefcase)}
+.cp-fact.gap{--ico:var(--i-hourglass)}
+body.banks-page .cp-fact.listed{background:linear-gradient(160deg,var(--pf-gold-soft),transparent 70%),var(--e7-tile);border-color:color-mix(in srgb,var(--pf-gold) 35%,var(--pf-line))!important}
+body.banks-page .cp-ago{border-radius:999px;padding:2px 9px}
+body.banks-page .cp-timeline{border:1px solid var(--pf-line);border-radius:var(--e7-r-sm);background:var(--e7-tile)}
+body.banks-page .cp-track{border-radius:999px;overflow:visible}
+body.banks-page .cp-listed-seg{border-radius:999px;background:linear-gradient(90deg,var(--pf-gold),#fbbf24)}
+body.banks-page .cp-dot.gold{box-shadow:0 0 0 4px color-mix(in srgb,var(--pf-gold) 25%,transparent)}
+.cp-legend i{border-radius:999px}
+
+/* ---------------- بطاقة السهم ---------------- */
+#cq-tag{--ico:var(--i-clock);display:inline-flex;align-items:center;gap:6px}
+#cq-tag::before{width:13px;height:13px;vertical-align:0}
+body.banks-page .pf-trade-btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px!important;font-weight:800}
+.pf-trade-btn.buy{--ico:var(--i-plus)}
+.pf-trade-btn.sell{--ico:var(--i-minus)}
+.pf-trade-btn::before{width:14px;height:14px;vertical-align:0}
+
+body.banks-page .cq-body{gap:14px;padding:0 14px 14px}
+body.banks-page .cq-figures{gap:10px;border:0}
+body.banks-page .company-quote .cq-figures .cq-tile{
+  position:relative;border:1px solid var(--pf-line)!important;border-radius:var(--e7-r-sm);
+  background:var(--e7-tile);padding:14px 16px;transition:border-color .15s,background .15s;
+}
+body.banks-page .company-quote .cq-figures .cq-tile:hover{background:var(--e7-tile-hover)}
+.cq-label{display:flex!important;align-items:center;gap:6px}
+.cq-label::before{width:14px;height:14px;vertical-align:0}
+.cq-tile:nth-child(1){--ico:var(--i-dollar)}
+.cq-tile:nth-child(2){--ico:var(--i-trend)}
+.cq-tile:nth-child(3){--ico:var(--i-coins)}
+.cq-tile:nth-child(4){--ico:var(--i-scale)}
+.cq-tile:nth-child(5){--ico:var(--i-book)}
+.cq-tile:nth-child(6){--ico:var(--i-percent)}
+/* السعر: بلاطة مميزة مثل الرقم الكبير في el7 */
+body.banks-page .company-quote .cq-figures .cq-tile.cq-price{
+  background:radial-gradient(120% 90% at 100% 0%,var(--pf-gold-soft),transparent 60%),var(--e7-tile);
+  border-color:color-mix(in srgb,var(--pf-gold) 40%,var(--pf-line))!important;
+}
+body.banks-page .cq-price .cq-value{font-size:30px;letter-spacing:-.5px}
+/* التغير: خلفية ملوّنة خفيفة أخضر/أحمر */
+body.banks-page .company-quote .cq-figures .cq-tile.cq-up{background:color-mix(in srgb,var(--cq-up) 9%,var(--e7-tile));border-color:color-mix(in srgb,var(--cq-up) 35%,var(--pf-line))!important}
+body.banks-page .company-quote .cq-figures .cq-tile.cq-down{background:color-mix(in srgb,var(--cq-down) 9%,var(--e7-tile));border-color:color-mix(in srgb,var(--cq-down) 35%,var(--pf-line))!important}
+
+/* الشارت المصغر داخل بلاطة مستقلة */
+body.banks-page .cq-mini-slot{border:1px solid var(--pf-line)!important;border-radius:var(--e7-r-sm);background:var(--e7-tile);padding:12px 14px}
+body.banks-page .cq-mini-ranges{gap:4px;margin-bottom:8px}
+body.banks-page .cq-mini-ranges button{border:0;border-radius:8px;padding:3px 8px;background:transparent}
+body.banks-page .cq-mini-ranges button:hover{background:var(--e7-tile-hover)}
+body.banks-page .cq-mini-ranges button[aria-pressed="true"]{background:var(--pf-gold);color:var(--e7-on-gold);border-color:transparent}
+body.banks-page .cq-mini-dot{border-color:var(--e7-tile);box-shadow:0 0 0 4px color-mix(in srgb,var(--pf-gold) 25%,transparent)}
+body.banks-page .cq-mini-meta .cq-up,body.banks-page .cq-mini-meta .cq-down{padding:2px 8px;border-radius:999px;background:color-mix(in srgb,currentColor 12%,transparent)}
+
+/* ---------------- شريط الفترة ---------------- */
+body.banks-page .period-bar{border-radius:var(--e7-r);padding:12px 16px;border-color:var(--pf-line);background:var(--pf-bg);box-shadow:var(--e7-shadow);gap:10px 22px}
+.period-group > span{display:inline-flex;align-items:center;gap:6px}
+#bank-period-bar .period-group:first-child > span{--ico:var(--i-calendar)}
+#bank-quarter-group > span{--ico:var(--i-layers)}
+body.banks-page .period-seg{border-radius:12px;padding:3px;gap:2px;background:var(--e7-tile);border-color:var(--pf-line)}
+body.banks-page .period-seg button{border:0!important;border-radius:9px;min-height:32px;padding:6px 14px;transition:background .15s,color .15s}
+body.banks-page .period-seg button:hover{background:var(--e7-tile-hover)}
+body.banks-page .period-seg button[aria-pressed="true"]{background:var(--pf-gold);color:var(--e7-on-gold);box-shadow:0 4px 12px -6px color-mix(in srgb,var(--pf-gold) 80%,transparent)}
+
+/* ---------------- أهم الأرقام (بلاطات) ---------------- */
+.key-figures-title{--ico:var(--i-gauge);margin:18px 0 0!important;font-size:12.5px!important;font-weight:700;color:var(--pf-ink)!important}
+body.banks-page .key-figures{gap:10px;background:transparent;border:0;margin:12px 0 14px}
+body.banks-page .key-figures .key-figure{
+  border:1px solid var(--pf-line)!important;border-radius:var(--e7-r-sm);background:var(--e7-tile);padding:13px 14px;gap:5px;
+  transition:border-color .15s,transform .15s;
+}
+body.banks-page .key-figures .key-figure:hover{border-color:color-mix(in srgb,var(--pf-gold) 45%,var(--pf-line))!important;transform:translateY(-1px)}
+.key-figure dt{display:flex;align-items:center;gap:6px}
+.key-figure dt::before{width:14px;height:14px;vertical-align:0;color:var(--pf-gold)}
+.key-figure dt[title^="الإيرادات"]{--ico:var(--i-bars)}
+.key-figure dt[title^="صافي الربح"]{--ico:var(--i-coins)}
+.key-figure dt[title^="هامش صافي"]{--ico:var(--i-pie)}
+.key-figure dt[title^="هامش التشغيل"]{--ico:var(--i-sliders)}
+.key-figure dt[title^="التدفق"]{--ico:var(--i-cash)}
+.key-figure dt[title^="العائد"]{--ico:var(--i-trend)}
+.key-figure dt[title^="الدين"]{--ico:var(--i-shield)}
+body.banks-page .key-figure dd{font-size:20px;font-weight:800}
+
+/* ---------------- الجداول ---------------- */
+body.banks-page .annual-table-wrap{border-radius:var(--e7-r);border-color:var(--pf-line);background:var(--pf-bg);box-shadow:var(--e7-shadow)}
+.annual-table caption{--ico:var(--i-table);display:table-caption}
+.annual-table caption::before{width:16px;height:16px;margin-inline-end:8px;color:var(--pf-gold)}
+.annual-margin-section .annual-table caption{--ico:var(--i-percent)}
+.annual-margin-section > h3{--ico:var(--i-percent);margin:18px 14px 8px!important;font-size:14px}
+body.banks-page .annual-table td.annual-change .num.up,
+body.banks-page .annual-table td.annual-change .num.down{
+  padding:2px 8px;border-radius:999px;font-weight:700;
+  background:color-mix(in srgb,currentColor 12%,transparent);
+}
+body.banks-page .annual-table thead th.period-latest{background:color-mix(in srgb,var(--pf-gold) 14%,var(--head,#242d37))}
+
+/* ---------------- المقارنة بالأعمدة ---------------- */
+body.banks-page .bank-charts{margin-top:16px;padding:16px 18px;border:1px solid var(--pf-line);border-radius:var(--e7-r);background:var(--pf-bg);box-shadow:var(--e7-shadow)}
+.bank-charts-heading h3{--ico:var(--i-bars);margin:0}
+.bank-chart-control label{--ico:var(--i-sliders);display:inline-flex;align-items:center;gap:6px}
+body.banks-page .bank-chart-control select{border-radius:10px;padding:7px 12px;background:var(--e7-tile);border:1px solid var(--pf-line)}
+body.banks-page .bank-chart-card{border-radius:var(--e7-r-sm);border:1px solid var(--pf-line);background:var(--e7-tile)}
+
+/* ---------------- الجوال ---------------- */
+@media (max-width:760px){
+  html body .site-nav a{padding:7px 9px}
+  body.banks-page .bank-heading{padding:12px}
+  body.banks-page .cp-body,body.banks-page .cq-body{padding:0 10px 10px}
+  body.banks-page .cq-price .cq-value{font-size:24px}
+}
+@media (max-width:520px){
+  body.banks-page .cq-figures{gap:8px}
+  body.banks-page .key-figures{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .site-nav a::before{display:none}
+}
+
+/* ============================================================
+   باقي الصفحات: الرئيسية، المقارنة، التحليل الفني
+   ============================================================ */
+
+/* أيقونة صغيرة بلون النص (نفس الأداة العامة أعلاه) */
+.hero-date::before,
+.toolbar-heading .eyebrow::before,
+.table-tools-label::before,
+.read-guide summary::before,
+.group-button:not(.favorites-button)::before,
+.mover-title::before,
+.mover-tab::before,
+.cx-ghost::before,
+.cx-label::before,
+.cx-quick button::before,
+.sc-tabs button::before{
+  content:"";display:inline-block;flex:none;width:15px;height:15px;vertical-align:-3px;background:currentColor;
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+
+/* عنوان قسم بأيقونة داخل مربع ذهبي (نفس الأداة العامة أعلاه) */
+.market-summary > h2,.market-movers > h2,.toolbar-heading h2,.sector-heading h3,
+.cx-title h2,.cx-card-head h3,.ta-heading h2{
+  position:relative;display:flex;align-items:center;min-height:30px;padding-inline-start:40px;
+}
+.market-summary > h2::before,.market-movers > h2::before,.toolbar-heading h2::before,.sector-heading h3::before,
+.cx-title h2::before,.cx-card-head h3::before,.ta-heading h2::before{
+  content:"";position:absolute;inset-inline-start:0;top:50%;width:30px;height:30px;margin-top:-15px;border-radius:10px;
+  background:var(--pf-gold-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pf-gold) 30%,transparent);
+}
+.market-summary > h2::after,.market-movers > h2::after,.toolbar-heading h2::after,.sector-heading h3::after,
+.cx-title h2::after,.cx-card-head h3::after,.ta-heading h2::after{
+  content:"";position:absolute;inset-inline-start:7px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--pf-gold);
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+
+/* بطاقة عامة بزوايا دائرية وتوهّج ذهبي خفيف */
+html body .market-summary,
+html body .market-movers,
+html body .workspace .sector-nav,
+html body .cx-controls,
+html body .cx-card,
+html body .ta-panel{
+  border:1px solid var(--pf-line);border-radius:var(--e7-r);
+  background:linear-gradient(180deg,var(--e7-glow),transparent 120px),var(--pf-bg);box-shadow:var(--e7-shadow);
+}
+
+/* وصف تحت الشعار في الشريط العلوي */
+html body .site-bar .hero-date{--ico:var(--i-clock);display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--e7-tile);border:1px solid var(--pf-line)}
+.hero-date::before{width:13px;height:13px;vertical-align:0;color:var(--pf-gold)}
+.cx-page .site-bar .hero-date{--ico:var(--i-compare)}
+
+/* ---------------- الرئيسية: ملخص السوق ---------------- */
+html body .market-summary{padding:14px 16px}
+.market-summary > h2{--ico:var(--i-gauge);justify-content:flex-start!important;gap:10px;color:var(--pf-ink)!important}
+html body .market-date{padding:2px 9px;border-radius:999px;background:var(--e7-tile);border:1px solid var(--pf-line);font-size:10.5px}
+html body .market-summary .market-stats{gap:10px}
+html body .market-summary .market-group{border:1px solid var(--pf-line)!important;border-radius:var(--e7-r-sm);background:var(--e7-tile);padding:12px 14px!important}
+html body .market-group-label{display:flex;align-items:center;gap:6px;font-weight:700}
+html body .market-group-label::before{
+  content:"";width:14px;height:14px;flex:none;background:var(--pf-gold);
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+.market-group-index{--ico:var(--i-candles)}
+.market-group-breadth{--ico:var(--i-users)}
+.market-group-turnover{--ico:var(--i-cash)}
+.market-group-performance{--ico:var(--i-trend)}
+html body .market-group-index .market-group-logo{background:#fff;padding:3px;object-fit:contain}
+/* على الشاشات الكبيرة كان الشعار فوق البلاطة؛ نضعه داخل زاويتها. على الجوال يبقى مكانه الأصلي */
+@media (min-width:981px){
+  html body .market-summary .market-group-index{position:relative}
+  html body .market-group-index .market-group-logo{position:absolute;top:10px;bottom:auto;left:12px;right:auto;inset-inline:auto;width:28px;height:28px;margin:0}
+  html body .market-group-index .market-group-logo{left:12px}
+}
+html body .breadth-bar{height:8px;border-radius:999px;gap:3px}
+html body .breadth-bar i{border-radius:999px}
+
+/* ---------------- الرئيسية: حركة السوق ---------------- */
+html body .market-movers{padding:14px 16px}
+.market-movers > h2{--ico:var(--i-zap);gap:10px;color:var(--pf-ink)!important}
+html body .movers-note{padding:2px 9px;border-radius:999px;background:var(--e7-tile);border:1px solid var(--pf-line);font-size:10.5px}
+html body .mover-grid{gap:10px}
+html body .mover-card,html body .mover-card:nth-child(n){border:1px solid var(--pf-line)!important;border-radius:var(--e7-r-sm);background:var(--e7-tile);padding:10px 12px}
+.mover-title{display:flex;align-items:center;gap:6px}
+.mover-title::before{color:var(--pf-gold)}
+.mover-card[data-mover="gainers"]{--ico:var(--i-logo)}
+.mover-card[data-mover="losers"]{--ico:var(--i-down)}
+.mover-card:not([data-mover="gainers"]):not([data-mover="losers"]){--ico:var(--i-bars)}
+.mover-card[data-mover="gainers"] .mover-title::before{color:var(--green)}
+.mover-card[data-mover="losers"] .mover-title::before{color:var(--red)}
+html body .mover-list li{border-radius:8px}
+html body .mover-list li:hover{background:var(--e7-tile-hover)}
+html body .mover-tabs{border-radius:12px;padding:3px;gap:2px;background:var(--e7-tile);border-color:var(--pf-line)}
+html body .mover-tab{border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.mover-tab[data-mover-tab="gainers"]{--ico:var(--i-logo)}
+.mover-tab[data-mover-tab="losers"]{--ico:var(--i-down)}
+.mover-tab:not([data-mover-tab="gainers"]):not([data-mover-tab="losers"]){--ico:var(--i-bars)}
+.mover-tab::before{width:13px;height:13px;vertical-align:0}
+html body .mover-more{border-radius:10px}
+
+/* ---------------- الرئيسية: أدوات الجدول ---------------- */
+.toolbar-heading h2{--ico:var(--i-grid)}
+html body .toolbar-heading .eyebrow{--ico:var(--i-shield);display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--pf-gold-soft);color:var(--pf-gold)}
+.toolbar-heading .eyebrow::before{width:13px;height:13px;vertical-align:0}
+html body .search-box{border-radius:12px;background:var(--e7-tile);border-color:var(--pf-line)}
+html body .search-box:focus-within{border-color:var(--pf-gold);box-shadow:0 0 0 3px var(--pf-gold-soft)}
+html body .clear-button{border-radius:12px}
+
+html body .workspace .sector-nav{padding:12px 14px}
+html body .group-button,html body .workspace .sector-nav .sector-button{border-radius:999px!important}
+html body .group-button{gap:7px;--ico:var(--i-layers)}
+.group-button::before{width:13px;height:13px;vertical-align:0;opacity:.8}
+html body .group-button.active{box-shadow:0 4px 12px -6px color-mix(in srgb,var(--pf-gold) 80%,transparent)}
+html body .group-button .count,html body .workspace .sector-nav .sector-button .count{padding:1px 7px;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent)}
+.favorites-button .fav-icon{color:var(--pf-gold)}
+html body .group-button.active .fav-icon{color:inherit}
+
+.table-tools-label{--ico:var(--i-columns);display:inline-flex;align-items:center;gap:6px}
+html body .col-switch,html body .eps-switch{border-radius:12px;padding:3px;gap:2px;background:var(--e7-tile);border:1px solid var(--pf-line);display:inline-flex}
+html body .col-switch button,html body .eps-switch button{border-radius:9px;border:0}
+html body .col-switch button[aria-pressed="true"],html body .eps-switch button.selected{box-shadow:0 4px 12px -6px color-mix(in srgb,var(--pf-gold) 80%,transparent)}
+html body .read-guide summary{--ico:var(--i-info);display:inline-flex;align-items:center;gap:6px}
+html body .table-note{border-radius:12px}
+
+.sector-heading h3{--ico:var(--i-table)}
+html body .sector-pill{border-radius:999px;background:var(--e7-tile);border:1px solid var(--pf-line)}
+html body .sections .table-wrap{border-radius:var(--e7-r);border:1px solid var(--pf-line);box-shadow:var(--e7-shadow)}
+html body .fav-toggle{color:var(--pf-gold)}
+/* نسب التغير داخل جدول الشركات كبسولات ملوّنة */
+html body #sectors td .num.up,html body #sectors td .num.down{padding:2px 8px;border-radius:999px;background:color-mix(in srgb,currentColor 12%,transparent)}
+/* نطاق 52 أسبوعًا: شريط متدرّج أحمر ← ذهبي ← أخضر مثل el7 */
+html body .range52-track{height:6px;border:0;border-radius:999px;background:linear-gradient(90deg,#ef4444,#f59e0b 50%,#22c55e)}
+html body .range52-marker{top:-4px;width:4px;height:14px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px var(--pf-bg),0 2px 6px rgba(0,0,0,.5)}
+html body .range52-marker::before{display:none}
+:root[data-theme="light"] .range52-marker{background:var(--pf-ink)}
+
+/* ---------------- المقارنة ---------------- */
+.cx-title h2{--ico:var(--i-compare)}
+html body .cx-ghost{--ico:var(--i-link);display:inline-flex;align-items:center;gap:6px;border-radius:10px}
+html body .cx-controls{overflow:hidden}
+.cx-label{display:inline-flex!important;align-items:center;gap:6px;font-weight:700}
+.cx-label::before{color:var(--pf-gold)}
+.cx-row:nth-child(1){--ico:var(--i-layers)}
+.cx-row:nth-child(2){--ico:var(--i-calendar)}
+.cx-row:nth-child(3){--ico:var(--i-bars)}
+.cx-row:nth-child(4){--ico:var(--i-clock)}
+.cx-row:nth-child(5){--ico:var(--i-building)}
+html body .cx-seg{border-radius:12px;padding:3px;gap:2px;background:var(--e7-tile);border:1px solid var(--pf-line)}
+html body .cx-seg button{border-radius:9px}
+html body .cx-seg button[aria-pressed="true"]{background:var(--pf-gold);color:var(--e7-on-gold)}
+html body .cx-chip{border-radius:999px;background:var(--e7-tile)}
+html body .cx-select select,html body .cx-search{border-radius:10px;background:var(--e7-tile)}
+html body .cx-quick button{display:inline-flex;align-items:center;gap:5px;border-radius:8px}
+.cx-quick button[data-pick="top5"]{--ico:var(--i-logo)}
+.cx-quick button[data-pick="bottom5"]{--ico:var(--i-down)}
+.cx-quick button[data-pick="reset"]{--ico:var(--i-sliders)}
+.cx-quick button::before{width:13px;height:13px;vertical-align:0}
+html body .cx-quick:not(:has(button[data-pick])) button::before{display:none}
+.cx-figures .key-figure dt::before{color:var(--pf-gold)}
+.cx-figures .key-figure:nth-child(1) dt{--ico:var(--i-logo)}
+.cx-figures .key-figure:nth-child(2) dt{--ico:var(--i-down)}
+.cx-figures .key-figure:nth-child(3) dt{--ico:var(--i-scale)}
+.cx-figures .key-figure:nth-child(4) dt{--ico:var(--i-trend)}
+html body .cx-card{overflow:hidden}
+html body .cx-card-head{border-bottom:0;padding:14px 16px}
+#chart-title{--ico:var(--i-bars)}
+#rank-title{--ico:var(--i-list)}
+#table-title{--ico:var(--i-table)}
+html body .cx-card-head h3:empty{padding:0}
+html body .cx-card-head h3:empty::before,html body .cx-card-head h3:empty::after{display:none}
+html body .cx-table-wrap{margin:0 12px 12px;border:1px solid var(--pf-line);border-radius:var(--e7-r-sm)}
+html body .cx-rank li{border-radius:10px}
+html body .cx-legend button{border-radius:999px}
+
+/* ---------------- التحليل الفني ---------------- */
+.ta-heading h2{--ico:var(--i-candles)}
+html body .ta-heading{padding:14px 18px;border:1px solid var(--pf-line);border-radius:var(--e7-r);background:linear-gradient(180deg,var(--e7-glow),transparent 120px),var(--pf-bg);box-shadow:var(--e7-shadow)}
+html body.ta-page .sc-tabs{gap:4px;padding:4px;border:1px solid var(--pf-line);border-radius:14px;background:var(--pf-bg);width:max-content;max-width:100%}
+html body.ta-page .sc-tabs button{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:10px;margin:0;padding:8px 14px}
+html body.ta-page .sc-tabs button:hover{background:var(--e7-tile-hover)}
+html body.ta-page .sc-tabs button[aria-selected="true"]{background:var(--pf-gold);color:var(--e7-on-gold)}
+.sc-tabs button[data-tab-button="chart"]{--ico:var(--i-candles)}
+.sc-tabs button[data-tab-button="scanner"]{--ico:var(--i-key)}
+.sc-tabs button[data-tab-button="watch"]{--ico:var(--i-eye)}
+html body.ta-page .ta-panel{border-radius:var(--e7-r)}
+html body.ta-page .sc-filters{border-radius:var(--e7-r);background:var(--pf-bg)}
+html body.ta-page .sc-filters select,html body.ta-page .sc-filters input{border-radius:10px;background:var(--e7-tile)}
+html body.ta-page .sc-btn,html body.ta-page .sc-open,html body.ta-page .sc-reset{border-radius:10px}
+html body.ta-page .sc-wrap{border-radius:var(--e7-r);box-shadow:var(--e7-shadow)}
+html body.ta-page .sc-card{border-radius:var(--e7-r);overflow:hidden}
+html body.ta-page .sc-block{border-radius:var(--e7-r-sm)}
+html body.ta-page .sc-chip,html body.ta-page .sc-tag,html body.ta-page .sc-status,html body.ta-page .sc-score,html body.ta-page .sc-count{border-radius:999px}
+html body.ta-page .sc-banner{border-radius:12px}
+
+/* ---------------- الشريط العلوي: مساحة تكفي خمسة روابط مع مبدّل المظهر في صف واحد ---------------- */
+html body .site-bar{column-gap:12px}
+html body .site-nav{gap:2px}
+html body .site-nav a{gap:6px;padding:7px 9px}
+
+/* ---------------- المحفظة (portfolio-page.js) ---------------- */
+html body .pf-page{gap:14px}
+/* عنوان القسم: أيقونة داخل مربع ذهبي */
+.pf-title h2,.pf-panel > h3{position:relative;display:flex;align-items:center;min-height:30px;padding-inline-start:40px}
+.pf-title h2{--ico:var(--i-wallet)}
+.pf-panel[data-sec="chart"]{--ico:var(--i-trend)}
+.pf-panel[data-sec="positions"]{--ico:var(--i-briefcase)}
+.pf-panel[data-sec="orders"]{--ico:var(--i-clock)}
+.pf-panel[data-sec="days"]{--ico:var(--i-calendar)}
+.pf-panel[data-sec="trades"]{--ico:var(--i-list)}
+.pf-title h2::before,.pf-panel > h3::before{
+  content:"";position:absolute;inset-inline-start:0;top:50%;width:30px;height:30px;margin-top:-15px;border-radius:10px;
+  background:var(--pf-gold-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pf-gold) 30%,transparent);
+}
+.pf-title h2::after,.pf-panel > h3::after{
+  content:"";position:absolute;inset-inline-start:7px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--pf-gold);
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+html body .pf-panel > h3{margin:0 0 14px;font-size:15px}
+html body .pf-panel > h3 small{padding:3px 10px;border-radius:999px;background:var(--e7-tile);border:1px solid var(--pf-line);font-size:11px;font-weight:600}
+
+/* البطاقة الرئيسية: العنوان + القيمة الإجمالية + توزيع الأسهم والنقد + الأزرار */
+html body .pf-hero{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px 24px;flex-wrap:wrap;padding:18px 20px;
+  border:1px solid color-mix(in srgb,var(--pf-gold) 30%,var(--pf-line));border-radius:var(--e7-r);
+  background:radial-gradient(90% 140% at 100% 0%,var(--pf-gold-soft),transparent 55%),var(--pf-bg);box-shadow:var(--e7-shadow);
+}
+.pf-hero-main{display:grid;gap:14px;flex:1 1 420px;min-width:0}
+html body .pf-hero .pf-title{display:block}
+html body .pf-hero .pf-title h2{font-size:20px;margin:0}
+html body .pf-hero .pf-title p{margin:6px 0 0;font-size:12px;color:var(--pf-muted)}
+.pf-hero-value{display:grid;gap:6px}
+.pf-hero-label{font-size:12px;font-weight:700;color:var(--pf-muted)}
+.pf-hero-value > b{font-size:38px;line-height:1.1;font-weight:800;color:var(--pf-ink);letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.pf-hero-pills{display:flex;flex-wrap:wrap;gap:6px}
+.pf-hero-pills .pf-chip{font-size:12px;padding:4px 11px}
+.pf-alloc{display:grid;gap:7px;max-width:520px}
+.pf-alloc-bar{height:8px;border-radius:999px;background:var(--pf-track);overflow:hidden;display:flex;justify-content:flex-start}
+.pf-alloc-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#fbbf24,var(--pf-gold))}
+.pf-alloc-legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11.5px;color:var(--pf-muted)}
+.pf-alloc-legend span{display:inline-flex;align-items:center;gap:6px}
+.pf-alloc-legend i{width:9px;height:9px;border-radius:3px;flex:none}
+.pf-alloc-legend i.s{background:var(--pf-gold)}
+.pf-alloc-legend i.c{background:var(--pf-track);box-shadow:inset 0 0 0 1px var(--pf-muted)}
+.pf-alloc-legend bdi{color:var(--pf-ink);font-weight:700}
+/* الأزرار: الأساسي ذهبي، والباقي أزرار هادئة بأيقونات */
+html body .pf-hero .pf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:0 0 auto;min-width:300px}
+html body .pf-hero .pf-actions .primary{grid-column:1/-1;min-height:42px;font-size:14px}
+html body .pf-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:10px;border-color:var(--pf-line);background:var(--e7-tile);font-weight:700}
+html body .pf-btn.primary{background:linear-gradient(135deg,#fbbf24,var(--pf-gold));border-color:transparent;color:var(--e7-on-gold);box-shadow:0 8px 20px -10px color-mix(in srgb,var(--pf-gold) 90%,transparent)}
+html body .pf-btn.primary:hover{color:var(--e7-on-gold);filter:brightness(1.07)}
+.pf-btn[data-pf-export],.pf-btn[data-pf-import],.pf-btn[data-pf-reset]{--ico:var(--i-download)}
+.pf-btn[data-pf-import]{--ico:var(--i-upload)}
+.pf-btn[data-pf-reset]{--ico:var(--i-reset)}
+.pf-btn[data-pf-export]::before,.pf-btn[data-pf-import]::before,.pf-btn[data-pf-reset]::before{
+  content:"";width:15px;height:15px;flex:none;background:currentColor;-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+
+/* بطاقات الأرقام */
+html body .pf-cards{gap:10px}
+html body .pf-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+html body .pf-stats{grid-template-columns:repeat(5,minmax(0,1fr));margin:0 0 14px}
+html body .pf-card{gap:6px;padding:14px 16px;border:1px solid var(--pf-line);border-radius:var(--e7-r-sm);background:var(--e7-tile);transition:border-color .15s}
+html body .pf-card:hover{border-color:color-mix(in srgb,var(--pf-gold) 40%,var(--pf-line))}
+html body .pf-card > span{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--pf-muted)}
+html body .pf-card > span::before{
+  content:"";width:15px;height:15px;flex:none;background:var(--pf-gold);-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+html body .pf-card > b{font-size:22px;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums;text-align:start;direction:ltr;unicode-bidi:isolate;justify-self:start}
+html body .pf-card > small{font-size:11.5px;color:var(--pf-muted)}
+/* «مقابل S&P 500»: الرقم ثم الوحدة بخط أصغر (كان «ن.م.» ينقلب قبل الرقم) */
+html body .pf-card > b.pf-pp{display:flex;align-items:baseline;gap:6px;direction:rtl}
+.pf-card > b.pf-pp bdi{direction:ltr}
+.pf-card > b.pf-pp em{font-style:normal;font-size:12px;font-weight:700;opacity:.8}
+.pf-card[data-k="day"]{--ico:var(--i-trend)}
+.pf-card[data-k="total"]{--ico:var(--i-logo)}
+.pf-card[data-k="bench"]{--ico:var(--i-scale)}
+.pf-card[data-k="cash"]{--ico:var(--i-cash)}
+.pf-card[data-k="best"]{--ico:var(--i-logo)}
+.pf-card[data-k="worst"]{--ico:var(--i-down)}
+.pf-card[data-k="dd"]{--ico:var(--i-shield)}
+.pf-card[data-k="realized"]{--ico:var(--i-coins)}
+.pf-card[data-k="unrealized"]{--ico:var(--i-hourglass)}
+
+/* اللوحات */
+html body .pf-panel{padding:16px 18px;border:1px solid var(--pf-line);border-radius:var(--e7-r);background:linear-gradient(180deg,var(--e7-glow),transparent 120px),var(--pf-bg);box-shadow:var(--e7-shadow)}
+html body .pf-legend{gap:6px}
+html body .pf-legend > span{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;background:var(--e7-tile);border:1px solid var(--pf-line);font-size:11px;font-weight:600}
+html body .pf-tip{border-radius:10px;border-color:var(--pf-line);background:var(--pf-bg);box-shadow:0 10px 24px -12px rgba(0,0,0,.6)}
+
+/* الجداول */
+html body .pf-page .pf-table-wrap{border:1px solid var(--pf-line);border-radius:var(--e7-r-sm);background:var(--e7-tile)}
+/* الجداول العامة في الموقع بأعمدة متساوية (table-layout:fixed)؛ هنا تأخذ الأعمدة عرض محتواها فلا يتداخل الرمز مع الكمية */
+html body .pf-page .pf-table{table-layout:auto}
+html body .pf-page .pf-table thead th{padding:11px 12px;font-size:11.5px;font-weight:700;color:var(--pf-muted);background:color-mix(in srgb,var(--pf-line) 45%,transparent);border-bottom:1px solid var(--pf-line)}
+html body .pf-page .pf-table tbody td{padding:11px 12px;font-size:13px;vertical-align:middle}
+html body .pf-page .pf-table tbody tr:hover td{background:color-mix(in srgb,var(--pf-gold) 6%,transparent)}
+html body .pf-table th.pf-n,html body .pf-table td.pf-n{text-align:center}
+.pf-table td.pf-n > b{font-weight:800}
+.pf-table .sym{gap:8px}
+.pf-table .sym .symbol-badge{padding:2px 7px;border-radius:999px;background:var(--pf-gold-soft);color:var(--pf-gold);font-size:10.5px;font-weight:800}
+.pf-table .co-logo-sm{background:#fff;padding:2px;object-fit:contain}
+.pf-sub{display:block;margin-top:3px;font-size:11px;font-weight:700;color:var(--pf-muted);direction:ltr}
+.pf-muted{color:var(--pf-muted)}
+.pf-time{color:var(--pf-muted);font-variant-numeric:tabular-nums;direction:ltr;text-align:right}
+/* كبسولات القيم الموجبة والسالبة */
+.pf-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--pf-ink);background:color-mix(in srgb,var(--pf-muted) 12%,transparent);white-space:nowrap;direction:ltr;unicode-bidi:isolate}
+.pf-hero-pills .pf-chip{direction:rtl}
+.pf-chip.pf-up{color:var(--cq-up,#22c55e);background:color-mix(in srgb,var(--cq-up,#22c55e) 13%,transparent)}
+.pf-chip.pf-down{color:var(--cq-down,#f05252);background:color-mix(in srgb,var(--cq-down,#f05252) 13%,transparent)}
+.pf-chip bdi{direction:ltr}
+/* نوع الصفقة */
+.pf-side{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:800}
+.pf-side.buy{color:var(--cq-up,#22c55e);background:color-mix(in srgb,var(--cq-up,#22c55e) 13%,transparent)}
+.pf-side.sell{color:var(--cq-down,#f05252);background:color-mix(in srgb,var(--cq-down,#f05252) 13%,transparent)}
+/* وزن المركز */
+.pf-w{display:block;width:64px;height:5px;margin:0 auto;border-radius:999px;background:var(--pf-track);overflow:hidden}
+.pf-w i{display:block;height:100%;border-radius:999px;background:var(--pf-gold)}
+/* أزرار شراء/بيع داخل الجدول: كبسولات شفافة بدل الألوان الصارخة */
+.pf-act{white-space:nowrap;text-align:left}
+html body .pf-act .pf-mini{margin-inline-start:4px;padding:4px 12px;border-radius:999px;font-weight:800;border:1px solid transparent}
+html body .pf-act .pf-mini.buy{color:var(--cq-up,#22c55e);background:color-mix(in srgb,var(--cq-up,#22c55e) 13%,transparent);border-color:color-mix(in srgb,var(--cq-up,#22c55e) 35%,transparent)}
+html body .pf-act .pf-mini.sell{color:var(--cq-down,#f05252);background:color-mix(in srgb,var(--cq-down,#f05252) 13%,transparent);border-color:color-mix(in srgb,var(--cq-down,#f05252) 35%,transparent)}
+html body .pf-act .pf-mini:hover{filter:brightness(1.2)}
+html body .pf-cancel-btn{border-radius:999px;padding:3px 12px}
+/* ملاحظة أسفل الصفحة */
+html body .pf-note-box{margin:0;padding:12px 16px 12px 16px;padding-inline-start:40px;position:relative;border:1px dashed var(--pf-line);border-radius:var(--e7-r-sm);font-size:11.5px;--ico:var(--i-info)}
+html body .pf-note-box::before{content:"";position:absolute;inset-inline-start:14px;top:15px;width:16px;height:16px;background:var(--pf-muted);-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
+
+/* نافذة التداول */
+html body .pf-dialog{border-radius:var(--e7-r)}
+html body .pf-tabs,html body .pf-mode{border-radius:12px;overflow:hidden}
+html body .pf-field input,html body .pf-search input,html body .pf-limit input{border-radius:10px}
+html body .pf-quick button,html body .pf-confirm,html body .pf-mini,html body .pf-cancel-btn{border-radius:10px}
+
+@media (max-width:980px){
+  html body .pf-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  html body .pf-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  html body .pf-hero{padding:14px}
+  .pf-hero-value > b{font-size:30px}
+  html body .pf-hero .pf-actions{min-width:0;width:100%}
+  html body .pf-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  html body .pf-card > b{font-size:18px}
+  html body .pf-panel{padding:14px 12px}
+}
+
+/* ---------------- أعمدة المقارنة (company.js → barChart) ---------------- */
+.e7c{--e7c-up:var(--pf-gold);--e7c-up-hi:#fbbf24;--e7c-dn:var(--cq-down,#f05252)}
+:root[data-theme="light"] .e7c{--e7c-up-hi:#f59e0b}
+.e7c-head{display:flex;flex-wrap:wrap;gap:6px 8px;margin:2px 4px 6px}
+.e7c-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:11.5px;font-weight:700;color:var(--pf-muted);background:var(--e7-tile,transparent);border:1px solid var(--pf-line)}
+.e7c-pill i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.e7c-pill bdi{direction:ltr;color:var(--pf-ink);font-variant-numeric:tabular-nums}
+.e7c-pill.up{color:var(--cq-up,#22c55e);background:color-mix(in srgb,var(--cq-up,#22c55e) 10%,transparent);border-color:color-mix(in srgb,var(--cq-up,#22c55e) 35%,transparent)}
+.e7c-pill.down{color:var(--cq-down,#f05252);background:color-mix(in srgb,var(--cq-down,#f05252) 10%,transparent);border-color:color-mix(in srgb,var(--cq-down,#f05252) 35%,transparent)}
+.e7c-pill.up bdi,.e7c-pill.down bdi{color:inherit}
+.e7c-pill.gold{color:var(--pf-gold);background:var(--pf-gold-soft);border-color:color-mix(in srgb,var(--pf-gold) 35%,transparent)}
+.e7c svg{display:block;margin:0 auto;font-family:inherit;overflow:visible}
+.e7c-grid{stroke:var(--pf-muted);stroke-opacity:.22;stroke-dasharray:3 5}
+.e7c-zero{stroke-opacity:.5;stroke-dasharray:none}
+.e7c-ytick{fill:var(--pf-muted);font-size:11px;font-variant-numeric:tabular-nums}
+.e7c-up-a{stop-color:var(--e7c-up);stop-opacity:.7}.e7c-up-b{stop-color:var(--e7c-up);stop-opacity:.06}
+.e7c-upl-a{stop-color:var(--e7c-up-hi);stop-opacity:1}.e7c-upl-b{stop-color:var(--e7c-up);stop-opacity:.22}
+.e7c-dn-a{stop-color:var(--e7c-dn);stop-opacity:.7}.e7c-dn-b{stop-color:var(--e7c-dn);stop-opacity:.06}
+.e7c-dnl-a{stop-color:var(--e7c-dn);stop-opacity:1}.e7c-dnl-b{stop-color:var(--e7c-dn);stop-opacity:.22}
+.e7c-glow{flood-color:var(--e7c-up);flood-opacity:.45}
+.e7c-cap{fill:var(--e7c-up);opacity:.85}
+.e7c-bar.is-neg .e7c-cap{fill:var(--e7c-dn)}
+.e7c-bar.is-last .e7c-cap{fill:var(--e7c-up-hi);opacity:1}
+.e7c-bar.is-last.is-neg .e7c-cap{fill:var(--e7c-dn)}
+.e7c-hit{fill:transparent}
+.e7c-val{fill:var(--pf-ink);font-size:13px;font-weight:800;text-anchor:middle;font-variant-numeric:tabular-nums}
+.e7c-bar:not(.is-last) .e7c-val{fill:color-mix(in srgb,var(--pf-ink) 80%,transparent)}
+.e7c-x{fill:var(--pf-muted);font-weight:600;text-anchor:middle}
+.e7c-bar.is-last .e7c-x{fill:var(--pf-gold);font-weight:800}
+.e7c-chip rect{fill:color-mix(in srgb,var(--pf-muted) 14%,transparent)}
+.e7c-chip text{font-size:10.5px;font-weight:800;text-anchor:middle;fill:var(--pf-muted);direction:ltr;unicode-bidi:plaintext}
+.e7c-chip.up rect{fill:color-mix(in srgb,var(--cq-up,#22c55e) 16%,transparent)}.e7c-chip.up text{fill:var(--cq-up,#22c55e)}
+.e7c-chip.down rect{fill:color-mix(in srgb,var(--cq-down,#f05252) 16%,transparent)}.e7c-chip.down text{fill:var(--cq-down,#f05252)}
+/* المرور: يبرز العمود ويخفت الباقي */
+.e7c-bar{transition:opacity .15s}
+.e7c svg:hover .e7c-bar:not(:hover){opacity:.45}
+.e7c-bar:hover .e7c-fill{filter:brightness(1.2)}
+/* ظهور الأعمدة بالتتابع */
+.e7c-fill,.e7c-cap{transform-box:fill-box;transform-origin:50% 100%;animation:e7c-grow .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 70ms)}
+.e7c-bar.is-neg .e7c-fill,.e7c-bar.is-neg .e7c-cap{transform-origin:50% 0}
+.e7c-val,.e7c-chip{animation:e7c-fade .4s ease both;animation-delay:calc(var(--i) * 70ms + .35s)}
+@keyframes e7c-grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes e7c-fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.e7c-fill,.e7c-cap,.e7c-val,.e7c-chip{animation:none}}
+
+/* ============================================================
+   إضافات السوق السعودي: روابط وأقسام غير موجودة في الموقع الأمريكي
+   ============================================================ */
+:root{
+  --i-sparkles:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z'/%3E%3Cpath d='M20 3v4M22 5h-4M4 17v2M5 18H3'/%3E%3C/svg%3E");
+  --i-megaphone:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 11 18-5v12L3 14v-3z'/%3E%3Cpath d='M11.6 16.8a3 3 0 1 1-5.8-1.6'/%3E%3C/svg%3E");
+}
+
+/* الشريط العلوي: رابط النتائج يتغير حسب القطاع، والمحلل الذكي بدل المحفظة */
+.site-nav a[data-results-link]{--ico:var(--i-results)}
+.site-nav a[href^="ai-analyst"]{--ico:var(--i-sparkles)}
+.site-bar .site-name a{color:inherit;text-decoration:none}
+
+/* إعلانات الشركة وموعد النتائج: نفس بطاقة النبذة (company-profile) */
+.ca-head{padding:14px 18px!important;border-bottom:0!important;flex-wrap:wrap}
+.ca-head h3{position:relative;display:flex;align-items:center;min-height:30px;padding-inline-start:40px;font-size:14px!important;--ico:var(--i-megaphone)}
+.ca-head h3::before{
+  content:"";position:absolute;inset-inline-start:0;top:50%;width:30px;height:30px;margin-top:-15px;border-radius:10px;
+  background:var(--pf-gold-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pf-gold) 30%,transparent);
+}
+.ca-head h3::after{
+  content:"";position:absolute;inset-inline-start:7px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--pf-gold);
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+#ced-title{--ico:var(--i-calendar)}
+html body .ca-filters{margin:0 14px 10px;padding:4px;gap:3px;border:1px solid var(--pf-line);border-radius:12px;background:var(--e7-tile)}
+html body .ca-filters button{border:0;border-radius:9px;min-height:30px;padding:5px 12px;transition:background .15s,color .15s}
+html body .ca-filters button:hover{background:var(--e7-tile-hover)}
+html body .ca-filters button[aria-pressed="true"]{background:var(--pf-gold);color:var(--e7-on-gold);box-shadow:0 4px 12px -6px color-mix(in srgb,var(--pf-gold) 80%,transparent)}
+html body .ca-filters button b{padding:0 6px;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);color:inherit}
+html body .company-announcements .ca-list{margin:0 14px 14px;border:1px solid var(--pf-line);border-radius:var(--e7-r-sm);background:var(--e7-tile);overflow:hidden}
+html body .ca-item summary{transition:background .15s}
+html body .ca-item summary:hover{background:var(--e7-tile-hover)}
+html body .ca-cat,html body .ca-new{border-radius:999px}
+html body .ca-tile{border-radius:var(--e7-r-sm)}
+html body .ced-body{gap:10px;padding:0 14px 14px}
+html body .ced-col{border:1px solid var(--pf-line)!important;border-radius:var(--e7-r-sm);background:var(--e7-tile)}
+html body .ced-cd{border-radius:999px;padding:2px 10px}
+html body .ced-win{border-radius:999px}
+
+/* مكرر الربحية الحالي والنتائج الربعية */
+html body .bank-current-pe-card{border-radius:var(--e7-r);border-color:var(--pf-line);background:linear-gradient(180deg,var(--e7-glow),transparent 120px),var(--pf-bg);box-shadow:var(--e7-shadow)}
+html body .bank-current-pe-card strong{color:var(--pf-gold)}
+html body.banks-page .bank-charts-heading{border-bottom:0;padding-bottom:0}
+
+/* الرئيسية: فلتر مواعيد النتائج وكبسولة تغير القطاع */
+html body .sector-performance{border-radius:999px}
+html body .bank-results-link{border-radius:999px}
+
+/* ---------------- أعمدة المقارنة في صفحات النتائج (e7-bars.js) ----------------
+   الرسم نفسه من *-charts.mjs؛ e7-bars.js يعيد تلوين الأعمدة بتدرّج ذهبي بزوايا علوية دائرية،
+   ويبرز آخر سنة، ويضيف كبسولات التغير وملخص أعلى الرسم كما في الموقع الأمريكي. */
+html body .bank-chart-card{border-radius:var(--e7-r-sm);border:1px solid var(--pf-line);background:var(--e7-tile)}
+.bank-chart-card.e7c .e7c-head{margin:6px 0 10px}
+.bank-chart-svg.e7c-svg .chart-grid{stroke:var(--pf-muted);stroke-opacity:.22;stroke-dasharray:3 5}
+.bank-chart-svg.e7c-svg .chart-zero-baseline{stroke-opacity:.5}
+.bank-chart-svg.e7c-svg .chart-axis-label{fill:var(--pf-muted)}
+.bank-chart-svg.e7c-svg .chart-value{font-weight:800;font-size:13px}
+.bank-chart-svg.e7c-svg .e7c-bar:not(.is-last) .chart-value{fill:color-mix(in srgb,var(--pf-ink) 80%,transparent)}
+.bank-chart-svg.e7c-svg .chart-year{font-weight:600}
+.bank-chart-svg.e7c-svg .e7c-bar.is-last .chart-year{fill:var(--pf-gold);font-weight:800}
+.bank-chart-svg.e7c-svg .chart-bar:hover{opacity:1}
+.bank-chart-svg.e7c-svg:hover .e7c-bar:not(:hover){opacity:.45}
+.bank-chart-svg.e7c-svg .e7c-bar:hover .e7c-fill{filter:brightness(1.2)}
+.e7c-fill.e7c-series{fill:var(--e7c-series)}
+.table-tools-label:has(+ .earn-filter){--ico:var(--i-calendar)}
+html body .earn-filter button b{padding:0 6px;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);opacity:1}
+
+/* ---------------- المحلل الذكي (ai-analyst.html) ---------------- */
+html body .ai-card{border:1px solid var(--pf-line);border-radius:var(--e7-r);overflow:hidden;background:linear-gradient(180deg,var(--e7-glow),transparent 120px),var(--pf-bg);box-shadow:var(--e7-shadow)}
+.ai-title h2{position:relative;display:flex;align-items:center;min-height:30px;padding-inline-start:40px;--ico:var(--i-sparkles)}
+.ai-title h2::before,.ai-card-head h3::before{
+  content:"";position:absolute;inset-inline-start:0;top:50%;width:30px;height:30px;margin-top:-15px;border-radius:10px;
+  background:var(--pf-gold-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pf-gold) 30%,transparent);
+}
+.ai-title h2::after,.ai-card-head h3::after{
+  content:"";position:absolute;inset-inline-start:7px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--pf-gold);
+  -webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat;
+}
+.ai-card-head h3{position:relative;display:flex;align-items:center;min-height:30px;padding-inline-start:40px;--ico:var(--i-info)}
+.ai-card:nth-of-type(1) .ai-card-head h3{--ico:var(--i-layers)}
+.ai-card:nth-of-type(2) .ai-card-head h3{--ico:var(--i-list)}
+.ai-card:nth-of-type(3) .ai-card-head h3{--ico:var(--i-sliders)}
+html body .ai-card-head{border-bottom:0}
+html body .ai-card-head small{padding:2px 9px;border-radius:999px;background:var(--e7-tile);border:1px solid var(--pf-line)}
+html body .ai-scope button,html body .ai-chips button,html body .ai-sugg button{border-radius:999px}
+html body .ai-scope button[aria-pressed="true"]{box-shadow:0 4px 12px -6px color-mix(in srgb,var(--pf-gold) 80%,transparent)}
+html body .ai-pick select,html body .ai-pick input,html body .ai-search input,html body .ai-settings select,html body .ai-settings input{border-radius:10px}
+html body .ai-chat{border-radius:var(--e7-r-sm);border:1px solid var(--pf-line);background:var(--e7-tile)}
+html body .ai-send,html body .ai-compose button{border-radius:12px}
+html body .msg-body{border-radius:var(--e7-r-sm)}
+html body .ai-card button:not(.ai-send):not([data-scope]){border-radius:10px}
