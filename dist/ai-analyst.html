@@ -62,6 +62,8 @@
     .ai-chip:hover{color:var(--ink);border-color:var(--teal);background:color-mix(in srgb,var(--teal) 8%,var(--white))}
     .ai-chip:disabled{opacity:.45;cursor:not-allowed}
     .ai-chat{min-height:440px;max-height:72vh;overflow:auto;padding:20px 16px;display:flex;flex-direction:column;gap:18px;background:var(--bg);scroll-behavior:smooth}
+    /* بطاقة الرد لا تنكمش داخل المحادثة: الإجابة الطويلة تظهر كاملة والتمرير يكون في المحادثة نفسها */
+    .ai-chat > *{flex-shrink:0}
     .ai-empty{margin:auto;max-width:460px;padding:28px 12px;text-align:center;color:var(--muted);font-size:13px;line-height:1.9}
     .ai-empty::before{content:"";display:block;width:52px;height:52px;margin:0 auto 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel) url(favicon-32x32.png?v=20261120-favicon2) center/30px no-repeat}
     .ai-empty b{display:block;margin-bottom:6px;font-size:17px;color:var(--ink)}
@@ -494,6 +496,9 @@ chat.addEventListener("click", e => {
   const b = e.target.closest(".msg-copy"); if (!b) return;
   navigator.clipboard?.writeText(b.closest(".msg").querySelector(".msg-body").innerText).then(() => { b.textContent = "تم النسخ"; setTimeout(() => b.textContent = "نسخ", 1500); }).catch(() => {});
 });
+// يتابع المحادثة للأسفل أثناء الكتابة فقط إذا كان القارئ في آخرها، ولا يسحبه إن صعد ليقرأ.
+const atEnd = (gap = 120) => { const c = $("chat"); return c.scrollHeight - c.scrollTop - c.clientHeight < gap; };
+const toEnd = () => $("chat").scrollTo({ top: $("chat").scrollHeight, behavior: "instant" });
 const grow = () => { const q = $("q"); q.style.height = "auto"; q.style.height = Math.min(q.scrollHeight + 2, 180) + "px"; };
 $("q").addEventListener("input", grow);
 $("compose").addEventListener("submit", () => setTimeout(grow));
@@ -525,7 +530,7 @@ async function ask(question, label){
   const card = document.createElement("article"); card.className = "msg bot";
   card.innerHTML = `<header class="msg-head"><img src="favicon-32x32.png?v=20261120-favicon2" alt=""><b>المحلل الذكي</b><span class="msg-model">${esc(modelEl.selectedOptions[0]?.textContent.split(" — ")[0] || "")}</span></header><div class="msg-body"><span class="ai-thinking"><span class="typing"><i></i><i></i><i></i></span>المحلل يقرأ البيانات…</span></div>`;
   const bot = card.querySelector(".msg-body");
-  chat.append(card); chat.scrollTop = chat.scrollHeight;
+  chat.append(card); toEnd();
   const t0 = performance.now(), model = modelEl.value;
   const key = apiKey();
   let answer = "", usage = null, remaining = null, offline = !key && !ENDPOINT, failure = "";
@@ -564,7 +569,7 @@ async function ask(question, label){
         if (c?.finish_reason) fin = c.finish_reason;
         if (j.usage) usage = usage ? { prompt_tokens: usage.prompt_tokens + (j.usage.prompt_tokens || 0), completion_tokens: usage.completion_tokens + (j.usage.completion_tokens || 0) } : j.usage;
       }
-      if (out && !(hide && looksLikePick(out))) { bot.innerHTML = md(out); chat.scrollTop = chat.scrollHeight; }
+      if (out && !(hide && looksLikePick(out))) { const follow = atEnd(); bot.innerHTML = md(out); if (follow) toEnd(); }
     }
     if (fin === "length" && out.trim()) out += "\n\n**تنبيه:** توقفت الإجابة لأنها بلغت الحد الأقصى للطول. اطلب «أكمل» لمتابعتها.";
     if (!out.trim()) {
@@ -613,7 +618,7 @@ async function ask(question, label){
     ? `<span class="demo">قراءة آلية — ليست من الذكاء الاصطناعي</span>`
     : `${inT!=null?`<span>دخل <span class="n">${fmt(inT,0)}</span> توكن · خرج <span class="n">${fmt(outT,0)}</span></span>`:""}${remaining!=null?`<span>تبقّى لك اليوم <span class="n">${remaining}</span> سؤال</span>`:""}`;
   card.insertAdjacentHTML("beforeend", `<footer class="msg-meta">${meta}<span><span class="n">${((performance.now()-t0)/1000).toFixed(1)}</span> ث</span>${failure ? "" : `<button type="button" class="msg-copy">نسخ</button>`}</footer>`);
-  chat.scrollTop = chat.scrollHeight; busy = false; setEnabled(true); updateMeter();
+  if (atEnd(200)) toEnd(); busy = false; setEnabled(true); updateMeter();
   if (key) loadAccount();
 }
 
