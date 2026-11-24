@@ -117,7 +117,7 @@ function niceTicks(lo, hi, count=5){
   return ticks;
 }
 // هل تتسع الأعمدة لشعار فوق كل عمود؟ إن لم تتسع تُلوَّن الأعمدة بألوان الشركات
-const fullBars = (d, w) => !d.noLogos && d.view==='bars' && (w-130)/d.periods.length*0.8/d.companies.length >= 40;
+const fullBars = (d, w) => d.view==='bars' && (w-130)/d.periods.length*0.8/d.companies.length >= 40;
 function drawChart(ctx, P, d, x, y, w, h){
   const yrs = d.periods, list = d.companies, n = list.length, bars = d.view==='bars';
   const vals = list.flatMap(c => c.values).filter(v => v!=null);
@@ -126,7 +126,7 @@ function drawChart(ctx, P, d, x, y, w, h){
   if(bars || (lo>=0 && lo<hi*0.5)) lo = Math.min(0, lo);
   if(bars) hi = Math.max(0, hi);
   if(lo===hi){ lo -= Math.abs(lo)*0.1 || 1; hi += Math.abs(hi)*0.1 || 1; }
-  const ticks = niceTicks(lo, hi, d.tickCount || 5), step = ticks[1]-ticks[0]; lo = ticks[0]; hi = ticks.at(-1);
+  const ticks = niceTicks(lo, hi), step = ticks[1]-ticks[0]; lo = ticks[0]; hi = ticks.at(-1);
   const TS = 24, LS = 26, tickText = ticks.map(t => d.axisFmt(t, step));
   const ml = Math.max(...tickText.map(t => measure(ctx, t, TS))) + 20;
   const gw0 = (w-ml-10)/yrs.length;
@@ -306,98 +306,69 @@ function layoutWide(ctx, P, d, S, key, brand, parts){
 }
 
 
-/* ---------- عدة بنود: بطاقة لكل بند ---------- */
-// صفوف البند: الشعار والاسم يمينًا، القيمة يسارًا والتغير تحتها، وشريط بينهما
-function drawRows(ctx, P, rows, x0, y, x1, rowH){
-  const w = x1-x0, k = Math.max(0.7, Math.min(1.3, rowH/70)), two = rowH >= 62;
-  const L = Math.min(44*k, rowH-12), nameSize = Math.max(20, 26*k), valSize = Math.max(22, 30*k), small = Math.max(18, 19*Math.min(k, 1.15));
-  const vs = rows.map(r => r.v).filter(v => v!=null), lo = Math.min(0, ...vs), hi = Math.max(0, ...vs), span = hi-lo || 1;
-  const nameW = Math.min(w*0.4, Math.max(100, ...rows.map(r => measure(ctx, r.company.name, nameSize, 700))));
-  const valW = Math.min(w*0.34, Math.max(...rows.map(r => Math.max(measure(ctx, r.text, valSize, 800), two ? measure(ctx, r.delta, small, 700) : 0))) + 14);
-  rows.forEach((r, i) => {
-    const ry = y+i*rowH, mid = ry+rowH/2;
-    if(i){ ctx.beginPath(); ctx.moveTo(x0, ry); ctx.lineTo(x1, ry); ctx.strokeStyle = P.line; ctx.lineWidth = 1; ctx.stroke(); }
-    logo(ctx, P, r.company, x1-L, mid-L/2, L, r.company.color);
-    txt(ctx, r.company.name, x1-L-14, mid+nameSize*0.36, { size:nameSize, weight:700, color:P.ink, max:nameW });
-    const vy = two && r.delta ? mid+2 : mid+valSize*0.36;
-    txt(ctx, r.text, x0, vy, { size:valSize, weight:800, color: r.v!=null && r.v<0 ? P.neg : P.ink, align:'left', dir:'ltr', max:valW });
-    if(two && r.delta) txt(ctx, r.delta, x0, mid+30*k, { size:small, weight:700, color: r.dir>0 ? P.up : r.dir<0 ? P.down : P.muted, align:'left', max:valW });
-    const t0 = x0+valW+10, t1 = x1-L-14-nameW-18, th = 11*Math.min(k, 1.2);
-    if(t1-t0 > 50){
-      rr(ctx, t0, mid-th/2, t1-t0, th, th/2); ctx.fillStyle = P.track; ctx.fill();
-      if(r.v!=null){
-        const X = v => t0+(v-lo)/span*(t1-t0), fx = Math.min(X(0), X(r.v)), fw = Math.max(4, Math.abs(X(r.v)-X(0)));
-        const g = ctx.createLinearGradient(fx, 0, fx+fw, 0), col = r.v<0 ? P.neg : r.company.color;
-        g.addColorStop(r.v<0 ? 1 : 0, alpha(col, 1)); g.addColorStop(r.v<0 ? 0 : 1, alpha(col, .55));
-        rr(ctx, fx, mid-th/2, fw, th, th/2); ctx.fillStyle = g; ctx.fill();
-        if(lo < 0){ ctx.fillStyle = P.zero; ctx.fillRect(X(0)-1, mid-th, 2, th*2); }
-      }
-    }
-  });
+/* ---------- عدة بنود: مواجهة بين شركتين ---------- */
+// الشركة الأولى يمينًا والثانية يسارًا، والبنود في العمود الأوسط، وقيمة كل شركة تحت اسمها.
+function glow(ctx, x, y, r, color){
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, alpha(color, .22)); g.addColorStop(1, alpha(color, 0));
+  ctx.fillStyle = g; ctx.fillRect(x-r, y-r, r*2, r*2);
 }
-// هل تُرسم للبند فترات؟ بنود «التقييم الحالي» أو السنة الواحدة قيم فقط
-const hasChart = (m, parts) => parts.chart && m.periods.length > 1;
-const CARD_HEAD = 70, CARD_FOOT = 14;
-function drawMetricCard(ctx, P, d, m, x, y, w, h, parts, rowCap){
-  card(ctx, P, x, y, w, h, 22);
-  const pad = 26, x0 = x+pad, x1 = x+w-pad, n = d.companies.length;
-  const tw = txt(ctx, m.label, x1, y+48, { size:32, weight:800, color:P.gold, max:(w-pad*2)*0.58 });
-  txt(ctx, m.note, x0, y+46, { size:21, weight:600, color:P.muted, align:'left', max:w-pad*2-tw-20 });
-  let top = y+CARD_HEAD; const bottom = y+h-CARD_FOOT;
-  const chart = hasChart(m, parts), rows = parts.rank || !chart;
-  // بطاقة عريضة قصيرة (الصورة العرضية): الرسم يمينًا والقيم يسارًا بدل أن تضغط القيم الرسم
-  if(chart && rows && w >= 760 && h < w*0.5){
-    const rw = Math.round((w-pad*2)*0.42), cxw = w-pad*2-rw-24, rH = Math.max(30, Math.min(80, (bottom-top)/n));
-    const sub = { view:'bars', noLogos:true, tickCount: 4, periods:m.periods, fmt:m.fmt, axisFmt:m.axisFmt, companies: d.companies.map((c, i) => ({ ...c, values:m.values[i] })) };
-    drawChart(ctx, P, sub, x1-cxw-6, top-4, cxw+12, bottom-top+4);
-    drawRows(ctx, P, m.rows, x0, top+Math.max(0, (bottom-top-rH*n)/2), x0+rw, rH);
-    return;
-  }
-  const rowH = rows ? Math.max(30, Math.min(rowCap, (bottom-top-(chart ? 200 : 0))/n)) : 0;
-  const rowsH = rowH*n, chartH = bottom-top-rowsH-(rows ? 10 : 0);
-  if(chart){
-    const sub = { view:'bars', noLogos:true, tickCount: chartH < 300 ? 3 : 4, periods:m.periods, fmt:m.fmt, axisFmt:m.axisFmt, companies: d.companies.map((c, i) => ({ ...c, values:m.values[i] })) };
-    drawChart(ctx, P, sub, x0-6, top-4, w-pad*2+12, chartH);
-    top += chartH+10;
-  }
-  // القيم وحدها: تتوسط البطاقة إن لم تملأها
-  if(rows) drawRows(ctx, P, m.rows, x0, chart ? top : top+Math.max(0, (bottom-top-rowsH)/2), x1, rowH);
-}
-// البطاقات في صفوف بترتيب الاختيار: بطاقة الرسم في صف مع بطاقات رسم، وبطاقة القيم مع بطاقات قيم.
-// صف القيم يأخذ ارتفاعه الطبيعي، وما بقي يُقسم على صفوف الرسوم.
-function layoutMulti(ctx, P, d, S, key, brand, parts){
-  const W = S.w, H = S.h, wide = W > H, PAD = 56, x0 = PAD, x1 = W-PAD, CW = x1-x0, GAP = wide ? 22 : 26;
+function layoutVersus(ctx, P, d, S, key, brand){
+  const W = S.w, H = S.h, wide = W > H, PAD = 56, x0 = PAD, x1 = W-PAD, CW = x1-x0, GAP = wide ? 22 : 28;
   const top = key==='iphone' ? 150 : wide ? 44 : 88, bottom = H-(key==='iphone' ? 100 : wide ? 36 : 60);
-  let y = top;
-  y += drawHeader(ctx, P, d, x0, x1, y, brand, wide ? 58 : 72) + GAP;
-  const n = d.companies.length;
-  const lay = legendLayout(ctx, d, x0, x1, ...legendSize(n).map(v => wide ? v-4 : v));
-  drawLegend(ctx, P, lay, y, true); y += lay.h+GAP;
-  const areaH = bottom-30-GAP-y;
-  const charts = d.metrics.filter(m => hasChart(m, parts)).length;
-  const perChart = wide ? (charts <= 2 ? Math.max(1, charts) : charts <= 4 ? 2 : 3) : charts <= 4 ? 1 : 2;
-  const perRows = wide ? (n <= 6 ? 4 : 3) : (n <= 8 ? 2 : 1);
-  const rows = [];
-  for(const m of d.metrics){
-    const kind = hasChart(m, parts) ? 'chart' : 'rows', last = rows.at(-1);
-    if(last && last.kind===kind && last.items.length < (kind==='chart' ? perChart : perRows)) last.items.push(m);
-    else rows.push({ kind, items:[m] });
-  }
-  const chartRows = rows.filter(r => r.kind==='chart').length, valRows = rows.length-chartRows, gaps = GAP*(rows.length-1);
-  // ارتفاع سطر القيم: مريح إن اتسع، ويصغر حتى يبقى للرسوم مكانها (360 على الأقل لكل صف رسم)
-  const natural = rh => CARD_HEAD+n*rh+CARD_FOOT+16;
-  let rh = chartRows ? 72 : 92;
-  while(rh > 40 && chartRows && areaH-gaps-valRows*natural(rh) < chartRows*(wide ? 300 : 360)) rh -= 2;
-  const valH = chartRows ? natural(rh) : Math.max(natural(Math.min(rh, 60)), (areaH-gaps)/Math.max(1, valRows));
-  const chartH = chartRows ? (areaH-gaps-valRows*valH)/chartRows : 0;
-  const rowCapChart = Math.min(66, Math.max(40, (chartH-CARD_HEAD-CARD_FOOT-200)/n));
-  for(const r of rows){
-    const h = r.kind==='chart' ? chartH : valH, per = r.kind==='chart' ? perChart : perRows;
-    // صف ناقص: البطاقات تتسع لعرض الصف
-    const c = Math.min(per, r.items.length), cw = (CW-GAP*(c-1))/c;
-    r.items.forEach((m, i) => drawMetricCard(ctx, P, d, m, x1-(i+1)*cw-i*GAP, y, cw, h, parts, r.kind==='chart' ? rowCapChart : Math.min(92, rh)));
-    y += h+GAP;
-  }
+  let y = top + drawHeader(ctx, P, d, x0, x1, top, brand, wide ? 58 : 66) + GAP;
+  const [A, B] = d.companies, M = d.rows.length;
+  // أعمدة ثابتة للبطاقتين: القيم تقع تحت اسم شركتها تمامًا
+  const midW = wide ? 620 : 380, colW = (CW-midW)/2, xa = x1-colW/2, xb = x0+colW/2, xm = x0+CW/2;
+  const headH = wide ? 200 : 300, avail = bottom-30-GAP-y;
+  const rowsPad = 24, rowH = Math.max(wide ? 52 : 64, Math.min(wide ? 104 : 160, (avail-headH-GAP-rowsPad*2)/M));
+  const rowsH = rowH*M+rowsPad*2;
+  y += Math.max(0, (avail-headH-GAP-rowsH)/2); // تتوسط المساحة إن لم تملأها
+  // ---- بطاقة الشركتين ----
+  card(ctx, P, x0, y, CW, headH);
+  ctx.save(); rr(ctx, x0, y, CW, headH, 24); ctx.clip();
+  if(A) glow(ctx, xa, y+headH*0.4, colW*0.7, A.color);
+  if(B) glow(ctx, xb, y+headH*0.4, colW*0.7, B.color);
+  ctx.restore();
+  const L = wide ? 92 : 132;
+  const company = (c, cx) => {
+    if(!c){ txt(ctx, 'اختر شركة ثانية', cx, y+headH/2, { size:26, color:P.muted, align:'center' }); return; }
+    const ly = wide ? y+24 : y+30;
+    logo(ctx, P, c, cx-L/2, ly, L, c.color);
+    txt(ctx, c.name, cx, ly+L+(wide ? 44 : 56), { size: wide ? 34 : 40, weight:800, color:P.ink, align:'center', max:colW-40 });
+    txt(ctx, c.symbol, cx, ly+L+(wide ? 76 : 96), { size: wide ? 22 : 25, weight:600, color:P.muted, align:'center', dir:'ltr' });
+  };
+  company(A, xa); company(B, xb);
+  const pw = wide ? 170 : 160, ph = wide ? 54 : 60, py = y+headH/2-ph/2-(wide ? 14 : 22);
+  rr(ctx, xm-pw/2, py, pw, ph, ph/2); ctx.fillStyle = P.gold; ctx.fill();
+  txt(ctx, 'VS', xm, py+ph*0.7, { size: wide ? 30 : 32, weight:900, color:'#111', align:'center', dir:'ltr' });
+  txt(ctx, d.span, xm, py+ph+(wide ? 40 : 46), { size: wide ? 24 : 25, weight:700, color:P.muted, align:'center', max:midW-30 });
+  y += headH+GAP;
+  // ---- بطاقة البنود ----
+  card(ctx, P, x0, y, CW, rowsH);
+  const k = Math.max(0.72, Math.min(1.15, rowH/(wide ? 96 : 140)));
+  const valSize = 54*k, labSize = Math.max(28, 34*k), small = Math.max(19, 23*k), barW = midW-70, barH = Math.max(8, 11*k);
+  d.rows.forEach((r, i) => {
+    const ry = y+rowsPad+i*rowH, mid = ry+rowH/2;
+    if(i){ ctx.beginPath(); ctx.moveTo(x0+28, ry); ctx.lineTo(x1-28, ry); ctx.strokeStyle = P.line; ctx.lineWidth = 1.5; ctx.stroke(); }
+    const hasBar = r.share!=null && rowH >= 72, hasNote = rowH >= 60;
+    // البند في الوسط: الاسم ثم الوحدة والمقارنة ثم شريط نصيب الشركتين
+    const block = labSize + (hasNote ? small+10 : 0) + (hasBar ? barH+14 : 0), ty = mid-block/2+labSize*0.82;
+    txt(ctx, r.label, xm, ty, { size:labSize, weight:800, color:P.ink, align:'center', max:midW-24 });
+    if(hasNote) txt(ctx, r.note, xm, ty+small+10, { size:small, weight:600, color:P.muted, align:'center', max:midW-24 });
+    if(hasBar){
+      const bx = xm-barW/2, by = ty+(hasNote ? small+10 : 0)+16;
+      rr(ctx, bx, by, barW, barH, barH/2); ctx.fillStyle = B ? B.color : P.track; ctx.fill();
+      const aw = Math.max(barH, barW*r.share); rr(ctx, bx+barW-aw, by, aw, barH, barH/2); ctx.fillStyle = A.color; ctx.fill();
+    }
+    const value = (x, cx) => {
+      if(!x) return;
+      const showDelta = x.delta && rowH >= 70, vy = showDelta ? mid+valSize*0.18 : mid+valSize*0.36;
+      const col = x.v!=null && x.v<0 ? P.neg : P.ink; // لون واحد للشركتين
+      txt(ctx, x.text, cx, vy, { size:valSize, weight:800, color:col, align:'center', dir:'ltr', max:colW-52 });
+      if(showDelta) txt(ctx, x.delta, cx, vy+small+18, { size:small, weight:700, color: x.dir>0 ? P.up : x.dir<0 ? P.down : P.muted, align:'center', max:colW-30 });
+    };
+    value(r.a, xa); value(r.b, xb);
+  });
   drawFooter(ctx, P, d, x0, x1, bottom);
 }
 
@@ -409,14 +380,14 @@ export async function renderComparison(data, key='iphone', parts={ figures:true,
   companies.forEach((c, i) => c.img = imgs[i]);
   const by = new Map(companies.map(c => [c.symbol, c]));
   const d = data.multi
-    ? { ...data, companies, metrics: data.metrics.map(m => ({ ...m, rows: m.rows.map(r => ({ ...r, company: by.get(r.symbol) })) })) }
+    ? { ...data, companies }
     : { ...data, companies,
       figures: data.figures.map(f => ({ ...f, company: f.symbol ? by.get(f.symbol) : null })),
       rank: { ...data.rank, rows: data.rank.rows.map(r => ({ ...r, company: by.get(r.symbol) })) } };
   const cv = document.createElement('canvas'); cv.width = S.w*SCALE; cv.height = S.h*SCALE;
   const ctx = cv.getContext('2d'); ctx.scale(SCALE, SCALE);
   drawBackground(ctx, P, S.w, S.h);
-  (d.multi ? layoutMulti : S.w > S.h ? layoutWide : layoutTall)(ctx, P, d, S, key, brand, parts);
+  (d.multi ? layoutVersus : S.w > S.h ? layoutWide : layoutTall)(ctx, P, d, S, key, brand, parts);
   return cv;
 }
 
@@ -435,14 +406,14 @@ async function build(){
   dlg.querySelectorAll('[data-part]').forEach(b => b.setAttribute('aria-pressed', String(parts[b.dataset.part])));
   busy.hidden = false; img.style.opacity = '.35';
   const data = dlg._getData();
-  // عدة بنود: لا أرقام سريعة، و«الترتيب» هو قيم كل بند
-  const fig = dlg.querySelector('[data-part="figures"]'), rk = dlg.querySelector('[data-part="rank"]');
-  fig.hidden = !!data.multi; rk.textContent = data.multi ? 'القيم' : 'الترتيب';
+  // المواجهة صورة واحدة ثابتة: لا اختيار للمحتوى
+  dlg.querySelector('.cx-export-parts').closest('.cx-export-row').hidden = !!data.multi;
+  dlg.querySelector('.cx-export-hint-parts').hidden = !!data.multi;
   const cv = await renderComparison(data, key, parts);
   const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
   if(my!==seq || !blob) return;
   if(dlg._url) URL.revokeObjectURL(dlg._url);
-  const what = parts.chart && parts.rank ? '' : parts.chart ? '-الرسم' : data.multi ? '-القيم' : '-الترتيب';
+  const what = data.multi || (parts.chart && parts.rank) ? '' : parts.chart ? '-الرسم' : '-الترتيب';
   const name = `مقارنة-${data.title}${what}-${data.span}-${SIZES[key].dims.replace(/\s/g, '')}.png`.replace(/[\\/:*?"<>|]/g, '-');
   dlg._url = URL.createObjectURL(blob); dlg._file = new File([blob], name, { type:'image/png' });
   img.src = dlg._url; img.style.opacity = ''; busy.hidden = true;
@@ -458,7 +429,7 @@ export function openExportDialog(getData){
         <div class="cx-export-row"><span class="cx-export-label">المحتوى</span><div class="cx-export-parts" role="group" aria-label="ما يظهر في الصورة">${PARTS.map(([k, t]) => `<button type="button" class="cx-chip" data-part="${k}" aria-pressed="true">${t}</button>`).join('')}</div></div>
         <div class="cx-export-stage"><img alt="معاينة صورة المقارنة"><span class="cx-export-busy">جارٍ تجهيز الصورة…</span></div>
         <div class="cx-export-actions"><button type="button" class="cx-export-share">حفظ في الصور / مشاركة</button><a class="cx-export-dl" href="#" download>تنزيل PNG</a></div>
-        <p class="cx-export-hint">على الآيفون: «حفظ في الصور» ثم «Save Image»، أو اضغط مطولًا على الصورة. يبقى الرسم أو الترتيب (أو القيم) واحدًا على الأقل.</p>
+        <p class="cx-export-hint">على الآيفون: «حفظ في الصور» ثم «Save Image»، أو اضغط مطولًا على الصورة.<span class="cx-export-hint-parts"> يبقى الرسم أو الترتيب واحدًا على الأقل.</span></p>
       </div>`;
     document.body.append(dlg);
     dlg.addEventListener('click', e => { if(e.target===dlg) dlg.close(); });

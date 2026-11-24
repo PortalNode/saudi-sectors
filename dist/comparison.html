@@ -6,7 +6,7 @@
   <script src="theme.js?v=comparison-v4"></script>
   <link rel="stylesheet" href="styles.css?v=comparison-v4"><link rel="stylesheet" href="banks.css?v=comparison-v4"><link rel="stylesheet" href="theme.css?v=comparison-v4">
   <link rel="stylesheet" href="layout.css?v=logos-20261116">
-  <link rel="stylesheet" href="comparison-page.css?v=comparison-v7-export-c-multi">
+  <link rel="stylesheet" href="comparison-page.css?v=comparison-v7-export-c-multi-vs2">
   <link rel="stylesheet" href="mobile.css?v=mobile-20261119g">
   <link rel="icon" href="favicon.ico?v=20261120-favicon2" sizes="any" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261120-favicon2">
@@ -50,7 +50,7 @@
       <div class="cx-field">
         <div class="cx-inline">
           <div id="metric-groups" class="cx-seg" role="group" aria-label="مجموعة البنود"></div>
-          <button type="button" id="metric-multi" class="cx-toggle" aria-pressed="false" title="اختر أكثر من بند (حتى 8) من أي مجموعة، مثل الإيرادات وصافي الربح ومكرر الأرباح وعائد التوزيع"><i aria-hidden="true"></i>اختيار عدة بنود</button>
+          <button type="button" id="metric-multi" class="cx-toggle" aria-pressed="false" title="قارن شركتين في أكثر من بند (حتى 8) من أي مجموعة لفترة واحدة، مثل الإيرادات وصافي الربح ومكرر الأرباح وعائد التوزيع"><i aria-hidden="true"></i>اختيار عدة بنود</button>
         </div>
         <div id="metric-chips" class="cx-chips" role="group" aria-label="البند المراد مقارنته"></div>
         <div id="metric-picked" class="cx-picked" aria-label="البنود المختارة" hidden></div>
@@ -97,10 +97,9 @@
       </section>
     </div>
 
-    <!-- ===== عدة بنود: بطاقة لكل بند ===== -->
-    <section id="cx-multi" class="cx-multi" aria-label="مقارنة عدة بنود" hidden>
-      <div id="multi-legend" class="cx-legend cx-multi-legend"></div>
-      <div id="multi-grid" class="cx-multi-grid"></div>
+    <!-- ===== عدة بنود: مواجهة بين شركتين في فترة واحدة ===== -->
+    <section id="cx-multi" class="cx-multi" aria-label="مواجهة بين شركتين في عدة بنود" hidden>
+      <div id="versus" class="cx-card cx-vs"></div>
     </section>
 
     <!-- ===== الجدول ===== -->
@@ -111,11 +110,11 @@
   </div>
 
   <details class="read-guide cx-guide"><summary>طريقة القراءة</summary>
-    <p>القيم من ملفات النتائج السنوية والربعية داخل المشروع، وبنود كل قطاع كما في ملفاته. «ربع محدد» يقارن الربع نفسه عبر السنوات، و«أرباع متتالية» يعرض الأرباع بترتيبها الزمني، و«6 أشهر» و«9 أشهر» مجموع الأرباع المستقلة من بداية السنة، والهوامش تُحسب من هذه المجاميع. لكل شركة لون ثابت ما دامت مختارة. تظهر «—» للقيم غير المتاحة، والقيم السالبة بالأحمر. عمود «التغير» يقارن أول فترة مختارة بآخر فترة مختارة، ويُعرض بالنقاط المئوية للبنود النسبية. «اختيار عدة بنود» يعرض بطاقة لكل بند بقيمه في آخر فترة مختارة ورسمًا صغيرًا للفترات. بنود «التقييم الحالي» (مكرر الأرباح، القيمة الدفترية، مكرر القيمة الدفترية، عائد التوزيع، القيمة السوقية) من الصفحة الرئيسية: قيمة واحدة حالية لكل شركة من آخر سعر وآخر أربعة أرباع، والشركة الخاسرة بلا مكرر.</p>
+    <p>القيم من ملفات النتائج السنوية والربعية داخل المشروع، وبنود كل قطاع كما في ملفاته. «ربع محدد» يقارن الربع نفسه عبر السنوات، و«أرباع متتالية» يعرض الأرباع بترتيبها الزمني، و«6 أشهر» و«9 أشهر» مجموع الأرباع المستقلة من بداية السنة، والهوامش تُحسب من هذه المجاميع. لكل شركة لون ثابت ما دامت مختارة. تظهر «—» للقيم غير المتاحة، والقيم السالبة بالأحمر. عمود «التغير» يقارن أول فترة مختارة بآخر فترة مختارة، ويُعرض بالنقاط المئوية للبنود النسبية. «اختيار عدة بنود» يقارن شركتين فقط في فترة واحدة (سنة، أو ربع محدد، أو 6 أو 9 أشهر لسنة معينة): الأولى يمينًا والثانية يسارًا، والبنود في الوسط، وأرقام الشركتين بلون واحد. بنود «التقييم الحالي» (مكرر الأرباح، القيمة الدفترية، مكرر القيمة الدفترية، عائد التوزيع، القيمة السوقية) من الصفحة الرئيسية: قيمة واحدة حالية لكل شركة من آخر سعر وآخر أربعة أرباع، والشركة الخاسرة بلا مكرر.</p>
   </details>
   <div id="cx-tip" class="cx-tip" hidden></div>
 </main>
-<script type="module" src="comparison-page.js?v=comparison-v8-export-j-multi"></script>
+<script type="module" src="comparison-page.js?v=comparison-v8-export-j-multi-vs2"></script>
   <script src="layout.js?v=logos-20261116" defer></script>
   <script src="e7-bars.js?v=20261123" defer></script>
 </body></html>

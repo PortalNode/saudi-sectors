@@ -1,12 +1,14 @@
 // صفحة المقارنة: تقرأ ملفات ‎*-financials.json‎ (سنوي) و‎*-quarterly-financials.json‎ (ربعي) لكل قطاع.
 import { DEFAULT_PERIOD_SPEC, sumQuarters, withMargins, quarterLabel, monthRange, isCalendarYear, MONTH_NAMES, QUARTER_NAMES } from './quarterly-periods.mjs?v=quarterly-20261115';
 import { marketCapMap, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
-import { openExportDialog } from './comparison-export.mjs?v=export-20261123j-multi';
+import { openExportDialog } from './comparison-export.mjs?v=export-20261123j-multi-vs2';
 import { MARKET_KEYS, isMarketKey, marketIndex, marketDate } from './comparison-market.mjs?v=market-20261124';
 const DATA_BASE = '';
 const VERSION = 'comparison-v6';
 const MAX_COMPANIES = 15; // خمسة عشر لونًا في comparison-page.css؛ الأعمدة بلون موحّد والشعار يميّز الشركة
-const MAX_METRICS = 8; // «عدة بنود»: بطاقة لكل بند
+const MAX_METRICS = 8; // «عدة بنود»: مواجهة بين شركتين في فترة واحدة، صف لكل بند
+const VS_COMPANIES = 2;
+const maxCompanies = () => state.multiPick ? VS_COMPANIES : MAX_COMPANIES;
 const $ = id => document.getElementById(id);
 const SECTORS = [
  ['الزراعة','agriculture'],['البنوك','banks'],['التأمين','insurance'],['التمويل','finance'],['الخدمات المالية','financial-services'],['البتروكيماويات','petrochem'],['النفط و الغاز','oilgas'],['الاسمنت','cement'],['تجارة و تجزئة','retail'],['الأغذية والمشروبات','food'],['الصناعات التحويلية','industrial'],['العقارات','realestate'],['الصناديق العقارية المتداولة','reits'],['النقل','transport'],['الاتصالات','telecom'],['الرعاية الصحية','health'],['خدمات الرعاية الصحية','healthservices'],['التعليم و التدريب','education'],['تقنية المعلومات','information-technology'],['المواد الاساسية','materials'],['التعدين والمعادن','mining'],['المراكز الرياضية','sports'],['موردي الادوية','pharma'],['الفنادق و السياحة','hotels-tourism'],['وسائل الاعلام','media'],['متعددة الأنشطة','multi'],['المرافق والطاقة','utilities'],['خدمات الاعمال','business-services'],['المنتجات الزجاجية','glass'],['أسواق الاوراق المالية','exchange'],['السلع الاستهلاكية','consumer']
@@ -43,7 +45,8 @@ const NOW = 'now'; // عمود بنود التقييم الحالي
 const lab = id => id===NOW ? 'الحالي' : colLabels.get(id) ?? String(id);
 const inLab = id => id===NOW ? 'حاليًا' : `في ${lab(id)}`; // «الأعلى في 2025» / «الأعلى حاليًا»
 const isMkt = k => isMarketKey(k ?? state.metric);
-const multi = () => state.metrics.length>1;
+// «اختيار عدة بنود» يفتح المواجهة بين شركتين ولو بقي بند واحد
+const multi = () => state.multiPick;
 // أعمدة البند الحالي: الفترات المختارة، أو عمود «الحالي» لبنود التقييم
 const cols = () => isMkt() ? [NOW] : state.years;
 // يرسم fn كأن البند k هو المختار (الدوال كلها تقرأ state.metric)
@@ -111,16 +114,16 @@ function readHash(){
   if(SECTORS.some(([,s]) => s===p.get('s'))) state.sector = p.get('s');
   if(PERIOD_OPTIONS.some(([id]) => id===p.get('p'))) state.period = p.get('p');
   if(/^[1-4]$/.test(p.get('q')||'')) state.quarter = p.get('q');
-  return { m:(p.get('m')||'').split(',').filter(Boolean), y:(p.get('y')||'').split(',').filter(Boolean), c:(p.get('c')||'').split(',').filter(Boolean), v:p.get('v') };
+  return { vs:p.get('vs')==='1', m:(p.get('m')||'').split(',').filter(Boolean), y:(p.get('y')||'').split(',').filter(Boolean), c:(p.get('c')||'').split(',').filter(Boolean), v:p.get('v') };
 }
 function writeHash(){
-  const p = new URLSearchParams({ s:state.sector, p:state.period, ...(state.period==='q' ? {q:state.quarter} : {}), m:state.metrics.join(','), y:state.years.join(','), c:state.symbols.join(','), v:state.view });
+  const p = new URLSearchParams({ s:state.sector, p:state.period, ...(state.period==='q' ? {q:state.quarter} : {}), m:state.metrics.join(','), ...(state.multiPick ? {vs:'1'} : {}), y:state.years.join(','), c:state.symbols.join(','), v:state.view });
   history.replaceState(null,'','#'+p.toString().replace(/%2C/g,','));
 }
 
 /* ---------- عناصر الاختيار ---------- */
 function setSymbols(list){
-  state.symbols = list.slice(0,MAX_COMPANIES);
+  state.symbols = list.slice(0,maxCompanies());
   for(const s of [...slots.keys()]) if(!state.symbols.includes(s)) slots.delete(s);
   for(const s of state.symbols) if(!slots.has(s)){ const used = new Set(slots.values()); let i=0; while(used.has(i)) i++; slots.set(s,i); }
 }
@@ -155,7 +158,8 @@ function renderMetrics(){
 function renderYears(){
   // بنود التقييم الحالي وحدها لا تحتاج سنوات
   $('years-label').closest('.cx-row').hidden = state.metrics.every(k => isMkt(k));
-  $('years-label').textContent = isSeq() ? 'الأرباع' : 'السنوات';
+  $('years-label').textContent = state.multiPick ? 'السنة' : isSeq() ? 'الأرباع' : 'السنوات';
+  $('year-quick').hidden = state.multiPick; // المواجهة لسنة واحدة
   $('year-chips').innerHTML = allYears.map(y => `<button type="button" class="cx-chip" data-year="${esc(y)}" aria-pressed="${state.years.includes(y)}"><span class="n">${esc(lab(y))}</span></button>`).join('');
   const quick = isSeq() ? [['all','الكل'],['8','آخر 8 أرباع'],['4','آخر 4 أرباع'],['1','آخر ربع']] : [['all','الكل'],['3','آخر 3 سنوات'],['1','آخر سنة']];
   $('year-quick').innerHTML = quick.map(([n,t]) => `<button type="button" data-years="${n}">${t}</button>`).join('');
@@ -172,12 +176,16 @@ function periodNote(list){
     h1: 'مجموع الربعين الأول والثاني (يناير – يونيو) لكل سنة، من الأرباع المستقلة.',
     m9: 'مجموع الأرباع الثلاثة الأولى (يناير – سبتمبر) لكل سنة، من الأرباع المستقلة.'
   }[state.period];
+  // المواجهة: فترة واحدة لسنة تختارها
+  const vsText = { fy:'سنة مالية كاملة واحدة تختارها من صف السنة.', q:`الربع ${QUARTER_NAMES[n]} وحده (${monthRange(12,n)}) لسنة واحدة تختارها.`, h1:'الربعان الأول والثاني (يناير – يونيو) لسنة واحدة تختارها.', m9:'الأرباع الثلاثة الأولى (يناير – سبتمبر) لسنة واحدة تختارها.' };
   const offYear = state.period==='fy' ? [] : list.filter(c => !isCalendarYear(c.fiscalYearEnd));
   const mk = state.metrics.some(k => isMkt(k)) ? ` بنود «التقييم الحالي» قيمة واحدة من الصفحة الرئيسية ${marketNote()} (آخر سعر وآخر أربعة أرباع)، ولا تتغير بالفترة.` : '';
-  return text + mk + (offYear.length ? ' ' + offYear.map(c => `سنة ${c.name} المالية تنتهي في ${MONTH_NAMES[c.fiscalYearEnd]}`).join('، ') + '، وأرباعها مرقّمة حسب سنتها المالية كما في أرقام.' : '');
+  return (state.multiPick ? vsText[state.period] || text : text) + mk + (offYear.length ? ' ' + offYear.map(c => `سنة ${c.name} المالية تنتهي في ${MONTH_NAMES[c.fiscalYearEnd]}`).join('، ') + '، وأرباعها مرقّمة حسب سنتها المالية كما في أرقام.' : '');
 }
 function renderPeriod(){
-  $('period-seg').innerHTML = PERIOD_OPTIONS.map(([id,name]) => `<button type="button" data-period="${id}" aria-pressed="${id===state.period}" ${id!=='fy'&&!quarterly?'disabled title="لا تتوفر نتائج ربعية لهذا القطاع"':''}>${name}</button>`).join('');
+  // المواجهة لفترة واحدة: الأرباع المتتالية غير متاحة فيها
+  const off = id => id!=='fy'&&!quarterly ? 'disabled title="لا تتوفر نتائج ربعية لهذا القطاع"' : id==='seq'&&state.multiPick ? 'disabled title="عند اختيار عدة بنود تكون المقارنة لفترة واحدة: سنة أو ربع محدد أو 6 أو 9 أشهر"' : '';
+  $('period-seg').innerHTML = PERIOD_OPTIONS.map(([id,name]) => `<button type="button" data-period="${id}" aria-pressed="${id===state.period}" ${off(id)}>${name}</button>`).join('');
   $('quarter-seg').hidden = state.period!=='q';
   $('quarter-seg').innerHTML = [1,2,3,4].map(n => `<button type="button" data-quarter="${n}" aria-pressed="${String(n)===state.quarter}">الربع ${QUARTER_NAMES[n]}</button>`).join('');
   $('period-note').textContent = periodNote(chosen());
@@ -192,13 +200,15 @@ function prevOf(id){
   return allYears[allYears.indexOf(id)-1] ?? null;
 }
 function renderCompanies(){
-  const full = state.symbols.length>=MAX_COMPANIES, q = state.query.trim();
+  // في المواجهة لا تُعطَّل الشركات: اختيار ثالثة يستبدل الثانية
+  const full = !state.multiPick && state.symbols.length>=MAX_COMPANIES, q = state.query.trim();
   $('company-search').closest('.cx-company-tools').querySelector('.cx-search').hidden = companies.length<=12;
   $('company-chips').innerHTML = companies.filter(c => !q || state.symbols.includes(c.symbol) || c.name.includes(q) || String(c.symbol).includes(q)).map(c => {
     const on = state.symbols.includes(c.symbol);
     return `<button type="button" class="cx-chip" data-symbol="${esc(c.symbol)}" aria-pressed="${on}" ${!on&&full?'disabled':''} style="--c:${on?color(c):'transparent'}"><i></i>${esc(c.name)} <bdi>${esc(c.symbol)}</bdi></button>`;
   }).join('');
-  $('selection-count').textContent = `${state.symbols.length} من ${companies.length}${full?' · الحد الأقصى':''}`;
+  $('selection-count').textContent = state.multiPick ? `${state.symbols.length} من ${VS_COMPANIES} · مواجهة بين شركتين` : `${state.symbols.length} من ${companies.length}${full?' · الحد الأقصى':''}`;
+  document.querySelectorAll('[data-pick="top5"],[data-pick="bottom5"]').forEach(b => b.hidden = state.multiPick);
 }
 
 /* ---------- أرقام سريعة ---------- */
@@ -366,71 +376,36 @@ function renderRank(list){
   }).join('');
 }
 
-/* ---------- عدة بنود: بطاقة لكل بند ---------- */
-// صف قيم البند k في آخر عمود له، مرتب من الأعلى، مع التغير عن العمود السابق
-function metricRows(k, list){
-  return using(k, () => {
+/* ---------- عدة بنود: مواجهة بين شركتين ---------- */
+// الفترة الواحدة بالكلام: «سنة 2025»، «الربع الثالث 2025»، «أول 6 أشهر 2025»
+function vsPeriod(){
+  if(state.metrics.every(k => isMkt(k))) return `التقييم الحالي · ${marketNote()}`;
+  const y = state.years.at(-1) ?? '';
+  return { fy:`سنة ${y}`, q:`الربع ${QUARTER_NAMES[Number(state.quarter)]} ${y}`, h1:`أول 6 أشهر ${y}`, m9:`أول 9 أشهر ${y}` }[state.period] || lab(y);
+}
+// لكل بند: قيمة الشركتين في الفترة المختارة (أو «الحالي» لبنود التقييم)، والتغير عن الفترة السابقة،
+// ونصيب كل منهما من المجموع للشريط (الأرقام بلون واحد دون تمييز الأعلى)
+function versusData(list){
+  const [A,B] = list;
+  return state.metrics.map(k => using(k, () => {
     const y = cols().at(-1), prev = prevOf(y);
-    const rows = list.map(c => ({ c, v:valueAt(c,y) })).sort((a,b) => (b.v ?? -Infinity)-(a.v ?? -Infinity))
-      .map(r => ({ ...r, ch: prev!=null ? change(valueAt(r.c,prev), r.v) : null }));
-    return { y, prev, rows };
-  });
+    const side = c => { if(!c) return null; const v = valueAt(c,y), ch = prev!=null ? change(valueAt(c,prev), v) : null; return { v, text:fmt(v), ch, cls: ch ? dirClass(ch.dir) : '' }; };
+    const a = side(A), b = side(B);
+    const share = a?.v>0 && b?.v>0 ? a.v/(a.v+b.v) : null;
+    return { k, label:label(k), unit:unit(k), now: y===NOW, prev: prev!=null ? lab(prev) : '', a, b, share };
+  }));
 }
-// وصف البطاقة: الوحدة والفترة (أو تاريخ لقطة التقييم)
-const metricNote = k => using(k, () => isMkt() ? `${unit(k)} · ${marketNote()}` : `${unit(k)} · ${cols().length>1 ? `${lab(cols()[0])} – ${lab(cols().at(-1))}` : lab(cols()[0] ?? '')}`);
-// رسم صغير: أعمدة مجمّعة لكل فترة، كل شركة بلونها وبترتيب المفتاح
-function renderMini(k, list, W, H=168){
-  return using(k, () => {
-    const yrs = cols(), n = list.length;
-    const vals = list.flatMap(c => yrs.map(y => valueAt(c,y))).filter(v => v!=null);
-    if(yrs.length<2 || !vals.length) return '';
-    let lo = Math.min(0,...vals), hi = Math.max(0,...vals); if(lo===hi) hi = lo+1;
-    const ticks = niceTicks(lo,hi,3), step = ticks[1]-ticks[0]; lo = ticks[0]; hi = ticks.at(-1);
-    const tt = ticks.map(t => axisFmt(t,step)), names = yrs.map(lab);
-    const m = { l: 12+Math.max(...tt.map(t => t.length))*6, r:4, t:8, b:24 }, pw = W-m.l-m.r, ph = H-m.t-m.b, gw = pw/yrs.length;
-    const Y = v => m.t+(hi-v)/(hi-lo)*ph, cx = i => m.l+gw*(i+.5);
-    const every = Math.max(1, Math.ceil((Math.max(...names.map(t => t.length))*6+8)/gw));
-    const inner = gw*0.78, slot = inner/n, bw = Math.max(2, Math.min(26, slot-1.5));
-    let g = '';
-    ticks.forEach((t,i) => { g += `<line class="${t===0?'zero':'grid'}" x1="${m.l}" x2="${W-m.r}" y1="${Y(t)}" y2="${Y(t)}"/><text class="tick" x="${m.l-6}" y="${Y(t)+3.5}" text-anchor="end">${tt[i]}</text>`; });
-    yrs.forEach((y,i) => {
-      g += `<rect class="band" data-year="${esc(y)}" x="${m.l+gw*i}" y="${m.t-4}" width="${gw}" height="${ph+8}"/>`;
-      list.forEach((c,j) => {
-        const v = valueAt(c,y); if(v==null) return;
-        const x = cx(i)-inner/2+j*slot+(slot-bw)/2, y0 = Y(0), y1 = Y(v), h = Math.max(1.5, Math.abs(y1-y0));
-        g += `<rect class="mark${i===yrs.length-1?' last':''}" data-s="${esc(c.symbol)}" x="${x}" y="${v>=0 ? y0-h : y0}" width="${bw}" height="${h}" rx="${Math.min(2.5,bw/3)}" fill="${color(c)}"/>`;
-      });
-      if(!((yrs.length-1-i) % every)) g += `<text class="year" x="${cx(i)}" y="${H-6}" text-anchor="middle">${esc(names[i])}</text>`;
-    });
-    return `<svg class="cx-mini" data-metric="${esc(k)}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label(k))} حسب ${isSeq() ? 'الربع' : 'السنة'}">${g}</svg>`;
-  });
-}
-function drawMinis(){
-  document.querySelectorAll('#multi-grid .cx-mchart').forEach(el => { const cs = getComputedStyle(el), w = el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight); if(w>0) el.innerHTML = renderMini(el.dataset.metric, chosen(), Math.max(220, Math.floor(w))); });
-}
-function renderMulti(list){
-  $('multi-legend').innerHTML = list.map(c => `<button type="button" data-s="${esc(c.symbol)}" style="--c:${color(c)}">${logoHtml(c)}${esc(c.name)} <bdi>${esc(c.symbol)}</bdi></button>`).join('');
-  $('multi-grid').innerHTML = state.metrics.map(k => {
-    const { prev, rows } = metricRows(k, list);
-    const vs = rows.map(r => r.v).filter(v => v!=null), lo = Math.min(0,...vs), hi = Math.max(0,...vs), span = hi-lo || 1;
-    const hasMini = using(k, () => cols().length>1);
-    return `<article class="cx-card cx-mcard" data-metric="${esc(k)}">
-      <header class="cx-card-head"><div><h3>${esc(label(k))}</h3><span class="cx-sub">${esc(metricNote(k))}</span></div>${prev!=null?`<span class="cx-sub">التغير عن <span class="n">${esc(lab(prev))}</span></span>`:''}</header>
-      ${hasMini ? `<div class="cx-mchart" data-metric="${esc(k)}"></div>` : ''}
-      <ol class="cx-mrows">${rows.map(r => using(k, () => `<li data-s="${esc(r.c.symbol)}" style="--c:${color(r.c)}"><span class="who">${logoHtml(r.c)}<span>${esc(r.c.name)}</span></span><span class="fig${r.v!=null&&r.v<0?' neg':''}">${num(r.v)}</span><span class="track">${r.v==null?'':`<span class="fill" style="left:${(Math.min(r.v,0)-lo)/span*100}%;width:${Math.abs(r.v)/span*100}%"></span>`}${lo<0?`<span class="axis0" style="left:${-lo/span*100}%"></span>`:''}</span><span class="delta">${r.ch?`<span class="n ${dirClass(r.ch.dir)}">${arrow(r.ch.dir)} ${esc(r.ch.text)}</span>`:''}</span></li>`)).join('')}</ol>
-    </article>`;
-  }).join('');
-  drawMinis();
-}
-// جدول «عدة بنود»: صف لكل بند، وعمود لكل شركة بقيمتها في آخر فترة
-function renderMultiTable(list){
-  $('table-sub').textContent = `${periodName()} · قيمة كل بند في آخر فترة مختارة، والتغير عن الفترة السابقة`;
-  $('cx-table').innerHTML = `<thead><tr><th>البند</th>${list.map(c => `<th><span class="cx-th-co">${logoHtml(c)}${esc(c.name)}</span></th>`).join('')}</tr></thead><tbody>${state.metrics.map(k => {
-    const { y, prev, rows } = metricRows(k, list), by = new Map(rows.map(r => [r.c.symbol, r]));
-    const top = NEUTRAL.has(k) ? null : Math.max(...rows.map(r => r.v ?? -Infinity));
-    return using(k, () => `<tr><th scope="row"><span class="cx-th-metric">${esc(label(k))}<small>${esc(unit(k))} · <span class="n">${esc(lab(y))}</span></small></span></th>${list.map(c => { const r = by.get(c.symbol), v = r?.v ?? null;
-      return `<td data-s="${esc(c.symbol)}" class="${v==null?'miss':v<0?'neg':''}${v!=null&&v===top&&list.length>1?' best':''}">${num(v)}${r?.ch?`<small class="cx-cell-delta n ${dirClass(r.ch.dir)}">${arrow(r.ch.dir)} ${esc(r.ch.text)}</small>`:''}</td>`; }).join('')}</tr>`);
-  }).join('')}</tbody>`;
+function renderVersus(list){
+  const [A,B] = list, rows = versusData(list);
+  const co = (c,side) => c
+    ? `<div class="cx-vs-co ${side}" data-s="${esc(c.symbol)}" style="--c:${color(c)}">${logoHtml(c)}<b>${esc(c.name)}</b><bdi>${esc(c.symbol)}</bdi></div>`
+    : `<div class="cx-vs-co ${side} empty">اختر شركة ثانية</div>`;
+  // النص منسّق مسبقًا ببنده (fmt تقرأ البند الحالي)
+  const val = (r,s) => { const x = r[s]; if(!x) return `<span class="cx-vs-val ${s}"></span>`;
+    return `<span class="cx-vs-val ${s}${x.v!=null&&x.v<0?' neg':''}"><span class="n">${esc(x.text)}</span>${x.ch?`<small class="n ${x.cls}">${arrow(x.ch.dir)} ${esc(x.ch.text)}</small>`:''}</span>`; };
+  $('versus').style.cssText = `--ca:${A?color(A):'var(--s1)'};--cb:${B?color(B):'var(--s2)'}`;
+  $('versus').innerHTML = `<header class="cx-vs-head">${co(A,'a')}<div class="cx-vs-mid"><span class="cx-vs-badge" dir="ltr">VS</span><span class="cx-vs-when">${esc(vsPeriod())}</span></div>${co(B,'b')}</header>
+    <ol class="cx-vs-rows">${rows.map(r => `<li>${val(r,'a')}<span class="cx-vs-label"><b>${esc(r.label)}</b><small>${esc(r.unit)}${r.now && state.metrics.some(k => !isMkt(k)) ? ' · الحالي' : ''}${r.prev?` · التغير عن <span class="n">${esc(r.prev)}</span>`:''}</small>${r.share!=null?`<span class="cx-vs-bar" aria-hidden="true"><i style="width:${(r.share*100).toFixed(1)}%"></i><i></i></span>`:''}</span>${val(r,'b')}</li>`).join('')}</ol>`;
 }
 
 /* ---------- صورة المقارنة ---------- */
@@ -447,19 +422,15 @@ function exportData(){
   const company = c => ({ symbol:String(c.symbol), name:c.name, initial:initial(c), logo: hasLogo(c) ? `logos/${c.symbol}.svg` : null,
     color: css.getPropertyValue(`--s${(slots.get(c.symbol) ?? 0)+1}`).trim() || '#3987e5' });
   if(multi()){
-    // بطاقة لكل بند؛ fmt وaxisFmt مربوطة ببندها
-    const fin = state.metrics.filter(k => !isMkt(k)), yrs = state.years;
+    // المواجهة: الشركة الأولى يمينًا والثانية يسارًا، والبنود في الوسط
+    const side = x => x && { v:x.v, text:x.text, delta: x.ch ? `${arrow(x.ch.dir)} ${x.ch.text}` : '', dir: x.ch ? dirOf(x.ch) : 0 };
+    const mixed = state.metrics.some(k => !isMkt(k));
     return { ...base, multi:true,
-      title: list.length===2 ? `${list[0].name} مقابل ${list[1].name}` : `مقارنة ${state.metrics.length} بنود`,
-      sub: `${fin.length ? periodName()+' · ' : ''}${list.length} ${list.length===2 ? 'شركتان' : 'شركات'} · قطاع ${sectorName}`,
-      span: fin.length ? (yrs.length>1 ? `${lab(yrs[0])} – ${lab(yrs.at(-1))}` : lab(yrs[0])) : marketNote(),
+      title: list.length===2 ? `${list[0].name} مقابل ${list[1].name}` : list[0].name,
+      sub: `مقارنة ${state.metrics.length} بنود · قطاع ${sectorName}`, span: vsPeriod(),
       companies: list.map(company),
-      metrics: state.metrics.map(k => { const { prev, rows } = metricRows(k, list); return using(k, () => ({
-        key:k, label:label(k), note:metricNote(k), periods: cols().map(lab),
-        fmt: v => using(k, () => fmt(v)), axisFmt: (v,s) => using(k, () => axisFmt(v,s)),
-        values: list.map(c => cols().map(y => valueAt(c,y))),
-        rows: rows.map(r => ({ symbol:String(r.c.symbol), v:r.v, text:fmt(r.v), delta: r.ch ? `${arrow(r.ch.dir)} ${r.ch.text}` : '', dir: r.ch ? dirOf(r.ch) : 0 })),
-        prev: prev!=null ? lab(prev) : '' })); }),
+      rows: versusData(list).map(r => ({ label:r.label, note:[r.unit, r.now && mixed ? 'الحالي' : '', r.prev ? `التغير عن ${r.prev}` : ''].filter(Boolean).join(' · '),
+        share:r.share, a:side(r.a), b:side(r.b) })),
     };
   }
   const { prev, rows } = rankData(list);
@@ -524,12 +495,11 @@ function render(){
   }
   // عدة بنود: بطاقات البنود وجدولها بدل الرسم والترتيب
   const many = multi();
-  $('cx-multi').hidden = !many; $('cx-figures').hidden = many; document.querySelector('.cx-grid').hidden = many;
+  $('cx-multi').hidden = !many; $('cx-figures').hidden = many; document.querySelector('.cx-grid').hidden = many; document.querySelector('.cx-table-card').hidden = many;
   document.body.classList.toggle('cx-uni', uni());
   if(many){
-    const fin = state.metrics.some(k => !isMkt(k));
-    $('cx-summary').innerHTML = `<b>${state.metrics.length} بنود</b> · ${fin ? `${esc(periodName())} · ` : ''}${list.length===1 ? 'شركة واحدة' : `${list.length} شركات`} من قطاع ${esc(sectorName)}${fin ? ` · <span class="n">${esc(state.years.length>1 ? `${lab(state.years[0])} – ${lab(state.years.at(-1))}` : lab(state.years[0]))}</span>` : ''}`;
-    renderMulti(list); renderMultiTable(list);
+    $('cx-summary').innerHTML = `<b>${list.length===2 ? `${esc(list[0].name)} مقابل ${esc(list[1].name)}` : esc(list[0].name)}</b> · ${state.metrics.length} بنود · ${esc(vsPeriod())} · قطاع ${esc(sectorName)}`;
+    renderVersus(list);
     writeHash(); return;
   }
   const span = cols().length>1 ? `${lab(cols()[0])} – ${lab(cols().at(-1))}` : lab(cols()[0]);
@@ -599,6 +569,11 @@ function applyData(wanted={}){
   if(!state.multiPick) setMetrics(next.slice(0,1));
   const want = wanted.y ?? state.years, ys = want.filter(y => allYears.includes(y)).sort();
   state.years = ys.length ? ys : isSeq() ? allYears.slice(-SEQ_DEFAULT) : [...allYears];
+  if(state.multiPick){
+    // المواجهة لفترة واحدة: «أرباع متتالية» تصير «ربع محدد» بربع آخر عمود
+    if(isSeq()){ const last = state.years.at(-1); chosenPeriod = 'q'; if(last) state.quarter = last.slice(5); return applyData({ ...wanted, y: last ? [last.slice(0,4)] : [] }); }
+    state.years = state.years.slice(-1);
+  }
   const wantC = (wanted.c ?? state.symbols).filter(s => companies.some(c => c.symbol===s));
   setSymbols(wantC.length>=2 ? wantC : wantC.length===1 ? [...wantC, ...companies.filter(c => c.symbol!==wantC[0]).slice(0,2).map(c => c.symbol)] : companies.slice(0,3).map(c => c.symbol));
   state.sort = {key:null,dir:-1};
@@ -609,6 +584,7 @@ async function loadSector(slug, wanted={}){
   if(state.sector!==slug) return; // اختار المستخدم قطاعًا آخر أثناء التحميل
   slots = new Map(); state.query = ''; $('company-search').value = '';
   state.symbols = []; state.years = [];
+  if(wanted.vs) state.multiPick = true;
   applyData({ m:wanted.m, y:wanted.y || [], c:wanted.c || [] });
   if(wanted.v==='lines' || wanted.v==='bars') state.view = wanted.v;
   render();
@@ -626,13 +602,20 @@ $('metric-chips').addEventListener('click', e => {
   else if(state.metrics.length<MAX_METRICS) setMetrics([...state.metrics, k]);
   render();
 });
-$('metric-multi').addEventListener('click', () => { state.multiPick = !state.multiPick; if(!state.multiPick) setMetrics(state.metrics.slice(0,1)); render(); });
+$('metric-multi').addEventListener('click', () => {
+  state.multiPick = !state.multiPick;
+  if(!state.multiPick) setMetrics(state.metrics.slice(0,1));
+  else { applyData({ m:state.metrics, y:state.years.slice(-1), c:state.symbols.slice(0,VS_COMPANIES) }); }
+  render();
+});
 $('metric-picked').addEventListener('click', e => { const b = e.target.closest('[data-unpick]'); if(!b || state.metrics.length<2) return; setMetrics(state.metrics.filter(x => x!==b.dataset.unpick)); render(); });
 $('period-seg').addEventListener('click', e => { const b = e.target.closest('[data-period]'); if(!b || b.disabled || b.dataset.period===state.period) return; chosenPeriod = b.dataset.period; applyData(); render(); });
 $('quarter-seg').addEventListener('click', e => { const b = e.target.closest('[data-quarter]'); if(!b || b.dataset.quarter===state.quarter) return; state.quarter = b.dataset.quarter; applyData(); render(); });
-$('year-chips').addEventListener('click', e => { const b = e.target.closest('[data-year]'); if(!b) return; const y = b.dataset.year; state.years = (state.years.includes(y) ? state.years.filter(v => v!==y) : [...state.years,y]).sort(); render(); });
+$('year-chips').addEventListener('click', e => { const b = e.target.closest('[data-year]'); if(!b) return; const y = b.dataset.year; state.years = state.multiPick ? [y] : (state.years.includes(y) ? state.years.filter(v => v!==y) : [...state.years,y]).sort(); render(); });
 $('year-quick').addEventListener('click', e => { const b = e.target.closest('[data-years]'); if(!b) return; state.years = b.dataset.years==='all' ? [...allYears] : allYears.slice(-Number(b.dataset.years)); render(); });
-$('company-chips').addEventListener('click', e => { const b = e.target.closest('[data-symbol]'); if(!b) return; const s = b.dataset.symbol; setSymbols(state.symbols.includes(s) ? state.symbols.filter(v => v!==s) : [...state.symbols,s]); render(); });
+$('company-chips').addEventListener('click', e => { const b = e.target.closest('[data-symbol]'); if(!b) return; const s = b.dataset.symbol;
+  // المواجهة: شركة ثالثة تحل محل آخر شركة اختيرت
+  setSymbols(state.symbols.includes(s) ? state.symbols.filter(v => v!==s) : state.multiPick && state.symbols.length>=VS_COMPANIES ? [state.symbols[0], s] : [...state.symbols,s]); render(); });
 $('company-search').addEventListener('input', e => { state.query = e.target.value; renderCompanies(); });
 document.querySelector('[data-pick]').parentElement.addEventListener('click', e => {
   const b = e.target.closest('[data-pick]'); if(!b) return;
@@ -646,15 +629,7 @@ $('cx-table').addEventListener('click', e => { const b = e.target.closest('[data
 $('chart').addEventListener('pointermove', e => { const band = e.target.closest?.('.band') || document.elementsFromPoint(e.clientX,e.clientY).find(el => el.classList?.contains('band')); if(!band){ hideTip(); return; } document.querySelectorAll('.cx-chart .band.on').forEach(b => b!==band && b.classList.remove('on')); band.classList.add('on'); showLogos(band.dataset.year); showTip(band.dataset.year, e.clientX, e.clientY); });
 $('chart').addEventListener('pointerleave', hideTip);
 addEventListener('scroll', hideTip, {passive:true});
-// تلميح الرسوم الصغيرة: قيم الشركات للفترة التي يمرّ عليها المؤشر في بند البطاقة
-$('multi-grid').addEventListener('pointermove', e => {
-  const band = e.target.closest?.('.band'), svg = band?.closest('svg');
-  document.querySelectorAll('.cx-mini .band.on').forEach(b => b!==band && b.classList.remove('on'));
-  if(!band || !svg){ $('cx-tip').hidden = true; return; }
-  band.classList.add('on'); using(svg.dataset.metric, () => showTip(band.dataset.year, e.clientX, e.clientY));
-});
-$('multi-grid').addEventListener('pointerleave', () => { $('cx-tip').hidden = true; document.querySelectorAll('.cx-mini .band.on').forEach(b => b.classList.remove('on')); });
-for(const id of ['chart-legend','rank-list','cx-table','multi-legend','multi-grid']){
+for(const id of ['chart-legend','rank-list','cx-table','versus']){
   $(id).addEventListener('pointerover', e => { const el = e.target.closest('[data-s]'); if(el) highlight(el.dataset.s); });
   $(id).addEventListener('pointerleave', () => highlight(null));
 }
@@ -662,8 +637,6 @@ $('cx-save-img').addEventListener('click', () => { if(!$('cx-results').hidden) o
 $('cx-share').addEventListener('click', async e => { const b = e.currentTarget, t = b.textContent; try{ await navigator.clipboard.writeText(location.href); b.textContent = 'تم نسخ الرابط ✓'; }catch{ b.textContent = 'انسخ الرابط من شريط العنوان'; } setTimeout(() => b.textContent = t, 1800); });
 let lastW = 0;
 new ResizeObserver(() => { const w = $('chart').clientWidth; if(w && w!==lastW && !$('cx-results').hidden && !multi()){ lastW = w; renderChart(chosen()); } }).observe($('chart'));
-let lastMW = 0;
-new ResizeObserver(() => { const w = $('multi-grid').clientWidth; if(w && w!==lastMW && multi()){ lastMW = w; drawMinis(); } }).observe($('multi-grid'));
 const fail = e => { $('cx-results').hidden = true; $('cx-empty').hidden = false; $('cx-empty').textContent = 'تعذر تحميل بيانات القطاع.'; console.error(e); };
 const wanted = readHash();
 chosenPeriod = state.period;

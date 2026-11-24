@@ -50,10 +50,14 @@ test('market valuation items come from data.json: P/E, book value, P/B, yield an
   for (const k of MARKET_KEYS) assert.match(page, new RegExp(`${k}:'`), k);
 });
 
-test('several items can be compared at once and saved as one image', () => {
+test('several items compare two companies in one period, right and left, saved as one image', () => {
   const html = read('comparison.html'), exp = read('comparison-export.mjs');
-  for (const id of ['metric-multi', 'metric-picked', 'cx-multi', 'multi-grid', 'multi-legend']) assert.match(html, new RegExp(`id="${id}"`), id);
+  for (const id of ['metric-multi', 'metric-picked', 'cx-multi', 'versus']) assert.match(html, new RegExp(`id="${id}"`), id);
   assert.match(page, /const MAX_METRICS = 8/);
+  assert.match(page, /const VS_COMPANIES = 2/);
+  assert.match(page, /state\.multiPick \? VS_COMPANIES : MAX_COMPANIES/);
+  assert.match(page, /state\.years = state\.years\.slice\(-1\)/);
+  assert.match(page, /id==='seq'&&state\.multiPick \? 'disabled/);
   assert.match(page, /m:state\.metrics\.join\(','\)/);
-  assert.match(exp, /d\.multi \? layoutMulti/);
+  assert.match(exp, /d\.multi \? layoutVersus/);
 });

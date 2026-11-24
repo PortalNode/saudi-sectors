@@ -246,37 +246,44 @@ html body #cx-save-img{--ico:var(--i-download)}
 .cx-picked-chip:disabled span{display:none}
 .cx-row[hidden]{display:none}
 
-/* ---------- بطاقات البنود ---------- */
+/* ---------- المواجهة: شركتان وبنود في الوسط ---------- */
 .cx-multi{margin:12px 0}
-.cx-multi[hidden],.cx-grid[hidden],.cx-figures[hidden]{display:none}
-.cx-multi-legend{padding:0 0 10px}
-.cx-multi-legend bdi{font-size:10.5px;opacity:.7}
-.cx-multi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:12px}
-.cx-mcard .cx-card-head{align-items:flex-start}
-.cx-mchart{padding:10px 12px 0;direction:ltr;min-height:168px}
-.cx-mini{display:block;overflow:visible}
-.cx-mini .grid{stroke:var(--cx-grid);stroke-width:1}
-.cx-mini .zero{stroke:var(--muted);stroke-width:1}
-.cx-mini .tick{fill:var(--muted);font-size:10px;font-family:inherit;font-variant-numeric:tabular-nums}
-.cx-mini .year{fill:var(--muted);font-size:10.5px;font-weight:700;font-family:inherit}
-.cx-mini .band{fill:transparent}
-.cx-mini .band.on{fill:var(--head);opacity:.55}
-.cx-mini .mark{opacity:.72;transition:opacity .15s}
-.cx-mini .mark.last{opacity:1}
-.cx-mrows{list-style:none;margin:0;padding:4px 14px 10px}
-.cx-mrows li{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"who fig" "track delta";gap:5px 12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);transition:opacity .15s}
-.cx-mrows li:last-child{border-bottom:0}
-.cx-mrows .who{grid-area:who;display:flex;align-items:center;gap:8px;min-width:0;font-size:12.5px;font-weight:700;color:var(--ink)}
-.cx-mrows .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cx-mrows .who .cx-logo{width:20px;height:20px}
-.cx-mrows .fig{grid-area:fig;font-size:15px;font-weight:800;color:var(--ink)}
-.cx-mrows .fig.neg{color:var(--red)}
-.cx-mrows .track{grid-area:track;position:relative;height:8px;background:var(--cx-grid);border-radius:999px;direction:ltr}
-.cx-mrows .fill{position:absolute;top:0;bottom:0;border-radius:999px;min-width:2px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 45%,transparent),var(--c))}
-.cx-mrows .axis0{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--muted)}
-.cx-mrows .delta{grid-area:delta;min-width:72px;font-size:11px;font-weight:700;text-align:left;color:var(--muted)}
-.cx-multi.dim .cx-mrows li:not(.hl){opacity:.3}
-.cx-multi.dim .cx-mini .mark:not(.hl){opacity:.15}
+.cx-multi[hidden],.cx-grid[hidden],.cx-figures[hidden],.cx-table-card[hidden]{display:none}
+.cx-vs{overflow:hidden}
+.cx-vs-head{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;padding:22px 18px 18px;border-bottom:1px solid var(--line);background:radial-gradient(120% 140% at 100% 0,color-mix(in srgb,var(--ca) 16%,transparent),transparent 55%),radial-gradient(120% 140% at 0 0,color-mix(in srgb,var(--cb) 16%,transparent),transparent 55%)}
+.cx-vs-co{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;text-align:center}
+.cx-vs-co .cx-logo{width:58px;height:58px;border-radius:16px;box-shadow:0 0 0 2px var(--c),0 6px 18px #0005}
+.cx-vs-co .cx-logo-letter{font-size:24px}
+.cx-vs-co b{max-width:100%;font-size:17px;line-height:1.4;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cx-vs-co bdi{font-size:11.5px;color:var(--muted)}
+.cx-vs-co.empty{color:var(--muted);font-size:12.5px}
+.cx-vs-mid{display:flex;flex-direction:column;align-items:center;gap:8px}
+.cx-vs-badge{display:grid;place-items:center;min-width:64px;padding:6px 14px;border-radius:999px;background:var(--cx-gold);color:#111;font-size:15px;font-weight:900;letter-spacing:.5px}
+.cx-vs-when{font-size:12px;font-weight:700;color:var(--muted);text-align:center;max-width:180px}
+.cx-vs-rows{list-style:none;margin:0;padding:4px 18px 10px}
+.cx-vs-rows li{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,1.15fr) minmax(0,1fr);align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.cx-vs-rows li:last-child{border-bottom:0}
+.cx-vs-val{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:19px;font-weight:800;color:var(--ink);text-align:center}
+.cx-vs-val.neg{color:var(--red)}
+.cx-vs-val small{font-size:11px;font-weight:700;color:var(--muted)}
+.cx-vs-label{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;min-width:0}
+.cx-vs-label b{font-size:13.5px;color:var(--ink)}
+.cx-vs-label small{font-size:10.5px;color:var(--muted)}
+.cx-vs-bar{display:flex;width:100%;max-width:220px;height:6px;margin-top:4px;border-radius:999px;overflow:hidden;background:var(--cb)}
+.cx-vs-bar i:first-child{background:var(--ca)}
+.cx-vs-bar i:last-child{flex:1}
+.cx-multi.dim .cx-vs-co:not(.hl){opacity:.45}
+@media(max-width:760px){
+  .cx-vs-head{padding:16px 10px 14px;gap:8px}
+  .cx-vs-co .cx-logo{width:44px;height:44px;border-radius:12px}
+  .cx-vs-co b{font-size:14px;white-space:normal}
+  .cx-vs-badge{min-width:52px;font-size:11px}
+  .cx-vs-when{font-size:11px;max-width:96px}
+  .cx-vs-rows{padding:2px 10px 8px}
+  .cx-vs-rows li{grid-template-columns:minmax(0,1fr) minmax(96px,1fr) minmax(0,1fr);gap:6px;padding:11px 0}
+  .cx-vs-val{font-size:15px}
+  .cx-vs-label b{font-size:12px}
+}
 /* جدول عدة بنود */
 .cx-table .cx-th-co{display:inline-flex;align-items:center;gap:7px}
 .cx-table .cx-th-co .cx-logo{width:18px;height:18px}
@@ -286,7 +293,6 @@ html body #cx-save-img{--ico:var(--i-download)}
 .cx-table .cx-cell-delta.cx-up{color:var(--green)}.cx-table .cx-cell-delta.cx-down{color:var(--red)}
 .cx-page .cx-table tbody tr:nth-child(n) td.hl{background:var(--hover)}
 @media(max-width:760px){
-  .cx-multi-grid{grid-template-columns:minmax(0,1fr)}
   .cx-toggle{min-height:34px}
 }
 .cx-table td.best .cx-cell-delta{box-shadow:none;padding-bottom:0;font-weight:700}
