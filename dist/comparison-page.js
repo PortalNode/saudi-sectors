@@ -1,7 +1,7 @@
 // صفحة المقارنة: تقرأ ملفات ‎*-financials.json‎ (سنوي) و‎*-quarterly-financials.json‎ (ربعي) لكل قطاع.
 import { DEFAULT_PERIOD_SPEC, sumQuarters, withMargins, quarterLabel, monthRange, isCalendarYear, MONTH_NAMES, QUARTER_NAMES } from './quarterly-periods.mjs?v=quarterly-20261115';
 import { marketCapMap, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
-import { openExportDialog } from './comparison-export.mjs?v=export-20261123j-multi-vs3';
+import { openExportDialog } from './comparison-export.mjs?v=export-20261123j-multi-vs4';
 import { MARKET_KEYS, isMarketKey, marketIndex, marketDate } from './comparison-market.mjs?v=market-20261124';
 const DATA_BASE = '';
 const VERSION = 'comparison-v6';

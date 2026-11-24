@@ -322,6 +322,17 @@ function drawVersusHeader(ctx, P, d, x0, x1, y, brand, wide){
   txt(ctx, d.sector, (x0+x1)/2, sy, { size: wide ? 40 : 46, weight:800, color:P.gold, align:'center', max:(x1-x0)*0.8 });
   return sy-y+(wide ? 14 : 20);
 }
+// حساب X صاحب الموقع في أسفل صورة المواجهة
+const X_HANDLE = '@4eea_';
+// شعار X مرسوم (لا يعتمد على خط فيه الرمز): مربع بزوايا ناعمة وعليه X، حافته اليمنى عند right وقاعدته عند base
+function drawXMark(ctx, P, right, base, size){
+  const s = size*1.15, x = right-s, y = base-s*0.86;
+  rr(ctx, x, y, s, s, s*0.24); ctx.fillStyle = P.ink; ctx.fill();
+  const p = s*0.27; ctx.strokeStyle = P.panel; ctx.lineCap = 'round';
+  ctx.lineWidth = s*0.11; ctx.beginPath(); ctx.moveTo(x+p, y+p); ctx.lineTo(x+s-p, y+s-p); ctx.stroke();
+  ctx.lineWidth = s*0.07; ctx.beginPath(); ctx.moveTo(x+s-p, y+p); ctx.lineTo(x+p, y+s-p); ctx.stroke();
+  return s;
+}
 // الأرقام في الصورة: النقطة فاصلًا للآلاف بدل الفاصلة (30,866 ← 30.866)
 const dots = s => String(s ?? '').replace(/,/g, '.');
 function layoutVersus(ctx, P, d, S, key, brand){
@@ -381,7 +392,10 @@ function layoutVersus(ctx, P, d, S, key, brand){
     };
     value(r.a, xa); value(r.b, xb);
   });
-  txt(ctx, d.stamp, x0, bottom, { size:22, weight:600, color:P.muted, align:'left' }); // التاريخ فقط، بلا رابط الموقع
+  // التذييل: حساب X يمينًا (مكان رابط الموقع) والتاريخ يسارًا
+  const xw = drawXMark(ctx, P, x1, bottom, 26);
+  txt(ctx, X_HANDLE, x1-xw-10, bottom, { size:26, weight:800, color:P.ink, dir:'ltr' });
+  txt(ctx, d.stamp, x0, bottom, { size:22, weight:600, color:P.muted, align:'left' });
 }
 
 export async function renderComparison(data, key='iphone', parts={ figures:true, chart:true, rank:true }){
