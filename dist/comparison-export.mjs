@@ -312,10 +312,22 @@ function glow(ctx, x, y, r, color){
   const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, alpha(color, .22)); g.addColorStop(1, alpha(color, 0));
   ctx.fillStyle = g; ctx.fillRect(x-r, y-r, r*2, r*2);
 }
+// رأس المواجهة: شعار الموقع واسمه، واسم القطاع في المنتصف؛ لا عنوان ولا فترة (الفترة تحت VS)
+function drawVersusHeader(ctx, P, d, x0, x1, y, brand, wide){
+  const B = 54;
+  if(brand){ ctx.save(); rr(ctx, x1-B, y, B, B, 14); ctx.clip(); ctx.drawImage(brand, x1-B, y, B, B); ctx.restore(); }
+  txt(ctx, d.site, x1-B-16, y+38, { size:30, weight:800, color:P.ink });
+  txt(ctx, 'مقارنة النتائج المالية', x0, y+38, { size:24, weight:600, color:P.muted, align:'left' });
+  const sy = y+B+(wide ? 50 : 66);
+  txt(ctx, d.sector, (x0+x1)/2, sy, { size: wide ? 40 : 46, weight:800, color:P.gold, align:'center', max:(x1-x0)*0.8 });
+  return sy-y+(wide ? 14 : 20);
+}
+// الأرقام في الصورة: النقطة فاصلًا للآلاف بدل الفاصلة (30,866 ← 30.866)
+const dots = s => String(s ?? '').replace(/,/g, '.');
 function layoutVersus(ctx, P, d, S, key, brand){
   const W = S.w, H = S.h, wide = W > H, PAD = 56, x0 = PAD, x1 = W-PAD, CW = x1-x0, GAP = wide ? 22 : 28;
   const top = key==='iphone' ? 150 : wide ? 44 : 88, bottom = H-(key==='iphone' ? 100 : wide ? 36 : 60);
-  let y = top + drawHeader(ctx, P, d, x0, x1, top, brand, wide ? 58 : 66) + GAP;
+  let y = top + drawVersusHeader(ctx, P, d, x0, x1, top, brand, wide) + GAP;
   const [A, B] = d.companies, M = d.rows.length;
   // أعمدة ثابتة للبطاقتين: القيم تقع تحت اسم شركتها تمامًا
   const midW = wide ? 620 : 380, colW = (CW-midW)/2, xa = x1-colW/2, xb = x0+colW/2, xm = x0+CW/2;
@@ -364,12 +376,12 @@ function layoutVersus(ctx, P, d, S, key, brand){
       if(!x) return;
       const showDelta = x.delta && rowH >= 70, vy = showDelta ? mid+valSize*0.18 : mid+valSize*0.36;
       const col = x.v!=null && x.v<0 ? P.neg : P.ink; // لون واحد للشركتين
-      txt(ctx, x.text, cx, vy, { size:valSize, weight:800, color:col, align:'center', dir:'ltr', max:colW-52 });
-      if(showDelta) txt(ctx, x.delta, cx, vy+small+18, { size:small, weight:700, color: x.dir>0 ? P.up : x.dir<0 ? P.down : P.muted, align:'center', max:colW-30 });
+      txt(ctx, dots(x.text), cx, vy, { size:valSize, weight:800, color:col, align:'center', dir:'ltr', max:colW-52 });
+      if(showDelta) txt(ctx, dots(x.delta), cx, vy+small+18, { size:small, weight:700, color: x.dir>0 ? P.up : x.dir<0 ? P.down : P.muted, align:'center', max:colW-30 });
     };
     value(r.a, xa); value(r.b, xb);
   });
-  drawFooter(ctx, P, d, x0, x1, bottom);
+  txt(ctx, d.stamp, x0, bottom, { size:22, weight:600, color:P.muted, align:'left' }); // التاريخ فقط، بلا رابط الموقع
 }
 
 export async function renderComparison(data, key='iphone', parts={ figures:true, chart:true, rank:true }){

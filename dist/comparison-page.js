@@ -1,7 +1,7 @@
 // صفحة المقارنة: تقرأ ملفات ‎*-financials.json‎ (سنوي) و‎*-quarterly-financials.json‎ (ربعي) لكل قطاع.
 import { DEFAULT_PERIOD_SPEC, sumQuarters, withMargins, quarterLabel, monthRange, isCalendarYear, MONTH_NAMES, QUARTER_NAMES } from './quarterly-periods.mjs?v=quarterly-20261115';
 import { marketCapMap, sortByMarketCap } from './market-cap-order.mjs?v=mcap-order-20261115';
-import { openExportDialog } from './comparison-export.mjs?v=export-20261123j-multi-vs2';
+import { openExportDialog } from './comparison-export.mjs?v=export-20261123j-multi-vs3';
 import { MARKET_KEYS, isMarketKey, marketIndex, marketDate } from './comparison-market.mjs?v=market-20261124';
 const DATA_BASE = '';
 const VERSION = 'comparison-v6';
@@ -427,7 +427,7 @@ function exportData(){
     const mixed = state.metrics.some(k => !isMkt(k));
     return { ...base, multi:true,
       title: list.length===2 ? `${list[0].name} مقابل ${list[1].name}` : list[0].name,
-      sub: `مقارنة ${state.metrics.length} بنود · قطاع ${sectorName}`, span: vsPeriod(),
+      sub: `مقارنة ${state.metrics.length} بنود · قطاع ${sectorName}`, sector: `قطاع ${sectorName}`, span: vsPeriod(),
       companies: list.map(company),
       rows: versusData(list).map(r => ({ label:r.label, note:[r.unit, r.now && mixed ? 'الحالي' : '', r.prev ? `التغير عن ${r.prev}` : ''].filter(Boolean).join(' · '),
         share:r.share, a:side(r.a), b:side(r.b) })),
