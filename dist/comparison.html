@@ -6,7 +6,7 @@
   <script src="theme.js?v=comparison-v4"></script>
   <link rel="stylesheet" href="styles.css?v=comparison-v4"><link rel="stylesheet" href="banks.css?v=comparison-v4"><link rel="stylesheet" href="theme.css?v=comparison-v4">
   <link rel="stylesheet" href="layout.css?v=logos-20261116">
-  <link rel="stylesheet" href="comparison-page.css?v=comparison-v7-export-c">
+  <link rel="stylesheet" href="comparison-page.css?v=comparison-v7-export-c-multi">
   <link rel="stylesheet" href="mobile.css?v=mobile-20261119g">
   <link rel="icon" href="favicon.ico?v=20261120-favicon2" sizes="any" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20261120-favicon2">
@@ -48,8 +48,12 @@
     <div class="cx-row">
       <span class="cx-label">البند</span>
       <div class="cx-field">
-        <div id="metric-groups" class="cx-seg" role="group" aria-label="مجموعة البنود"></div>
+        <div class="cx-inline">
+          <div id="metric-groups" class="cx-seg" role="group" aria-label="مجموعة البنود"></div>
+          <button type="button" id="metric-multi" class="cx-toggle" aria-pressed="false" title="اختر أكثر من بند (حتى 8) من أي مجموعة، مثل الإيرادات وصافي الربح ومكرر الأرباح وعائد التوزيع"><i aria-hidden="true"></i>اختيار عدة بنود</button>
+        </div>
         <div id="metric-chips" class="cx-chips" role="group" aria-label="البند المراد مقارنته"></div>
+        <div id="metric-picked" class="cx-picked" aria-label="البنود المختارة" hidden></div>
       </div>
     </div>
     <div class="cx-row">
@@ -93,6 +97,12 @@
       </section>
     </div>
 
+    <!-- ===== عدة بنود: بطاقة لكل بند ===== -->
+    <section id="cx-multi" class="cx-multi" aria-label="مقارنة عدة بنود" hidden>
+      <div id="multi-legend" class="cx-legend cx-multi-legend"></div>
+      <div id="multi-grid" class="cx-multi-grid"></div>
+    </section>
+
     <!-- ===== الجدول ===== -->
     <section class="cx-card cx-table-card" aria-labelledby="table-title">
       <header class="cx-card-head"><div><h3 id="table-title">الجدول التفصيلي</h3><span id="table-sub" class="cx-sub"></span></div></header>
@@ -101,11 +111,11 @@
   </div>
 
   <details class="read-guide cx-guide"><summary>طريقة القراءة</summary>
-    <p>القيم من ملفات النتائج السنوية والربعية داخل المشروع، وبنود كل قطاع كما في ملفاته. «ربع محدد» يقارن الربع نفسه عبر السنوات، و«أرباع متتالية» يعرض الأرباع بترتيبها الزمني، و«6 أشهر» و«9 أشهر» مجموع الأرباع المستقلة من بداية السنة، والهوامش تُحسب من هذه المجاميع. لكل شركة لون ثابت ما دامت مختارة. تظهر «—» للقيم غير المتاحة، والقيم السالبة بالأحمر. عمود «التغير» يقارن أول فترة مختارة بآخر فترة مختارة، ويُعرض بالنقاط المئوية للبنود النسبية.</p>
+    <p>القيم من ملفات النتائج السنوية والربعية داخل المشروع، وبنود كل قطاع كما في ملفاته. «ربع محدد» يقارن الربع نفسه عبر السنوات، و«أرباع متتالية» يعرض الأرباع بترتيبها الزمني، و«6 أشهر» و«9 أشهر» مجموع الأرباع المستقلة من بداية السنة، والهوامش تُحسب من هذه المجاميع. لكل شركة لون ثابت ما دامت مختارة. تظهر «—» للقيم غير المتاحة، والقيم السالبة بالأحمر. عمود «التغير» يقارن أول فترة مختارة بآخر فترة مختارة، ويُعرض بالنقاط المئوية للبنود النسبية. «اختيار عدة بنود» يعرض بطاقة لكل بند بقيمه في آخر فترة مختارة ورسمًا صغيرًا للفترات. بنود «التقييم الحالي» (مكرر الأرباح، القيمة الدفترية، مكرر القيمة الدفترية، عائد التوزيع، القيمة السوقية) من الصفحة الرئيسية: قيمة واحدة حالية لكل شركة من آخر سعر وآخر أربعة أرباع، والشركة الخاسرة بلا مكرر.</p>
   </details>
   <div id="cx-tip" class="cx-tip" hidden></div>
 </main>
-<script type="module" src="comparison-page.js?v=comparison-v8-export-j"></script>
+<script type="module" src="comparison-page.js?v=comparison-v8-export-j-multi"></script>
   <script src="layout.js?v=logos-20261116" defer></script>
   <script src="e7-bars.js?v=20261123" defer></script>
 </body></html>

@@ -21,11 +21,12 @@ test('a failed price snapshot leaves the file order', async () => {
   } finally { console.warn = warn; }
 });
 
-test('results pages, banks and the comparison page order companies by market cap without showing it', () => {
+// صفحة المقارنة تعرض القيمة السوقية الآن بندًا اختياريًا («التقييم الحالي»)، وتبقى مرتبة بها
+test('results pages, banks and the comparison page order companies by market cap; only the comparison page may show it', () => {
   assert.match(read('sector-results-page.mjs'), /companies: sortByMarketCap\(dataset\.companies, caps\)/);
   assert.match(read('banks.js'), /dataset\.banks = sortByMarketCap\(dataset\.banks, marketCapMap\(/);
   const comparison = read('comparison-page.js');
   assert.match(comparison, /sortByMarketCap\(annual\.companies \|\| annual\.banks/);
   assert.match(comparison, /sortByMarketCap\(quarterly\.companies, caps\)/);
-  for (const name of ['sector-results-page.mjs', 'banks.js', 'comparison-page.js']) assert.doesNotMatch(read(name).replace(/sortByMarketCap|marketCapMap|loadMarketCaps|market-cap-order/g, ''), /marketCap|القيمة السوقية/, name);
+  for (const name of ['sector-results-page.mjs', 'banks.js']) assert.doesNotMatch(read(name).replace(/sortByMarketCap|marketCapMap|loadMarketCaps|market-cap-order/g, ''), /marketCap|القيمة السوقية/, name);
 });

@@ -34,3 +34,26 @@ test('every item in a sector data file has a label on the comparison page', () =
     }
   }
 });
+
+test('market valuation items come from data.json: P/E, book value, P/B, yield and market cap', async () => {
+  const { MARKET_KEYS, marketIndex, marketDate } = await import(new URL('comparison-market.mjs', dist));
+  assert.deepEqual(MARKET_KEYS, ['mktPe', 'mktBook', 'mktPb', 'mktYield', 'mktCap']);
+  const idx = marketIndex({ asOf: '2026-11-22', sectors: [{ stocks: [
+    { symbol: '1180', price: 36.8, eps: 4.314, pe: 8.53, bookValue: 31.86, pb: 1.155, dividendYield: 5.84, marketCap: 220800 },
+    { symbol: '2', price: 10, eps: -1, pe: null, bookValue: 5, pb: null, dividendYield: null, marketCap: 50 },
+  ] }] });
+  assert.deepEqual(idx.get('1180'), { mktPe: 8.53, mktBook: 31.86, mktPb: 1.155, mktYield: 0.0584, mktCap: 220800 });
+  // الخاسرة بلا مكرر، والمكرر الدفتري يُحسب من السعر والقيمة الدفترية إن غاب
+  assert.equal(idx.get('2').mktPe, null);
+  assert.equal(idx.get('2').mktPb, 2);
+  assert.equal(marketDate({ asOf: '2026-11-22' }), '2026-11-22');
+  for (const k of MARKET_KEYS) assert.match(page, new RegExp(`${k}:'`), k);
+});
+
+test('several items can be compared at once and saved as one image', () => {
+  const html = read('comparison.html'), exp = read('comparison-export.mjs');
+  for (const id of ['metric-multi', 'metric-picked', 'cx-multi', 'multi-grid', 'multi-legend']) assert.match(html, new RegExp(`id="${id}"`), id);
+  assert.match(page, /const MAX_METRICS = 8/);
+  assert.match(page, /m:state\.metrics\.join\(','\)/);
+  assert.match(exp, /d\.multi \? layoutMulti/);
+});
