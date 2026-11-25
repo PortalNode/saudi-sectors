@@ -19,7 +19,7 @@
   ];
   const currentPage = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
   const siteName = document.querySelector('.site-bar .site-name');
-  // «نتائج الشركات» in the top bar opens the last results page viewed (Banks the first time).
+  // «البيانات المالية» in the top bar opens the last results page viewed (Banks the first time).
   const onResultsPage = SECTOR_PAGES.some(([page]) => page === currentPage);
   if (onResultsPage) write('saudi-sectors-results-page', currentPage);
   const lastResults = read('saudi-sectors-results-page');
@@ -37,9 +37,9 @@
     select.setAttribute('aria-label', 'التبديل إلى نتائج قطاع آخر');
     for (const [page, name] of sorted) select.add(new Option(name, page, false, page === currentPage));
     select.addEventListener('change', () => {
-      // Keep the chosen period (quarter, 6 or 9 months); pages without it fall back to annual.
+      // Keep the chosen period (quarter, 6 or 9 months) and statement; pages without them fall back to annual / income.
       const from = new URLSearchParams(location.search), to = new URLSearchParams();
-      for (const key of ['period', 'q']) if (from.get(key)) to.set(key, from.get(key));
+      for (const key of ['period', 'q', 'stmt', 'view']) if (from.get(key)) to.set(key, from.get(key));
       location.href = `${select.value}.html${to.toString() ? `?${to}` : ''}`;
     });
     label.append(caption, select);

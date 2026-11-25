@@ -73,13 +73,14 @@ def financial_index():
         names.append(f"{s}-financials.json")
         if s != "reits":
             names.append(f"{s}-quarterly-financials.json")
+        names.append(f"{s}-statements.json")
     with ThreadPoolExecutor(8) as ex:
         results = dict(zip(names, ex.map(fetch, names)))
     idx = {}
     for name, doc in results.items():
         if not doc:
             continue
-        kind = "quarterly" if "quarterly" in name else "annual"
+        kind = "quarterly" if "quarterly" in name else "statements" if "statements" in name else "annual"
         for c in doc.get("companies") or doc.get("banks") or []:
             idx.setdefault(str(c.get("symbol")), {})[kind] = c
     return idx
@@ -137,6 +138,14 @@ def tool_company(args):
         qs = fin["quarterly"].get("quarters", {})
         n = int(args.get("quarters", 8))
         out["quarterly"] = [{"quarter": k, **v} for k, v in sorted(qs.items())[-n:]]
+    stm = fin.get("statements")
+    if stm and stm.get("status") == "ok":
+        out["statements"] = {
+            "note": "المركز المالي (bs) والتدفقات النقدية (cf) بالمليون ريال من ملفات XBRL الرسمية في تداول، والإجماليات مطابقة لملخص تداول. المفاتيح: سنوات مثل 2025، وأرباع مثل 2026Q3 (التدفقات الربعية لكل ربع منفرد). صافي الدين السالب = فائض نقدي.",
+            "fiscalYearEndMonth": stm.get("fiscalYearEnd"),
+            "years": stm.get("years"), "quarters": stm.get("quarters"),
+            "balanceSheet": stm.get("bs"), "cashFlow": stm.get("cf"),
+        }
     cal = fetch(f"earnings-calendar/{sym}.json")
     if cal and cal.get("recs"):
         out["resultsDates"] = {
@@ -195,7 +204,7 @@ def tool_market(args):
 TOOLS = {
     "search_companies": (tool_search, "ابحث عن شركة بالاسم أو الرمز أو القطاع في موقع قطاعات السوق السعودي. Search companies by name, symbol or sector.",
                          {"query": {"type": "string", "description": "اسم الشركة أو رمزها أو اسم القطاع"}}, ["query"]),
-    "get_company": (tool_company, "كل بيانات شركة من الموقع: السعر والمكررات والأداء، النبذة، النتائج السنوية والربعية، مواعيد إعلان النتائج (السابقة والموعد المتوقع القادم)، وملخص تاريخ السعر.",
+    "get_company": (tool_company, "كل بيانات شركة من الموقع: السعر والمكررات والأداء، النبذة، النتائج السنوية والربعية، المركز المالي والتدفقات النقدية، مواعيد إعلان النتائج (السابقة والموعد المتوقع القادم)، وملخص تاريخ السعر.",
                     {"company": {"type": "string", "description": "اسم الشركة أو رمزها مثل 2222 أو الراجحي"},
                      "quarters": {"type": "integer", "description": "عدد الأرباع الأخيرة (افتراضي 8)"},
                      "first": {"type": "boolean", "description": "خذ أول تطابق إذا تعددت النتائج"}}, ["company"]),

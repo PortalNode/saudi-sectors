@@ -13,15 +13,15 @@ test('the sector switcher lists every results page once, under its main-table se
   assert.deepEqual(listed.map(item => item.page).sort(), [...sectorPages].sort());
   const site = JSON.parse(read('data.json'));
   assert.deepEqual(listed.map(item => item.name).sort(), site.sectors.map(sector => sector.name).sort());
-  for (const page of sectorPages) assert.match(read(`${page}.html`), /layout\.js\?v=logos-20261116/, page);
+  for (const page of sectorPages) assert.match(read(`${page}.html`), /layout\.js\?v=statements-20261125/, page);
 });
 
-test('the top bar has a «نتائج الشركات» tab on every page, current on the results pages', () => {
+test('the top bar has a «البيانات المالية» tab on every page, current on the results pages', () => {
   for (const page of [...sectorPages, 'index', 'comparison']) {
     const nav = read(`${page}.html`).match(/<nav class="site-nav"[^>]*>(.*?)<\/nav>/)[1];
-    assert.deepEqual([...nav.matchAll(/>([^<]+)<\/a>/g)].map(match => match[1]), ['الرئيسية', 'نتائج الشركات', 'مقارنة النتائج المالية', 'التحليل الفني', 'المحلل الذكي'], page);
+    assert.deepEqual([...nav.matchAll(/>([^<]+)<\/a>/g)].map(match => match[1]), ['الرئيسية', 'البيانات المالية', 'مقارنة النتائج المالية', 'التحليل الفني', 'المحلل الذكي'], page);
     const current = nav.match(/<a [^>]*aria-current="page"[^>]*>([^<]+)</)[1];
-    assert.equal(current, page === 'index' ? 'الرئيسية' : page === 'comparison' ? 'مقارنة النتائج المالية' : 'نتائج الشركات', page);
+    assert.equal(current, page === 'index' ? 'الرئيسية' : page === 'comparison' ? 'مقارنة النتائج المالية' : 'البيانات المالية', page);
     assert.match(nav, /<a href="banks\.html" data-results-link/, page);
   }
   assert.match(layout, /write\('saudi-sectors-results-page', currentPage\)/);
