@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { renderStatement, formatAmount, formatChange, columnLabel, validateStatements } from '../dist/statements.mjs';
+import { renderStatement, formatAmount, formatChange, columnLabel, validateStatements, chartModel, shortLabel } from '../dist/statements.mjs';
+import { renderChartSvg } from '../dist/cement-charts.mjs';
 import { statementsSection, buildPack } from '../scripts/build-ai-packs.mjs';
 
 const dist = new URL('../dist/', import.meta.url);
@@ -111,4 +112,23 @@ test('the AI analyst company pack carries the balance sheet and cash flows', () 
   const pack = buildPack({ stock: { symbol: '3092', name: 'أسمنت الرياض' }, sector: { name: 'الاسمنت', stocks: [] }, statements: { doc: sample, company: sample.companies[0] } });
   assert.match(pack.text, /المركز المالي \(مليون ريال\):/);
   assert.ok(pack.sources.some(([name]) => name === 'المركز المالي والتدفقات النقدية'));
+});
+
+test('the bar chart compares a statement item across the shown periods', () => {
+  const company = sample.companies[0];
+  const assets = chartModel(sample, company, 'bs', 'fy');
+  assert.equal(assets.key, 'totalAssets', 'total assets is the default balance-sheet chart');
+  assert.equal(assets.unit, 'مليار ريال');
+  assert.deepEqual(assets.years, ['2024', '2025']);
+  assert.deepEqual(assets.series[0].points.map(p => p.rawValue), [1970.47, 1896.89]);
+  assert.equal(chartModel(sample, company, 'cf', 'q').key, 'cfo', 'operating cash flow is the default cash-flow chart');
+  assert.deepEqual(chartModel(sample, company, 'cf', 'q').years, ['Q2 2026', 'Q3 2026']);
+  const ratio = chartModel(sample, company, 'bs', 'fy', 'loansToDeposits');
+  assert.equal(ratio.unit, '%');
+  assert.equal(ratio.series[0].points.at(-1).value, 81.23);
+  assert.equal(chartModel(sample, sample.companies[1], 'bs', 'fy'), null);
+  assert.equal(shortLabel('2026Q1'), 'Q1 2026');
+  const svg = renderChartSvg(assets, 600);
+  assert.match(svg, /class="bank-chart-svg"/);
+  assert.equal((svg.match(/<rect class="chart-bar"/g) || []).length, 2);
 });
