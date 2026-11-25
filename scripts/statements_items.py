@@ -25,10 +25,10 @@ def _positive_ratio(a, b):
     return None if a is None or b is None or b <= 0 else a / b
 
 
-def _total_debt(short, long, current_liabilities):
-    # بلا أي بند قروض في المركز المالي (والقائمة نفسها موجودة) = شركة بلا قروض
+def _total_debt(short, long, equity):
+    # بلا أي بند قروض في مركز مالي تفصيلي موجود من ملف الشركة (حقوق الملكية منه علامة على وجوده) = شركة بلا قروض
     if short is None and long is None:
-        return 0.0 if current_liabilities is not None else None
+        return 0.0 if equity is not None else None
     return _sum(short, long)
 
 
@@ -77,7 +77,7 @@ CF_TAIL = [
 NORMAL = {
     "bs": [
         {"key": "cash", "label": "النقد وما في حكمه", "group": "الموجودات",
-         "from": ["النقد وما في حكمه", "النقدية وشبه النقدية", "أرصدة لدى البنوك ونقد في الصندوق", r"re:^(ال)?نقد(ية)? وما (في|يماثله)|^(ال)?نقدية وشبه"]},
+         "from": ["النقد وما في حكمه", "النقدية وشبه النقدية", "أرصدة لدى البنوك ونقد في الصندوق", r"re:^(ال)?نقد(ية)? و(ما (في|يماثله|يعادله)|معادلات|شبه)|^(ال)?نقدية وشبه|^نقد وأرصدة لدى البنوك|^(ال)?نقد لدى البنوك"]},
         {"key": "receivables", "label": "مدينون تجاريون", "group": "الموجودات",
          "from": ["مدينون تجاريون", r"re:^مدينون تجاريون|^ذمم مدينة تجارية"]},
         {"key": "inventory", "label": "المخزون", "group": "الموجودات", "from": ["المخزون", r"re:^المخزون|^مخزون"]},
@@ -95,7 +95,7 @@ NORMAL = {
         {"key": "parentEquity", "label": "حقوق ملاك الشركة الأم", "group": "حقوق الملكية",
          "from": ["حقوق الملكية المتعلقة بملاك الشركة الأم", r"re:^(إجمالي )?حقوق الملكية المتعلقة بملاك الشركة الأم|^(إجمالي )?حقوق الملكية (العائدة|المتعلقة) (ل|ب)مساهمي", "إجمالي حقوق الملكية"]},
         {**TOTAL_EQUITY, "group": "حقوق الملكية"},
-        {"key": "totalDebt", "label": "إجمالي الديون", "group": "مؤشرات محسوبة", "needs": ["shortDebt", "longDebt", "currentLiabilities"], "calc": _total_debt},
+        {"key": "totalDebt", "label": "إجمالي الديون", "group": "مؤشرات محسوبة", "needs": ["shortDebt", "longDebt", "totalEquity"], "calc": _total_debt},
         {"key": "netDebt", "label": "صافي الدين (السالب = فائض نقدي)", "group": "مؤشرات محسوبة", "needs": ["totalDebt", "cash"], "calc": _sub},
         {"key": "workingCapital", "label": "رأس المال العامل", "group": "مؤشرات محسوبة", "needs": ["currentAssets", "currentLiabilities"], "calc": _sub},
         *leverage_items("totalDebt"),

@@ -341,6 +341,7 @@ def build_company(record, stype):
 
     # 1) مقارنة الإجماليات بملخص تداول لكل تاريخ، وتحديد الفترات التي ملفها خاطئ
     bad = {"bs": set(), "cf": set()}
+    flipped = set()
     dates = set(labels) | {c.fiscal.prev_quarter_end(D(e)).isoformat() for e in quarters}
     for key, stmt in CORE.items():
         item = by_key.get(key)
@@ -354,6 +355,11 @@ def build_company(record, stype):
             if mine is None:
                 continue
             c.checked += 1
+            if mine and official and mine * official < 0 and not _differs(abs(mine), abs(official)):
+                # الرقم نفسه بإشارة معكوسة في ملخص تداول: خطأ نقل في الملخص، فنعتمد ملف الشركة
+                flipped.add((key, e))
+                c.notes.append(f"{item['label']} {labels.get(e, e)}: ملخص تداول {official / UNIT:,.1f} بإشارة معكوسة عن ملف الشركة {mine / UNIT:,.1f} → اعتُمد ملف الشركة")
+                continue
             if _differs(mine, official):
                 c.mismatched += 1
                 where = labels.get(e, e) + (" (تراكمي)" if stmt == "cf" and e not in annual.values() and key != "cashEnd" else "")
@@ -368,7 +374,7 @@ def build_company(record, stype):
     # 2) قيمة بند في تاريخ: الإجماليات من ملخص تداول إن وُجد، والبقية من XBRL ما لم يكن الملف خاطئًا
     def value(stmt, item, e):
         key = item["key"]
-        if key in CORE:
+        if key in CORE and (key, e) not in flipped:
             official = s.get(key, {}).get(e)
             if official is not None:
                 return official
@@ -412,11 +418,29 @@ def build_company(record, stype):
                         c.filled += 1
             out[stmt][item["key"]] = vals
         compute(items[stmt], out[stmt])
+    # النقد في المركز المالي باسم لم نتعرف عليه: هو نفسه «النقد آخر الفترة» في قائمة التدفقات لنفس التاريخ
+    if "cash" in out["bs"] and "cashEnd" in out["cf"]:
+        for p, v in out["cf"]["cashEnd"].items():
+            out["bs"]["cash"].setdefault(p, v)
     # التأمين: ملفاتها القديمة تفصل مطلوبات عمليات التأمين عن المساهمين بلا إجمالي؛ المطلوبات = الموجودات − حقوق المساهمين
     if stype == "insurance":
         tl, ta_, eq = out["bs"].setdefault("totalLiabilities", {}), out["bs"].get("totalAssets", {}), out["bs"].get("parentEquity", {})
         for p in ta_.keys() & eq.keys() - tl.keys():
             tl[p] = ta_[p] - eq[p]
+    # القروض قصيرة الأجل والجزء المتداول جزء من المطلوبات المتداولة: إن زاد مجموعهما عليها فالبندان
+    # متداخلان في ملف الشركة (نفس القرض مرتين)، فيُؤخذ الأكبر منهما
+    short_item = by_key.get("shortDebt")
+    if short_item and "shortDebt" in out["bs"]:
+        cl = out["bs"].get("currentLiabilities", {})
+        dates = {str(y): e for y, e in annual.items()} | {qkeys[e]: e for e in quarters}
+        for p, v in list(out["bs"]["shortDebt"].items()):
+            if cl.get(p) is not None and v > 1.001 * cl[p] and p in dates:
+                parts = [resolve(c, "bs", {"from": [pat]}, lambda lab, e=dates[p]: c.bs_at(lab, e)) for pat in short_item["from"]]
+                parts = [x for x in parts if x is not None]
+                if parts:
+                    out["bs"]["shortDebt"][p] = max(parts)
+                    c.notes.append(f"القروض قصيرة الأجل {p}: بندان متداخلان مجموعهما {v / UNIT:,.1f} أكبر من المطلوبات المتداولة {cl[p] / UNIT:,.1f} → أُخذ الأكبر {max(parts) / UNIT:,.1f}")
+        compute(items["bs"], out["bs"])
     # بند في المركز المالي أكبر من إجمالي الموجودات خطأ (جمع مكرر أو بند في غير مكانه): لا يُعرض
     ta = out["bs"].get("totalAssets", {})
     for key, vals in out["bs"].items():
