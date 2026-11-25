@@ -26,6 +26,7 @@ YEARS = [2021, 2022, 2023, 2024, 2025]
 N_QUARTERS = 4
 UNIT = 1_000_000  # مليون ريال
 TOLERANCE = 0.005
+USD_SAR = 3.75
 # الصناديق العقارية: تداول يعرضها صناديقَ بلا ملفات XBRL ولا جدول ملخص في صفحة الشركة
 SKIP_SECTORS = {"reits"}
 
@@ -139,7 +140,10 @@ class Company:
             info = f["info"]
             declared = rounding_factor(info.get("rounding"))
             f["factor"] = None
+            # قوائم بالدولار (مثل أمريكانا) تُحوَّل إلى الريال بسعر الربط
+            f["fx"] = USD_SAR if "دولار" in (info.get("currency") or "") else 1
             raw = _value_at(info["bs"], ta, f["docEnd"])
+            raw = raw * f["fx"] if raw is not None else None
             snapped = snap_factor(raw, known.get(f["docEnd"]))
             if snapped:
                 f["factor"] = snapped
@@ -152,9 +156,10 @@ class Company:
             for f in [p for p in pending if p["factor"] is None]:
                 for col in (f["info"]["bs"] or {"cols": []})["cols"]:
                     raw = _value_at(f["info"]["bs"], ta, col[1])
+                    raw = raw * f["fx"] if raw is not None else None
                     other = next((g for g in self.files if g["factor"] and _value_at(g["info"]["bs"], ta, col[1])), None)
                     if other:
-                        target = _value_at(other["info"]["bs"], ta, col[1]) * other["factor"]
+                        target = _value_at(other["info"]["bs"], ta, col[1]) * other["factor"] * other["fx"]
                         snapped = snap_factor(raw, target)
                         if snapped:
                             f["factor"] = snapped
@@ -173,7 +178,7 @@ class Company:
         comp = {"bs": collections.defaultdict(dict), "cf": collections.defaultdict(dict)}
         self.ends = set()
         for f in self.files:
-            info, k, doc_end = f["info"], f["factor"], f.get("docEnd")
+            info, k, doc_end = f["info"], f["factor"] * f["fx"], f.get("docEnd")
             if doc_end:
                 self.ends.add(doc_end)
             for stmt in ("bs", "cf"):
@@ -415,13 +420,20 @@ def build_company(record, stype):
     # بند في المركز المالي أكبر من إجمالي الموجودات خطأ (جمع مكرر أو بند في غير مكانه): لا يُعرض
     ta = out["bs"].get("totalAssets", {})
     for key, vals in out["bs"].items():
-        if key == "totalAssets" or by_key[key].get("unit") == "ratio" or "calc" in by_key[key]:
+        # بنود الموجودات فقط: المطلوبات قد تتجاوز الموجودات فعلًا حين تكون حقوق الملكية سالبة
+        if key == "totalAssets" or by_key[key].get("group") != "الموجودات" or by_key[key].get("unit") in ("ratio", "times") or "calc" in by_key[key]:
             continue
         for p in [p for p, v in vals.items() if ta.get(p) and abs(v) > 1.05 * abs(ta[p])]:
             c.notes.append(f"{by_key[key]['label']} {p}: {vals[p] / UNIT:,.1f} أكبر من إجمالي الموجودات {ta[p] / UNIT:,.1f} → لم يُعرض")
             del vals[p]
     for stmt in ("bs", "cf"):
         compute(items[stmt], out[stmt])
+    # الديون جزء من المطلوبات: إن زادت عليها فالبنود مكررة، فلا تُعرض الديون ومؤشراتها لتلك الفترة
+    debt, tl = out["bs"].get("totalDebt", {}), out["bs"].get("totalLiabilities", {})
+    for p in [p for p, v in debt.items() if tl.get(p) is not None and v > 1.02 * tl[p]]:
+        c.notes.append(f"إجمالي الديون {p}: {debt[p] / UNIT:,.1f} أكبر من إجمالي المطلوبات {tl[p] / UNIT:,.1f} → لم تُعرض الديون")
+        for key in ("totalDebt", "shortDebt", "longDebt", "netDebt", "debtToEquity", "debtToAssets"):
+            out["bs"].get(key, {}).pop(p, None)
     # شركة بلا حصص غير مسيطرة: «حقوق ملاك الشركة الأم» تكرر «إجمالي حقوق الملكية» فتُدمجان في صف واحد
     parent, total = out["bs"].get("parentEquity"), out["bs"].get("totalEquity")
     if stype != "insurance" and parent is not None and total is not None and all(abs(parent[p] - total[p]) < 0.0005 * max(abs(total[p]), 1) for p in parent.keys() & total.keys()):
@@ -431,7 +443,7 @@ def build_company(record, stype):
     for stmt in ("bs", "cf"):
         for key, vals in list(out[stmt].items()):
             unit = by_key[key].get("unit")
-            out[stmt][key] = {p: ((round(v, 4) if unit == "ratio" else round(v / UNIT, 2)) or 0.0) for p, v in vals.items()}
+            out[stmt][key] = {p: ((round(v, 4) if unit in ("ratio", "times") else round(v / UNIT, 2)) or 0.0) for p, v in vals.items()}
             if not out[stmt][key]:
                 del out[stmt][key]
     name = next((f["info"]["name"] for f in reversed(c.files) if f["info"].get("name")), record["name"])

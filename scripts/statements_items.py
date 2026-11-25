@@ -20,6 +20,35 @@ def _ratio(a, b):
     return None if a is None or not b else a / b
 
 
+def _positive_ratio(a, b):
+    """نسبة لا معنى لها بمقام سالب أو صفر (حقوق ملكية سالبة، مطلوبات متداولة صفر)."""
+    return None if a is None or b is None or b <= 0 else a / b
+
+
+def _total_debt(short, long, current_liabilities):
+    # بلا أي بند قروض في المركز المالي (والقائمة نفسها موجودة) = شركة بلا قروض
+    if short is None and long is None:
+        return 0.0 if current_liabilities is not None else None
+    return _sum(short, long)
+
+
+# بنود القروض بأسمائها المختلفة في ملفات الشركات (الإيجارات لا تُحسب دَينًا)
+SHORT_DEBT = [r"re:^قروض قصيرة الأجل|^قروض (بنكية )?قصيرة|^مرابحات، متداولة|^قروض - متداولة|^القروض والسلف, المتداولة|^قروض بنكية متداولة",
+              r"re:^قسط متداول من قروض طويلة الأجل|^الجزء المتداول من (ال)?قروض"]
+LONG_DEBT = ["سندات دين وقروض لأجل وقروض وصكوك مصدرة",
+             r"re:^سندات دين وقرو?ض|^قروض طويلة الأجل|^قروض - غير متداولة|^القروض والسلف, غير المتداولة|^مرابحات، غير متداولة|^قروض مرابحة طويلة|^قروض بنكية غير( ال)?متداولة|^قروض لأجل$|^قرض صندوق التنمية|^تسهيلات قروض|^مرابحات$"]
+
+
+def leverage_items(debt_key):
+    """مؤشرات السيولة والمديونية للشركات غير البنوك."""
+    return [
+        {"key": "currentRatio", "label": "نسبة التداول", "group": "مؤشرات محسوبة", "unit": "times", "needs": ["currentAssets", "currentLiabilities"], "calc": _positive_ratio},
+        {"key": "cashToCurrentLiabilities", "label": "النقد إلى الالتزامات المتداولة", "group": "مؤشرات محسوبة", "unit": "times", "needs": ["cash", "currentLiabilities"], "calc": _positive_ratio},
+        {"key": "debtToEquity", "label": "الديون إلى حقوق الملكية", "group": "مؤشرات محسوبة", "unit": "ratio", "needs": [debt_key, "totalEquity"], "calc": _positive_ratio},
+        {"key": "debtToAssets", "label": "الديون إلى إجمالي الأصول", "group": "مؤشرات محسوبة", "unit": "ratio", "needs": [debt_key, "totalAssets"], "calc": _positive_ratio},
+    ]
+
+
 CFO = r"re:^صافي التدفقات النقدية من \(المستخدمة في\) النشاطات التشغيلية"
 CFI = r"re:^صافي التدفقات النقدية من \(المستخدمة في\) النشاطات الاستثمارية"
 CFF = r"re:^صافي التدفقات النقدية من \(المستخدمة في\) النشاطات التمويلية"
@@ -56,21 +85,20 @@ NORMAL = {
         {"key": "ppe", "label": "ممتلكات وآلات ومعدات", "group": "الموجودات",
          "from": ["ممتلكات وآلات ومعدات", r"re:^ممتلكات و(آلات و)?معدات"]},
         {**TOTAL_ASSETS, "group": "الموجودات"},
-        {"key": "shortDebt", "label": "قروض قصيرة الأجل والجزء المتداول", "group": "المطلوبات", "mode": "sum",
-         "from": ["قروض قصيرة الأجل", r"re:^قسط متداول من قروض طويلة الأجل|^الجزء المتداول من (ال)?قروض"]},
+        {"key": "shortDebt", "label": "قروض قصيرة الأجل والجزء المتداول", "group": "المطلوبات", "mode": "sum", "from": SHORT_DEBT},
         {"key": "payables", "label": "دائنون تجاريون", "group": "المطلوبات", "from": ["دائنون تجاريون", r"re:^دائنون تجاريون|^ذمم دائنة تجارية"]},
         {"key": "currentLiabilities", "label": "إجمالي المطلوبات المتداولة", "group": "المطلوبات", "from": ["إجمالي المطلوبات المتداولة"], "total": True},
-        {"key": "longDebt", "label": "قروض طويلة الأجل وصكوك", "group": "المطلوبات",
-         "from": ["سندات دين وقروض لأجل وقروض وصكوك مصدرة", r"re:^سندات دين وقرو?ض|^قروض طويلة الأجل"]},
+        {"key": "longDebt", "label": "قروض طويلة الأجل وصكوك", "group": "المطلوبات", "from": LONG_DEBT},
         {**TOTAL_LIAB, "group": "المطلوبات"},
         {**CAPITAL, "group": "حقوق الملكية"},
         {**RETAINED, "group": "حقوق الملكية"},
         {"key": "parentEquity", "label": "حقوق ملاك الشركة الأم", "group": "حقوق الملكية",
          "from": ["حقوق الملكية المتعلقة بملاك الشركة الأم", r"re:^(إجمالي )?حقوق الملكية المتعلقة بملاك الشركة الأم|^(إجمالي )?حقوق الملكية (العائدة|المتعلقة) (ل|ب)مساهمي", "إجمالي حقوق الملكية"]},
         {**TOTAL_EQUITY, "group": "حقوق الملكية"},
-        {"key": "totalDebt", "label": "إجمالي الديون", "group": "مؤشرات محسوبة", "needs": ["shortDebt", "longDebt"], "calc": _sum},
+        {"key": "totalDebt", "label": "إجمالي الديون", "group": "مؤشرات محسوبة", "needs": ["shortDebt", "longDebt", "currentLiabilities"], "calc": _total_debt},
         {"key": "netDebt", "label": "صافي الدين (السالب = فائض نقدي)", "group": "مؤشرات محسوبة", "needs": ["totalDebt", "cash"], "calc": _sub},
         {"key": "workingCapital", "label": "رأس المال العامل", "group": "مؤشرات محسوبة", "needs": ["currentAssets", "currentLiabilities"], "calc": _sub},
+        *leverage_items("totalDebt"),
     ],
     "cf": [
         {"key": "pbt", "label": "الربح قبل الزكاة والضريبة", "group": "الأنشطة التشغيلية", "from": PBT},
@@ -158,16 +186,20 @@ FINANCE = {
         {"key": "financing", "label": "ذمم التمويل (صافي)", "group": "الموجودات", "mode": "sum",
          "from": [r"re:^موجودات مالية، متداولة$", r"re:^موجودات مالية، غير متداولة$", r"re:^موجودات مالية$"],
          "fallback": {"mode": "sum", "from": [r"re:^قروض وتمويل وسلف", r"re:^مدين[وو]? عقود إيجار|^مديون عقود إيجار", r"re:^ذمم (مدينة )?(ال)?تمويل|^مدينو التمويل|^صافي (ال)?استثمار في (عقود )?(ال)?تمويل"]}},
+        {"key": "currentAssets", "label": "إجمالي الموجودات المتداولة", "group": "الموجودات", "from": ["إجمالي الموجودات المتداولة"], "total": True},
         {**TOTAL_ASSETS, "group": "الموجودات"},
-        {"key": "debt", "label": "القروض والصكوك", "group": "المطلوبات", "mode": "sum",
-         "from": ["سندات دين وقروض لأجل وقروض وصكوك مصدرة", r"re:^أرصدة مستحقة (إلى|الى) (ال)?بنوك", "قروض قصيرة الأجل", r"re:^قسط متداول من قروض"]},
+        {"key": "totalDebt", "label": "إجمالي الديون (قروض وصكوك)", "group": "المطلوبات", "mode": "sum",
+         "from": ["سندات دين وقروض لأجل وقروض وصكوك مصدرة", r"re:^أرصدة مستحقة (إلى|الى) (ال)?بنوك", *SHORT_DEBT]},
+        {"key": "currentLiabilities", "label": "إجمالي المطلوبات المتداولة", "group": "المطلوبات", "from": ["إجمالي المطلوبات المتداولة"], "total": True},
         {**TOTAL_LIAB, "group": "المطلوبات"},
         {**CAPITAL, "group": "حقوق الملكية"},
         {**RETAINED, "group": "حقوق الملكية"},
         {**TOTAL_EQUITY, "group": "حقوق الملكية"},
         {"key": "parentEquity", "label": "حقوق ملاك الشركة الأم", "group": "حقوق الملكية",
          "from": ["حقوق الملكية المتعلقة بملاك الشركة الأم", r"re:^(إجمالي )?حقوق الملكية المتع?لقة ب(ملاك|مساهمي)"]},
-        {"key": "debtToEquity", "label": "الديون إلى حقوق الملكية", "group": "مؤشرات محسوبة", "unit": "ratio", "needs": ["debt", "totalEquity"], "calc": _ratio},
+        {"key": "netDebt", "label": "صافي الدين (السالب = فائض نقدي)", "group": "مؤشرات محسوبة", "needs": ["totalDebt", "cash"], "calc": _sub},
+        {"key": "workingCapital", "label": "رأس المال العامل", "group": "مؤشرات محسوبة", "needs": ["currentAssets", "currentLiabilities"], "calc": _sub},
+        *leverage_items("totalDebt"),
     ],
     "cf": [
         {"key": "pbt", "label": "الربح قبل الزكاة والضريبة", "group": "الأنشطة التشغيلية", "from": PBT},

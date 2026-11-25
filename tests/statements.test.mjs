@@ -132,3 +132,27 @@ test('the bar chart compares a statement item across the shown periods', () => {
   assert.match(svg, /class="bank-chart-svg"/);
   assert.equal((svg.match(/<rect class="chart-bar"/g) || []).length, 2);
 });
+
+test('liquidity and leverage indicators: times and percentages, for every non-bank company type that has them', () => {
+  assert.match(formatAmount(1.4692, 'times'), />1\.47</);
+  assert.match(formatAmount(0.6076, 'ratio'), />60\.8%</);
+  assert.match(formatChange(1.5, 1.2, 'times'), /missing/);
+  const keys = ['totalDebt', 'netDebt', 'workingCapital', 'currentRatio', 'debtToEquity', 'debtToAssets', 'cashToCurrentLiabilities'];
+  for (const name of readdirSync(dist).filter(n => n.endsWith('-statements.json'))) {
+    const data = JSON.parse(read(name));
+    const bs = data.items.bs.map(i => i.key);
+    if (data.type === 'normal' || data.type === 'finance') for (const key of keys) assert.ok(bs.includes(key), `${name} ${key}`);
+    if (data.type === 'bank') for (const key of ['currentRatio', 'debtToEquity']) assert.ok(!bs.includes(key), `${name} ${key}`);
+    const units = Object.fromEntries(data.items.bs.map(i => [i.key, i.unit]));
+    if (bs.includes('currentRatio')) assert.deepEqual([units.currentRatio, units.cashToCurrentLiabilities, units.debtToEquity, units.debtToAssets], ['times', 'times', 'ratio', 'ratio'], name);
+    for (const c of data.companies.filter(c => c.status === 'ok')) {
+      for (const [p, v] of Object.entries(c.bs.currentRatio || {})) assert.ok(v > 0 && v < 100, `${name} ${c.symbol} currentRatio ${p}`);
+      // الديون قد تتجاوز الأصول فقط حين تكون حقوق الملكية سالبة
+      for (const [p, v] of Object.entries(c.bs.debtToAssets || {})) assert.ok(v >= 0 && (v <= 1.02 || c.bs.totalEquity?.[p] < 0), `${name} ${c.symbol} debtToAssets ${p}`);
+    }
+  }
+  const sample2 = { ...sample, items: { ...sample.items, bs: [...sample.items.bs, { key: 'currentRatio', label: 'نسبة التداول', group: 'مؤشرات محسوبة', unit: 'times', computed: true }] } };
+  const company = { ...sample.companies[0], bs: { ...sample.companies[0].bs, currentRatio: { 2024: 4.86, 2025: 4.7045 } } };
+  assert.match(renderStatement(sample2, company, 'bs', 'fy'), /نسبة التداول \(مرة\)<\/th><td><span class="num">4\.86<\/span>/);
+  assert.equal(chartModel(sample2, company, 'bs', 'fy', 'currentRatio').unit, 'مرة');
+});

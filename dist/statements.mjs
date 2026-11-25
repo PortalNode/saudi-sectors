@@ -4,7 +4,7 @@
 // البيانات من dist/<slug>-statements.json (يبنيه scripts/build-statements.py من ملفات XBRL في تداول).
 import { renderChartSvg } from './cement-charts.mjs?v=cement-value-labels-20261106-v12';
 
-const VERSION = 'statements-20261125c';
+const VERSION = 'statements-20261125d';
 const STATEMENTS = { is: 'قائمة الدخل', bs: 'المركز المالي', cf: 'التدفقات النقدية' };
 const VIEWS = { fy: 'سنوي', q: 'ربعي' };
 const QUARTER_NAMES = ['', 'الأول', 'الثاني', 'الثالث', 'الرابع'];
@@ -18,7 +18,8 @@ const numeric = value => (typeof value === 'number' && Number.isFinite(value) ? 
 export function formatAmount(value, unit) {
   value = numeric(value);
   if (value === null) return '<span class="missing" title="غير متاح">—</span>';
-  if (unit === 'ratio') return `<span class="num">${(value * 100).toLocaleString('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%</span>`;
+  if (unit === 'ratio') return `<span class="num${value < 0 ? ' down' : ''}">${(value * 100).toLocaleString('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%</span>`;
+  if (unit === 'times') return `<span class="num${value < 0 ? ' down' : ''}">${value.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</span>`;
   const digits = Math.abs(value) >= 10000 ? 0 : 1;
   return `<span class="num${value < 0 ? ' down' : ''}">${value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: digits })}</span>`;
 }
@@ -26,7 +27,7 @@ export function formatAmount(value, unit) {
 /** نسبة التغير عن الفترة السابقة بأسلوب جدول قائمة الدخل؛ «—» حين لا يمكن حسابها. */
 export function formatChange(current, previous, unit) {
   current = numeric(current); previous = numeric(previous);
-  if (current === null || previous === null || unit === 'ratio' || previous === 0) return '<span class="missing" title="لا يمكن حساب التغير">—</span>';
+  if (current === null || previous === null || unit === 'ratio' || unit === 'times' || previous === 0) return '<span class="missing" title="لا يمكن حساب التغير">—</span>';
   const value = (current - previous) / Math.abs(previous) * 100;
   const zero = Math.abs(value) < 0.05;
   const trend = zero ? 'flat' : value > 0 ? 'up' : 'down';
@@ -64,13 +65,13 @@ export function chartModel(data, company, stmt, view, key) {
   const { columns, values, items } = statementView(data, company, stmt, view);
   const item = items.find(i => i.key === key) || items.find(i => i.key === DEFAULT_CHART[stmt]) || items[0];
   if (!item) return null;
-  const ratio = item.unit === 'ratio';
+  const ratio = item.unit === 'ratio', times = item.unit === 'times';
   return {
-    key: item.key, title: item.label, unit: ratio ? '%' : 'مليار ريال', companyName: company.name ?? '',
+    key: item.key, title: item.label, unit: ratio ? '%' : times ? 'مرة' : 'مليار ريال', companyName: company.name ?? '',
     years: columns.map(shortLabel),
     series: [{ key: item.key, title: item.label, color: '#f59e0b', points: columns.map(col => {
       const rawValue = numeric(values[item.key]?.[col]);
-      return { year: shortLabel(col), rawValue, value: rawValue === null ? null : ratio ? rawValue * 100 : rawValue / 1000 };
+      return { year: shortLabel(col), rawValue, value: rawValue === null ? null : ratio ? rawValue * 100 : times ? rawValue : rawValue / 1000 };
     }) }],
   };
 }
@@ -93,7 +94,7 @@ export function renderStatement(data, company, stmt, view) {
     const series = values[item.key] || {};
     // أول عمود بلا مقارنة، ثم «نسبة التغير» عن الفترة السابقة قبل كل عمود (كما في جدول قائمة الدخل)
     const cells = columns.map((col, i) => (i ? `<td class="annual-change">${formatChange(series[col], series[columns[i - 1]], item.unit)}</td>` : '') + `<td>${formatAmount(series[col], item.unit)}</td>`).join('');
-    rows.push(`<tr data-item="${escapeHtml(item.key)}"${cls ? ` class="${cls}"` : ''}><th scope="row" class="annual-label">${escapeHtml(item.label)}${item.unit === 'ratio' ? ' (%)' : ''}</th>${cells}</tr>`);
+    rows.push(`<tr data-item="${escapeHtml(item.key)}"${cls ? ` class="${cls}"` : ''}><th scope="row" class="annual-label">${escapeHtml(item.label)}${item.unit === 'ratio' ? ' (%)' : item.unit === 'times' ? ' (مرة)' : ''}</th>${cells}</tr>`);
   }
   const range = view === 'q' ? 'آخر الأرباع' + (stmt === 'cf' ? ' (كل ربع منفرد)' : '') : `السنوي ${columns[0]}–${columns.at(-1)}`;
   const changeHead = view === 'q' ? 'التغير عن الربع السابق' : 'نسبة التغير';
