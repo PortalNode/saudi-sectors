@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
- * dist/since-listing.json: each stock's performance since its first trading day, twice —
+ * dist/since-listing.json: each stock's performance since the open of its first trading day (usually
+ * the offer price; TradingView's «All» starts there too), twice —
  *   priceReturn: price only (adjusted for bonus shares, splits and rights issues, no dividends)
  *   totalReturn: with every cash dividend reinvested on its ex-date (TradingView's ADJ basis)
- * plus the compound annual rate of each and what 1,000 SAR at the first close is worth now.
+ * plus the compound annual rate of each and what 1,000 SAR at the first open is worth now.
  *
  * Sources (scripts/listing-anchors.json, refreshed weekly by scripts/fetch-listing-history.mjs):
- *   price:     base → join from TradingView's history (before our candles start, e.g. 1999–2010), then
- *              join → last close from our candles, the Saudi Exchange's official adjusted closes
+ *   price:     base → anchor from TradingView's history (the same adjustments as its «All» figure; for
+ *              rights issues they differ from the exchange's), then anchor → last close from our candles
  *   dividends: reinvested base → join from TradingView's record (preDiv, checked against the prices),
  *              then from our own dividends (dist/ohlc div, checked against Yahoo and the official closes).
  *              When TradingView's early record fails its check, divFrom says from when dividends count.
@@ -35,19 +36,22 @@ export const cagr = (r, years) => years >= 1 && r > -1 ? (1 + r) ** (1 / years) 
 export function sinceListing({ ours, anchor = null, listed = null }) {
   if (!ours?.d?.length || ours.d.length !== ours.c?.length) return null;
   const n = ours.d.length - 1, factor = dividendFactors(ours.d, ours.c, ours.div ?? []);
-  const j = anchor ? ours.d.indexOf(anchor.join?.d) : -1;
+  const j = anchor ? ours.d.indexOf(anchor.join?.d) : -1, a = anchor ? ours.d.indexOf(anchor.anchor?.d) : -1;
   let base, price, total, from, divFrom = null;
-  if (j >= 0 && anchor.base?.c > 0 && anchor.join?.c > 0 && anchor.preDiv >= 1) {
+  if (j >= 0 && a >= j && anchor.base?.c > 0 && anchor.anchor?.c > 0 && anchor.preDiv >= 1) {
     base = anchor.base.d; from = 'tradingview';
-    price = (anchor.join.c / anchor.base.c) * (ours.c[n] / ours.c[j]) - 1;
+    // Price: TradingView's history to the anchor (its rights-issue adjustments, as its «All» figure),
+    // then the official closes.
+    price = (anchor.anchor.c / (anchor.base.o ?? anchor.base.c)) * (ours.c[n] / ours.c[a]) - 1;
     // Dividends reinvested: TradingView's record before our candles, then ours (factor[j] covers every
     // dividend after the join session).
     total = (1 + price) * anchor.preDiv / factor[j] - 1;
     divFrom = anchor.divFrom ?? null;
   } else {
     base = ours.d[0]; from = 'candles';
-    price = ours.c[n] / ours.c[0] - 1;
-    total = ours.c[n] / (ours.c[0] * factor[0]) - 1;
+    const open = ours.o?.[0] > 0 ? ours.o[0] : ours.c[0]; // dividends start after the first session either way
+    price = ours.c[n] / open - 1;
+    total = ours.c[n] / (open * factor[0]) - 1;
   }
   const years = days(base, ours.d[n]) / 365.25;
   return {
@@ -77,7 +81,7 @@ async function main() {
   const through = Object.values(stocks).reduce((m, r) => r.last > m ? r.last : m, '');
   await writeFile(new URL('since-listing.json', DIST), JSON.stringify({
     generatedAt: new Date().toISOString(), through,
-    method: 'الأساس إغلاق أول جلسة تداول (لا سعر الطرح). بدون التوزيعات: الأسعار معدّلة للمنح والتجزئة وحقوق الأولوية فقط. مع التوزيعات: كل توزيع نقدي يُعاد استثماره في تاريخ استحقاقه. تاريخ ما قبل آخر تحديث أسبوعي من TradingView، وما بعده من إغلاقات تداول الرسمية والتوزيعات. لا زكاة ولا رسوم.',
+    method: 'الأساس سعر افتتاح أول جلسة تداول، وهو في الغالب سعر الطرح، وبه يحسب TradingView أداء «الكل». بدون التوزيعات: الأسعار معدّلة للمنح والتجزئة وحقوق الأولوية فقط. مع التوزيعات: كل توزيع نقدي يُعاد استثماره في تاريخ استحقاقه. تاريخ ما قبل آخر تحديث أسبوعي من TradingView، وما بعده من إغلاقات تداول الرسمية والتوزيعات. لا زكاة ولا رسوم.',
     stocks
   }) + '\n');
   console.log(`Since listing: ${Object.keys(stocks).length} stocks (${fromAnchors} from TradingView history, ${partial} start after their listing) through ${through}${missing.length ? `; none for ${missing.join(', ')}` : ''}`);

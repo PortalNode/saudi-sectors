@@ -7,7 +7,7 @@ const URL_WS = 'wss://data.tradingview.com/socket.io/websocket?type=chart';
 const frame = (m, p) => { const s = JSON.stringify({ m, p }); return `~m~${s.length}~m~${s}`; };
 const iso = seconds => new Date((seconds + 3 * 3600) * 1000).toISOString().slice(0, 10); // Riyadh
 
-/** { splits: [{d, c}], dividends: [{d, c}] } for `TADAWUL:<symbol>`; rejects on error or timeout. */
+/** { splits: [{d, o, c}], dividends: [{d, o, c}] } for `TADAWUL:<symbol>`; rejects on error or timeout. */
 export function tvDailyHistory(symbol, { bars = 20000, timeoutMs = 45000 } = {}) {
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(URL_WS, { headers: { Origin: 'https://www.tradingview.com' } });
@@ -38,7 +38,7 @@ export function tvDailyHistory(symbol, { bars = 20000, timeoutMs = 45000 } = {})
             ws.send(frame('create_series', ['cs_2', 's2', 's2', 'y2', '1D', bars, '']));
           } else if (id === 's2') {
             series.dividends = got.s2;
-            const toBars = rows => rows.filter(v => Number.isFinite(v?.[4]) && v[4] > 0).map(v => ({ d: iso(v[0]), c: v[4] }));
+            const toBars = rows => rows.filter(v => Number.isFinite(v?.[4]) && v[4] > 0).map(v => ({ d: iso(v[0]), o: v[1], c: v[4] }));
             done(null, { splits: toBars(series.splits), dividends: toBars(series.dividends) });
           }
         }

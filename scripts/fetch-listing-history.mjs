@@ -4,7 +4,8 @@
  * full daily history (back to 1999, including the Nomu period of companies that moved to the main
  * market). Sessions per stock, with TradingView's close adjusted for capital actions (c) and also for
  * cash dividends (ca):
- *   base   = the first session on or after the listing (or the first TradingView has)
+ *   base   = the first session TradingView has (the listing day, or 1999 for older companies); its open (o)
+ *            is where the figure starts, as TradingView's «All» does
  *   join   = the first session our own candles (dist/ohlc, the exchange's official closes) also have
  *   anchor = the latest session both have (for the checks, and the date the dividends run to)
  *   preDiv = what reinvesting the dividends base → join multiplied the holding by
@@ -50,9 +51,9 @@ export const WINDOW_LIMIT = 0.25;     // TradingView's move over the shared sess
 export function buildAnchor({ splits, dividends }, ours, listed) {
   if (!splits?.length || splits.length !== dividends?.length) return { error: 'TradingView series missing or unequal' };
   for (let i = 0; i < splits.length; i++) if (splits[i].d !== dividends[i].d) return { error: 'TradingView series dates differ' };
-  // Base: the first session on or after the listing (a session listed days before it is the same listing).
-  let b = 0;
-  if (listed) { const i = splits.findIndex(x => days(listed, x.d) >= -LISTING_SLACK); if (i > 0) b = i; }
+  // Base: TradingView's first session, as its «All» figure. When that is before the listing date we hold
+  // (6050, 8010: trading from months or years earlier), that date is the one that is off.
+  const b = 0;
   const ourClose = new Map(ours.d.map((d, i) => [d, ours.c[i]]));
   let a = -1; for (let i = splits.length - 1; i >= b; i--) if (ourClose.has(splits[i].d)) { a = i; break; }
   if (a < 0) return { error: 'no session shared with our candles' };
@@ -64,10 +65,12 @@ export function buildAnchor({ splits, dividends }, ours, listed) {
   const shared = splits.slice(j, a + 1).filter(x => ourClose.has(x.d)), off = shared.map(x => Math.abs(ourClose.get(x.d) / (x.c * k) - 1));
   const tvMove = splits[a].c / splits[j].c, ourMove = ourClose.get(splits[a].d) / ourClose.get(splits[j].d);
   const at = i => ({ d: splits[i].d, c: round(splits[i].c, 6), ca: round(dividends[i].c, 6) });
+  // The base is the first session's open, as TradingView measures «All» (on a listing day, usually the offer price).
+  const first = { ...at(b), o: round(splits[b].o ?? splits[b].c, 6) };
   return {
     listed: listed ?? null,
     first: splits[0].d,
-    base: at(b), join: at(j), anchor: at(a),
+    base: first, join: at(j), anchor: at(a),
     complete: !listed || days(listed, splits[b].d) <= LISTING_SLACK,
     check: { shared: shared.length, mismatched: off.filter(x => x > MATCH_TOLERANCE).length, maxOff: round(Math.max(...off) * 100, 2), window: round((tvMove / ourMove - 1) * 100, 2) }
   };

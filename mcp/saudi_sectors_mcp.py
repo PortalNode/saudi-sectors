@@ -159,7 +159,7 @@ def tool_company(args):
     since = ((fetch("since-listing.json") or {}).get("stocks") or {}).get(sym)
     if since:
         out["sinceListing"] = {
-            "note": "الأداء % من إغلاق أول جلسة تداول (لا سعر الطرح) حتى آخر إغلاق رسمي: priceReturn بدون التوزيعات (معدّل للمنح والتجزئة وحقوق الأولوية)، totalReturn مع إعادة استثمار كل توزيع نقدي في تاريخ استحقاقه، و*Cagr العائد السنوي المركب، و*Value قيمة 1000 ريال اليوم. complete=false يعني أن base أقدم جلسة متاحة وهي بعد تاريخ الإدراج listed.",
+            "note": "الأداء % من افتتاح أول جلسة تداول (في الغالب سعر الطرح، ويطابق أداء الكل في TradingView) حتى آخر إغلاق رسمي: priceReturn بدون التوزيعات (معدّل للمنح والتجزئة وحقوق الأولوية)، totalReturn مع إعادة استثمار كل توزيع نقدي في تاريخ استحقاقه، و*Cagr العائد السنوي المركب، و*Value قيمة 1000 ريال اليوم. complete=false يعني أن base أقدم جلسة متاحة وهي بعد تاريخ الإدراج listed.",
             **since,
         }
     ohlc = fetch(f"ohlc/{sym}.json")

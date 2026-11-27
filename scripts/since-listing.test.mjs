@@ -28,19 +28,19 @@ test('history that starts after the listing is marked partial', () => {
   assert.equal(r.base, '2010-03-03');
 });
 
-test('TradingView carries the years before our candles; the official closes carry the rest', () => {
-  // TradingView: ×5 from 1999 to our first candle, and its dividends in those years doubled a holding.
+test('TradingView carries the price to the anchor; the official closes and our dividends carry the rest', () => {
+  // TradingView: ×10 from 1999 to the anchor, and its dividends before our candles doubled a holding.
   const anchor = { base: { d: '1999-01-10', c: 2, ca: 1 }, join: { d: '2010-03-03', c: 10, ca: 10 }, anchor: { d: '2026-01-01', c: 20, ca: 20 }, preDiv: 2 };
   const r = sinceListing({ ours: ours(['2010-03-03', '2026-01-01', '2026-02-01', '2026-03-01'], [9, 20, 20, 22], [['2026-02-01', 2]]), anchor, listed: '1999-01-10' });
-  // price: ×5 from TradingView, then 9 → 22 on the official closes (not TradingView's 10 → 20)
-  assert.equal(r.priceReturn, round2((5 * 22 / 9 - 1) * 100));
+  // price: ×10 from TradingView (not the official 9 → 20 from 2010), then 20 → 22 on the official closes
+  assert.equal(r.priceReturn, round2((10 * 22 / 20 - 1) * 100));
   // dividends: ×2 before our candles, then our 2 SAR dividend (factor 0.9)
-  assert.equal(r.totalReturn, round2(((5 * 22 / 9) * 2 / 0.9 - 1) * 100));
+  assert.equal(r.totalReturn, round2((11 * 2 / 0.9 - 1) * 100));
   assert.equal(r.source, 'tradingview');
   assert.equal(r.base, '1999-01-10');
   assert.equal(r.divFrom, undefined);
   // An untrusted early record: dividends count from our first candle, and the figure says so.
-  const later = sinceListing({ ours: ours(['2010-03-03', '2026-03-01'], [9, 22]), anchor: { ...anchor, preDiv: 1, divFrom: '2010-03-03' }, listed: '1999-01-10' });
+  const later = sinceListing({ ours: ours(['2010-03-03', '2026-01-01', '2026-03-01'], [9, 20, 22]), anchor: { ...anchor, preDiv: 1, divFrom: '2010-03-03' }, listed: '1999-01-10' });
   assert.equal(later.divFrom, '2010-03-03');
   assert.equal(later.totalReturn, later.priceReturn);
 });
@@ -128,4 +128,13 @@ test('after TradingView\'s record replaces ours, Yahoo only adds later dividends
   assert.deepEqual(nextDividends({ div: [['2025-03-01', 1]] }, [['2025-03-01', 3]]).div, [['2025-03-01', 3]]);
   // A 1-for-2 bonus issue on 2026-01-10 makes earlier closes two thirds: so are earlier amounts.
   assert.deepEqual(rescaleDividends([['2025-03-01', 1.5], ['2026-02-01', 0.5]], '2026-01-10', 2 / 3), [['2025-03-01', 1], ['2026-02-01', 0.5]]);
+});
+
+test('the base is the first session\'s open, as TradingView\'s «All» (Alinma: open 7.125, close 8)', () => {
+  const anchor = { base: { d: '2008-06-03', o: 7.125, c: 8, ca: 5.53 }, join: { d: '2010-03-03', c: 6.35, ca: 4.39 }, anchor: { d: '2026-11-26', c: 21.33, ca: 21.33 }, preDiv: 1 };
+  const r = sinceListing({ ours: ours(['2010-03-03', '2026-11-26'], [6.5, 21.33]), anchor, listed: '2008-06-03' });
+  assert.equal(r.priceReturn, round2((21.33 / 7.125 - 1) * 100)); // TradingView Perf.All +199.37%
+  // Our own candles alone start from their first open too.
+  const c = sinceListing({ ours: { d: ['2020-01-01', '2026-01-01'], o: [9, 12], c: [10, 12], div: [] }, listed: '2020-01-01' });
+  assert.equal(c.priceReturn, round2((12 / 9 - 1) * 100));
 });

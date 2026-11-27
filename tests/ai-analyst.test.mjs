@@ -247,8 +247,8 @@ test('the analyst knows each stock\'s performance since listing, with and withou
   const since = { listed: '2019-12-11', base: '2019-12-11', last: '2026-11-24', close: 26.3, years: 6.95, complete: true, priceReturn: -9.62, totalReturn: 23.75, priceCagr: -1.44, totalCagr: 3.11, priceValue: 904, totalValue: 1238, source: 'tradingview' };
   const sector = { name: 'الطاقة', stocks: [{ symbol: '2222', name: 'أرامكو', pe: 16, marketCap: 6e6 }] };
   const pack = buildPack({ stock: sector.stocks[0], sector, since });
-  assert.match(pack.text, /الأداء منذ الإدراج \(من إغلاق أول جلسة 2019-12-11 حتى 2026-11-24، 7 سنة\): بدون التوزيعات -9\.6% \(سنويًا -1\.4%\) · مع إعادة استثمار التوزيعات \+23\.8% \(سنويًا \+3\.1%\)/);
-  assert.match(pack.text, /الأساس إغلاق أول جلسة لا سعر الطرح/);
+  assert.match(pack.text, /الأداء منذ الإدراج \(من افتتاح أول جلسة 2019-12-11 حتى 2026-11-24، 7 سنة\): بدون التوزيعات -9\.6% \(سنويًا -1\.4%\) · مع إعادة استثمار التوزيعات \+23\.8% \(سنويًا \+3\.1%\)/);
+  assert.match(pack.text, /الأساس سعر افتتاح أول جلسة \(في الغالب سعر الطرح/);
   assert.ok(pack.sources.some(([name]) => name === 'الأداء منذ الإدراج'));
   const sum = companySummary(sector.stocks[0], pack);
   const rows = [{ st: sector.stocks[0], pack, sum }];
