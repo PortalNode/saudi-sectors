@@ -1,6 +1,6 @@
 {
  "note": "Since-listing anchors from TradingView daily history (scripts/fetch-listing-history.mjs). base = first session on/after listing; join = first session shared with dist/ohlc; anchor = latest shared session; preDiv = dividends reinvested base→join (1 and divFrom = join when the TradingView record there fails the price check). c = close adjusted for capital actions, ca = also adjusted for cash dividends; only ratios between them are used.",
- "fetchedAt": "2026-11-27T06:57:08.390Z",
+ "fetchedAt": "2026-11-27T16:46:22.246Z",
  "source": "TradingView",
  "symbols": {
   "1010": {
@@ -235,13 +235,13 @@
    "first": "2005-04-30",
    "base": {
     "d": "2005-04-30",
-    "c": 30.599976,
-    "ca": 24.955926,
-    "o": 29.999977
+    "c": 30.59998,
+    "ca": 24.955929,
+    "o": 29.999981
    },
    "join": {
     "d": "2010-03-07",
-    "c": 4.039997,
+    "c": 4.039998,
     "ca": 3.294835
    },
    "anchor": {
@@ -291,14 +291,14 @@
    "first": "2014-11-12",
    "base": {
     "d": "2014-11-12",
-    "c": 24.749976,
-    "ca": 15.562461,
-    "o": 24.749976
+    "c": 24.749979,
+    "ca": 15.562463,
+    "o": 24.749979
    },
    "join": {
     "d": "2014-11-12",
-    "c": 24.749976,
-    "ca": 15.562461
+    "c": 24.749979,
+    "ca": 15.562463
    },
    "anchor": {
     "d": "2026-11-26",
@@ -1036,7 +1036,7 @@
    },
    "complete": true,
    "check": {
-    "shared": 500,
+    "shared": 499,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
@@ -1498,12 +1498,12 @@
    "base": {
     "d": "2004-01-03",
     "c": 4.40027,
-    "ca": 3.504205,
+    "ca": 3.504206,
     "o": 4.466689
    },
    "join": {
     "d": "2010-03-06",
-    "c": 9.971442,
+    "c": 9.971443,
     "ca": 8.218526
    },
    "anchor": {
@@ -2258,14 +2258,14 @@
    "first": "2006-06-14",
    "base": {
     "d": "2006-06-14",
-    "c": 117.816236,
-    "ca": 95.350732,
-    "o": 157.638537
+    "c": 117.816226,
+    "ca": 95.350723,
+    "o": 157.638522
    },
    "join": {
     "d": "2010-03-06",
-    "c": 52.614956,
-    "ca": 44.237502
+    "c": 52.614951,
+    "ca": 44.237498
    },
    "anchor": {
     "d": "2026-11-26",
@@ -3577,9 +3577,9 @@
    "first": "2004-01-03",
    "base": {
     "d": "2004-01-03",
-    "c": 6.81398,
+    "c": 6.813979,
     "ca": 2.675026,
-    "o": 6.830439
+    "o": 6.830438
    },
    "join": {
     "d": "2010-03-06",
@@ -7618,5 +7618,7 @@
   }
  },
  "failed": [],
- "unchecked": []
+ "unchecked": [
+  "1325 (TradingView +1400% vs the official closes over 1278 sessions)"
+ ]
 }
