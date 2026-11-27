@@ -156,6 +156,12 @@ def tool_company(args):
             "backtest": cal.get("bt"),
             "history": [{k: r.get(k) for k in ("fy", "q", "pe", "d", "tm", "lag", "yoy", "rx")} for r in cal["recs"][-12:]],
         }
+    since = ((fetch("since-listing.json") or {}).get("stocks") or {}).get(sym)
+    if since:
+        out["sinceListing"] = {
+            "note": "الأداء % من إغلاق أول جلسة تداول (لا سعر الطرح) حتى آخر إغلاق رسمي: priceReturn بدون التوزيعات (معدّل للمنح والتجزئة وحقوق الأولوية)، totalReturn مع إعادة استثمار كل توزيع نقدي في تاريخ استحقاقه، و*Cagr العائد السنوي المركب، و*Value قيمة 1000 ريال اليوم. complete=false يعني أن base أقدم جلسة متاحة وهي بعد تاريخ الإدراج listed.",
+            **since,
+        }
     ohlc = fetch(f"ohlc/{sym}.json")
     if ohlc and ohlc.get("c"):
         c, dts = ohlc["c"], ohlc["d"]
@@ -204,7 +210,7 @@ def tool_market(args):
 TOOLS = {
     "search_companies": (tool_search, "ابحث عن شركة بالاسم أو الرمز أو القطاع في موقع قطاعات السوق السعودي. Search companies by name, symbol or sector.",
                          {"query": {"type": "string", "description": "اسم الشركة أو رمزها أو اسم القطاع"}}, ["query"]),
-    "get_company": (tool_company, "كل بيانات شركة من الموقع: السعر والمكررات والأداء، النبذة، النتائج السنوية والربعية، المركز المالي والتدفقات النقدية، مواعيد إعلان النتائج (السابقة والموعد المتوقع القادم)، وملخص تاريخ السعر.",
+    "get_company": (tool_company, "كل بيانات شركة من الموقع: السعر والمكررات والأداء، النبذة، النتائج السنوية والربعية، المركز المالي والتدفقات النقدية، مواعيد إعلان النتائج (السابقة والموعد المتوقع القادم)، الأداء منذ الإدراج بدون التوزيعات ومع إعادة استثمارها، وملخص تاريخ السعر.",
                     {"company": {"type": "string", "description": "اسم الشركة أو رمزها مثل 2222 أو الراجحي"},
                      "quarters": {"type": "integer", "description": "عدد الأرباع الأخيرة (افتراضي 8)"},
                      "first": {"type": "boolean", "description": "خذ أول تطابق إذا تعددت النتائج"}}, ["company"]),

@@ -153,7 +153,7 @@ export function forecastSection({ st, sectorPe, years, quarters, isReit = false 
 
 // دور النموذج: يُكتب داخل كل ملف حتى تستخدم الصفحة والخادم الوسيط النص نفسه.
 export const SYSTEM_PROMPT = `أنت محلل مالي وفني محترف متخصص في السوق السعودي (تداول)، تكتب لمستثمر فرد بالعربية تقريرًا بمستوى محلل في بيت أبحاث.
-تصلك البيانات بحسب نطاق السؤال: جدول السوق كاملًا (كل الشركات مجمعة حسب القطاع مع مؤشر تاسي)، أو جدول قطاع كامل، أو ملف شركة كامل (النشاط، المكررات، المنافسون، النتائج السنوية والربعية، المركز المالي والتدفقات النقدية، جودة الأرباح والتوقعات، التوزيعات، الإعلانات، مواعيد إعلان النتائج، والتحليل الفني). جدول السوق فيه أيضًا روزنامة إعلان النتائج، وجدولا السوق والقطاع فيهما الموعد المتوقع لنتائج كل شركة. وقد تصلك ملفات إضافية لشركات ذكرها السائل أو رُشّحت للتحليل.
+تصلك البيانات بحسب نطاق السؤال: جدول السوق كاملًا (كل الشركات مجمعة حسب القطاع مع مؤشر تاسي)، أو جدول قطاع كامل، أو ملف شركة كامل (النشاط، المكررات، المنافسون، النتائج السنوية والربعية، المركز المالي والتدفقات النقدية، جودة الأرباح والتوقعات، التوزيعات، الأداء منذ الإدراج، الإعلانات، مواعيد إعلان النتائج، والتحليل الفني). جدول السوق فيه أيضًا روزنامة إعلان النتائج، وجدولا السوق والقطاع فيهما الموعد المتوقع لنتائج كل شركة. وقد تصلك ملفات إضافية لشركات ذكرها السائل أو رُشّحت للتحليل.
 
 قواعد العمل:
 - اعتمد فقط على البيانات المرفقة. اذكر الأرقام وتواريخها، ولا تخترع رقمًا أو خبرًا أو مشروعًا أو محفزًا. إذا نقصت معلومة فقل ذلك صراحة، واقترح النطاق الأنسب (السوق أو القطاع أو الشركة).
@@ -161,6 +161,7 @@ export const SYSTEM_PROMPT = `أنت محلل مالي وفني محترف مت�
 - التوقعات: استخدم قسم جودة الأرباح والتوقعات المحسوب (فرضيات النمو والمكرر وسيناريوهات 3 سنوات)، واشرح افتراضاته، وقل هل تراه واقعيًا في ضوء اتجاه الأرباع الأخيرة والهوامش والإعلانات. يجوز أن تعدّل التقدير إذا ذكرت السبب من البيانات والرقم الذي اعتمدته. التوقعات تقديرات لا ضمانات.
 - المحفزات تأتي فقط من نشاط الشركة وإعلاناتها المرفقة مع تاريخ الإعلان. إن لم يوجد محفز معلن فاكتب: لا يوجد محفز معلن في البيانات.
 - مواعيد النتائج: عند السؤال عن موعد إعلان نتائج شركة، أو من سيعلن قريبًا، أو من تأخر، أجب من قسم مواعيد إعلان النتائج أو روزنامة النتائج أو عمود النتائج المتوقعة: اذكر الموعد المتوقع ونطاقه ودرجة الثقة وتاريخ إعلان الفترة نفسها في السنوات السابقة، وقل صراحة إنه تقدير من سجل الشركة لا موعد رسمي معلن. نتائج الربع الرابع تُعلن مع النتائج السنوية، وأول من يُتوقع أن يعلن كل فترة مذكور في الروزنامة. إن تجاوزت الشركة نطاقها المعتاد بلا إعلان فقل إنها متأخرة عن عادتها. واربط عند الحاجة بين الإعلان وحركة السهم المعتادة بعده.
+- الأداء منذ الإدراج: عند السؤال عن أداء السهم التاريخي أو منذ الإدراج أو كم ربح المستثمر منذ الطرح، استخدم سطر الأداء منذ الإدراج أو عمود منذ الإدراج: اذكر الرقمين بدون التوزيعات ومع إعادة استثمارها والعائد السنوي المركب وتاريخ البداية، وفرّق بينهما (الفرق هو أثر التوزيعات). الأساس إغلاق أول جلسة لا سعر الطرح. إن كان الحساب يبدأ بعد الإدراج (نجمة مع سنة، أو عبارة أقدم جلسة متاحة) فقل صراحة إنه منذ تلك السنة لا منذ الإدراج الفعلي.
 - المركز المالي والتدفقات النقدية: استخدمهما للحكم على الملاءة والسيولة (إجمالي الديون وصافي الدين، رأس المال العامل، نسبة التداول، النقد إلى الالتزامات المتداولة، الديون إلى حقوق الملكية، الديون إلى إجمالي الأصول، القروض إلى الودائع للبنوك) وجودة الربح (هل يتحول الربح إلى نقد تشغيلي، والتدفق النقدي الحر بعد الإنفاق الرأسمالي، وهل التوزيعات مغطاة بالتدفق الحر). صافي الدين السالب يعني فائضًا نقديًا.
 - اجمع بين التحليل الأساسي والفني، ووضّح هل يتفقان أم يتعارضان ولماذا.
 - احسب ما تحتاجه من الأرقام المتاحة (نمو، هوامش، مقارنات، متوسطات، المسافة عن الدعم والمقاومة).
@@ -351,7 +352,18 @@ export function statementsSection(statements) {
   return { lines: L, facts: { netDebt, debtYear, fcf, fcfYear, cfo: lastValue(co.cf?.cfo, allYears)[1] } };
 }
 
-export function buildPack({ stock: st, sector, profile, annual, quarterly, statements, announcements, ohlc, signal, tasi, tasiTrend, earnings, today }) {
+/* ---------- الأداء منذ الإدراج (dist/since-listing.json، scripts/build-since-listing.mjs) ---------- */
+/** سطر ملف الشركة وأرقام صف الجدول: الأداء من إغلاق أول جلسة بدون التوزيعات ومع إعادة استثمارها. */
+export function sinceListingSection(r) {
+  if (!r || num(r.priceReturn) == null) return null;
+  const head = r.complete ? `الأداء منذ الإدراج (من إغلاق أول جلسة ${r.base}` : `الأداء منذ ${r.base} (أقدم جلسة متاحة، والإدراج ${r.listed || '—'}؛ ليس منذ الإدراج الفعلي`;
+  const line = `${head} حتى ${r.last}، ${fmt(r.years, 1)} سنة): بدون التوزيعات ${sgn(r.priceReturn)}${r.priceCagr != null ? ` (سنويًا ${sgn(r.priceCagr)})` : ''} · مع إعادة استثمار التوزيعات ${sgn(r.totalReturn)}${r.totalCagr != null ? ` (سنويًا ${sgn(r.totalCagr)})` : ''} · 1000 ريال أصبحت ${fmt(r.priceValue, 0)} بالسعر و${fmt(r.totalValue, 0)} مع التوزيعات. الأساس إغلاق أول جلسة لا سعر الطرح، والسعر معدّل للمنح والتجزئة وحقوق الأولوية.`;
+  return { line, facts: { price: r.priceReturn, total: r.totalReturn, priceCagr: r.priceCagr, totalCagr: r.totalCagr, base: r.base, complete: !!r.complete } };
+}
+// خلية الجدول: «سعري/مع التوزيعات» ونجمة حين يبدأ الحساب بعد الإدراج.
+const sinceCell = f => (f ? `${sgn(f.price)}/${sgn(f.total)}${f.complete ? '' : `*${f.base.slice(0, 4)}`}` : '—');
+
+export function buildPack({ stock: st, sector, profile, annual, quarterly, statements, announcements, ohlc, signal, tasi, tasiTrend, earnings, since, today }) {
   const lines = [];
   const sources = [];
   const stocks = sector.stocks || [];
@@ -363,6 +375,8 @@ export function buildPack({ stock: st, sector, profile, annual, quarterly, state
   if (profile?.founded || profile?.listed) lines.push(`التأسيس ${profile.founded || '—'} · الإدراج ${profile.listed || '—'}`);
   if (profile) sources.push(['نبذة الشركة', '']);
   lines.push(`السعر ${fmt(st.price)} ريال بتاريخ ${st.priceDate || '—'} | التغير: يومي ${fmt(st.day)}% · منذ بداية السنة ${fmt(st.ytd)}% · 3 أشهر ${fmt(st.month3)}% · 6 أشهر ${fmt(st.month6)}% · سنة ${fmt(st.year1)}% | نطاق 52 أسبوع ${fmt(st.week52Low)}–${fmt(st.week52High)}`);
+  const sl = sinceListingSection(since);
+  if (sl) { lines.push(sl.line); sources.push(['الأداء منذ الإدراج', since.base]); }
   lines.push(`القيمة السوقية ${fmt(st.marketCap, 0)} مليون ريال | عدد الأسهم ${fmt(st.shares / 1e6, 1)} مليون | المكرر ${fmt(st.pe, 1)} | القيمة الدفترية للسهم ${fmt(st.bookValue)} | مضاعف القيمة الدفترية ${fmt(st.pb, 2)} | عائد التوزيع ${fmt(st.dividendYield)}% | ربح السهم (آخر 4 أرباع) ${fmt(st.eps, 3)} | قيمة تداول آخر جلسة ${fmt(st.tradedValue / 1e6, 1)} مليون ريال`);
   lines.push(`وسيط القطاع (عدد الشركات ${stocks.length}): المكرر ${fmt(avgPe, 1)} · مضاعف الدفترية ${fmt(sectorMedian(stocks, 'pb'), 2)} · العائد ${fmt(avgDy)}% · أداء سنة ${fmt(sectorMedian(stocks, 'year1'))}%`);
   const byCap = [...stocks].filter(s => num(s.marketCap) != null).sort((a, b) => b.marketCap - a.marketCap);
@@ -428,7 +442,7 @@ export function buildPack({ stock: st, sector, profile, annual, quarterly, state
     system: SYSTEM_PROMPT, text, tokens: estimateTokens(SYSTEM_PROMPT + text), rawTokens, sources,
     // أرقام صغيرة للقراءة الآلية حين لا يكون الذكاء الاصطناعي مفعّلًا.
     facts: {
-      avgPe, avgDy, tech: tech?.facts || null, forecast: fc?.facts || null, earnings: ed?.facts || null, statements: fs?.facts || null,
+      avgPe, avgDy, since: sl?.facts || null, tech: tech?.facts || null, forecast: fc?.facts || null, earnings: ed?.facts || null, statements: fs?.facts || null,
       years: years.map(y => ({ year: y.year, revenue: num(y.values?.revenue), netProfit: num(y.values?.netProfit), core: num(coreProfit(y.values || {})), netMargin: num(y.values?.netMargin) })),
       quarters: quarters.map(([q, v]) => [q, num(v?.netProfit), num(coreProfit(v || {}))]),
     },
@@ -455,7 +469,7 @@ export function companySummary(st, pack) {
     trend: TREND_SHORT[t.trend] || '—', rsi: t.rsi, vs200: t.sma200 && t.price ? (t.price / t.sma200 - 1) * 100 : null,
     score: t.score, support: t.support, resistance: t.resistance,
     nextResults: f.earnings ? `${f.earnings.next}${f.earnings.late ? ' (متأخرة)' : ''}` : '—', lastResults: f.earnings?.last ?? '—',
-    netDebt: f.statements?.netDebt ?? null, fcf: f.statements?.fcf ?? null,
+    netDebt: f.statements?.netDebt ?? null, fcf: f.statements?.fcf ?? null, since: f.since ?? null,
   };
 }
 // ملاحظة جودة الأرباح في صف الجدول.
@@ -470,10 +484,10 @@ function sectorHeader(sector, marketCapTotal) {
 export function buildSectorPack(sector, slug, rows, { asOf, tasiLine, profiles } = {}) {
   const L = [`جدول قطاع ${sector.name} كاملًا (الأسعار حتى ${asOf || '—'}). الأرقام المالية بالمليون ريال، والنسب المئوية للأداء.`, sectorHeader(sector)];
   if (tasiLine) L.push(tasiLine);
-  L.push('الربح الأساسي = صافي الربح بعد استبعاد البنود الاستثنائية، وعليه يُحسب النمو والمكرر الأساسي. العائد المتوقع = تقدير آلي للعائد السنوي لـ3 سنوات (السيناريو الأساسي مع التوزيع). النتائج القادمة = الموعد المتوقع لإعلان النتائج من سجل الشركة (تقدير لا موعد رسمي).');
-  L.push('', 'الرمز | الشركة | النشاط | السعر | القيمة السوقية | المكرر المعلن | المكرر الأساسي | مضاعف الدفترية | العائد% | يومي% | منذ بداية السنة% | سنة% | السنة المالية | الإيرادات | نمو الإيرادات | الربح الأساسي | نمو الربح الأساسي | نمو أساسي مركب 3 سنوات | الهامش الصافي | صافي الدين (آخر سنة) | التدفق النقدي الحر (آخر سنة) | جودة الربح | آخر ربع | ربح آخر ربع الأساسي | تغيره عن نفس الربع | العائد المتوقع سنويًا | الاتجاه | RSI | مقابل متوسط 200 | تقييم الماسح من 6 | الدعم | المقاومة | آخر إعلان نتائج | النتائج القادمة (متوقع)');
+  L.push('الربح الأساسي = صافي الربح بعد استبعاد البنود الاستثنائية، وعليه يُحسب النمو والمكرر الأساسي. العائد المتوقع = تقدير آلي للعائد السنوي لـ3 سنوات (السيناريو الأساسي مع التوزيع). النتائج القادمة = الموعد المتوقع لإعلان النتائج من سجل الشركة (تقدير لا موعد رسمي). منذ الإدراج = الأداء من إغلاق أول جلسة: بدون التوزيعات/مع إعادة استثمارها%، و*سنة تعني أن الحساب يبدأ في تلك السنة لا منذ الإدراج.');
+  L.push('', 'الرمز | الشركة | النشاط | السعر | القيمة السوقية | المكرر المعلن | المكرر الأساسي | مضاعف الدفترية | العائد% | يومي% | منذ بداية السنة% | سنة% | منذ الإدراج% سعري/مع التوزيعات | السنة المالية | الإيرادات | نمو الإيرادات | الربح الأساسي | نمو الربح الأساسي | نمو أساسي مركب 3 سنوات | الهامش الصافي | صافي الدين (آخر سنة) | التدفق النقدي الحر (آخر سنة) | جودة الربح | آخر ربع | ربح آخر ربع الأساسي | تغيره عن نفس الربع | العائد المتوقع سنويًا | الاتجاه | RSI | مقابل متوسط 200 | تقييم الماسح من 6 | الدعم | المقاومة | آخر إعلان نتائج | النتائج القادمة (متوقع)');
   for (const { st, sum } of [...rows].sort((a, b) => (b.st.marketCap || 0) - (a.st.marketCap || 0))) {
-    L.push([st.symbol, st.name, activityShort(profiles?.[st.symbol]?.activity), fmt(st.price), fmt(st.marketCap, 0), fmt(st.pe, 1), fmt(sum.corePe, 1), fmt(st.pb, 2), fmt(st.dividendYield), fmt(st.day), fmt(st.ytd), fmt(st.year1),
+    L.push([st.symbol, st.name, activityShort(profiles?.[st.symbol]?.activity), fmt(st.price), fmt(st.marketCap, 0), fmt(st.pe, 1), fmt(sum.corePe, 1), fmt(st.pb, 2), fmt(st.dividendYield), fmt(st.day), fmt(st.ytd), fmt(st.year1), sinceCell(sum.since),
       sum.year, fmt(sum.revenue, 0), sum.revenueGrowth, fmt(sum.core, 0), sum.profitGrowth, pctOrDash(sum.coreCagr3), num(sum.netMargin) == null ? '—' : pct(sum.netMargin), fmt(sum.netDebt, 0), fmt(sum.fcf, 0), quality(sum),
       sum.lastQ, fmt(sum.lastQProfit, 0), sum.lastQYoY, pctOrDash(sum.baseReturn), sum.trend, fmt(sum.rsi, 0), sgn(sum.vs200), sum.score ?? '—',
       sum.support ? `${fmt(sum.support[0])}–${fmt(sum.support[1])}` : '—', sum.resistance ? `${fmt(sum.resistance[0])}–${fmt(sum.resistance[1])}` : '—', sum.lastResults, sum.nextResults].join(' | ') + (st.suspended ? ' | موقوف' : ''));
@@ -490,12 +504,12 @@ export function buildMarketPack(market, groups, { tasiLine, tasiTech, calendar }
   const L = [`جدول السوق السعودي كاملًا (الأسعار حتى ${market.asOf || '—'}، ${all.length} شركة في ${groups.length} قطاعًا). القيمة السوقية وصافي الربح بالمليون ريال، والأداء بالنسبة المئوية.`];
   if (tasiLine) L.push(tasiLine);
   L.push(`القيمة السوقية للسوق ${fmt(total / 1e6, 2)} تريليون ريال · وسيط المكرر ${fmt(sectorMedian(all.map(r => r.st), 'pe'), 1)} · وسيط العائد ${fmt(sectorMedian(all.map(r => r.st), 'dividendYield'))}%`);
-  L.push('الربح الأساسي = صافي الربح بعد استبعاد البنود الاستثنائية، وعليه يُحسب النمو والمكرر الأساسي. جودة الربح: استثنائي = أكثر من 20% من ربح آخر 4 أرباع بنود استثنائية، من خارج النشاط = الربح الأساسي يفوق التشغيلي. العائد المتوقع = تقدير آلي للعائد السنوي لـ3 سنوات (السيناريو الأساسي مع التوزيع).');
-  L.push('', 'الأعمدة: الرمز | الشركة | السعر | القيمة السوقية | المكرر المعلن | المكرر الأساسي | مضاعف الدفترية | العائد% | منذ بداية السنة% | سنة% | الربح الأساسي آخر سنة (السنة) | نموه | نمو أساسي مركب 3 سنوات | تغير ربح آخر ربع الأساسي عن نفس الربع | جودة الربح | العائد المتوقع سنويًا | الاتجاه | RSI | مقابل متوسط 200 | تقييم الماسح من 6 | النتائج المتوقعة');
+  L.push('الربح الأساسي = صافي الربح بعد استبعاد البنود الاستثنائية، وعليه يُحسب النمو والمكرر الأساسي. جودة الربح: استثنائي = أكثر من 20% من ربح آخر 4 أرباع بنود استثنائية، من خارج النشاط = الربح الأساسي يفوق التشغيلي. العائد المتوقع = تقدير آلي للعائد السنوي لـ3 سنوات (السيناريو الأساسي مع التوزيع). منذ الإدراج = بدون التوزيعات/مع إعادة استثمارها%، و*سنة = يبدأ الحساب في تلك السنة لا منذ الإدراج.');
+  L.push('', 'الأعمدة: الرمز | الشركة | السعر | القيمة السوقية | المكرر المعلن | المكرر الأساسي | مضاعف الدفترية | العائد% | منذ بداية السنة% | سنة% | منذ الإدراج% | الربح الأساسي آخر سنة (السنة) | نموه | نمو أساسي مركب 3 سنوات | تغير ربح آخر ربع الأساسي عن نفس الربع | جودة الربح | العائد المتوقع سنويًا | الاتجاه | RSI | مقابل متوسط 200 | تقييم الماسح من 6 | النتائج المتوقعة');
   for (const { sector, rows } of groups) {
     L.push('', `## ${sectorHeader(sector, total)}`);
     for (const { st, sum } of [...rows].sort((a, b) => (b.st.marketCap || 0) - (a.st.marketCap || 0))) {
-      L.push([st.symbol, st.name, fmt(st.price), fmt(st.marketCap, 0), fmt(st.pe, 1), fmt(sum.corePe, 1), fmt(st.pb, 2), fmt(st.dividendYield), fmt(st.ytd), fmt(st.year1),
+      L.push([st.symbol, st.name, fmt(st.price), fmt(st.marketCap, 0), fmt(st.pe, 1), fmt(sum.corePe, 1), fmt(st.pb, 2), fmt(st.dividendYield), fmt(st.ytd), fmt(st.year1), sinceCell(sum.since),
         `${fmt(sum.core, 0)} (${sum.year})`, sum.profitGrowth, pctOrDash(sum.coreCagr3), sum.lastQYoY, quality(sum), pctOrDash(sum.baseReturn), sum.trend, fmt(sum.rsi, 0), sgn(sum.vs200), sum.score ?? '—', sum.nextResults].join(' | ') + (st.suspended ? ' | موقوف' : ''));
     }
   }
@@ -518,6 +532,7 @@ function main() {
   const profiles = readJSON('company-profiles.json') || {};
   const scanner = readJSON('scanner/signals.json');
   const tasi = readJSON('ohlc/TASI.json');
+  const sinceListing = readJSON('since-listing.json');
   const tasiTrend = scanner?.meta?.tasi?.detail || null;
   const out = new URL('ai/', dist);
   rmSync(out, { recursive: true, force: true });
@@ -539,7 +554,7 @@ function main() {
       const sym = String(stock.symbol);
       const earnings = readJSON(`earnings-calendar/${sym}.json`);
       if (earnings) calendars.push(earnings);
-      const pack = buildPack({ earnings,
+      const pack = buildPack({ earnings, since: sinceListing?.stocks?.[sym] ?? null,
         stock, sector, profile: profiles[sym],
         annual: annualDoc.find(c => String(c.symbol) === sym),
         quarterly: quarterlyDoc.find(c => String(c.symbol) === sym),

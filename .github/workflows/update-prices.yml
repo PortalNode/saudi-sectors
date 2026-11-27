@@ -92,6 +92,10 @@ jobs:
       # Market scanner: signals for every stock from the candles just written. A failure keeps the previous file.
       - name: Build scanner signals
         run: node scripts/build-scanner.mjs || echo "::warning::Scanner signals were not updated."
+      # «الأداء منذ الإدراج» on the company pages: TradingView anchors (scripts/listing-anchors.json,
+      # refreshed weekly) carried to the session just written with our candles and dividends. No network.
+      - name: Build since-listing performance
+        run: node scripts/build-since-listing.mjs || echo "::warning::Since-listing performance was not rebuilt."
       # New Saudi Exchange issuer announcements for the company pages (dist/announcements). One market-wide
       # query for the last days; only ids not stored yet get their detail page fetched. A source outage keeps
       # the previous files and never blocks the price update.
@@ -116,7 +120,7 @@ jobs:
           git config user.name "price-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
-            git add -A dist/data.json dist/ohlc dist/intraday dist/scanner/signals.json dist/announcements dist/earnings-calendar scripts/earnings-dates.json
+            git add -A dist/data.json dist/ohlc dist/intraday dist/scanner/signals.json dist/since-listing.json dist/announcements dist/earnings-calendar scripts/earnings-dates.json
             if git diff --cached --quiet; then
               echo "No price changes to commit."
               echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -140,6 +144,7 @@ jobs:
             node scripts/update-tasi.mjs || true
             node scripts/update-intraday.mjs || true
             node scripts/build-scanner.mjs || true
+            node scripts/build-since-listing.mjs || true
             python3 scripts/update-announcements.py || true
             python3 scripts/build-earnings-calendar.py || true
           done

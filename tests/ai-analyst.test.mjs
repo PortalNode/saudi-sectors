@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { buildPack, technicalSection, buildSectorPack, buildMarketPack, companySummary, coreProfit, forecastSection, earningsSection, calendarSection, SECTOR_SLUGS, SYSTEM_PROMPT, PICK_PROMPT, DEEP_PROMPT } from '../scripts/build-ai-packs.mjs';
+import { buildPack, technicalSection, buildSectorPack, buildMarketPack, companySummary, coreProfit, forecastSection, earningsSection, calendarSection, sinceListingSection, SECTOR_SLUGS, SYSTEM_PROMPT, PICK_PROMPT, DEEP_PROMPT } from '../scripts/build-ai-packs.mjs';
 
 const dist = new URL('../dist/', import.meta.url);
 const read = name => readFileSync(new URL(name, dist), 'utf8');
@@ -105,7 +105,7 @@ test('sector and market packs list every company in one short row', () => {
   assert.equal(mkt.scope, 'market');
   assert.deepEqual(mkt.sectors, [['cement', 'الاسمنت', 2]]);
   assert.match(mkt.text, /## الاسمنت: عدد الشركات 2 .*\(100% من السوق\)/);
-  assert.match(mkt.text, /3010 \| أ \| 10 \| 500 \| 10 \| — \| 1 \| 5 \| 1 \| 2 \| -5 \(2025\) \| تحوّل لخسارة \| — \| \+50\.0% \| — \| — \| صاعد \| 61 \| \+25\.0% \| 4/);
+  assert.match(mkt.text, /3010 \| أ \| 10 \| 500 \| 10 \| — \| 1 \| 5 \| 1 \| 2 \| — \| -5 \(2025\) \| تحوّل لخسارة \| — \| \+50\.0% \| — \| — \| صاعد \| 61 \| \+25\.0% \| 4/);
   assert.doesNotMatch(mkt.digest, /^3010 \|/m, 'the digest has no company rows');
   assert.match(mkt.digest, /## الاسمنت/);
   assert.equal(mkt.pick, PICK_PROMPT);
@@ -240,4 +240,29 @@ test('the analyst is told how to answer results-date questions and offers them a
   assert.match(build, /readJSON\(`earnings-calendar\/\$\{sym\}\.json`\)/);
   const mcp = readFileSync(new URL('../mcp/saudi_sectors_mcp.py', import.meta.url), 'utf8');
   assert.match(mcp, /fetch\(f"earnings-calendar\/\{sym\}\.json"\)/);
+});
+
+// الأداء منذ الإدراج (dist/since-listing.json): يعرفه المحلل في ملف الشركة وجداول القطاع والسوق.
+test('the analyst knows each stock\'s performance since listing, with and without dividends', () => {
+  const since = { listed: '2019-12-11', base: '2019-12-11', last: '2026-11-24', close: 26.3, years: 6.95, complete: true, priceReturn: -9.62, totalReturn: 23.75, priceCagr: -1.44, totalCagr: 3.11, priceValue: 904, totalValue: 1238, source: 'tradingview' };
+  const sector = { name: 'الطاقة', stocks: [{ symbol: '2222', name: 'أرامكو', pe: 16, marketCap: 6e6 }] };
+  const pack = buildPack({ stock: sector.stocks[0], sector, since });
+  assert.match(pack.text, /الأداء منذ الإدراج \(من إغلاق أول جلسة 2019-12-11 حتى 2026-11-24، 7 سنة\): بدون التوزيعات -9\.6% \(سنويًا -1\.4%\) · مع إعادة استثمار التوزيعات \+23\.8% \(سنويًا \+3\.1%\)/);
+  assert.match(pack.text, /الأساس إغلاق أول جلسة لا سعر الطرح/);
+  assert.ok(pack.sources.some(([name]) => name === 'الأداء منذ الإدراج'));
+  const sum = companySummary(sector.stocks[0], pack);
+  const rows = [{ st: sector.stocks[0], pack, sum }];
+  assert.match(buildSectorPack(sector, 'energy', rows, { asOf: '2026-11-24' }).text, /\| منذ الإدراج% سعري\/مع التوزيعات \|[\s\S]*\| -9\.6%\/\+23\.8% \|/);
+  assert.match(buildMarketPack({ asOf: '2026-11-24', sectors: [sector] }, [{ sector, slug: 'energy', rows }], {}).text, /^2222 \| أرامكو \|.*\| -9\.6%\/\+23\.8% \|/m);
+  // يبدأ بعد الإدراج: يقول ذلك صراحة ويعلّم الخلية بسنة البداية
+  const old = sinceListingSection({ ...since, listed: '1988-12-01', base: '1999-01-10', complete: false });
+  assert.match(old.line, /الأداء منذ 1999-01-10 \(أقدم جلسة متاحة، والإدراج 1988-12-01؛ ليس منذ الإدراج الفعلي/);
+  assert.equal(sinceListingSection(null), null);
+  assert.match(SYSTEM_PROMPT, /الأداء منذ الإدراج: عند السؤال عن أداء السهم التاريخي/);
+  const page = read('ai-analyst.html');
+  for (const label of ['الأداء منذ الإدراج', 'الأفضل منذ الإدراج']) assert.match(page, new RegExp(`\\["${label}","`));
+  const build = readFileSync(new URL('../scripts/build-ai-packs.mjs', import.meta.url), 'utf8');
+  assert.match(build, /readJSON\('since-listing\.json'\)/);
+  const mcp = readFileSync(new URL('../mcp/saudi_sectors_mcp.py', import.meta.url), 'utf8');
+  assert.match(mcp, /fetch\("since-listing\.json"\)/);
 });

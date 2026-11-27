@@ -59,6 +59,16 @@ jobs:
           if [ -n "$SYMBOLS" ]; then node scripts/backfill-ohlc.mjs --symbols "$SYMBOLS"; else node scripts/backfill-ohlc.mjs; fi
       - name: Compare with TradingView's own figures (report only)
         run: node scripts/compare-ohlc-tradingview.mjs || true
+      # «الأداء منذ الإدراج»: each stock's full history from TradingView (back to 1999), checked against
+      # the candles just rebuilt, re-anchors scripts/listing-anchors.json. A TradingView outage keeps the
+      # previous anchors; the figures are then rebuilt from them.
+      - name: Refresh since-listing anchors
+        timeout-minutes: 40
+        run: |
+          if [ -n "$SYMBOLS" ]; then node scripts/fetch-listing-history.mjs --symbols "$SYMBOLS"; else node scripts/fetch-listing-history.mjs; fi || echo "::warning::Since-listing anchors were not refreshed."
+          node scripts/build-since-listing.mjs
+        env:
+          SYMBOLS: ${{ github.event.inputs.symbols }}
       - name: Test rebuilt candles
         run: node --test scripts/*.test.mjs tests/*.test.mjs
       - name: Commit rebuilt candles
@@ -66,7 +76,7 @@ jobs:
         run: |
           git config user.name "price-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A dist/ohlc
+          git add -A dist/ohlc dist/since-listing.json scripts/listing-anchors.json
           if git diff --cached --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           git commit -m "Rebuild stock chart candles on TradingView's basis $(date -u +%F)"
           for attempt in 1 2 3; do
