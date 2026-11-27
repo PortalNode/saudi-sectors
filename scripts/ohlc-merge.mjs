@@ -116,6 +116,19 @@ export function parseYahooDividends(json) {
   for (const e of Object.values(r?.events?.dividends ?? {})) if (Number.isFinite(e?.date) && e.amount > 0) byDate.set(iso(e.date, offset), Math.round(e.amount * 1e6) / 1e6);
   return [...byDate].sort(([a], [b]) => a < b ? -1 : 1);
 }
+/**
+ * A stock's dividends after a new Yahoo report. Once TradingView's dividend record has replaced the
+ * stored list (scripts/fetch-listing-history.mjs: divSource 'tradingview', through divThrough), Yahoo
+ * only adds dividends after that date: its older amounts miss dividends and count in-kind
+ * distributions as cash. Returns the fields to put on the candle file.
+ */
+export function nextDividends(before, fresh = []) {
+  if (before?.divSource !== 'tradingview' || !before.divThrough) return { div: mergeDividends(before?.div, fresh) };
+  return { div: mergeDividends(before.div, fresh.filter(([d]) => d > before.divThrough)), divSource: 'tradingview', divThrough: before.divThrough };
+}
+/** Dividends after a capital action on `date` (see applyFactor): amounts whose previous close was rescaled scale with it. */
+export const rescaleDividends = (div, date, factor) => div.map(([d, a]) => d <= date ? [d, Math.round(a * factor * 1e6) / 1e6] : [d, a]);
+
 /** Stored dividends with newly reported ones (a newer report wins for its date). */
 export function mergeDividends(stored = [], fresh = []) {
   const byDate = new Map(stored); for (const [d, a] of fresh) byDate.set(d, a);

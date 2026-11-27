@@ -21,26 +21,28 @@
     const listed = r.listed ? (r.listedPrecision === 'month' ? monthYear(r.listed) : dmy(r.listed)) : null;
     const note = r.complete ? ''
       : `<p class="cpl-partial">أقدم جلسة متاحة في البيانات ${num(dmy(r.base))}${listed ? `، والإدراج كان ${num(listed)}` : ''}؛ الأرقام هنا منذ تلك الجلسة لا منذ الإدراج الفعلي.</p>`;
-    const tile = (label, ret, cg, value, cls) => `
+    // سجل التوزيعات قبل هذا التاريخ لم يجتز الفحص مقابل الأسعار، فلا يُحسب (scripts/fetch-listing-history.mjs)
+    const divNote = r.divFrom ? `<span class="cpl-sub cpl-warn">التوزيعات محسوبة منذ ${num(r.divFrom.slice(0, 4))} فقط</span>` : '';
+    const tile = (label, ret, cg, value, cls, extra = '') => `
       <div class="cpl-tile ${cls}">
         <span class="cp-label">${label}</span>
         <span class="cpl-big">${pct(ret)}</span>
         <span class="cpl-sub">${cg == null ? 'أقل من سنة: لا عائد سنوي' : `سنويًا ${pct(cg)}`}</span>
-        <span class="cpl-sub">1,000 ريال أصبحت ${num(nf.format(value))} ريال</span>
+        <span class="cpl-sub">1,000 ريال أصبحت ${num(nf.format(value))} ريال</span>${extra}
       </div>`;
     return `
       <div class="cpl-head"><h4 id="cpl-title">${r.complete ? 'الأداء منذ الإدراج' : `الأداء منذ ${num(r.base.slice(0, 4))}`}</h4><span class="cpl-span">${yearsLabel(r.years)} · من ${num(dmy(r.base))} إلى ${num(dmy(r.last))}</span></div>
       ${note}
       <div class="cpl-grid">
         ${tile('بدون التوزيعات (السعر فقط)', r.priceReturn, r.priceCagr, r.priceValue, 'price')}
-        ${tile('مع إعادة استثمار التوزيعات', r.totalReturn, r.totalCagr, r.totalValue, 'total')}
+        ${tile('مع إعادة استثمار التوزيعات', r.totalReturn, r.totalCagr, r.totalValue, 'total', divNote)}
         <ul class="cpl-facts">
           <li><span>إغلاق أول جلسة (معدّل)</span><b>${num(nf2.format(base))} ريال</b></li>
           <li><span>آخر إغلاق رسمي</span><b>${num(nf2.format(r.close))} ريال</b></li>
           <li><span>ما أضافته التوزيعات</span><b>${Math.abs(divAdd) < 0.005 ? 'لا توزيعات' : `${num((divAdd > 0 ? '+' : '') + nf2.format(divAdd))} نقطة مئوية`}</b></li>
         </ul>
       </div>
-      <p class="cpl-method">الأساس إغلاق أول جلسة لا سعر الطرح. السعر معدّل للمنح والتجزئة وحقوق الأولوية؛ العائد مع التوزيعات يفترض إعادة استثمار كل توزيع نقدي في تاريخ استحقاقه، دون زكاة أو رسوم. المصدر: تاريخ TradingView وإغلاقات تداول السعودية الرسمية.</p>`;
+      <p class="cpl-method">الأساس إغلاق أول جلسة لا سعر الطرح. السعر معدّل للمنح والتجزئة وحقوق الأولوية؛ العائد مع التوزيعات يفترض إعادة استثمار كل توزيع نقدي في تاريخ استحقاقه، دون زكاة أو رسوم. كل توزيع مُطابق بين TradingView وYahoo ومع هبوط السعر الرسمي في تاريخ استحقاقه. المصدر: تاريخ TradingView وإغلاقات تداول السعودية الرسمية.</p>`;
   }
 
   async function paint() {

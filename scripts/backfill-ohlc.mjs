@@ -19,7 +19,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { readCandles, writeCandles } from './ohlc-files.mjs';
 import { execFile as execFileCb } from 'node:child_process';
 import { promisify } from 'node:util';
-import { parseYahoo, parseYahooSplits, parseYahooDividends, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, mergeDividends, HISTORY_START, round2Price, SOURCE, TV_FIGURES, tvDistance } from './ohlc-merge.mjs';
+import { parseYahoo, parseYahooSplits, parseYahooDividends, hourlyDays, parseOfficialCloses, rebuildBars, candleFile, validOhlc, fileBars, nextDividends, HISTORY_START, round2Price, SOURCE, TV_FIGURES, tvDistance } from './ohlc-merge.mjs';
 
 const execFile = promisify(execFileCb);
 const DIST = new URL('../dist/', import.meta.url);
@@ -157,7 +157,8 @@ async function worker() {
       const kept = new Map(before?.source === SOURCE && validOhlc(before) ? fileBars(before).filter(b => !(before.est || []).includes(b.d)).map(b => [b.d, b]) : []);
       const est = new Set(rebuilt.est);
       const bars = rebuilt.bars.map(b => { const k = kept.get(b.d); if (k && Math.abs(k.c - b.c) < 0.005) { est.delete(b.d); return k; } return b; });
-      const file = candleFile(stock.symbol, SOURCE, official.at(-1)?.d ?? null, bars, [...est], mergeDividends(before?.div, dividends));
+      const { div, ...divFields } = nextDividends(before, dividends);
+      const file = { ...candleFile(stock.symbol, SOURCE, official.at(-1)?.d ?? null, bars, [...est], div), ...divFields };
       if (!validOhlc(file)) throw new Error('too few valid bars');
       await writeCandles(DIR, file);
       report.rebuilt += 1; report.estimated += file.est.length; failedInARow = 0;

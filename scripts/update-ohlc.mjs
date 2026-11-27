@@ -16,7 +16,7 @@
  * Usage: node scripts/update-ohlc.mjs [--force] [--symbols 3003,2222] [--out <dir>]
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { parseYahoo, parseYahooDividends, mergeDividends, cleanBars, validOhlc, isFakeBar, fileBars, candleFile, scanBars, addSession, SCAN_COLUMNS, HISTORY_START, SOURCE } from './ohlc-merge.mjs';
+import { parseYahoo, parseYahooDividends, nextDividends, rescaleDividends, cleanBars, validOhlc, isFakeBar, fileBars, candleFile, scanBars, addSession, SCAN_COLUMNS, HISTORY_START, SOURCE } from './ohlc-merge.mjs';
 import { readCandles, writeCandles } from './ohlc-files.mjs';
 
 const DIST = new URL('../dist/', import.meta.url);
@@ -84,7 +84,7 @@ async function worker() {
       const before = await readCandles(DIR, stock.symbol), session = sessions.get(stock.symbol);
       // Stored history (files from before the rebuild may still hold Yahoo's flat no-volume bars), or Yahoo for a new stock.
       let bars = before && validOhlc(before) ? fileBars(before).filter(b => Array.isArray(before.est) || !isFakeBar(b)) : null;
-      let source = before?.source === SOURCE ? SOURCE : FALLBACK_SOURCE, est = before?.est || [], div = before?.div || [];
+      let source = before?.source === SOURCE ? SOURCE : FALLBACK_SOURCE, est = before?.est || [], dv = nextDividends(before);
       if (!bars) bars = cleanBars((await yahoo(stock.symbol, 'all')).filter(b => !isFakeBar(b)), { official }).bars;
       let through = before?.officialThrough ?? null;
       if (session?.today && official) {
@@ -92,17 +92,19 @@ async function worker() {
         // Sessions this update missed: the stored history stops before TradingView's previous session.
         // Recent Yahoo bars: dividends declared since the last run (the chart's ADJ option), and sessions this update missed.
         let recent = null; try { recent = await yahooJson(stock.symbol, '3mo'); } catch { /* dividends wait for the next run */ }
-        if (recent) div = mergeDividends(div, parseYahooDividends(recent));
+        if (recent) dv = nextDividends(before, parseYahooDividends(recent));
         const fill = recent && session.prev && last < session.prev.d && !bars.some(b => b.d === session.prev.d) ? parseYahoo(recent) : [];
         const result = addSession(bars, session, official, { fill });
         if (result.added) {
           bars = result.bars; through = official.date;
           est = est.filter(d => d !== session.today.d && d !== session.prev?.d); // now real TradingView candles
+          if (result.factor) dv.div = rescaleDividends(dv.div, session.prev.d, result.factor);
           if (result.factor) adjusted.push({ symbol: stock.symbol, date: session.prev.d, factor: Math.round(result.factor * 1e6) / 1e6 });
         }
       }
       if (!before && bars.at(-1)?.d === official?.date) through = official.date;
-      const next = candleFile(stock.symbol, source, through, bars, est, div);
+      const { div, ...divFields } = dv;
+      const next = { ...candleFile(stock.symbol, source, through, bars, est, div), ...divFields };
       if (!validOhlc(next)) throw new Error('too few valid bars');
       fetched += 1;
       written += await writeCandles(DIR, next);

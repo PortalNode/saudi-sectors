@@ -8,8 +8,9 @@
  * Sources (scripts/listing-anchors.json, refreshed weekly by scripts/fetch-listing-history.mjs):
  *   price:     base → join from TradingView's history (before our candles start, e.g. 1999–2010), then
  *              join → last close from our candles, the Saudi Exchange's official adjusted closes
- *   dividends: their effect base → anchor from TradingView's dividend-adjusted series (a fuller record
- *              than ours), then anchor → last close from our own dividends (dist/ohlc div)
+ *   dividends: reinvested base → join from TradingView's record (preDiv, checked against the prices),
+ *              then from our own dividends (dist/ohlc div, checked against Yahoo and the official closes).
+ *              When TradingView's early record fails its check, divFrom says from when dividends count.
  * A stock without an anchor uses our candles alone. When the first session we know is later than
  * the listing, the figure is marked incomplete and says from when.
  * Runs without network. Usage: node scripts/build-since-listing.mjs
@@ -34,15 +35,15 @@ export const cagr = (r, years) => years >= 1 && r > -1 ? (1 + r) ** (1 / years) 
 export function sinceListing({ ours, anchor = null, listed = null }) {
   if (!ours?.d?.length || ours.d.length !== ours.c?.length) return null;
   const n = ours.d.length - 1, factor = dividendFactors(ours.d, ours.c, ours.div ?? []);
-  const j = anchor ? ours.d.indexOf(anchor.join?.d) : -1, a = anchor ? ours.d.indexOf(anchor.anchor?.d) : -1;
-  const ok = x => x?.c > 0 && x?.ca > 0;
-  let base, price, total, from;
-  if (j >= 0 && a >= j && ok(anchor.base) && ok(anchor.join) && ok(anchor.anchor)) {
+  const j = anchor ? ours.d.indexOf(anchor.join?.d) : -1;
+  let base, price, total, from, divFrom = null;
+  if (j >= 0 && anchor.base?.c > 0 && anchor.join?.c > 0 && anchor.preDiv >= 1) {
     base = anchor.base.d; from = 'tradingview';
     price = (anchor.join.c / anchor.base.c) * (ours.c[n] / ours.c[j]) - 1;
-    // Dividends alone: TradingView's total move over its price move, base → anchor; then ours.
-    const divMul = (anchor.anchor.ca / anchor.base.ca) / (anchor.anchor.c / anchor.base.c) / factor[a];
-    total = (1 + price) * divMul - 1;
+    // Dividends reinvested: TradingView's record before our candles, then ours (factor[j] covers every
+    // dividend after the join session).
+    total = (1 + price) * anchor.preDiv / factor[j] - 1;
+    divFrom = anchor.divFrom ?? null;
   } else {
     base = ours.d[0]; from = 'candles';
     price = ours.c[n] / ours.c[0] - 1;
@@ -55,7 +56,7 @@ export function sinceListing({ ours, anchor = null, listed = null }) {
     priceReturn: round(price * 100), totalReturn: round(total * 100),
     priceCagr: round(cagr(price, years) * 100), totalCagr: round(cagr(total, years) * 100),
     priceValue: round(1000 * (1 + price), 0), totalValue: round(1000 * (1 + total), 0),
-    source: from
+    source: from, ...(divFrom && { divFrom })
   };
 }
 

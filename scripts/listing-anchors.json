@@ -1,6 +1,6 @@
 {
- "note": "Since-listing anchors from TradingView daily history (scripts/fetch-listing-history.mjs). base = first session on/after listing; join = first session shared with dist/ohlc; anchor = latest shared session. c = close adjusted for capital actions, ca = also adjusted for cash dividends; only ratios between them are used.",
- "fetchedAt": "2026-11-27T05:33:00.531Z",
+ "note": "Since-listing anchors from TradingView daily history (scripts/fetch-listing-history.mjs). base = first session on/after listing; join = first session shared with dist/ohlc; anchor = latest shared session; preDiv = dividends reinvested base→join (1 and divFrom = join when the TradingView record there fails the price check). c = close adjusted for capital actions, ca = also adjusted for cash dividends; only ratios between them are used.",
+ "fetchedAt": "2026-11-27T06:18:47.127Z",
  "source": "TradingView",
  "symbols": {
   "1010": {
@@ -17,17 +17,19 @@
     "ca": 4.639634
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 20.3,
-    "ca": 20.3
+    "d": "2026-11-26",
+    "c": 20.26,
+    "ca": 20.26
    },
    "complete": false,
    "check": {
-    "shared": 3832,
+    "shared": 3834,
     "mismatched": 4,
     "maxOff": 1.73,
     "window": -0.02
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2011-01-01"
   },
   "1020": {
    "listed": "1976-10-09",
@@ -43,17 +45,19 @@
     "ca": 4.785293
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.78,
-    "ca": 10.78
+    "d": "2026-11-26",
+    "c": 10.7,
+    "ca": 10.7
    },
    "complete": false,
    "check": {
-    "shared": 4127,
+    "shared": 4129,
     "mismatched": 6,
     "maxOff": 1.35,
     "window": -0.04
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-07"
   },
   "1030": {
    "listed": "1993-01-02",
@@ -69,17 +73,18 @@
     "ca": 3.191849
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 11.48,
-    "ca": 11.48
+    "d": "2026-11-26",
+    "c": 11.46,
+    "ca": 11.46
    },
    "complete": false,
    "check": {
-    "shared": 4110,
+    "shared": 4112,
     "mismatched": 2791,
     "maxOff": 20.03,
     "window": 2.47
-   }
+   },
+   "preDiv": 1.016854
   },
   "1050": {
    "listed": "1993-01-02",
@@ -95,17 +100,18 @@
     "ca": 7.23127
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 19.73,
-    "ca": 19.73
+    "d": "2026-11-26",
+    "c": 19.6,
+    "ca": 19.6
    },
    "complete": false,
    "check": {
-    "shared": 4125,
+    "shared": 4127,
     "mismatched": 24,
     "maxOff": 4.83,
     "window": -0.06
-   }
+   },
+   "preDiv": 1.127388
   },
   "1060": {
    "listed": "1993-01-02",
@@ -121,17 +127,18 @@
     "ca": 13.713214
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 32.24,
-    "ca": 32.24
+    "d": "2026-11-26",
+    "c": 31.72,
+    "ca": 31.72
    },
    "complete": false,
    "check": {
-    "shared": 4131,
+    "shared": 4133,
     "mismatched": 29,
     "maxOff": 2.68,
     "window": 0.21
-   }
+   },
+   "preDiv": 1.160711
   },
   "1080": {
    "listed": "1979-12-01",
@@ -147,17 +154,18 @@
     "ca": 7.273955
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 20.6,
-    "ca": 20.6
+    "d": "2026-11-26",
+    "c": 20.44,
+    "ca": 20.44
    },
    "complete": false,
    "check": {
-    "shared": 4125,
+    "shared": 4127,
     "mismatched": 23,
     "maxOff": 2.91,
     "window": 0
-   }
+   },
+   "preDiv": 1.098953
   },
   "1111": {
    "listed": "2021-12-08",
@@ -173,17 +181,18 @@
     "ca": 117.215968
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 107.3,
     "ca": 107.3
    },
    "complete": true,
    "check": {
-    "shared": 1235,
+    "shared": 1237,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1120": {
    "listed": "1988-12-01",
@@ -199,43 +208,46 @@
     "ca": 11.460707
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 61.05,
-    "ca": 61.05
+    "d": "2026-11-26",
+    "c": 60.5,
+    "ca": 60.5
    },
    "complete": false,
    "check": {
-    "shared": 4140,
+    "shared": 4142,
     "mismatched": 5,
     "maxOff": 1.52,
     "window": 0.1
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-03"
   },
   "1140": {
    "listed": "2005-04-30",
    "first": "2005-04-30",
    "base": {
     "d": "2005-04-30",
-    "c": 30.599976,
-    "ca": 24.955926
+    "c": 30.59998,
+    "ca": 24.955929
    },
    "join": {
     "d": "2010-03-07",
-    "c": 4.039997,
+    "c": 4.039998,
     "ca": 3.294835
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 20.03,
-    "ca": 20.03
+    "d": "2026-11-26",
+    "c": 20,
+    "ca": 20
    },
    "complete": true,
    "check": {
-    "shared": 4116,
+    "shared": 4118,
     "mismatched": 9,
     "maxOff": 3.36,
     "window": 0.25
-   }
+   },
+   "preDiv": 1
   },
   "1150": {
    "listed": "2008-06-03",
@@ -251,17 +263,18 @@
     "ca": 4.39061
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 21.37,
-    "ca": 21.37
+    "d": "2026-11-26",
+    "c": 21.33,
+    "ca": 21.33
    },
    "complete": true,
    "check": {
-    "shared": 4129,
+    "shared": 4131,
     "mismatched": 3,
     "maxOff": 2.36,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1180": {
    "listed": "2014-11-12",
@@ -277,17 +290,18 @@
     "ca": 15.562461
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 37,
-    "ca": 37
+    "d": "2026-11-26",
+    "c": 36.6,
+    "ca": 36.6
    },
    "complete": true,
    "check": {
-    "shared": 2997,
+    "shared": 2999,
     "mismatched": 31,
     "maxOff": 1.98,
     "window": -0.48
-   }
+   },
+   "preDiv": 1
   },
   "1182": {
    "listed": "2020-07-13",
@@ -303,17 +317,18 @@
     "ca": 13.534815
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 7.3,
-    "ca": 7.3
+    "d": "2026-11-26",
+    "c": 7.34,
+    "ca": 7.34
    },
    "complete": true,
    "check": {
-    "shared": 1583,
+    "shared": 1585,
     "mismatched": 0,
     "maxOff": 0.69,
     "window": -0.05
-   }
+   },
+   "preDiv": 1
   },
   "1183": {
    "listed": "2022-04-20",
@@ -329,17 +344,18 @@
     "ca": 24.433051
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 11.78,
-    "ca": 11.78
+    "d": "2026-11-26",
+    "c": 11.7,
+    "ca": 11.7
    },
    "complete": true,
    "check": {
-    "shared": 1141,
+    "shared": 1143,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1201": {
    "listed": "2012-02-07",
@@ -355,17 +371,18 @@
     "ca": 51.960055
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.22,
-    "ca": 3.22
+    "d": "2026-11-26",
+    "c": 3.23,
+    "ca": 3.23
    },
    "complete": true,
    "check": {
-    "shared": 3667,
+    "shared": 3669,
     "mismatched": 305,
     "maxOff": 3.94,
     "window": 3.04
-   }
+   },
+   "preDiv": 1
   },
   "1202": {
    "listed": "2015-05-03",
@@ -381,17 +398,18 @@
     "ca": 24.762491
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.89,
-    "ca": 12.89
+    "d": "2026-11-26",
+    "c": 13.08,
+    "ca": 13.08
    },
    "complete": true,
    "check": {
-    "shared": 2867,
+    "shared": 2869,
     "mismatched": 6,
     "maxOff": 2.44,
     "window": 0.02
-   }
+   },
+   "preDiv": 1
   },
   "1210": {
    "listed": "2008-06-16",
@@ -407,17 +425,18 @@
     "ca": 20.322659
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 23.66,
-    "ca": 23.66
+    "d": "2026-11-26",
+    "c": 23.62,
+    "ca": 23.62
    },
    "complete": true,
    "check": {
-    "shared": 4144,
+    "shared": 4146,
     "mismatched": 16,
     "maxOff": 2.7,
     "window": 0
-   }
+   },
+   "preDiv": 1.013477
   },
   "1211": {
    "listed": "2008-07-28",
@@ -433,17 +452,18 @@
     "ca": 5.456994
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 56.05,
-    "ca": 56.05
+    "d": "2026-11-26",
+    "c": 55.7,
+    "ca": 55.7
    },
    "complete": true,
    "check": {
-    "shared": 4137,
+    "shared": 4139,
     "mismatched": 10,
     "maxOff": 3.35,
     "window": 0.06
-   }
+   },
+   "preDiv": 1
   },
   "1212": {
    "listed": "2008-08-08",
@@ -459,17 +479,18 @@
     "ca": 23.664992
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 111.2,
-    "ca": 111.2
+    "d": "2026-11-26",
+    "c": 108.3,
+    "ca": 108.3
    },
    "complete": true,
    "check": {
-    "shared": 4134,
+    "shared": 4136,
     "mismatched": 12,
     "maxOff": 1.78,
     "window": 0.13
-   }
+   },
+   "preDiv": 1.022472
   },
   "1213": {
    "listed": "2010-02-22",
@@ -485,17 +506,18 @@
     "ca": 95.025156
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.21,
-    "ca": 10.21
+    "d": "2026-11-26",
+    "c": 10.12,
+    "ca": 10.12
    },
    "complete": true,
    "check": {
-    "shared": 4119,
+    "shared": 4121,
     "mismatched": 25,
     "maxOff": 2.58,
     "window": -0.47
-   }
+   },
+   "preDiv": 1
   },
   "1214": {
    "listed": "2010-05-17",
@@ -511,17 +533,18 @@
     "ca": 23.173413
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.21,
-    "ca": 8.21
+    "d": "2026-11-26",
+    "c": 8.22,
+    "ca": 8.22
    },
    "complete": true,
    "check": {
-    "shared": 4058,
+    "shared": 4060,
     "mismatched": 12,
     "maxOff": 2.93,
     "window": 0.16
-   }
+   },
+   "preDiv": 1
   },
   "1301": {
    "listed": "2011-08-21",
@@ -537,17 +560,18 @@
     "ca": 18.453647
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 16.05,
-    "ca": 16.05
+    "d": "2026-11-26",
+    "c": 16.08,
+    "ca": 16.08
    },
    "complete": true,
    "check": {
-    "shared": 3769,
+    "shared": 3771,
     "mismatched": 10,
     "maxOff": 2.8,
     "window": 0.08
-   }
+   },
+   "preDiv": 1
   },
   "1302": {
    "listed": "2013-12-24",
@@ -563,17 +587,18 @@
     "ca": 25.37358
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 23,
-    "ca": 23
+    "d": "2026-11-26",
+    "c": 22.05,
+    "ca": 22.05
    },
    "complete": true,
    "check": {
-    "shared": 3199,
+    "shared": 3201,
     "mismatched": 12,
     "maxOff": 1.7,
     "window": 0.14
-   }
+   },
+   "preDiv": 1
   },
   "1303": {
    "listed": "2014-12-07",
@@ -589,17 +614,18 @@
     "ca": 2.104771
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.01,
-    "ca": 10.01
+    "d": "2026-11-26",
+    "c": 10.3,
+    "ca": 10.3
    },
    "complete": true,
    "check": {
-    "shared": 2944,
+    "shared": 2946,
     "mismatched": 9,
     "maxOff": 2.03,
     "window": -0.02
-   }
+   },
+   "preDiv": 1
   },
   "1304": {
    "listed": "2016-05-22",
@@ -615,17 +641,18 @@
     "ca": 31.206252
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 30.66,
-    "ca": 30.66
+    "d": "2026-11-26",
+    "c": 30.4,
+    "ca": 30.4
    },
    "complete": true,
    "check": {
-    "shared": 2613,
+    "shared": 2615,
     "mismatched": 6,
     "maxOff": 1.33,
     "window": -0.34
-   }
+   },
+   "preDiv": 1
   },
   "1320": {
    "listed": "2009-08-04",
@@ -641,17 +668,18 @@
     "ca": 24.501975
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 44.86,
-    "ca": 44.86
+    "d": "2026-11-26",
+    "c": 45,
+    "ca": 45
    },
    "complete": true,
    "check": {
-    "shared": 4139,
+    "shared": 4141,
     "mismatched": 26,
     "maxOff": 2.92,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1321": {
    "listed": "2022-02-14",
@@ -667,17 +695,18 @@
     "ca": 51.302733
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 148.8,
-    "ca": 148.8
+    "d": "2026-11-26",
+    "c": 150.1,
+    "ca": 150.1
    },
    "complete": true,
    "check": {
-    "shared": 1188,
+    "shared": 1190,
     "mismatched": 0,
     "maxOff": 0.04,
     "window": -0.04
-   }
+   },
+   "preDiv": 1
   },
   "1322": {
    "listed": "2022-03-29",
@@ -693,17 +722,18 @@
     "ca": 55.48965
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 58.75,
-    "ca": 58.75
+    "d": "2026-11-26",
+    "c": 59.1,
+    "ca": 59.1
    },
    "complete": true,
    "check": {
-    "shared": 1157,
+    "shared": 1159,
     "mismatched": 0,
     "maxOff": 0.04,
     "window": 0.04
-   }
+   },
+   "preDiv": 1
   },
   "1323": {
    "listed": "2025-05-27",
@@ -719,17 +749,18 @@
     "ca": 43.719123
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 25.02,
-    "ca": 25.02
+    "d": "2026-11-26",
+    "c": 26,
+    "ca": 26
    },
    "complete": true,
    "check": {
-    "shared": 374,
+    "shared": 376,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1324": {
    "listed": "2026-03-11",
@@ -745,17 +776,18 @@
     "ca": 49.767451
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 35.32,
-    "ca": 35.32
+    "d": "2026-11-26",
+    "c": 35.42,
+    "ca": 35.42
    },
    "complete": true,
    "check": {
-    "shared": 174,
+    "shared": 176,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1810": {
    "listed": "2012-06-04",
@@ -771,17 +803,18 @@
     "ca": 17.915407
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 17.64,
-    "ca": 17.64
+    "d": "2026-11-26",
+    "c": 17.7,
+    "ca": 17.7
    },
    "complete": true,
    "check": {
-    "shared": 3591,
+    "shared": 3593,
     "mismatched": 1692,
     "maxOff": 21.95,
     "window": -21.67
-   }
+   },
+   "preDiv": 1
   },
   "1820": {
    "listed": "2014-06-26",
@@ -797,17 +830,18 @@
     "ca": 11.836417
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 1.68,
-    "ca": 1.68
+    "d": "2026-11-26",
+    "c": 1.66,
+    "ca": 1.66
    },
    "complete": true,
    "check": {
-    "shared": 3046,
+    "shared": 3048,
     "mismatched": 13,
     "maxOff": 2.25,
     "window": -0.06
-   }
+   },
+   "preDiv": 1
   },
   "1830": {
    "listed": "2018-09-10",
@@ -823,17 +857,18 @@
     "ca": 41.614948
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 79.4,
-    "ca": 79.4
+    "d": "2026-11-26",
+    "c": 80.85,
+    "ca": 80.85
    },
    "complete": true,
    "check": {
-    "shared": 2048,
+    "shared": 2050,
     "mismatched": 1,
     "maxOff": 2.97,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1831": {
    "listed": "2019-06-18",
@@ -849,17 +884,18 @@
     "ca": 3.756897
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.17,
-    "ca": 3.17
+    "d": "2026-11-26",
+    "c": 3.2,
+    "ca": 3.2
    },
    "complete": true,
    "check": {
-    "shared": 1849,
+    "shared": 1851,
     "mismatched": 0,
     "maxOff": 0.58,
     "window": 0.13
-   }
+   },
+   "preDiv": 1
   },
   "1832": {
    "listed": "2017-02-26",
@@ -875,17 +911,19 @@
     "ca": 3.938594
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 2.06,
     "ca": 2.06
    },
    "complete": true,
    "check": {
-    "shared": 1481,
+    "shared": 1483,
     "mismatched": 0,
     "maxOff": 0.16,
     "window": -0.07
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2020-12-13"
   },
   "1833": {
    "listed": "2023-06-19",
@@ -901,17 +939,18 @@
     "ca": 57.461278
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 81.55,
-    "ca": 81.55
+    "d": "2026-11-26",
+    "c": 82,
+    "ca": 82
    },
    "complete": true,
    "check": {
-    "shared": 857,
+    "shared": 859,
     "mismatched": 0,
     "maxOff": 0.01,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1834": {
    "listed": "2024-06-12",
@@ -927,17 +966,18 @@
     "ca": 8.116039
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 4.19,
     "ca": 4.19
    },
    "complete": true,
    "check": {
-    "shared": 611,
+    "shared": 613,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "1835": {
    "listed": "2024-11-27",
@@ -953,17 +993,18 @@
     "ca": 57.775529
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 34.58,
-    "ca": 34.58
+    "d": "2026-11-26",
+    "c": 34.64,
+    "ca": 34.64
    },
    "complete": true,
    "check": {
-    "shared": 498,
+    "shared": 500,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2001": {
    "listed": "2008-09-16",
@@ -979,17 +1020,18 @@
     "ca": 118.106231
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 19.74,
-    "ca": 19.74
+    "d": "2026-11-26",
+    "c": 19.08,
+    "ca": 19.08
    },
    "complete": true,
    "check": {
-    "shared": 4072,
+    "shared": 4074,
     "mismatched": 9,
     "maxOff": 1.94,
     "window": -0.02
-   }
+   },
+   "preDiv": 1
   },
   "2010": {
    "listed": "1984-01-01",
@@ -1005,17 +1047,18 @@
     "ca": 41.831709
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 48,
     "ca": 48
    },
    "complete": false,
    "check": {
-    "shared": 4134,
+    "shared": 4136,
     "mismatched": 3,
     "maxOff": 1.11,
     "window": 0
-   }
+   },
+   "preDiv": 1.281377
   },
   "2020": {
    "listed": "1990-03-07",
@@ -1031,17 +1074,18 @@
     "ca": 34.978403
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 113,
-    "ca": 113
+    "d": "2026-11-26",
+    "c": 111.7,
+    "ca": 111.7
    },
    "complete": false,
    "check": {
-    "shared": 4112,
+    "shared": 4114,
     "mismatched": 3,
     "maxOff": 1.42,
     "window": 0.11
-   }
+   },
+   "preDiv": 1.401456
   },
   "2030": {
    "listed": "1993-07-18",
@@ -1057,17 +1101,18 @@
     "ca": 40.814016
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 45.5,
-    "ca": 45.5
+    "d": "2026-11-26",
+    "c": 45.98,
+    "ca": 45.98
    },
    "complete": false,
    "check": {
-    "shared": 4143,
+    "shared": 4145,
     "mismatched": 14,
     "maxOff": 1.91,
     "window": 0
-   }
+   },
+   "preDiv": 1.034683
   },
   "2040": {
    "listed": "1993-01-10",
@@ -1083,17 +1128,18 @@
     "ca": 22.284041
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 19.68,
-    "ca": 19.68
+    "d": "2026-11-26",
+    "c": 19.79,
+    "ca": 19.79
    },
    "complete": false,
    "check": {
-    "shared": 4129,
+    "shared": 4131,
     "mismatched": 11,
     "maxOff": 3.1,
     "window": -0.03
-   }
+   },
+   "preDiv": 1.15584
   },
   "2050": {
    "listed": "1991-12-01",
@@ -1109,17 +1155,18 @@
     "ca": 15.099457
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 23.14,
-    "ca": 23.14
+    "d": "2026-11-26",
+    "c": 21.86,
+    "ca": 21.86
    },
    "complete": false,
    "check": {
-    "shared": 3986,
+    "shared": 3988,
     "mismatched": 21,
     "maxOff": 2,
     "window": 0.13
-   }
+   },
+   "preDiv": 1.194839
   },
   "2060": {
    "listed": "1993-01-02",
@@ -1135,17 +1182,18 @@
     "ca": 15.608944
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.91,
-    "ca": 6.91
+    "d": "2026-11-26",
+    "c": 6.78,
+    "ca": 6.78
    },
    "complete": false,
    "check": {
-    "shared": 4140,
+    "shared": 4142,
     "mismatched": 8,
     "maxOff": 2.6,
     "window": 0.17
-   }
+   },
+   "preDiv": 1.157699
   },
   "2070": {
    "listed": "1994-01-01",
@@ -1161,17 +1209,18 @@
     "ca": 13.603569
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 23.82,
-    "ca": 23.82
+    "d": "2026-11-26",
+    "c": 23.39,
+    "ca": 23.39
    },
    "complete": false,
    "check": {
-    "shared": 4131,
+    "shared": 4133,
     "mismatched": 7,
     "maxOff": 2.04,
     "window": 0.06
-   }
+   },
+   "preDiv": 1.22457
   },
   "2080": {
    "listed": "1993-01-02",
@@ -1187,17 +1236,18 @@
     "ca": 10.572832
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 59.95,
-    "ca": 59.95
+    "d": "2026-11-26",
+    "c": 59.4,
+    "ca": 59.4
    },
    "complete": false,
    "check": {
-    "shared": 4130,
+    "shared": 4132,
     "mismatched": 23,
     "maxOff": 2.1,
     "window": 0
-   }
+   },
+   "preDiv": 1.255803
   },
   "2081": {
    "listed": "2021-03-01",
@@ -1213,17 +1263,18 @@
     "ca": 78.36072
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 77.9,
-    "ca": 77.9
+    "d": "2026-11-26",
+    "c": 77.5,
+    "ca": 77.5
    },
    "complete": true,
    "check": {
-    "shared": 1423,
+    "shared": 1425,
     "mismatched": 0,
     "maxOff": 0.59,
     "window": -0.03
-   }
+   },
+   "preDiv": 1
   },
   "2082": {
    "listed": "2021-10-11",
@@ -1239,17 +1290,18 @@
     "ca": 65.143375
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 159.9,
-    "ca": 159.9
+    "d": "2026-11-26",
+    "c": 159,
+    "ca": 159
    },
    "complete": true,
    "check": {
-    "shared": 1276,
+    "shared": 1278,
     "mismatched": 0,
     "maxOff": 0.02,
     "window": 0.02
-   }
+   },
+   "preDiv": 1
   },
   "2083": {
    "listed": "2022-11-23",
@@ -1265,17 +1317,18 @@
     "ca": 42.174803
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 44.92,
-    "ca": 44.92
+    "d": "2026-11-26",
+    "c": 45,
+    "ca": 45
    },
    "complete": true,
    "check": {
-    "shared": 997,
+    "shared": 999,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2084": {
    "listed": "2024-06-06",
@@ -1291,17 +1344,18 @@
     "ca": 17.418787
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 8.27,
     "ca": 8.27
    },
    "complete": true,
    "check": {
-    "shared": 614,
+    "shared": 616,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2090": {
    "listed": "1993-01-01",
@@ -1317,17 +1371,19 @@
     "ca": 26.617247
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10,
-    "ca": 10
+    "d": "2026-11-26",
+    "c": 9.9,
+    "ca": 9.9
    },
    "complete": false,
    "check": {
-    "shared": 4128,
+    "shared": 4130,
     "mismatched": 12,
     "maxOff": 3.36,
     "window": 0
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-03"
   },
   "2100": {
    "listed": "1993-01-02",
@@ -1343,17 +1399,18 @@
     "ca": 18.396981
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 16.42,
-    "ca": 16.42
+    "d": "2026-11-26",
+    "c": 16.48,
+    "ca": 16.48
    },
    "complete": false,
    "check": {
-    "shared": 4130,
+    "shared": 4132,
     "mismatched": 16,
     "maxOff": 2.13,
     "window": -0.01
-   }
+   },
+   "preDiv": 1
   },
   "2110": {
    "listed": "1988-09-03",
@@ -1369,17 +1426,18 @@
     "ca": 376.320993
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 195.1,
-    "ca": 195.1
+    "d": "2026-11-26",
+    "c": 199,
+    "ca": 199
    },
    "complete": false,
    "check": {
-    "shared": 3325,
+    "shared": 3327,
     "mismatched": 39,
     "maxOff": 1.61,
     "window": 0.25
-   }
+   },
+   "preDiv": 1.031838
   },
   "2120": {
    "listed": "1993-05-24",
@@ -1391,21 +1449,22 @@
    },
    "join": {
     "d": "2010-03-06",
-    "c": 9.971443,
+    "c": 9.971442,
     "ca": 8.218526
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.16,
-    "ca": 12.16
+    "d": "2026-11-26",
+    "c": 12.07,
+    "ca": 12.07
    },
    "complete": false,
    "check": {
-    "shared": 4136,
+    "shared": 4138,
     "mismatched": 23,
     "maxOff": 3.37,
     "window": -0.01
-   }
+   },
+   "preDiv": 1.034965
   },
   "2130": {
    "listed": "1993-02-02",
@@ -1421,17 +1480,18 @@
     "ca": 16.973667
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 15.12,
-    "ca": 15.12
+    "d": "2026-11-26",
+    "c": 14.82,
+    "ca": 14.82
    },
    "complete": false,
    "check": {
-    "shared": 4124,
+    "shared": 4126,
     "mismatched": 20,
     "maxOff": 3.12,
     "window": 0.1
-   }
+   },
+   "preDiv": 1
   },
   "2140": {
    "listed": "1993-12-07",
@@ -1447,17 +1507,18 @@
     "ca": 10.450083
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 7.18,
-    "ca": 7.18
+    "d": "2026-11-26",
+    "c": 7.09,
+    "ca": 7.09
    },
    "complete": false,
    "check": {
-    "shared": 4132,
+    "shared": 4134,
     "mismatched": 9,
     "maxOff": 2.32,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2150": {
    "listed": "1993-12-21",
@@ -1473,17 +1534,19 @@
     "ca": 14.415267
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 36.1,
-    "ca": 36.1
+    "d": "2026-11-26",
+    "c": 35.72,
+    "ca": 35.72
    },
    "complete": true,
    "check": {
-    "shared": 4140,
+    "shared": 4142,
     "mismatched": 17,
     "maxOff": 2.37,
     "window": -0.13
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-03"
   },
   "2160": {
    "listed": "1996-05-01",
@@ -1499,17 +1562,18 @@
     "ca": 76.991883
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.65,
-    "ca": 8.65
+    "d": "2026-11-26",
+    "c": 8.66,
+    "ca": 8.66
    },
    "complete": false,
    "check": {
-    "shared": 4132,
+    "shared": 4134,
     "mismatched": 2646,
     "maxOff": 11.37,
     "window": -10.45
-   }
+   },
+   "preDiv": 1.04364
   },
   "2170": {
    "listed": "1997-08-11",
@@ -1525,17 +1589,18 @@
     "ca": 13.435598
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 22.5,
-    "ca": 22.5
+    "d": "2026-11-26",
+    "c": 21.51,
+    "ca": 21.51
    },
    "complete": false,
    "check": {
-    "shared": 4008,
+    "shared": 4010,
     "mismatched": 18,
     "maxOff": 4.26,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2180": {
    "listed": "1991-06-16",
@@ -1551,17 +1616,18 @@
     "ca": 29.292851
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 34.8,
-    "ca": 34.8
+    "d": "2026-11-26",
+    "c": 35.06,
+    "ca": 35.06
    },
    "complete": false,
    "check": {
-    "shared": 4148,
+    "shared": 4150,
     "mismatched": 13,
     "maxOff": 1.77,
     "window": 0
-   }
+   },
+   "preDiv": 1.091908
   },
   "2190": {
    "listed": "1998-08-26",
@@ -1577,17 +1643,18 @@
     "ca": 9.726054
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 36.4,
-    "ca": 36.4
+    "d": "2026-11-26",
+    "c": 35.72,
+    "ca": 35.72
    },
    "complete": false,
    "check": {
-    "shared": 4140,
+    "shared": 4142,
     "mismatched": 21,
     "maxOff": 3.2,
     "window": 0.13
-   }
+   },
+   "preDiv": 1
   },
   "2200": {
    "listed": "1992-12-21",
@@ -1603,17 +1670,19 @@
     "ca": 4.005329
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.33,
-    "ca": 4.33
+    "d": "2026-11-26",
+    "c": 4.57,
+    "ca": 4.57
    },
    "complete": false,
    "check": {
-    "shared": 4082,
+    "shared": 4084,
     "mismatched": 14,
     "maxOff": 2.4,
     "window": -0.02
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "2210": {
    "listed": "1998-10-22",
@@ -1639,7 +1708,8 @@
     "mismatched": 22,
     "maxOff": 3.94,
     "window": 0.07
-   }
+   },
+   "preDiv": 1
   },
   "2220": {
    "listed": "2000-09-26",
@@ -1655,17 +1725,18 @@
     "ca": 17.49921
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.75,
-    "ca": 8.75
+    "d": "2026-11-26",
+    "c": 8.58,
+    "ca": 8.58
    },
    "complete": false,
    "check": {
-    "shared": 4150,
+    "shared": 4152,
     "mismatched": 14,
     "maxOff": 1.9,
     "window": 0.02
-   }
+   },
+   "preDiv": 1.036106
   },
   "2222": {
    "listed": "2019-12-11",
@@ -1681,17 +1752,18 @@
     "ca": 21.07853
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 26.3,
-    "ca": 26.3
+    "d": "2026-11-26",
+    "c": 26.38,
+    "ca": 26.38
    },
    "complete": true,
    "check": {
-    "shared": 1732,
+    "shared": 1734,
     "mismatched": 0,
     "maxOff": 0.04,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2223": {
    "listed": "2022-12-28",
@@ -1707,17 +1779,18 @@
     "ca": 74.669326
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 101.1,
-    "ca": 101.1
+    "d": "2026-11-26",
+    "c": 100.9,
+    "ca": 100.9
    },
    "complete": true,
    "check": {
-    "shared": 973,
+    "shared": 975,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2230": {
    "listed": "2002-05-26",
@@ -1733,17 +1806,19 @@
     "ca": 1.621989
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.17,
-    "ca": 6.17
+    "d": "2026-11-26",
+    "c": 6.1,
+    "ca": 6.1
    },
    "complete": false,
    "check": {
-    "shared": 4122,
+    "shared": 4124,
     "mismatched": 23,
     "maxOff": 2.74,
     "window": 0
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-03"
   },
   "2240": {
    "listed": "2002-02-09",
@@ -1759,17 +1834,19 @@
     "ca": 31.842723
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 20.93,
-    "ca": 20.93
+    "d": "2026-11-26",
+    "c": 20.6,
+    "ca": 20.6
    },
    "complete": true,
    "check": {
-    "shared": 4132,
+    "shared": 4134,
     "mismatched": 15,
     "maxOff": 1.43,
     "window": 0.08
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "2250": {
    "listed": "2004-02-15",
@@ -1785,17 +1862,18 @@
     "ca": 12.433615
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.28,
-    "ca": 12.28
+    "d": "2026-11-26",
+    "c": 12.1,
+    "ca": 12.1
    },
    "complete": true,
    "check": {
-    "shared": 3990,
+    "shared": 3992,
     "mismatched": 3615,
     "maxOff": 9.32,
     "window": -6.99
-   }
+   },
+   "preDiv": 1.059076
   },
   "2270": {
    "listed": "2005-05-23",
@@ -1811,17 +1889,18 @@
     "ca": 22.753171
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 185.5,
-    "ca": 185.5
+    "d": "2026-11-26",
+    "c": 186.4,
+    "ca": 186.4
    },
    "complete": true,
    "check": {
-    "shared": 4145,
+    "shared": 4147,
     "mismatched": 20,
     "maxOff": 3.28,
     "window": 0
-   }
+   },
+   "preDiv": 1.123494
   },
   "2280": {
    "listed": "2005-08-17",
@@ -1837,17 +1916,19 @@
     "ca": 15.472386
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 42.68,
-    "ca": 42.68
+    "d": "2026-11-26",
+    "c": 41.04,
+    "ca": 41.04
    },
    "complete": true,
    "check": {
-    "shared": 4118,
+    "shared": 4120,
     "mismatched": 503,
     "maxOff": 2.04,
     "window": -1.35
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-07"
   },
   "2281": {
    "listed": "2021-08-04",
@@ -1863,17 +1944,18 @@
     "ca": 96.469954
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 47.3,
-    "ca": 47.3
+    "d": "2026-11-26",
+    "c": 47.12,
+    "ca": 47.12
    },
    "complete": true,
    "check": {
-    "shared": 1322,
+    "shared": 1324,
     "mismatched": 0,
     "maxOff": 0.56,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2282": {
    "listed": "2022-08-15",
@@ -1889,17 +1971,18 @@
     "ca": 80.092265
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 61.65,
-    "ca": 61.65
+    "d": "2026-11-26",
+    "c": 61.95,
+    "ca": 61.95
    },
    "complete": true,
    "check": {
-    "shared": 1066,
+    "shared": 1068,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2283": {
    "listed": "2023-06-22",
@@ -1915,17 +1998,18 @@
     "ca": 59.621047
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 61.3,
-    "ca": 61.3
+    "d": "2026-11-26",
+    "c": 58.9,
+    "ca": 58.9
    },
    "complete": true,
    "check": {
-    "shared": 854,
+    "shared": 856,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2284": {
    "listed": "2024-03-27",
@@ -1941,17 +2025,18 @@
     "ca": 52.730642
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 27.4,
-    "ca": 27.4
+    "d": "2026-11-26",
+    "c": 27.32,
+    "ca": 27.32
    },
    "complete": true,
    "check": {
-    "shared": 662,
+    "shared": 664,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2285": {
    "listed": "2024-10-08",
@@ -1967,17 +2052,18 @@
     "ca": 63.432009
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 39.9,
-    "ca": 39.9
+    "d": "2026-11-26",
+    "c": 39.6,
+    "ca": 39.6
    },
    "complete": true,
    "check": {
-    "shared": 532,
+    "shared": 534,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2286": {
    "listed": "2024-10-28",
@@ -1993,17 +2079,18 @@
     "ca": 4.593389
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.89,
-    "ca": 3.89
+    "d": "2026-11-26",
+    "c": 3.87,
+    "ca": 3.87
    },
    "complete": true,
    "check": {
-    "shared": 518,
+    "shared": 520,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2287": {
    "listed": "2025-03-17",
@@ -2019,17 +2106,18 @@
     "ca": 64.252014
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 18.05,
-    "ca": 18.05
+    "d": "2026-11-26",
+    "c": 18.2,
+    "ca": 18.2
    },
    "complete": true,
    "check": {
-    "shared": 420,
+    "shared": 422,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2288": {
    "listed": "2023-01-10",
@@ -2045,17 +2133,18 @@
     "ca": 9.171233
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.21,
-    "ca": 6.21
+    "d": "2026-11-26",
+    "c": 6.19,
+    "ca": 6.19
    },
    "complete": false,
    "check": {
-    "shared": 208,
+    "shared": 210,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2290": {
    "listed": "2006-02-20",
@@ -2071,17 +2160,18 @@
     "ca": 18.784223
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 30.62,
-    "ca": 30.62
+    "d": "2026-11-26",
+    "c": 30.46,
+    "ca": 30.46
    },
    "complete": true,
    "check": {
-    "shared": 4134,
+    "shared": 4136,
     "mismatched": 9,
     "maxOff": 3.13,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2300": {
    "listed": "2006-06-14",
@@ -2097,17 +2187,19 @@
     "ca": 44.237502
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 45.36,
-    "ca": 45.36
+    "d": "2026-11-26",
+    "c": 45.56,
+    "ca": 45.56
    },
    "complete": true,
    "check": {
-    "shared": 4100,
+    "shared": 4102,
     "mismatched": 13,
     "maxOff": 2.81,
     "window": 0.07
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "2310": {
    "listed": "2006-09-09",
@@ -2123,17 +2215,18 @@
     "ca": 10.33368
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 11.9,
-    "ca": 11.9
+    "d": "2026-11-26",
+    "c": 11.8,
+    "ca": 11.8
    },
    "complete": false,
    "check": {
-    "shared": 4144,
+    "shared": 4146,
     "mismatched": 20,
     "maxOff": 2.54,
     "window": 0.11
-   }
+   },
+   "preDiv": 1.081652
   },
   "2320": {
    "listed": "2006-12-12",
@@ -2149,17 +2242,18 @@
     "ca": 11.685023
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 49.72,
-    "ca": 49.72
+    "d": "2026-11-26",
+    "c": 50.7,
+    "ca": 50.7
    },
    "complete": true,
    "check": {
-    "shared": 4143,
+    "shared": 4145,
     "mismatched": 12,
     "maxOff": 4.53,
     "window": 0
-   }
+   },
+   "preDiv": 1.040241
   },
   "2330": {
    "listed": "2007-01-20",
@@ -2175,17 +2269,18 @@
     "ca": 5.74575
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 22.74,
     "ca": 22.74
    },
    "complete": true,
    "check": {
-    "shared": 4141,
+    "shared": 4143,
     "mismatched": 7,
     "maxOff": 1.76,
     "window": 0.08
-   }
+   },
+   "preDiv": 1.042077
   },
   "2340": {
    "listed": "2007-02-03",
@@ -2201,17 +2296,18 @@
     "ca": 25.235373
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.07,
-    "ca": 8.07
+    "d": "2026-11-26",
+    "c": 8.18,
+    "ca": 8.18
    },
    "complete": true,
    "check": {
-    "shared": 4124,
+    "shared": 4126,
     "mismatched": 21,
     "maxOff": 6.08,
     "window": 0
-   }
+   },
+   "preDiv": 1.021978
   },
   "2350": {
    "listed": "2007-06-23",
@@ -2227,17 +2323,18 @@
     "ca": 18.549999
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 4.92,
     "ca": 4.92
    },
    "complete": true,
    "check": {
-    "shared": 4135,
+    "shared": 4137,
     "mismatched": 20,
     "maxOff": 2.21,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2360": {
    "listed": "2007-05-26",
@@ -2253,17 +2350,18 @@
     "ca": 95.30964
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 40.76,
-    "ca": 40.76
+    "d": "2026-11-26",
+    "c": 40.96,
+    "ca": 40.96
    },
    "complete": true,
    "check": {
-    "shared": 4133,
+    "shared": 4135,
     "mismatched": 130,
     "maxOff": 2.7,
     "window": -0.77
-   }
+   },
+   "preDiv": 1.07862
   },
   "2370": {
    "listed": "2007-12-08",
@@ -2279,17 +2377,19 @@
     "ca": 42.933203
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 30.1,
-    "ca": 30.1
+    "d": "2026-11-26",
+    "c": 29.3,
+    "ca": 29.3
    },
    "complete": true,
    "check": {
-    "shared": 4142,
+    "shared": 4144,
     "mismatched": 873,
     "maxOff": 14.05,
     "window": -13.99
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "2380": {
    "listed": "2008-01-27",
@@ -2305,17 +2405,18 @@
     "ca": 22.665799
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 14.1,
-    "ca": 14.1
+    "d": "2026-11-26",
+    "c": 13.92,
+    "ca": 13.92
    },
    "complete": true,
    "check": {
-    "shared": 4135,
+    "shared": 4137,
     "mismatched": 14,
     "maxOff": 2.03,
     "window": 0.02
-   }
+   },
+   "preDiv": 1
   },
   "2381": {
    "listed": "2022-11-07",
@@ -2331,17 +2432,18 @@
     "ca": 113.3759
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 92.2,
-    "ca": 92.2
+    "d": "2026-11-26",
+    "c": 92.65,
+    "ca": 92.65
    },
    "complete": true,
    "check": {
-    "shared": 1009,
+    "shared": 1011,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "2382": {
    "listed": "2023-10-11",
@@ -2357,17 +2459,18 @@
     "ca": 8.493349
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.25,
-    "ca": 8.25
+    "d": "2026-11-26",
+    "c": 8.16,
+    "ca": 8.16
    },
    "complete": true,
    "check": {
-    "shared": 780,
+    "shared": 782,
     "mismatched": 0,
     "maxOff": 0.12,
     "window": 0.11
-   }
+   },
+   "preDiv": 1
   },
   "3002": {
    "listed": "2012-05-12",
@@ -2383,17 +2486,18 @@
     "ca": 15.858476
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.95,
-    "ca": 4.95
+    "d": "2026-11-26",
+    "c": 4.99,
+    "ca": 4.99
    },
    "complete": true,
    "check": {
-    "shared": 3609,
+    "shared": 3611,
     "mismatched": 5,
     "maxOff": 2.66,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "3003": {
    "listed": "2012-10-13",
@@ -2409,17 +2513,18 @@
     "ca": 5.860922
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 9.75,
-    "ca": 9.75
+    "d": "2026-11-26",
+    "c": 9.74,
+    "ca": 9.74
    },
    "complete": true,
    "check": {
-    "shared": 3503,
+    "shared": 3505,
     "mismatched": 1986,
     "maxOff": 14.63,
     "window": -13.69
-   }
+   },
+   "preDiv": 1
   },
   "3004": {
    "listed": "2013-02-05",
@@ -2435,17 +2540,18 @@
     "ca": 15.842941
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.19,
-    "ca": 6.19
+    "d": "2026-11-26",
+    "c": 6.16,
+    "ca": 6.16
    },
    "complete": true,
    "check": {
-    "shared": 3434,
+    "shared": 3436,
     "mismatched": 4,
     "maxOff": 2.43,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "3005": {
    "listed": "2014-06-12",
@@ -2461,17 +2567,18 @@
     "ca": 11.177659
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 8.93,
     "ca": 8.93
    },
    "complete": true,
    "check": {
-    "shared": 3059,
+    "shared": 3061,
     "mismatched": 11,
     "maxOff": 1.87,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "3007": {
    "listed": "2017-09-17",
@@ -2487,17 +2594,18 @@
     "ca": 2.729791
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 2.4,
-    "ca": 2.4
+    "d": "2026-11-26",
+    "c": 2.41,
+    "ca": 2.41
    },
    "complete": true,
    "check": {
-    "shared": 2294,
+    "shared": 2296,
     "mismatched": 1,
     "maxOff": 2.07,
     "window": 0.88
-   }
+   },
+   "preDiv": 1
   },
   "3008": {
    "listed": "2017-07-09",
@@ -2513,17 +2621,18 @@
     "ca": 20.651639
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 9.69,
-    "ca": 9.69
+    "d": "2026-11-26",
+    "c": 9.24,
+    "ca": 9.24
    },
    "complete": true,
    "check": {
-    "shared": 1756,
+    "shared": 1758,
     "mismatched": 0,
     "maxOff": 0.32,
     "window": -0.2
-   }
+   },
+   "preDiv": 1
   },
   "3010": {
    "listed": "1993-01-02",
@@ -2539,17 +2648,18 @@
     "ca": 12.43255
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 17.15,
-    "ca": 17.15
+    "d": "2026-11-26",
+    "c": 17.16,
+    "ca": 17.16
    },
    "complete": false,
    "check": {
-    "shared": 4120,
+    "shared": 4122,
     "mismatched": 6,
     "maxOff": 1.75,
     "window": 0.06
-   }
+   },
+   "preDiv": 1.335208
   },
   "3020": {
    "listed": "1993-01-02",
@@ -2565,17 +2675,18 @@
     "ca": 19.134266
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 18.9,
-    "ca": 18.9
+    "d": "2026-11-26",
+    "c": 18.46,
+    "ca": 18.46
    },
    "complete": false,
    "check": {
-    "shared": 4135,
+    "shared": 4137,
     "mismatched": 5,
     "maxOff": 2.87,
     "window": 0.1
-   }
+   },
+   "preDiv": 1.471141
   },
   "3030": {
    "listed": "1993-01-01",
@@ -2591,17 +2702,18 @@
     "ca": 16.321121
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 24.11,
-    "ca": 24.11
+    "d": "2026-11-26",
+    "c": 23.87,
+    "ca": 23.87
    },
    "complete": false,
    "check": {
-    "shared": 4128,
+    "shared": 4130,
     "mismatched": 4,
     "maxOff": 1.93,
     "window": -0.17
-   }
+   },
+   "preDiv": 1.498221
   },
   "3040": {
    "listed": "1993-01-02",
@@ -2617,17 +2729,18 @@
     "ca": 25.675691
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 43.02,
-    "ca": 43.02
+    "d": "2026-11-26",
+    "c": 43.6,
+    "ca": 43.6
    },
    "complete": false,
    "check": {
-    "shared": 4105,
+    "shared": 4107,
     "mismatched": 6,
     "maxOff": 2.22,
     "window": 0
-   }
+   },
+   "preDiv": 1.340398
   },
   "3050": {
    "listed": "1993-01-02",
@@ -2643,17 +2756,18 @@
     "ca": 33.185799
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 15.56,
-    "ca": 15.56
+    "d": "2026-11-26",
+    "c": 15,
+    "ca": 15
    },
    "complete": false,
    "check": {
-    "shared": 4118,
+    "shared": 4120,
     "mismatched": 17,
     "maxOff": 4.08,
     "window": 0
-   }
+   },
+   "preDiv": 1.424088
   },
   "3060": {
    "listed": "1993-01-02",
@@ -2669,17 +2783,18 @@
     "ca": 12.386834
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.42,
-    "ca": 12.42
+    "d": "2026-11-26",
+    "c": 12.37,
+    "ca": 12.37
    },
    "complete": false,
    "check": {
-    "shared": 4116,
+    "shared": 4118,
     "mismatched": 11,
     "maxOff": 1.93,
     "window": 0.1
-   }
+   },
+   "preDiv": 1.3836
   },
   "3080": {
    "listed": "1993-01-02",
@@ -2695,17 +2810,18 @@
     "ca": 21.058483
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 23.56,
-    "ca": 23.56
+    "d": "2026-11-26",
+    "c": 23.41,
+    "ca": 23.41
    },
    "complete": false,
    "check": {
-    "shared": 4106,
+    "shared": 4108,
     "mismatched": 5,
     "maxOff": 1.28,
     "window": 0
-   }
+   },
+   "preDiv": 1.330513
   },
   "3090": {
    "listed": "1994-08-27",
@@ -2721,17 +2837,18 @@
     "ca": 11.703465
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 5.43,
-    "ca": 5.43
+    "d": "2026-11-26",
+    "c": 5.41,
+    "ca": 5.41
    },
    "complete": false,
    "check": {
-    "shared": 4116,
+    "shared": 4118,
     "mismatched": 19,
     "maxOff": 2.12,
     "window": 0
-   }
+   },
+   "preDiv": 1.181018
   },
   "3091": {
    "listed": "2010-08-11",
@@ -2747,17 +2864,18 @@
     "ca": 14.693299
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.1,
-    "ca": 4.1
+    "d": "2026-11-26",
+    "c": 4.14,
+    "ca": 4.14
    },
    "complete": true,
    "check": {
-    "shared": 3988,
+    "shared": 3990,
     "mismatched": 5,
     "maxOff": 1.5,
     "window": 0.08
-   }
+   },
+   "preDiv": 1
   },
   "3092": {
    "listed": "2020-09-02",
@@ -2773,17 +2891,18 @@
     "ca": 27.840153
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 18.22,
-    "ca": 18.22
+    "d": "2026-11-26",
+    "c": 18.03,
+    "ca": 18.03
    },
    "complete": true,
    "check": {
-    "shared": 740,
+    "shared": 742,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1.192352
   },
   "4001": {
    "listed": "2008-07-14",
@@ -2799,17 +2918,18 @@
     "ca": 0.75446
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.55,
-    "ca": 3.55
+    "d": "2026-11-26",
+    "c": 3.59,
+    "ca": 3.59
    },
    "complete": true,
    "check": {
-    "shared": 4116,
+    "shared": 4118,
     "mismatched": 17,
     "maxOff": 3.02,
     "window": 0.09
-   }
+   },
+   "preDiv": 1.037221
   },
   "4002": {
    "listed": "2009-09-02",
@@ -2825,17 +2945,18 @@
     "ca": 5.319423
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 56.65,
-    "ca": 56.65
+    "d": "2026-11-26",
+    "c": 56.4,
+    "ca": 56.4
    },
    "complete": true,
    "check": {
-    "shared": 4151,
+    "shared": 4153,
     "mismatched": 19,
     "maxOff": 4.01,
     "window": 0.07
-   }
+   },
+   "preDiv": 1
   },
   "4003": {
    "listed": "2011-12-24",
@@ -2851,17 +2972,18 @@
     "ca": 14.182242
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 61,
-    "ca": 61
+    "d": "2026-11-26",
+    "c": 62.2,
+    "ca": 62.2
    },
    "complete": true,
    "check": {
-    "shared": 3605,
+    "shared": 3607,
     "mismatched": 1566,
     "maxOff": 8.01,
     "window": -3.94
-   }
+   },
+   "preDiv": 1
   },
   "4004": {
    "listed": "2012-11-17",
@@ -2877,17 +2999,18 @@
     "ca": 19.079222
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 58.2,
-    "ca": 58.2
+    "d": "2026-11-26",
+    "c": 56.75,
+    "ca": 56.75
    },
    "complete": false,
    "check": {
-    "shared": 3462,
+    "shared": 3464,
     "mismatched": 19,
     "maxOff": 1.71,
     "window": -0.08
-   }
+   },
+   "preDiv": 1
   },
   "4005": {
    "listed": "2012-03-13",
@@ -2903,17 +3026,18 @@
     "ca": 93.385238
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 113.7,
-    "ca": 113.7
+    "d": "2026-11-26",
+    "c": 109.2,
+    "ca": 109.2
    },
    "complete": false,
    "check": {
-    "shared": 3408,
+    "shared": 3410,
     "mismatched": 13,
     "maxOff": 2.2,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4006": {
    "listed": "2014-02-16",
@@ -2929,17 +3053,18 @@
     "ca": 21.81211
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 9.21,
-    "ca": 9.21
+    "d": "2026-11-26",
+    "c": 9.09,
+    "ca": 9.09
    },
    "complete": true,
    "check": {
-    "shared": 3165,
+    "shared": 3167,
     "mismatched": 15,
     "maxOff": 2.81,
     "window": 0.14
-   }
+   },
+   "preDiv": 1
   },
   "4007": {
    "listed": "2014-07-15",
@@ -2955,17 +3080,18 @@
     "ca": 11.496071
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 21.31,
-    "ca": 21.31
+    "d": "2026-11-26",
+    "c": 21.64,
+    "ca": 21.64
    },
    "complete": true,
    "check": {
-    "shared": 3075,
+    "shared": 3077,
     "mismatched": 12,
     "maxOff": 3.09,
     "window": 0.02
-   }
+   },
+   "preDiv": 1
   },
   "4008": {
    "listed": "2015-05-12",
@@ -2981,17 +3107,18 @@
     "ca": 58.013508
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 14.38,
-    "ca": 14.38
+    "d": "2026-11-26",
+    "c": 14.5,
+    "ca": 14.5
    },
    "complete": true,
    "check": {
-    "shared": 2850,
+    "shared": 2852,
     "mismatched": 14,
     "maxOff": 1.63,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4009": {
    "listed": "2016-03-29",
@@ -3007,17 +3134,18 @@
     "ca": 62.648657
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 24.46,
-    "ca": 24.46
+    "d": "2026-11-26",
+    "c": 24,
+    "ca": 24
    },
    "complete": true,
    "check": {
-    "shared": 2654,
+    "shared": 2656,
     "mismatched": 4,
     "maxOff": 2.51,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4011": {
    "listed": "2016-06-29",
@@ -3033,17 +3161,18 @@
     "ca": 31.565235
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 7.91,
-    "ca": 7.91
+    "d": "2026-11-26",
+    "c": 8.19,
+    "ca": 8.19
    },
    "complete": true,
    "check": {
-    "shared": 2588,
+    "shared": 2590,
     "mismatched": 3,
     "maxOff": 3.13,
     "window": -0.51
-   }
+   },
+   "preDiv": 1
   },
   "4012": {
    "listed": "2017-06-15",
@@ -3059,17 +3188,19 @@
     "ca": 2.882601
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.16,
-    "ca": 3.16
+    "d": "2026-11-26",
+    "c": 3.11,
+    "ca": 3.11
    },
    "complete": true,
    "check": {
-    "shared": 1756,
+    "shared": 1758,
     "mismatched": 0,
     "maxOff": 0.38,
     "window": 0
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2019-11-11"
   },
   "4013": {
    "listed": "2020-03-17",
@@ -3085,17 +3216,18 @@
     "ca": 48.755205
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 204.5,
-    "ca": 204.5
+    "d": "2026-11-26",
+    "c": 205.5,
+    "ca": 205.5
    },
    "complete": true,
    "check": {
-    "shared": 1667,
+    "shared": 1669,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4014": {
    "listed": "2022-02-28",
@@ -3111,17 +3243,18 @@
     "ca": 47.810102
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 27.04,
-    "ca": 27.04
+    "d": "2026-11-26",
+    "c": 26.62,
+    "ca": 26.62
    },
    "complete": true,
    "check": {
-    "shared": 1178,
+    "shared": 1180,
     "mismatched": 0,
     "maxOff": 0.04,
     "window": 0.03
-   }
+   },
+   "preDiv": 1
   },
   "4015": {
    "listed": "2023-06-20",
@@ -3137,17 +3270,18 @@
     "ca": 83.218022
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 113.6,
-    "ca": 113.6
+    "d": "2026-11-26",
+    "c": 112.7,
+    "ca": 112.7
    },
    "complete": true,
    "check": {
-    "shared": 855,
+    "shared": 857,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4016": {
    "listed": "2024-02-27",
@@ -3163,17 +3297,18 @@
     "ca": 75.294864
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 62.6,
-    "ca": 62.6
+    "d": "2026-11-26",
+    "c": 64.3,
+    "ca": 64.3
    },
    "complete": true,
    "check": {
-    "shared": 681,
+    "shared": 683,
     "mismatched": 0,
     "maxOff": 0.02,
     "window": -0.01
-   }
+   },
+   "preDiv": 1
   },
   "4017": {
    "listed": "2024-06-05",
@@ -3189,17 +3324,18 @@
     "ca": 59.910553
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 29.7,
-    "ca": 29.7
+    "d": "2026-11-26",
+    "c": 29.42,
+    "ca": 29.42
    },
    "complete": true,
    "check": {
-    "shared": 615,
+    "shared": 617,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4018": {
    "listed": "2025-01-07",
@@ -3215,17 +3351,18 @@
     "ca": 137.528854
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 104.6,
-    "ca": 104.6
+    "d": "2026-11-26",
+    "c": 104.5,
+    "ca": 104.5
    },
    "complete": true,
    "check": {
-    "shared": 468,
+    "shared": 470,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4019": {
    "listed": "2025-06-25",
@@ -3241,17 +3378,18 @@
     "ca": 21.903862
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.32,
-    "ca": 12.32
+    "d": "2026-11-26",
+    "c": 12,
+    "ca": 12
    },
    "complete": true,
    "check": {
-    "shared": 356,
+    "shared": 358,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4020": {
    "listed": "1993-01-10",
@@ -3267,17 +3405,18 @@
     "ca": 7.633016
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 13.54,
-    "ca": 13.54
+    "d": "2026-11-26",
+    "c": 13.44,
+    "ca": 13.44
    },
    "complete": false,
    "check": {
-    "shared": 4140,
+    "shared": 4142,
     "mismatched": 13,
     "maxOff": 3.06,
     "window": 0.04
-   }
+   },
+   "preDiv": 1.209047
   },
   "4021": {
    "listed": "2021-08-02",
@@ -3293,24 +3432,25 @@
     "ca": 8.129562
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.14,
-    "ca": 4.14
+    "d": "2026-11-26",
+    "c": 4.2,
+    "ca": 4.2
    },
    "complete": true,
    "check": {
-    "shared": 273,
+    "shared": 275,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1.041987
   },
   "4030": {
    "listed": "1993-01-02",
    "first": "2004-01-03",
    "base": {
     "d": "2004-01-03",
-    "c": 6.81398,
+    "c": 6.813979,
     "ca": 2.675026
    },
    "join": {
@@ -3319,17 +3459,18 @@
     "ca": 3.879986
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 34.6,
-    "ca": 34.6
+    "d": "2026-11-26",
+    "c": 34.76,
+    "ca": 34.76
    },
    "complete": false,
    "check": {
-    "shared": 4131,
+    "shared": 4133,
     "mismatched": 9,
     "maxOff": 3.43,
     "window": -0.02
-   }
+   },
+   "preDiv": 1.232131
   },
   "4031": {
    "listed": "2015-06-25",
@@ -3345,17 +3486,18 @@
     "ca": 42.515337
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 20,
-    "ca": 20
+    "d": "2026-11-26",
+    "c": 20.04,
+    "ca": 20.04
    },
    "complete": true,
    "check": {
-    "shared": 2835,
+    "shared": 2837,
     "mismatched": 7,
     "maxOff": 1.39,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4040": {
    "listed": "1993-01-02",
@@ -3371,17 +3513,19 @@
     "ca": 6.187266
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 9.62,
-    "ca": 9.62
+    "d": "2026-11-26",
+    "c": 9.48,
+    "ca": 9.48
    },
    "complete": true,
    "check": {
-    "shared": 4115,
+    "shared": 4117,
     "mismatched": 13,
     "maxOff": 1.75,
     "window": 0
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-03"
   },
   "4050": {
    "listed": "1993-01-02",
@@ -3397,17 +3541,19 @@
     "ca": 5.793048
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 34.56,
-    "ca": 34.56
+    "d": "2026-11-26",
+    "c": 34.2,
+    "ca": 34.2
    },
    "complete": false,
    "check": {
-    "shared": 4132,
+    "shared": 4134,
     "mismatched": 13,
     "maxOff": 2.94,
     "window": 0.14
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "4051": {
    "listed": "2017-02-26",
@@ -3423,17 +3569,19 @@
     "ca": 3.904159
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.73,
-    "ca": 4.73
+    "d": "2026-11-26",
+    "c": 4.79,
+    "ca": 4.79
    },
    "complete": true,
    "check": {
-    "shared": 1737,
+    "shared": 1739,
     "mismatched": 0,
     "maxOff": 0.15,
     "window": 0
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2019-12-04"
   },
   "4061": {
    "listed": "1994-01-01",
@@ -3449,17 +3597,18 @@
     "ca": 33.79194
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 11.03,
-    "ca": 11.03
+    "d": "2026-11-26",
+    "c": 10.51,
+    "ca": 10.51
    },
    "complete": true,
    "check": {
-    "shared": 4100,
+    "shared": 4102,
     "mismatched": 105,
     "maxOff": 3.58,
     "window": 0.02
-   }
+   },
+   "preDiv": 1
   },
   "4070": {
    "listed": "1993-01-03",
@@ -3475,17 +3624,18 @@
     "ca": 43.871692
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 14.88,
-    "ca": 14.88
+    "d": "2026-11-26",
+    "c": 14.97,
+    "ca": 14.97
    },
    "complete": false,
    "check": {
-    "shared": 3882,
+    "shared": 3884,
     "mismatched": 13,
     "maxOff": 4.67,
     "window": 0.06
-   }
+   },
+   "preDiv": 1.129516
   },
   "4071": {
    "listed": "2021-11-15",
@@ -3501,17 +3651,18 @@
     "ca": 91.023071
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 43.4,
-    "ca": 43.4
+    "d": "2026-11-26",
+    "c": 41.82,
+    "ca": 41.82
    },
    "complete": true,
    "check": {
-    "shared": 1247,
+    "shared": 1249,
     "mismatched": 0,
     "maxOff": 0.18,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4072": {
    "listed": "2024-01-08",
@@ -3527,17 +3678,18 @@
     "ca": 32.5
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 15.55,
-    "ca": 15.55
+    "d": "2026-11-26",
+    "c": 15.39,
+    "ca": 15.39
    },
    "complete": true,
    "check": {
-    "shared": 718,
+    "shared": 720,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4080": {
    "listed": "1977-01-05",
@@ -3553,17 +3705,18 @@
     "ca": 10.59323
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.5,
-    "ca": 6.5
+    "d": "2026-11-26",
+    "c": 6.52,
+    "ca": 6.52
    },
    "complete": false,
    "check": {
-    "shared": 4138,
+    "shared": 4140,
     "mismatched": 13,
     "maxOff": 2.14,
     "window": 0
-   }
+   },
+   "preDiv": 1.115029
   },
   "4081": {
    "listed": "2021-11-22",
@@ -3579,17 +3732,18 @@
     "ca": 26.619664
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.3,
-    "ca": 8.3
+    "d": "2026-11-26",
+    "c": 8.1,
+    "ca": 8.1
    },
    "complete": true,
    "check": {
-    "shared": 1244,
+    "shared": 1246,
     "mismatched": 0,
     "maxOff": 0.02,
     "window": -0.01
-   }
+   },
+   "preDiv": 1
   },
   "4082": {
    "listed": "2023-06-21",
@@ -3605,17 +3759,18 @@
     "ca": 13.159543
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 7.3,
-    "ca": 7.3
+    "d": "2026-11-26",
+    "c": 7.5,
+    "ca": 7.5
    },
    "complete": true,
    "check": {
-    "shared": 852,
+    "shared": 854,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4083": {
    "listed": "2024-12-03",
@@ -3631,17 +3786,18 @@
     "ca": 57.29163
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 19.1,
-    "ca": 19.1
+    "d": "2026-11-26",
+    "c": 22,
+    "ca": 22
    },
    "complete": true,
    "check": {
-    "shared": 493,
+    "shared": 495,
     "mismatched": 0,
     "maxOff": 0.02,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4084": {
    "listed": "2025-03-10",
@@ -3657,17 +3813,18 @@
     "ca": 35.548983
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 19.44,
-    "ca": 19.44
+    "d": "2026-11-26",
+    "c": 18.91,
+    "ca": 18.91
    },
    "complete": true,
    "check": {
-    "shared": 426,
+    "shared": 428,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4090": {
    "listed": "1993-01-02",
@@ -3683,17 +3840,19 @@
     "ca": 4.175165
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 16.44,
-    "ca": 16.44
+    "d": "2026-11-26",
+    "c": 15.71,
+    "ca": 15.71
    },
    "complete": false,
    "check": {
-    "shared": 4136,
+    "shared": 4138,
     "mismatched": 5,
     "maxOff": 1.23,
     "window": 0.01
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-07"
   },
   "4100": {
    "listed": "1989-10-20",
@@ -3709,17 +3868,18 @@
     "ca": 15.789185
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 66.8,
-    "ca": 66.8
+    "d": "2026-11-26",
+    "c": 65,
+    "ca": 65
    },
    "complete": false,
    "check": {
-    "shared": 4102,
+    "shared": 4104,
     "mismatched": 14,
     "maxOff": 2.32,
     "window": 0.05
-   }
+   },
+   "preDiv": 1.174372
   },
   "4110": {
    "listed": "1991-05-05",
@@ -3735,17 +3895,19 @@
     "ca": 0.723236
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 1.57,
-    "ca": 1.57
+    "d": "2026-11-26",
+    "c": 1.55,
+    "ca": 1.55
    },
    "complete": false,
    "check": {
-    "shared": 4088,
+    "shared": 4090,
     "mismatched": 45,
     "maxOff": 1.75,
     "window": 0.51
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-07"
   },
   "4130": {
    "listed": "1992-11-30",
@@ -3761,17 +3923,18 @@
     "ca": 2.696665
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 1.83,
-    "ca": 1.83
+    "d": "2026-11-26",
+    "c": 1.82,
+    "ca": 1.82
    },
    "complete": false,
    "check": {
-    "shared": 2961,
+    "shared": 2963,
     "mismatched": 1678,
     "maxOff": 8.16,
     "window": 0.12
-   }
+   },
+   "preDiv": 1
   },
   "4140": {
    "listed": "1993-07-10",
@@ -3787,17 +3950,18 @@
     "ca": 1.66624
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 1.83,
-    "ca": 1.83
+    "d": "2026-11-26",
+    "c": 1.79,
+    "ca": 1.79
    },
    "complete": false,
    "check": {
-    "shared": 3911,
+    "shared": 3913,
     "mismatched": 31,
     "maxOff": 2.64,
     "window": -0.02
-   }
+   },
+   "preDiv": 1
   },
   "4141": {
    "listed": "2017-02-26",
@@ -3813,17 +3977,18 @@
     "ca": 51.426641
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 18.83,
-    "ca": 18.83
+    "d": "2026-11-26",
+    "c": 18.7,
+    "ca": 18.7
    },
    "complete": true,
    "check": {
-    "shared": 1579,
+    "shared": 1581,
     "mismatched": 0,
     "maxOff": 0.89,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4142": {
    "listed": "2022-12-19",
@@ -3839,17 +4004,18 @@
     "ca": 35.812987
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 100.2,
-    "ca": 100.2
+    "d": "2026-11-26",
+    "c": 99.5,
+    "ca": 99.5
    },
    "complete": true,
    "check": {
-    "shared": 978,
+    "shared": 980,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4143": {
    "listed": "2024-06-13",
@@ -3865,17 +4031,18 @@
     "ca": 42.581075
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 29.04,
-    "ca": 29.04
+    "d": "2026-11-26",
+    "c": 28.96,
+    "ca": 28.96
    },
    "complete": true,
    "check": {
-    "shared": 609,
+    "shared": 611,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4144": {
    "listed": "2022-02-21",
@@ -3891,17 +4058,18 @@
     "ca": 89.486628
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 78,
-    "ca": 78
+    "d": "2026-11-26",
+    "c": 86.5,
+    "ca": 86.5
    },
    "complete": true,
    "check": {
-    "shared": 455,
+    "shared": 457,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1.073732
   },
   "4145": {
    "listed": "2022-02-07",
@@ -3917,17 +4085,18 @@
     "ca": 35.678571
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 24.4,
-    "ca": 24.4
+    "d": "2026-11-26",
+    "c": 25,
+    "ca": 25
    },
    "complete": true,
    "check": {
-    "shared": 339,
+    "shared": 341,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1.066705
   },
   "4146": {
    "listed": "2022-02-07",
@@ -3943,17 +4112,18 @@
     "ca": 15.696873
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 13.45,
-    "ca": 13.45
+    "d": "2026-11-26",
+    "c": 13.23,
+    "ca": 13.23
    },
    "complete": true,
    "check": {
-    "shared": 282,
+    "shared": 284,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1.135816
   },
   "4147": {
    "listed": "2025-12-09",
@@ -3969,17 +4139,18 @@
     "ca": 9.720558
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 7.06,
-    "ca": 7.06
+    "d": "2026-11-26",
+    "c": 6.86,
+    "ca": 6.86
    },
    "complete": true,
    "check": {
-    "shared": 239,
+    "shared": 241,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4148": {
    "listed": "2022-01-18",
@@ -3995,17 +4166,18 @@
     "ca": 3.315
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 2.38,
     "ca": 2.38
    },
    "complete": false,
    "check": {
-    "shared": 208,
+    "shared": 210,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4150": {
    "listed": "1994-04-02",
@@ -4021,17 +4193,18 @@
     "ca": 3.157561
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 15.26,
-    "ca": 15.26
+    "d": "2026-11-26",
+    "c": 15.3,
+    "ca": 15.3
    },
    "complete": false,
    "check": {
-    "shared": 4128,
+    "shared": 4130,
     "mismatched": 7,
     "maxOff": 1.5,
     "window": -0.09
-   }
+   },
+   "preDiv": 1.179607
   },
   "4161": {
    "listed": "2020-10-21",
@@ -4047,17 +4220,18 @@
     "ca": 10.105889
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.12,
-    "ca": 4.12
+    "d": "2026-11-26",
+    "c": 4.09,
+    "ca": 4.09
    },
    "complete": true,
    "check": {
-    "shared": 1506,
+    "shared": 1508,
     "mismatched": 0,
     "maxOff": 0.21,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4162": {
    "listed": "2021-12-20",
@@ -4073,17 +4247,18 @@
     "ca": 51.200183
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 50.6,
-    "ca": 50.6
+    "d": "2026-11-26",
+    "c": 49.3,
+    "ca": 49.3
    },
    "complete": true,
    "check": {
-    "shared": 1227,
+    "shared": 1229,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4163": {
    "listed": "2022-03-14",
@@ -4099,17 +4274,18 @@
     "ca": 63.724902
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 37.98,
-    "ca": 37.98
+    "d": "2026-11-26",
+    "c": 37.96,
+    "ca": 37.96
    },
    "complete": true,
    "check": {
-    "shared": 1164,
+    "shared": 1166,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4164": {
    "listed": "2022-03-22",
@@ -4125,17 +4301,18 @@
     "ca": 131.098085
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 89.4,
-    "ca": 89.4
+    "d": "2026-11-26",
+    "c": 87.4,
+    "ca": 87.4
    },
    "complete": true,
    "check": {
-    "shared": 1163,
+    "shared": 1165,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4165": {
    "listed": "2024-10-07",
@@ -4151,17 +4328,18 @@
     "ca": 149.226045
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 124,
-    "ca": 124
+    "d": "2026-11-26",
+    "c": 122.5,
+    "ca": 122.5
    },
    "complete": true,
    "check": {
-    "shared": 534,
+    "shared": 536,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4170": {
    "listed": "1999-10-02",
@@ -4177,17 +4355,18 @@
     "ca": 9.319829
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.27,
-    "ca": 10.27
+    "d": "2026-11-26",
+    "c": 10.22,
+    "ca": 10.22
    },
    "complete": false,
    "check": {
-    "shared": 4051,
+    "shared": 4053,
     "mismatched": 508,
     "maxOff": 3.93,
     "window": 0.86
-   }
+   },
+   "preDiv": 1
   },
   "4180": {
    "listed": "2000-05-03",
@@ -4203,17 +4382,19 @@
     "ca": 1.093796
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 2.02,
-    "ca": 2.02
+    "d": "2026-11-26",
+    "c": 2.06,
+    "ca": 2.06
    },
    "complete": false,
    "check": {
-    "shared": 4128,
+    "shared": 4130,
     "mismatched": 16,
     "maxOff": 2.31,
     "window": 0.29
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "4190": {
    "listed": "2003-12-15",
@@ -4229,17 +4410,18 @@
     "ca": 1.971087
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 15.9,
-    "ca": 15.9
+    "d": "2026-11-26",
+    "c": 15.45,
+    "ca": 15.45
    },
    "complete": false,
    "check": {
-    "shared": 4128,
+    "shared": 4130,
     "mismatched": 9,
     "maxOff": 1.79,
     "window": 0.14
-   }
+   },
+   "preDiv": 1.307303
   },
   "4191": {
    "listed": "2017-02-26",
@@ -4255,17 +4437,18 @@
     "ca": 20.402506
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 29.2,
-    "ca": 29.2
+    "d": "2026-11-26",
+    "c": 29.6,
+    "ca": 29.6
    },
    "complete": true,
    "check": {
-    "shared": 1756,
+    "shared": 1758,
     "mismatched": 0,
     "maxOff": 0.56,
     "window": 0
-   }
+   },
+   "preDiv": 1.126869
   },
   "4192": {
    "listed": "2022-12-27",
@@ -4281,17 +4464,18 @@
     "ca": 8.68727
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 5.6,
     "ca": 5.6
    },
    "complete": true,
    "check": {
-    "shared": 973,
+    "shared": 975,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4193": {
    "listed": "2025-01-08",
@@ -4307,17 +4491,18 @@
     "ca": 45.5
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.7,
-    "ca": 8.7
+    "d": "2026-11-26",
+    "c": 8.69,
+    "ca": 8.69
    },
    "complete": true,
    "check": {
-    "shared": 468,
+    "shared": 470,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4194": {
    "listed": "2025-09-02",
@@ -4333,17 +4518,18 @@
     "ca": 70.654394
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 35.48,
-    "ca": 35.48
+    "d": "2026-11-26",
+    "c": 34.72,
+    "ca": 34.72
    },
    "complete": true,
    "check": {
-    "shared": 308,
+    "shared": 310,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4200": {
    "listed": "2006-03-14",
@@ -4359,17 +4545,18 @@
     "ca": 5.644255
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 108.6,
-    "ca": 108.6
+    "d": "2026-11-26",
+    "c": 106.8,
+    "ca": 106.8
    },
    "complete": true,
    "check": {
-    "shared": 4131,
+    "shared": 4133,
     "mismatched": 14,
     "maxOff": 1.77,
     "window": 0.11
-   }
+   },
+   "preDiv": 1.093557
   },
   "4210": {
    "listed": "2006-05-15",
@@ -4385,17 +4572,18 @@
     "ca": 22.79906
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 44,
-    "ca": 44
+    "d": "2026-11-26",
+    "c": 43.3,
+    "ca": 43.3
    },
    "complete": true,
    "check": {
-    "shared": 4143,
+    "shared": 4145,
     "mismatched": 41,
     "maxOff": 3.49,
     "window": 0
-   }
+   },
+   "preDiv": 1.171828
   },
   "4220": {
    "listed": "2006-10-07",
@@ -4411,17 +4599,18 @@
     "ca": 21.111635
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.98,
-    "ca": 6.98
+    "d": "2026-11-26",
+    "c": 6.9,
+    "ca": 6.9
    },
    "complete": true,
    "check": {
-    "shared": 4122,
+    "shared": 4124,
     "mismatched": 2165,
     "maxOff": 4.6,
     "window": 2.64
-   }
+   },
+   "preDiv": 1
   },
   "4230": {
    "listed": "2006-11-04",
@@ -4437,17 +4626,19 @@
     "ca": 46.758377
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 16.86,
-    "ca": 16.86
+    "d": "2026-11-26",
+    "c": 17.28,
+    "ca": 17.28
    },
    "complete": true,
    "check": {
-    "shared": 4139,
+    "shared": 4141,
     "mismatched": 16,
     "maxOff": 2.16,
     "window": -0.08
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-03"
   },
   "4240": {
    "listed": "2006-12-23",
@@ -4463,17 +4654,18 @@
     "ca": 18.626187
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.86,
-    "ca": 10.86
+    "d": "2026-11-26",
+    "c": 10.7,
+    "ca": 10.7
    },
    "complete": true,
    "check": {
-    "shared": 4139,
+    "shared": 4141,
     "mismatched": 20,
     "maxOff": 1.85,
     "window": 0.13
-   }
+   },
+   "preDiv": 1.122886
   },
   "4250": {
    "listed": "2007-12-01",
@@ -4489,17 +4681,18 @@
     "ca": 17.989453
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 16.02,
-    "ca": 16.02
+    "d": "2026-11-26",
+    "c": 15.67,
+    "ca": 15.67
    },
    "complete": true,
    "check": {
-    "shared": 4132,
+    "shared": 4134,
     "mismatched": 17,
     "maxOff": 3.67,
     "window": 0.06
-   }
+   },
+   "preDiv": 1
   },
   "4260": {
    "listed": "2007-09-01",
@@ -4515,17 +4708,18 @@
     "ca": 6.889269
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 27.16,
-    "ca": 27.16
+    "d": "2026-11-26",
+    "c": 27.26,
+    "ca": 27.26
    },
    "complete": true,
    "check": {
-    "shared": 4118,
+    "shared": 4120,
     "mismatched": 24,
     "maxOff": 2.33,
     "window": -0.05
-   }
+   },
+   "preDiv": 1.050797
   },
   "4261": {
    "listed": "2021-03-29",
@@ -4541,17 +4735,18 @@
     "ca": 29.936662
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 17.7,
-    "ca": 17.7
+    "d": "2026-11-26",
+    "c": 17.34,
+    "ca": 17.34
    },
    "complete": true,
    "check": {
-    "shared": 1408,
+    "shared": 1410,
     "mismatched": 1174,
     "maxOff": 2.27,
     "window": -2.24
-   }
+   },
+   "preDiv": 1
   },
   "4262": {
    "listed": "2023-09-25",
@@ -4567,17 +4762,18 @@
     "ca": 85.800003
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 19.92,
-    "ca": 19.92
+    "d": "2026-11-26",
+    "c": 19.95,
+    "ca": 19.95
    },
    "complete": true,
    "check": {
-    "shared": 793,
+    "shared": 795,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4263": {
    "listed": "2023-11-01",
@@ -4593,17 +4789,18 @@
     "ca": 118.433087
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 166.7,
-    "ca": 166.7
+    "d": "2026-11-26",
+    "c": 163.6,
+    "ca": 163.6
    },
    "complete": true,
    "check": {
-    "shared": 766,
+    "shared": 768,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4264": {
    "listed": "2025-06-18",
@@ -4619,17 +4816,18 @@
     "ca": 77.3
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 39.02,
-    "ca": 39.02
+    "d": "2026-11-26",
+    "c": 39.26,
+    "ca": 39.26
    },
    "complete": true,
    "check": {
-    "shared": 362,
+    "shared": 364,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4265": {
    "listed": "2025-12-01",
@@ -4645,17 +4843,18 @@
     "ca": 25.85
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 19,
-    "ca": 19
+    "d": "2026-11-26",
+    "c": 19.15,
+    "ca": 19.15
    },
    "complete": true,
    "check": {
-    "shared": 245,
+    "shared": 247,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4270": {
    "listed": "2007-07-04",
@@ -4671,17 +4870,18 @@
     "ca": 140.835404
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 39,
-    "ca": 39
+    "d": "2026-11-26",
+    "c": 39.16,
+    "ca": 39.16
    },
    "complete": false,
    "check": {
-    "shared": 4128,
+    "shared": 4130,
     "mismatched": 32,
     "maxOff": 5.2,
     "window": -0.01
-   }
+   },
+   "preDiv": 1.112978
   },
   "4280": {
    "listed": "2007-07-10",
@@ -4697,17 +4897,18 @@
     "ca": 5.168899
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.75,
-    "ca": 12.75
+    "d": "2026-11-26",
+    "c": 13.2,
+    "ca": 13.2
    },
    "complete": false,
    "check": {
-    "shared": 4119,
+    "shared": 4121,
     "mismatched": 26,
     "maxOff": 2.93,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4290": {
    "listed": "2007-12-10",
@@ -4723,17 +4924,18 @@
     "ca": 9.297392
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 9.93,
-    "ca": 9.93
+    "d": "2026-11-26",
+    "c": 9.85,
+    "ca": 9.85
    },
    "complete": true,
    "check": {
-    "shared": 4127,
+    "shared": 4129,
     "mismatched": 27,
     "maxOff": 2.11,
     "window": -0.15
-   }
+   },
+   "preDiv": 1.013953
   },
   "4291": {
    "listed": "2018-11-18",
@@ -4749,17 +4951,18 @@
     "ca": 17.49197
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 108.4,
-    "ca": 108.4
+    "d": "2026-11-26",
+    "c": 106.4,
+    "ca": 106.4
    },
    "complete": true,
    "check": {
-    "shared": 2002,
+    "shared": 2004,
     "mismatched": 1,
     "maxOff": 1.11,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4292": {
    "listed": "2019-07-31",
@@ -4775,17 +4978,18 @@
     "ca": 27.047953
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 27.3,
-    "ca": 27.3
+    "d": "2026-11-26",
+    "c": 26.56,
+    "ca": 26.56
    },
    "complete": true,
    "check": {
-    "shared": 1825,
+    "shared": 1827,
     "mismatched": 1,
     "maxOff": 1.32,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4300": {
    "listed": "2007-12-29",
@@ -4801,17 +5005,18 @@
     "ca": 12.03647
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 18.98,
-    "ca": 18.98
+    "d": "2026-11-26",
+    "c": 18.86,
+    "ca": 18.86
    },
    "complete": true,
    "check": {
-    "shared": 4125,
+    "shared": 4127,
     "mismatched": 30,
     "maxOff": 1.73,
     "window": 0
-   }
+   },
+   "preDiv": 1.049587
   },
   "4310": {
    "listed": "2010-08-09",
@@ -4827,17 +5032,18 @@
     "ca": 9.35
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 18.97,
-    "ca": 18.97
+    "d": "2026-11-26",
+    "c": 19.13,
+    "ca": 19.13
    },
    "complete": true,
    "check": {
-    "shared": 4028,
+    "shared": 4030,
     "mismatched": 6,
     "maxOff": 1.26,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4320": {
    "listed": "2016-01-12",
@@ -4853,17 +5059,18 @@
     "ca": 10.309621
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 13.68,
-    "ca": 13.68
+    "d": "2026-11-26",
+    "c": 13.44,
+    "ca": 13.44
    },
    "complete": true,
    "check": {
-    "shared": 2708,
+    "shared": 2710,
     "mismatched": 2,
     "maxOff": 1.15,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4321": {
    "listed": "2019-05-22",
@@ -4879,17 +5086,18 @@
     "ca": 15.241965
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.19,
-    "ca": 12.19
+    "d": "2026-11-26",
+    "c": 12.01,
+    "ca": 12.01
    },
    "complete": true,
    "check": {
-    "shared": 1869,
+    "shared": 1871,
     "mismatched": 0,
     "maxOff": 0.06,
     "window": 0.01
-   }
+   },
+   "preDiv": 1
   },
   "4322": {
    "listed": "2022-06-27",
@@ -4905,17 +5113,18 @@
     "ca": 8.773378
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.38,
-    "ca": 6.38
+    "d": "2026-11-26",
+    "c": 6.26,
+    "ca": 6.26
    },
    "complete": true,
    "check": {
-    "shared": 1095,
+    "shared": 1097,
     "mismatched": 0,
     "maxOff": 0.1,
     "window": -0.02
-   }
+   },
+   "preDiv": 1
   },
   "4323": {
    "listed": "2020-05-11",
@@ -4931,17 +5140,19 @@
     "ca": 36.201045
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 26.6,
-    "ca": 26.6
+    "d": "2026-11-26",
+    "c": 26.9,
+    "ca": 26.9
    },
    "complete": true,
    "check": {
-    "shared": 804,
+    "shared": 806,
     "mismatched": 0,
     "maxOff": 0.08,
     "window": 0.05
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2023-09-07"
   },
   "4324": {
    "listed": "2021-08-11",
@@ -4957,17 +5168,18 @@
     "ca": 7.958635
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 2.78,
-    "ca": 2.78
+    "d": "2026-11-26",
+    "c": 2.85,
+    "ca": 2.85
    },
    "complete": false,
    "check": {
-    "shared": 490,
+    "shared": 492,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4325": {
    "listed": "2025-03-24",
@@ -4983,17 +5195,18 @@
     "ca": 19.5
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 15.78,
-    "ca": 15.78
+    "d": "2026-11-26",
+    "c": 15.52,
+    "ca": 15.52
    },
    "complete": true,
    "check": {
-    "shared": 416,
+    "shared": 418,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4326": {
    "listed": "2025-09-10",
@@ -5009,17 +5222,18 @@
     "ca": 13.83
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.84,
-    "ca": 4.84
+    "d": "2026-11-26",
+    "c": 4.75,
+    "ca": 4.75
    },
    "complete": true,
    "check": {
-    "shared": 302,
+    "shared": 304,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4327": {
    "listed": "2025-12-18",
@@ -5035,17 +5249,18 @@
     "ca": 58.239732
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 52.5,
-    "ca": 52.5
+    "d": "2026-11-26",
+    "c": 52.3,
+    "ca": 52.3
    },
    "complete": true,
    "check": {
-    "shared": 232,
+    "shared": 234,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4328": {
    "listed": "2022-06-14",
@@ -5061,17 +5276,18 @@
     "ca": 1.464021
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 1.69,
     "ca": 1.69
    },
    "complete": true,
    "check": {
-    "shared": 1058,
+    "shared": 1060,
     "mismatched": 3,
     "maxOff": 3.85,
     "window": -0.26
-   }
+   },
+   "preDiv": 1
   },
   "4330": {
    "listed": "2016-11-13",
@@ -5087,17 +5303,18 @@
     "ca": 6.367819
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.93,
-    "ca": 3.93
+    "d": "2026-11-26",
+    "c": 3.96,
+    "ca": 3.96
    },
    "complete": true,
    "check": {
-    "shared": 2492,
+    "shared": 2494,
     "mismatched": 2,
     "maxOff": 1.17,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4331": {
    "listed": "2017-02-15",
@@ -5113,17 +5330,18 @@
     "ca": 8.479246
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 9.86,
-    "ca": 9.86
+    "d": "2026-11-26",
+    "c": 9.8,
+    "ca": 9.8
    },
    "complete": true,
    "check": {
-    "shared": 2424,
+    "shared": 2426,
     "mismatched": 6,
     "maxOff": 2.25,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4332": {
    "listed": "2017-04-30",
@@ -5139,17 +5357,18 @@
     "ca": 8.776362
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.35,
-    "ca": 4.35
+    "d": "2026-11-26",
+    "c": 4.33,
+    "ca": 4.33
    },
    "complete": true,
    "check": {
-    "shared": 2263,
+    "shared": 2265,
     "mismatched": 0,
     "maxOff": 0.96,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4333": {
    "listed": "2017-05-30",
@@ -5165,17 +5384,18 @@
     "ca": 7.192039
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 9.94,
-    "ca": 9.94
+    "d": "2026-11-26",
+    "c": 10.05,
+    "ca": 10.05
    },
    "complete": true,
    "check": {
-    "shared": 2174,
+    "shared": 2176,
     "mismatched": 2,
     "maxOff": 1.36,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4334": {
    "listed": "2017-08-22",
@@ -5191,17 +5411,18 @@
     "ca": 6.537241
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 7.87,
-    "ca": 7.87
+    "d": "2026-11-26",
+    "c": 7.8,
+    "ca": 7.8
    },
    "complete": true,
    "check": {
-    "shared": 2291,
+    "shared": 2293,
     "mismatched": 1,
     "maxOff": 2.13,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4335": {
    "listed": "2017-10-01",
@@ -5217,17 +5438,18 @@
     "ca": 6.406417
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 2.97,
     "ca": 2.97
    },
    "complete": true,
    "check": {
-    "shared": 2267,
+    "shared": 2269,
     "mismatched": 1,
     "maxOff": 1.62,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4336": {
    "listed": "2017-11-05",
@@ -5243,17 +5465,18 @@
     "ca": 5.55932
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.92,
-    "ca": 3.92
+    "d": "2026-11-26",
+    "c": 4.03,
+    "ca": 4.03
    },
    "complete": true,
    "check": {
-    "shared": 2232,
+    "shared": 2234,
     "mismatched": 0,
     "maxOff": 0.67,
     "window": 0.1
-   }
+   },
+   "preDiv": 1
   },
   "4337": {
    "listed": "2018-01-18",
@@ -5269,17 +5492,18 @@
     "ca": 7.614117
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.55,
-    "ca": 3.55
+    "d": "2026-11-26",
+    "c": 3.56,
+    "ca": 3.56
    },
    "complete": true,
    "check": {
-    "shared": 2022,
+    "shared": 2024,
     "mismatched": 0,
     "maxOff": 0.58,
     "window": 0.22
-   }
+   },
+   "preDiv": 1
   },
   "4338": {
    "listed": "2018-01-08",
@@ -5295,17 +5519,18 @@
     "ca": 5.614671
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 5.97,
-    "ca": 5.97
+    "d": "2026-11-26",
+    "c": 5.95,
+    "ca": 5.95
    },
    "complete": true,
    "check": {
-    "shared": 2200,
+    "shared": 2202,
     "mismatched": 0,
     "maxOff": 0.91,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4339": {
    "listed": "2018-03-26",
@@ -5321,17 +5546,18 @@
     "ca": 5.247582
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.96,
-    "ca": 4.96
+    "d": "2026-11-26",
+    "c": 4.97,
+    "ca": 4.97
    },
    "complete": true,
    "check": {
-    "shared": 2140,
+    "shared": 2142,
     "mismatched": 0,
     "maxOff": 0.62,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4340": {
    "listed": "2018-03-20",
@@ -5347,17 +5573,18 @@
     "ca": 5.819495
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 7.82,
-    "ca": 7.82
+    "d": "2026-11-26",
+    "c": 7.79,
+    "ca": 7.79
    },
    "complete": true,
    "check": {
-    "shared": 2142,
+    "shared": 2144,
     "mismatched": 0,
     "maxOff": 0.9,
     "window": -0.21
-   }
+   },
+   "preDiv": 1
   },
   "4342": {
    "listed": "2018-02-11",
@@ -5373,17 +5600,18 @@
     "ca": 5.117165
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 7.85,
-    "ca": 7.85
+    "d": "2026-11-26",
+    "c": 8,
+    "ca": 8
    },
    "complete": true,
    "check": {
-    "shared": 2175,
+    "shared": 2177,
     "mismatched": 1,
     "maxOff": 1.56,
     "window": -0.33
-   }
+   },
+   "preDiv": 1
   },
   "4344": {
    "listed": "2018-05-01",
@@ -5399,17 +5627,18 @@
     "ca": 5.126658
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.37,
-    "ca": 6.37
+    "d": "2026-11-26",
+    "c": 6.4,
+    "ca": 6.4
    },
    "complete": true,
    "check": {
-    "shared": 2117,
+    "shared": 2119,
     "mismatched": 3,
     "maxOff": 2.26,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4345": {
    "listed": "2018-08-06",
@@ -5425,17 +5654,18 @@
     "ca": 6.161331
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.34,
-    "ca": 4.34
+    "d": "2026-11-26",
+    "c": 4.38,
+    "ca": 4.38
    },
    "complete": true,
    "check": {
-    "shared": 2056,
+    "shared": 2058,
     "mismatched": 0,
     "maxOff": 0.14,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4346": {
    "listed": "2018-11-13",
@@ -5451,17 +5681,18 @@
     "ca": 7.410539
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 2.68,
-    "ca": 2.68
+    "d": "2026-11-26",
+    "c": 2.67,
+    "ca": 2.67
    },
    "complete": true,
    "check": {
-    "shared": 1948,
+    "shared": 1950,
     "mismatched": 0,
     "maxOff": 0.69,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4347": {
    "listed": "2018-07-25",
@@ -5477,17 +5708,18 @@
     "ca": 5.185669
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.53,
-    "ca": 8.53
+    "d": "2026-11-26",
+    "c": 8.64,
+    "ca": 8.64
    },
    "complete": true,
    "check": {
-    "shared": 2064,
+    "shared": 2066,
     "mismatched": 0,
     "maxOff": 0.41,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4348": {
    "listed": "2019-03-20",
@@ -5503,17 +5735,18 @@
     "ca": 6.247901
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 5.08,
-    "ca": 5.08
+    "d": "2026-11-26",
+    "c": 5.1,
+    "ca": 5.1
    },
    "complete": true,
    "check": {
-    "shared": 1838,
+    "shared": 1840,
     "mismatched": 0,
     "maxOff": 0.68,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4349": {
    "listed": "2023-01-30",
@@ -5529,17 +5762,18 @@
     "ca": 7.241024
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.95,
-    "ca": 6.95
+    "d": "2026-11-26",
+    "c": 6.97,
+    "ca": 6.97
    },
    "complete": true,
    "check": {
-    "shared": 942,
+    "shared": 944,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "4350": {
    "listed": "2024-09-04",
@@ -5555,17 +5789,18 @@
     "ca": 8.261783
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.26,
-    "ca": 6.26
+    "d": "2026-11-26",
+    "c": 6.23,
+    "ca": 6.23
    },
    "complete": true,
    "check": {
-    "shared": 556,
+    "shared": 558,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "5110": {
    "listed": "2002-06-08",
@@ -5581,17 +5816,18 @@
     "ca": 6.141284
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 15.27,
-    "ca": 15.27
+    "d": "2026-11-26",
+    "c": 15.19,
+    "ca": 15.19
    },
    "complete": false,
    "check": {
-    "shared": 4106,
+    "shared": 4108,
     "mismatched": 4,
     "maxOff": 1.24,
     "window": 0
-   }
+   },
+   "preDiv": 1.319042
   },
   "6001": {
    "listed": "2008-07-16",
@@ -5607,17 +5843,18 @@
     "ca": 16.918303
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 23.46,
-    "ca": 23.46
+    "d": "2026-11-26",
+    "c": 23.1,
+    "ca": 23.1
    },
    "complete": true,
    "check": {
-    "shared": 4130,
+    "shared": 4132,
     "mismatched": 30,
     "maxOff": 1.97,
     "window": -0.08
-   }
+   },
+   "preDiv": 1.089609
   },
   "6002": {
    "listed": "2010-02-02",
@@ -5633,17 +5870,18 @@
     "ca": 16.392022
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 13.09,
-    "ca": 13.09
+    "d": "2026-11-26",
+    "c": 12.88,
+    "ca": 12.88
    },
    "complete": true,
    "check": {
-    "shared": 4122,
+    "shared": 4124,
     "mismatched": 25,
     "maxOff": 2.4,
     "window": 0.1
-   }
+   },
+   "preDiv": 1
   },
   "6004": {
    "listed": "2012-07-09",
@@ -5659,17 +5897,18 @@
     "ca": 37.329
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 53,
-    "ca": 53
+    "d": "2026-11-26",
+    "c": 53.8,
+    "ca": 53.8
    },
    "complete": true,
    "check": {
-    "shared": 3561,
+    "shared": 3563,
     "mismatched": 11,
     "maxOff": 2.13,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6010": {
    "listed": "1993-01-02",
@@ -5685,17 +5924,19 @@
     "ca": 7.57496
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 11.73,
-    "ca": 11.73
+    "d": "2026-11-26",
+    "c": 11.49,
+    "ca": 11.49
    },
    "complete": false,
    "check": {
-    "shared": 4129,
+    "shared": 4131,
     "mismatched": 21,
     "maxOff": 2.05,
     "window": 0.07
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "6012": {
    "listed": "2017-02-26",
@@ -5711,17 +5952,18 @@
     "ca": 72.019319
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.9,
-    "ca": 12.9
+    "d": "2026-11-26",
+    "c": 12.53,
+    "ca": 12.53
    },
    "complete": false,
    "check": {
-    "shared": 1743,
+    "shared": 1745,
     "mismatched": 0,
     "maxOff": 0.42,
     "window": 0.33
-   }
+   },
+   "preDiv": 1
   },
   "6013": {
    "listed": "2017-02-26",
@@ -5737,17 +5979,18 @@
     "ca": 211.60001
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 63.2,
-    "ca": 63.2
+    "d": "2026-11-26",
+    "c": 62.35,
+    "ca": 62.35
    },
    "complete": true,
    "check": {
-    "shared": 1245,
+    "shared": 1247,
     "mismatched": 0,
     "maxOff": 0.42,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6014": {
    "listed": "2022-08-09",
@@ -5763,17 +6006,18 @@
     "ca": 105.053445
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 46.02,
-    "ca": 45.406673
+    "d": "2026-11-26",
+    "c": 44.26,
+    "ca": 44.26
    },
    "complete": true,
    "check": {
-    "shared": 1070,
+    "shared": 1072,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6015": {
    "listed": "2022-12-12",
@@ -5789,17 +6033,18 @@
     "ca": 2.70965
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 2.66,
-    "ca": 2.66
+    "d": "2026-11-26",
+    "c": 2.59,
+    "ca": 2.59
    },
    "complete": true,
    "check": {
-    "shared": 984,
+    "shared": 986,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6016": {
    "listed": "2021-09-08",
@@ -5815,17 +6060,18 @@
     "ca": 13.887083
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 5.93,
-    "ca": 5.93
+    "d": "2026-11-26",
+    "c": 5.83,
+    "ca": 5.83
    },
    "complete": true,
    "check": {
-    "shared": 515,
+    "shared": 517,
     "mismatched": 0,
     "maxOff": 0.08,
     "window": 0.04
-   }
+   },
+   "preDiv": 1.024378
   },
   "6017": {
    "listed": "2022-01-05",
@@ -5841,17 +6087,18 @@
     "ca": 34.2
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.6,
-    "ca": 8.6
+    "d": "2026-11-26",
+    "c": 8.56,
+    "ca": 8.56
    },
    "complete": true,
    "check": {
-    "shared": 489,
+    "shared": 491,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6018": {
    "listed": "2025-07-22",
@@ -5867,17 +6114,18 @@
     "ca": 9.3
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.45,
-    "ca": 8.45
+    "d": "2026-11-26",
+    "c": 8.7,
+    "ca": 8.7
    },
    "complete": true,
    "check": {
-    "shared": 338,
+    "shared": 340,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6019": {
    "listed": "2025-12-02",
@@ -5893,17 +6141,18 @@
     "ca": 22.297167
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 21.7,
-    "ca": 21.7
+    "d": "2026-11-26",
+    "c": 20.7,
+    "ca": 20.7
    },
    "complete": true,
    "check": {
-    "shared": 244,
+    "shared": 246,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6020": {
    "listed": "1993-01-01",
@@ -5919,17 +6168,18 @@
     "ca": 15.945047
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 9.99,
-    "ca": 9.99
+    "d": "2026-11-26",
+    "c": 10.4,
+    "ca": 10.4
    },
    "complete": false,
    "check": {
-    "shared": 4132,
+    "shared": 4134,
     "mismatched": 15,
     "maxOff": 2.5,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6022": {
    "listed": "2023-11-30",
@@ -5945,17 +6195,18 @@
     "ca": 54.05
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 52.85,
-    "ca": 52.85
+    "d": "2026-11-26",
+    "c": 56.6,
+    "ca": 56.6
    },
    "complete": true,
    "check": {
-    "shared": 61,
+    "shared": 63,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "6040": {
    "listed": "1993-01-02",
@@ -5971,17 +6222,19 @@
     "ca": 99.714072
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 31.88,
-    "ca": 31.88
+    "d": "2026-11-26",
+    "c": 31.86,
+    "ca": 31.86
    },
    "complete": false,
    "check": {
-    "shared": 4141,
+    "shared": 4143,
     "mismatched": 2198,
     "maxOff": 417.31,
     "window": 1.16
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "6050": {
    "listed": "2001-04-20",
@@ -5997,17 +6250,18 @@
     "ca": 391.282399
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 51.75,
-    "ca": 51.75
+    "d": "2026-11-26",
+    "c": 51.9,
+    "ca": 51.9
    },
    "complete": true,
    "check": {
-    "shared": 4127,
+    "shared": 4129,
     "mismatched": 25,
     "maxOff": 98.49,
     "window": 0.32
-   }
+   },
+   "preDiv": 1
   },
   "6060": {
    "listed": "1993-01-02",
@@ -6023,17 +6277,19 @@
     "ca": 12.782863
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.71,
-    "ca": 10.71
+    "d": "2026-11-26",
+    "c": 10.66,
+    "ca": 10.66
    },
    "complete": false,
    "check": {
-    "shared": 4151,
+    "shared": 4153,
     "mismatched": 21,
     "maxOff": 2.09,
     "window": 0.06
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-06"
   },
   "6070": {
    "listed": "1993-01-02",
@@ -6049,17 +6305,18 @@
     "ca": 14.863597
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 32.78,
-    "ca": 32.78
+    "d": "2026-11-26",
+    "c": 33.3,
+    "ca": 33.3
    },
    "complete": false,
    "check": {
-    "shared": 3995,
+    "shared": 3997,
     "mismatched": 14,
     "maxOff": 1.52,
     "window": 0
-   }
+   },
+   "preDiv": 1.012987
   },
   "6090": {
    "listed": "1993-11-07",
@@ -6075,17 +6332,19 @@
     "ca": 13.453205
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 6.13,
-    "ca": 6.13
+    "d": "2026-11-26",
+    "c": 5.93,
+    "ca": 5.93
    },
    "complete": false,
    "check": {
-    "shared": 3976,
+    "shared": 3978,
     "mismatched": 15,
     "maxOff": 2.2,
     "window": 0
-   }
+   },
+   "preDiv": 1,
+   "divFrom": "2010-03-03"
   },
   "7010": {
    "listed": "2003-01-25",
@@ -6101,17 +6360,18 @@
     "ca": 6.962963
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 40.58,
     "ca": 40.58
    },
    "complete": false,
    "check": {
-    "shared": 4134,
+    "shared": 4136,
     "mismatched": 6,
     "maxOff": 1.58,
     "window": 0
-   }
+   },
+   "preDiv": 1.492419
   },
   "7020": {
    "listed": "2004-12-20",
@@ -6127,17 +6387,18 @@
     "ca": 27.252386
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 58.7,
-    "ca": 58.7
+    "d": "2026-11-26",
+    "c": 57.95,
+    "ca": 57.95
    },
    "complete": true,
    "check": {
-    "shared": 4076,
+    "shared": 4078,
     "mismatched": 8,
     "maxOff": 1.64,
     "window": 0.06
-   }
+   },
+   "preDiv": 1.030877
   },
   "7030": {
    "listed": "2008-03-22",
@@ -6153,17 +6414,18 @@
     "ca": 31.41255
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.62,
-    "ca": 8.62
+    "d": "2026-11-26",
+    "c": 8.57,
+    "ca": 8.57
    },
    "complete": true,
    "check": {
-    "shared": 4100,
+    "shared": 4102,
     "mismatched": 7,
     "maxOff": 1.91,
     "window": 0.41
-   }
+   },
+   "preDiv": 1
   },
   "7040": {
    "listed": "2009-03-31",
@@ -6179,17 +6441,18 @@
     "ca": 142.724671
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 73.2,
-    "ca": 73.2
+    "d": "2026-11-26",
+    "c": 73.05,
+    "ca": 73.05
    },
    "complete": true,
    "check": {
-    "shared": 3268,
+    "shared": 3270,
     "mismatched": 56,
     "maxOff": 2.09,
     "window": -0.19
-   }
+   },
+   "preDiv": 1
   },
   "7200": {
    "listed": "2019-04-24",
@@ -6205,17 +6468,18 @@
     "ca": 21.16838
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 263.8,
-    "ca": 263.8
+    "d": "2026-11-26",
+    "c": 261.4,
+    "ca": 261.4
    },
    "complete": true,
    "check": {
-    "shared": 1889,
+    "shared": 1891,
     "mismatched": 0,
     "maxOff": 0.06,
     "window": 0.03
-   }
+   },
+   "preDiv": 1
   },
   "7201": {
    "listed": "2017-02-26",
@@ -6231,17 +6495,18 @@
     "ca": 2.81
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.52,
-    "ca": 3.52
+    "d": "2026-11-26",
+    "c": 3.47,
+    "ca": 3.47
    },
    "complete": true,
    "check": {
-    "shared": 1643,
+    "shared": 1645,
     "mismatched": 0,
     "maxOff": 0.6,
     "window": 0
-   }
+   },
+   "preDiv": 1.04
   },
   "7202": {
    "listed": "2021-09-30",
@@ -6257,17 +6522,18 @@
     "ca": 95.737278
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 84.05,
-    "ca": 84.05
+    "d": "2026-11-26",
+    "c": 85.1,
+    "ca": 85.1
    },
    "complete": true,
    "check": {
-    "shared": 1285,
+    "shared": 1287,
     "mismatched": 0,
     "maxOff": 0.15,
     "window": 0.05
-   }
+   },
+   "preDiv": 1
   },
   "7203": {
    "listed": "2022-02-16",
@@ -6283,17 +6549,18 @@
     "ca": 156.434367
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 592,
-    "ca": 592
+    "d": "2026-11-26",
+    "c": 590,
+    "ca": 590
    },
    "complete": true,
    "check": {
-    "shared": 1186,
+    "shared": 1188,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "7204": {
    "listed": "2022-11-16",
@@ -6309,17 +6576,18 @@
     "ca": 9.209019
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.4,
-    "ca": 4.4
+    "d": "2026-11-26",
+    "c": 4.45,
+    "ca": 4.45
    },
    "complete": true,
    "check": {
-    "shared": 1000,
+    "shared": 1002,
     "mismatched": 737,
     "maxOff": 9.15,
     "window": -9.08
-   }
+   },
+   "preDiv": 1
   },
   "7205": {
    "listed": "2026-05-20",
@@ -6335,17 +6603,18 @@
     "ca": 12.87
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.06,
-    "ca": 10.06
+    "d": "2026-11-26",
+    "c": 10.04,
+    "ca": 10.04
    },
    "complete": true,
    "check": {
-    "shared": 128,
+    "shared": 130,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "7211": {
    "listed": "2022-03-01",
@@ -6361,17 +6630,18 @@
     "ca": 28.6
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 32.2,
-    "ca": 32.2
+    "d": "2026-11-26",
+    "c": 33.58,
+    "ca": 33.58
    },
    "complete": true,
    "check": {
-    "shared": 339,
+    "shared": 341,
     "mismatched": 0,
     "maxOff": 0,
     "window": 0
-   }
+   },
+   "preDiv": 1
   },
   "8010": {
    "listed": "2005-03-12",
@@ -6387,17 +6657,18 @@
     "ca": 14.162191
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 86.65,
-    "ca": 86.65
+    "d": "2026-11-26",
+    "c": 90.2,
+    "ca": 90.2
    },
    "complete": true,
    "check": {
-    "shared": 4138,
+    "shared": 4140,
     "mismatched": 35,
     "maxOff": 3.13,
     "window": -0.02
-   }
+   },
+   "preDiv": 1.294379
   },
   "8012": {
    "listed": "2013-07-21",
@@ -6413,17 +6684,18 @@
     "ca": 7.492494
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.65,
-    "ca": 8.65
+    "d": "2026-11-26",
+    "c": 8.77,
+    "ca": 8.77
    },
    "complete": true,
    "check": {
-    "shared": 3295,
+    "shared": 3297,
     "mismatched": 18,
     "maxOff": 3.54,
     "window": 0.02
-   }
+   },
+   "preDiv": 1
   },
   "8020": {
    "listed": "2007-05-05",
@@ -6439,17 +6711,18 @@
     "ca": 37.140851
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.58,
-    "ca": 8.58
+    "d": "2026-11-26",
+    "c": 8.7,
+    "ca": 8.7
    },
    "complete": true,
    "check": {
-    "shared": 4127,
+    "shared": 4129,
     "mismatched": 25,
     "maxOff": 4.53,
     "window": 0.02
-   }
+   },
+   "preDiv": 1
   },
   "8030": {
    "listed": "2007-04-16",
@@ -6465,17 +6738,18 @@
     "ca": 37.844745
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 13.11,
-    "ca": 13.11
+    "d": "2026-11-26",
+    "c": 13.07,
+    "ca": 13.07
    },
    "complete": false,
    "check": {
-    "shared": 4124,
+    "shared": 4126,
     "mismatched": 2079,
     "maxOff": 32.08,
     "window": -5.5
-   }
+   },
+   "preDiv": 1
   },
   "8040": {
    "listed": "2007-07-23",
@@ -6491,17 +6765,18 @@
     "ca": 26.149188
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.8,
-    "ca": 8.8
+    "d": "2026-11-26",
+    "c": 8.95,
+    "ca": 8.95
    },
    "complete": true,
    "check": {
-    "shared": 4152,
+    "shared": 4154,
     "mismatched": 20,
     "maxOff": 2.45,
     "window": -0.07
-   }
+   },
+   "preDiv": 1
   },
   "8050": {
    "listed": "2007-05-23",
@@ -6517,17 +6792,18 @@
     "ca": 39.714358
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 5.73,
-    "ca": 5.73
+    "d": "2026-11-26",
+    "c": 6.04,
+    "ca": 6.04
    },
    "complete": false,
    "check": {
-    "shared": 4143,
+    "shared": 4145,
     "mismatched": 26,
     "maxOff": 2.64,
     "window": -0.06
-   }
+   },
+   "preDiv": 1
   },
   "8060": {
    "listed": "2007-07-17",
@@ -6543,17 +6819,18 @@
     "ca": 11.276889
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.24,
-    "ca": 10.24
+    "d": "2026-11-26",
+    "c": 10.19,
+    "ca": 10.19
    },
    "complete": true,
    "check": {
-    "shared": 4142,
+    "shared": 4144,
     "mismatched": 3642,
     "maxOff": 14.91,
     "window": 1.99
-   }
+   },
+   "preDiv": 1
   },
   "8070": {
    "listed": "2007-06-26",
@@ -6569,17 +6846,18 @@
     "ca": 11.958462
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 10.52,
-    "ca": 10.52
+    "d": "2026-11-26",
+    "c": 10.45,
+    "ca": 10.45
    },
    "complete": true,
    "check": {
-    "shared": 4148,
+    "shared": 4150,
     "mismatched": 31,
     "maxOff": 7.53,
     "window": -0.04
-   }
+   },
+   "preDiv": 1
   },
   "8100": {
    "listed": "2007-09-03",
@@ -6595,17 +6873,18 @@
     "ca": 24.368668
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.86,
-    "ca": 8.86
+    "d": "2026-11-26",
+    "c": 9.03,
+    "ca": 9.03
    },
    "complete": true,
    "check": {
-    "shared": 4152,
+    "shared": 4154,
     "mismatched": 17,
     "maxOff": 3.63,
     "window": -0.16
-   }
+   },
+   "preDiv": 1
   },
   "8120": {
    "listed": "2007-09-11",
@@ -6621,17 +6900,18 @@
     "ca": 33.657992
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.61,
-    "ca": 12.61
+    "d": "2026-11-26",
+    "c": 13.22,
+    "ca": 13.22
    },
    "complete": true,
    "check": {
-    "shared": 4133,
+    "shared": 4135,
     "mismatched": 15,
     "maxOff": 2.14,
     "window": 0.12
-   }
+   },
+   "preDiv": 1
   },
   "8150": {
    "listed": "2007-08-27",
@@ -6647,17 +6927,18 @@
     "ca": 25.67626
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 5.68,
-    "ca": 5.68
+    "d": "2026-11-26",
+    "c": 6.3,
+    "ca": 6.3
    },
    "complete": true,
    "check": {
-    "shared": 4116,
+    "shared": 4118,
     "mismatched": 24,
     "maxOff": 5.12,
     "window": -0.18
-   }
+   },
+   "preDiv": 1
   },
   "8160": {
    "listed": "2008-02-04",
@@ -6673,17 +6954,18 @@
     "ca": 26.996574
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 5.61,
-    "ca": 5.61
+    "d": "2026-11-26",
+    "c": 5.9,
+    "ca": 5.9
    },
    "complete": true,
    "check": {
-    "shared": 4141,
+    "shared": 4143,
     "mismatched": 30,
     "maxOff": 6.94,
     "window": 0.01
-   }
+   },
+   "preDiv": 1
   },
   "8170": {
    "listed": "2008-02-09",
@@ -6699,17 +6981,18 @@
     "ca": 10.516979
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.45,
-    "ca": 4.45
+    "d": "2026-11-26",
+    "c": 4.55,
+    "ca": 4.55
    },
    "complete": true,
    "check": {
-    "shared": 4139,
+    "shared": 4141,
     "mismatched": 27,
     "maxOff": 3.63,
     "window": -0.04
-   }
+   },
+   "preDiv": 1
   },
   "8180": {
    "listed": "2008-02-10",
@@ -6725,17 +7008,18 @@
     "ca": 39.172111
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8.3,
-    "ca": 8.3
+    "d": "2026-11-26",
+    "c": 8.52,
+    "ca": 8.52
    },
    "complete": true,
    "check": {
-    "shared": 4010,
+    "shared": 4012,
     "mismatched": 16,
     "maxOff": 2.65,
     "window": -0.08
-   }
+   },
+   "preDiv": 1
   },
   "8190": {
    "listed": "2008-06-21",
@@ -6761,7 +7045,8 @@
     "mismatched": 30,
     "maxOff": 2.64,
     "window": -0.04
-   }
+   },
+   "preDiv": 1
   },
   "8200": {
    "listed": "2008-05-24",
@@ -6777,17 +7062,18 @@
     "ca": 8.702406
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 26.3,
-    "ca": 26.3
+    "d": "2026-11-26",
+    "c": 26.22,
+    "ca": 26.22
    },
    "complete": true,
    "check": {
-    "shared": 4127,
+    "shared": 4129,
     "mismatched": 3742,
     "maxOff": 2.88,
     "window": -1.41
-   }
+   },
+   "preDiv": 1
   },
   "8210": {
    "listed": "2008-05-17",
@@ -6803,17 +7089,18 @@
     "ca": 5.150454
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 137.6,
-    "ca": 137.6
+    "d": "2026-11-26",
+    "c": 140.5,
+    "ca": 140.5
    },
    "complete": true,
    "check": {
-    "shared": 4138,
+    "shared": 4140,
     "mismatched": 19,
     "maxOff": 2.05,
     "window": 0.1
-   }
+   },
+   "preDiv": 1
   },
   "8230": {
    "listed": "2009-07-13",
@@ -6829,17 +7116,18 @@
     "ca": 6.804234
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 46.56,
-    "ca": 46.56
+    "d": "2026-11-26",
+    "c": 46.62,
+    "ca": 46.62
    },
    "complete": true,
    "check": {
-    "shared": 4135,
+    "shared": 4137,
     "mismatched": 18,
     "maxOff": 3.04,
     "window": -0.06
-   }
+   },
+   "preDiv": 1
   },
   "8240": {
    "listed": "2009-07-29",
@@ -6855,17 +7143,18 @@
     "ca": 12.124988
    },
    "anchor": {
-    "d": "2026-11-24",
+    "d": "2026-11-26",
     "c": 13.11,
     "ca": 13.11
    },
    "complete": true,
    "check": {
-    "shared": 4149,
+    "shared": 4151,
     "mismatched": 19,
     "maxOff": 4.62,
     "window": 0.04
-   }
+   },
+   "preDiv": 1
   },
   "8250": {
    "listed": "2009-07-27",
@@ -6881,17 +7170,18 @@
     "ca": 11.60837
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 27.84,
-    "ca": 27.84
+    "d": "2026-11-26",
+    "c": 28.08,
+    "ca": 28.08
    },
    "complete": true,
    "check": {
-    "shared": 4154,
+    "shared": 4156,
     "mismatched": 20,
     "maxOff": 2.04,
     "window": 0.01
-   }
+   },
+   "preDiv": 1
   },
   "8260": {
    "listed": "2010-02-08",
@@ -6907,17 +7197,18 @@
     "ca": 22.750044
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 3.33,
-    "ca": 3.33
+    "d": "2026-11-26",
+    "c": 3.94,
+    "ca": 3.94
    },
    "complete": true,
    "check": {
-    "shared": 4146,
+    "shared": 4148,
     "mismatched": 2800,
     "maxOff": 5.99,
     "window": -2.99
-   }
+   },
+   "preDiv": 1
   },
   "8280": {
    "listed": "2009-12-08",
@@ -6933,17 +7224,18 @@
     "ca": 17.450885
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.67,
-    "ca": 12.67
+    "d": "2026-11-26",
+    "c": 12.8,
+    "ca": 12.8
    },
    "complete": true,
    "check": {
-    "shared": 4151,
+    "shared": 4153,
     "mismatched": 34,
     "maxOff": 2.78,
     "window": -0.01
-   }
+   },
+   "preDiv": 1
   },
   "8300": {
    "listed": "2010-06-06",
@@ -6959,17 +7251,18 @@
     "ca": 18.258147
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 12.91,
-    "ca": 12.91
+    "d": "2026-11-26",
+    "c": 12.98,
+    "ca": 12.98
    },
    "complete": true,
    "check": {
-    "shared": 4069,
+    "shared": 4071,
     "mismatched": 19,
     "maxOff": 2,
     "window": 0.01
-   }
+   },
+   "preDiv": 1
   },
   "8310": {
    "listed": "2010-06-13",
@@ -6985,17 +7278,18 @@
     "ca": 27.903359
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 4.62,
-    "ca": 4.62
+    "d": "2026-11-26",
+    "c": 4.73,
+    "ca": 4.73
    },
    "complete": true,
    "check": {
-    "shared": 4066,
+    "shared": 4068,
     "mismatched": 32,
     "maxOff": 2.96,
     "window": 0.06
-   }
+   },
+   "preDiv": 1
   },
   "8311": {
    "listed": "2012-02-27",
@@ -7011,17 +7305,18 @@
     "ca": 149.532663
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 8,
-    "ca": 8
+    "d": "2026-11-26",
+    "c": 7.96,
+    "ca": 7.96
    },
    "complete": true,
    "check": {
-    "shared": 3655,
+    "shared": 3657,
     "mismatched": 13,
     "maxOff": 2.28,
     "window": 0.02
-   }
+   },
+   "preDiv": 1
   },
   "8313": {
    "listed": "2024-06-13",
@@ -7037,21 +7332,22 @@
     "ca": 52.02934
    },
    "anchor": {
-    "d": "2026-11-24",
-    "c": 131,
-    "ca": 131
+    "d": "2026-11-26",
+    "c": 129.9,
+    "ca": 129.9
    },
    "complete": true,
    "check": {
-    "shared": 610,
+    "shared": 612,
     "mismatched": 0,
     "maxOff": 0.02,
     "window": 0
-   }
+   },
+   "preDiv": 1
   }
  },
  "failed": [],
  "unchecked": [
-  "1325 (TradingView +1400% vs the official closes over 1276 sessions)"
+  "1325 (TradingView +1400% vs the official closes over 1278 sessions)"
  ]
 }

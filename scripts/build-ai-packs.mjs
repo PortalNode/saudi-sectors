@@ -357,7 +357,7 @@ export function statementsSection(statements) {
 export function sinceListingSection(r) {
   if (!r || num(r.priceReturn) == null) return null;
   const head = r.complete ? `الأداء منذ الإدراج (من إغلاق أول جلسة ${r.base}` : `الأداء منذ ${r.base} (أقدم جلسة متاحة، والإدراج ${r.listed || '—'}؛ ليس منذ الإدراج الفعلي`;
-  const line = `${head} حتى ${r.last}، ${fmt(r.years, 1)} سنة): بدون التوزيعات ${sgn(r.priceReturn)}${r.priceCagr != null ? ` (سنويًا ${sgn(r.priceCagr)})` : ''} · مع إعادة استثمار التوزيعات ${sgn(r.totalReturn)}${r.totalCagr != null ? ` (سنويًا ${sgn(r.totalCagr)})` : ''} · 1000 ريال أصبحت ${fmt(r.priceValue, 0)} بالسعر و${fmt(r.totalValue, 0)} مع التوزيعات. الأساس إغلاق أول جلسة لا سعر الطرح، والسعر معدّل للمنح والتجزئة وحقوق الأولوية.`;
+  const line = `${head} حتى ${r.last}، ${fmt(r.years, 1)} سنة): بدون التوزيعات ${sgn(r.priceReturn)}${r.priceCagr != null ? ` (سنويًا ${sgn(r.priceCagr)})` : ''} · مع إعادة استثمار التوزيعات ${sgn(r.totalReturn)}${r.totalCagr != null ? ` (سنويًا ${sgn(r.totalCagr)})` : ''} · 1000 ريال أصبحت ${fmt(r.priceValue, 0)} بالسعر و${fmt(r.totalValue, 0)} مع التوزيعات.${r.divFrom ? ` التوزيعات محسوبة منذ ${r.divFrom} فقط (سجلها الأقدم لم يطابق الأسعار).` : ''} الأساس إغلاق أول جلسة لا سعر الطرح، والسعر معدّل للمنح والتجزئة وحقوق الأولوية.`;
   return { line, facts: { price: r.priceReturn, total: r.totalReturn, priceCagr: r.priceCagr, totalCagr: r.totalCagr, base: r.base, complete: !!r.complete } };
 }
 // خلية الجدول: «سعري/مع التوزيعات» ونجمة حين يبدأ الحساب بعد الإدراج.
